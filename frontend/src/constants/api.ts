@@ -18,6 +18,28 @@ export const STRAPI_TOKEN =
   process.env.NEXT_PUBLIC_STRAPI_TOKEN;
 export const IMAGE_BASE_URL =
   process.env.NEXT_PUBLIC_IMAGE_BASE_URL || DEFAULT_IMAGE_BASE_URL;
+
+/**
+ * Internal Strapi URL for server-side calls (bypasses TLS + Nginx + DNS)
+ * 
+ * For server-side components and middleware, use this URL instead of API_BASE_URL
+ * to avoid hairpin routing through the public internet. This significantly reduces
+ * latency by:
+ * - Eliminating DNS lookup
+ * - Skipping TLS handshake
+ * - Reducing Nginx proxy hops
+ * 
+ * Expected TTFB improvement: 50-200ms per server-side fetch
+ * 
+ * Configuration:
+ * - Set STRAPI_INTERNAL_URL env var to point to internal Nginx (HTTP only)
+ * - Example: http://127.0.0.1:8080/api (port 8080 for internal-only server block)
+ * - Falls back to API_BASE_URL if not set (for local development)
+ */
+export const STRAPI_INTERNAL_URL =
+  typeof window === "undefined"
+    ? (process.env.STRAPI_INTERNAL_URL || API_BASE_URL)
+    : API_BASE_URL;
 // API Versions
 export const API_VERSION = "v1";
 

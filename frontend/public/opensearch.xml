@@ -3,10 +3,10 @@
   <ShortName>فروشگاه پوشاک اینفینیتی</ShortName>
   <Description>جستجو در فروشگاه پوشاک اینفینیتی</Description>
   <Tags>فروشگاه پوشاک آنلاین</Tags>
-  <Contact>info@infinitycolor.org</Contact>
-  <Url type="text/html" method="get" template="https://infinitycolor.org/plp?search={searchTerms}"/>
-  <Url type="application/rss+xml" method="get" template="https://infinitycolor.org/blog/feed.xml?search={searchTerms}"/>
-  <Image height="16" width="16" type="image/x-icon">https://infinitycolor.org/favicon.ico</Image>
+  <Contact>info@infinitycolor.co</Contact>
+  <Url type="text/html" method="get" template="https://infinitycolor.co/plp?search={searchTerms}"/>
+  <Url type="application/rss+xml" method="get" template="https://infinitycolor.co/blog/feed.xml?search={searchTerms}"/>
+  <Image height="16" width="16" type="image/x-icon">https://infinitycolor.co/favicon.ico</Image>
   <Developer>Infinitycolor</Developer>
   <Attribution>
     جستجو در فروشگاه اینفینیتی

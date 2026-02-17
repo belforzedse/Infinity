@@ -1,15 +1,18 @@
-import { API_BASE_URL } from "@/constants/api";
+import { API_BASE_URL, STRAPI_INTERNAL_URL } from "@/constants/api";
 import type { SuperAdminSettings } from "@/types/super-admin/settings";
 import { defaultSettings, normalizeSuperAdminSettings } from "@/types/super-admin/settings";
 import logger from "@/utils/logger";
 
 export async function getPublicSuperAdminSettings(): Promise<SuperAdminSettings> {
   try {
-    const response = await fetch(`${API_BASE_URL}/settings?populate=*`, {
+    // Use internal URL for server-side fetches to bypass TLS/DNS overhead
+    const baseUrl = typeof window === "undefined" ? STRAPI_INTERNAL_URL : API_BASE_URL;
+    const response = await fetch(`${baseUrl}/settings?populate=*`, {
       next: { revalidate: 60 },
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
+        "Accept-Encoding": "gzip",
       },
     }).then((res) => res.json());
 

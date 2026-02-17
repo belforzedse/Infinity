@@ -1,0 +1,345 @@
+# Nginx Performance Fixes
+
+## Overview
+
+This document contains critical Nginx configuration changes to fix performance issues in the frontend-to-backend connection path. These changes eliminate connection overhead, enable compression, and improve throughput.
+
+**Impact:** Expected 50-200ms TTFB improvement per request, 70-90% payload reduction for JSON responses, and major throughput gains under load.
+
+**Priority:** P0 - Critical (implement immediately)
+
+---
+
+## A1. Fix Next.js Keepalive (Connection 'upgrade' kills keepalive)
+
+**File:** `/etc/nginx/sites-enabled/infinitycolor.org` (Next.js location block)
+
+**Problem:** `Connection 'upgrade'` is hardcoded on every request, not just WebSocket upgrades. This tells the upstream to close the connection after each response. The `keepalive 32` directive in the upstream block is completely nullified.
+
+**Current (BROKEN):**
+```nginx
+location / {
+    proxy_pass http://next_upstream;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection 'upgrade';  # <-- KILLS keepalive
+    # ... other headers
+}
+```
+
+**Fix:**
+```nginx
+# At the top of the file, ensure this map exists (already defined for gitlab):
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    ''      close;
+}
+
+location / {
+    proxy_pass http://next_upstream;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection $connection_upgrade;  # "" for normal, "upgrade" for WS
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_cache_bypass $http_upgrade;
+
+    # Enable buffering for better throughput
+    proxy_buffering on;
+    proxy_buffers 16 16k;
+    proxy_buffer_size 16k;
+}
+```
+
+**Impact:** Eliminates TCP handshake overhead (~1-3ms per request). With 5 Next.js instances serving hundreds of concurrent requests, this adds up to seconds of cumulative latency.
+
+---
+
+## A2. Fix Strapi Keepalive (Missing proxy_http_version and Connection header)
+
+**File:** `/etc/nginx/sites-enabled/infinitycolor.org` (Strapi location block)
+
+**Problem:** Without `proxy_http_version 1.1`, Nginx defaults to HTTP/1.0 for upstream connections. HTTP/1.0 does not support keepalive at all. The `keepalive 32` on `strapi_upstream` is completely wasted.
+
+**Current (BROKEN):**
+```nginx
+location / {
+    proxy_pass http://strapi_upstream;
+    proxy_set_header Host $host;
+    # ... NO proxy_http_version, NO Connection header
+}
+```
+
+**Fix:**
+```nginx
+location / {
+    proxy_pass http://strapi_upstream;
+    proxy_http_version 1.1;
+    proxy_set_header Connection "";  # Enable keepalive
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_read_timeout 600s;
+    proxy_connect_timeout 600s;
+    proxy_send_timeout 600s;
+    client_max_body_size 20M;
+
+    # Enable response buffering
+    proxy_buffering on;
+    proxy_buffers 16 16k;
+    proxy_buffer_size 16k;
+}
+```
+
+**Impact:** Eliminates TCP handshake overhead for all API calls (~1-3ms per request).
+
+---
+
+## A3. Enable Gzip for JSON (gzip effectively disabled)
+
+**File:** `/etc/nginx/nginx.conf`
+
+**Problem:** With only `gzip on`, Nginx only compresses `text/html`. JSON API responses (bulk of Strapi traffic) are sent uncompressed. A typical product listing response can be 50-200KB of JSON.
+
+**Current (BROKEN):**
+```nginx
+gzip on;
+# gzip_vary on;          # ALL COMMENTED OUT
+# gzip_proxied any;
+# gzip_comp_level 6;
+# gzip_types text/plain text/css application/json ...;
+```
+
+**Fix:**
+```nginx
+gzip on;
+gzip_vary on;
+gzip_proxied any;
+gzip_comp_level 5;
+gzip_min_length 256;
+gzip_buffers 16 8k;
+gzip_http_version 1.1;
+gzip_types
+    text/plain
+    text/css
+    text/xml
+    text/javascript
+    application/json
+    application/javascript
+    application/x-javascript
+    application/xml
+    application/xml+rss
+    application/vnd.ms-fontobject
+    application/x-font-ttf
+    font/opentype
+    image/svg+xml;
+```
+
+**Impact:** 70-90% reduction in JSON payload sizes. A 100KB product listing becomes ~15KB.
+
+---
+
+## A4. Enable proxy_buffering (Currently Disabled on Next.js)
+
+**File:** `/etc/nginx/sites-enabled/infinitycolor.org` (Next.js location block)
+
+**Problem:** With `proxy_buffering off`, Nginx must wait for the client to consume each chunk before requesting more from upstream. This ties up the upstream connection longer than necessary.
+
+**Current (BROKEN):**
+```nginx
+proxy_buffering off;
+```
+
+**Fix:** Remove `proxy_buffering off` (or set to `on`). Add explicit buffer sizes:
+
+```nginx
+# Enable buffering for better throughput
+proxy_buffering on;
+proxy_buffers 16 16k;
+proxy_buffer_size 16k;
+```
+
+**Impact:** Better throughput under load, reduces connection occupancy time.
+
+---
+
+## A5. Remove Deprecated SSL Protocols (Security)
+
+**File:** `/etc/nginx/nginx.conf`
+
+**Problem:** TLSv1 and TLSv1.1 are deprecated and insecure.
+
+**Current (INSECURE):**
+```nginx
+ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
+```
+
+**Fix:**
+```nginx
+ssl_protocols TLSv1.2 TLSv1.3;
+```
+
+---
+
+## B1. Internal Strapi URL (Nginx Internal Server Block)
+
+**Problem:** Next.js server-side fetches go through the public domain, adding DNS + TLS + extra Nginx hop overhead (50-200ms per fetch).
+
+**Solution:** Create an internal-only Nginx server block that bypasses TLS:
+
+**File:** `/etc/nginx/sites-enabled/infinitycolor.org` (or create new file)
+
+```nginx
+# Internal-only server block for Next.js -> Strapi communication (no TLS)
+server {
+    listen 127.0.0.1:8080;
+    server_name localhost;
+
+    location / {
+        proxy_pass http://strapi_upstream;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";  # Enable keepalive
+        proxy_set_header Host api.infinitycolor.co;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        
+        # Buffering
+        proxy_buffering on;
+        proxy_buffers 16 16k;
+        proxy_buffer_size 16k;
+        
+        # Timeouts
+        proxy_read_timeout 600s;
+        proxy_connect_timeout 600s;
+        proxy_send_timeout 600s;
+    }
+}
+```
+
+**Environment Variable:** Add to Next.js production environment (`.env` or deployment config):
+
+```bash
+STRAPI_INTERNAL_URL=http://127.0.0.1:8080/api
+```
+
+**Impact:** Eliminates DNS lookup + TLS handshake + double Nginx proxy. Expected TTFB improvement: 50-200ms per server-side fetch.
+
+---
+
+## Validation Plan
+
+After implementing these fixes, verify:
+
+### 1. Connection Reuse
+Add to Nginx log format to track connection reuse:
+
+```nginx
+log_format perf '$remote_addr - $request_time $upstream_connect_time $upstream_response_time $status "$request"';
+
+# In server block:
+access_log /var/log/nginx/perf.log perf;
+```
+
+**Expected:** `$upstream_connect_time` should drop from ~1-3ms to ~0ms consistently (keepalive is working).
+
+### 2. Gzip Compression
+Check response headers:
+
+```bash
+curl -H "Accept-Encoding: gzip" https://api.infinitycolor.co/api/products | head
+```
+
+**Expected:** `Content-Encoding: gzip` in response headers.
+
+**Payload size check:**
+```bash
+# Without gzip
+curl https://api.infinitycolor.co/api/products | wc -c
+
+# With gzip (should be 70-90% smaller)
+curl -H "Accept-Encoding: gzip" https://api.infinitycolor.co/api/products | wc -c
+```
+
+### 3. Internal URL
+Check Next.js server logs - should see requests to `127.0.0.1:8080` instead of `api.infinitycolor.co:443`.
+
+### 4. Lighthouse Scores
+Run Lighthouse on homepage/PLP/PDP before and after. Expected improvements:
+- TTFB: 50-200ms reduction
+- Payload size: 70-90% reduction for JSON responses
+- Overall performance score: +5-15 points
+
+---
+
+## Deployment Checklist
+
+- [ ] Backup current Nginx config: `cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.backup`
+- [ ] Backup site config: `cp /etc/nginx/sites-enabled/infinitycolor.org /etc/nginx/sites-enabled/infinitycolor.org.backup`
+- [ ] Apply A1 fix (Next.js keepalive)
+- [ ] Apply A2 fix (Strapi keepalive)
+- [ ] Apply A3 fix (gzip for JSON)
+- [ ] Apply A4 fix (proxy_buffering)
+- [ ] Apply A5 fix (SSL protocols)
+- [ ] Apply B1 (internal server block for Strapi)
+- [ ] Test Nginx config: `nginx -t`
+- [ ] Reload Nginx: `systemctl reload nginx`
+- [ ] Set `STRAPI_INTERNAL_URL=http://127.0.0.1:8080/api` in Next.js production environment
+- [ ] Restart Next.js instances
+- [ ] Monitor logs for errors
+- [ ] Run validation checks (connection reuse, gzip, performance)
+- [ ] Monitor production metrics for 24 hours
+
+---
+
+## Rollback Plan
+
+If issues occur:
+
+```bash
+# Restore backup configs
+cp /etc/nginx/nginx.conf.backup /etc/nginx/nginx.conf
+cp /etc/nginx/sites-enabled/infinitycolor.org.backup /etc/nginx/sites-enabled/infinitycolor.org
+
+# Test and reload
+nginx -t
+systemctl reload nginx
+
+# Remove STRAPI_INTERNAL_URL from Next.js env
+# Restart Next.js instances
+```
+
+---
+
+## Related Files
+
+**Frontend code changes (already applied):**
+- `frontend/src/constants/api.ts` - Added `STRAPI_INTERNAL_URL` constant
+- `frontend/src/services/product/homepage.ts` - Updated to use `STRAPI_INTERNAL_URL`
+- `frontend/middleware.ts` - Updated to use `STRAPI_INTERNAL_URL`
+
+**Backend code changes (already applied):**
+- `backend/config/plugins.ts` - Switched REST cache to Redis
+- `backend/config/database.ts` - Increased connection pool to 25 per instance
+- `backend/config/middlewares.ts` - Reduced body limits to 10-50MB
+
+---
+
+## Notes
+
+- These fixes are safe and follow standard Nginx best practices
+- All changes are backward-compatible
+- Changes can be applied incrementally (test each fix before moving to the next)
+- Monitor error logs after each change: `tail -f /var/log/nginx/error.log`
+- The internal server block (B1) is the highest-impact fix for server-side rendering performance
+
+---
+
+## References
+
+- Nginx upstream keepalive: https://nginx.org/en/docs/http/ngx_http_upstream_module.html#keepalive
+- Nginx gzip module: https://nginx.org/en/docs/http/ngx_http_gzip_module.html
+- Nginx proxy module: https://nginx.org/en/docs/http/ngx_http_proxy_module.html

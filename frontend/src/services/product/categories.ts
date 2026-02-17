@@ -1,4 +1,4 @@
-import { API_BASE_URL, CHECKOUT_REQUEST_TIMEOUT_MS, ENDPOINTS } from "@/constants/api";
+import { API_BASE_URL, STRAPI_INTERNAL_URL, CHECKOUT_REQUEST_TIMEOUT_MS, ENDPOINTS } from "@/constants/api";
 import logger from "@/utils/logger";
 import { resolveAssetUrl } from "@/utils/resolveAssetUrl";
 import fetchWithTimeout from "@/utils/fetchWithTimeout";
@@ -161,7 +161,9 @@ export async function getProductCategories(
     params.append("_skip_global_loader", "1");
   }
 
-  const url = `${API_BASE_URL}${ENDPOINTS.PRODUCT.CATEGORY}?${params.toString()}`;
+  // Use internal URL for server-side fetches to bypass TLS/DNS overhead
+  const baseUrl = typeof window === "undefined" ? STRAPI_INTERNAL_URL : API_BASE_URL;
+  const url = `${baseUrl}${ENDPOINTS.PRODUCT.CATEGORY}?${params.toString()}`;
 
   // Server-side: when revalidate is set, use cacheable fetch so Next.js Data Cache is used.
   // Client-side or when cache is explicitly set: respect options.cache (default no-store for fresh data).
@@ -174,6 +176,7 @@ export async function getProductCategories(
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
+      "Accept-Encoding": "gzip", // Explicitly request compression
     },
     cache: useCacheable ? "default" : (options.cache ?? "no-store"),
   };
@@ -185,7 +188,7 @@ export async function getProductCategories(
   try {
     if (typeof window === "undefined") {
       logger.info("[ProductCategories] Fetching categories", {
-        url: url.replace(API_BASE_URL, "[BASE_URL]"),
+        url: url.replace(baseUrl, "[BASE_URL]"),
         parentOnly: !!parentOnly,
         mainOnly: !!options.mainOnly,
         parentsWithChildrenOnly: !!options.parentsWithChildrenOnly,

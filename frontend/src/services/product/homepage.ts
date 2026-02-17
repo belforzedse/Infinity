@@ -1,5 +1,5 @@
 import { apiClient } from "@/services";
-import { ENDPOINTS, API_BASE_URL } from "@/constants/api";
+import { ENDPOINTS, API_BASE_URL, STRAPI_INTERNAL_URL } from "@/constants/api";
 import { buildTitleKeywordFilter } from "@/constants/productKeywords";
 import type { ProductCardProps } from "@/components/Product/Card";
 import { formatProductsToCardProps } from "./product";
@@ -48,6 +48,7 @@ const HOMEPAGE_FETCH_OPTIONS = {
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
+    "Accept-Encoding": "gzip", // Explicitly request compression
   },
 };
 
@@ -69,7 +70,7 @@ export const getProductsByIds = async (ids: number[]): Promise<ProductCardProps[
     `pagination[limit]=${Math.max(ids.length, 20)}&` +
     `pagination[withCount]=false`;
   try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, HOMEPAGE_FETCH_OPTIONS).then((res) =>
+    const response = await fetch(`${STRAPI_INTERNAL_URL}${endpoint}`, HOMEPAGE_FETCH_OPTIONS).then((res) =>
       res.json(),
     );
     const rawList = (response as { data?: unknown[] })?.data ?? [];
@@ -120,16 +121,21 @@ export const getHomepageSections = async (): Promise<{
     `pagination[withCount]=false`;
 
   try {
-    const settings = await getPublicSuperAdminSettings();
+    // Start settings fetch and default batch fetch in parallel (eliminates waterfall)
+    const settingsPromise = getPublicSuperAdminSettings();
+    const batchPromise = fetch(`${STRAPI_INTERNAL_URL}${batchEndpoint}`, HOMEPAGE_FETCH_OPTIONS).then(
+      (res) => res.json(),
+    );
+    
+    // Wait for settings to determine strategy for "new" and "discounted" sections
+    const settings = await settingsPromise;
     const curatedNewest = settings.homeNewestProductIds.length > 0;
     const curatedDiscounted = settings.homeDiscountedProductIds.length > 0;
 
-    const batchPromise = fetch(`${API_BASE_URL}${batchEndpoint}`, HOMEPAGE_FETCH_OPTIONS).then(
-      (res) => res.json(),
-    );
+    // Start new products and curated discounted fetches in parallel
     const newPromise = curatedNewest
       ? getProductsByIds(settings.homeNewestProductIds)
-      : fetch(`${API_BASE_URL}${newEndpoint}`, HOMEPAGE_FETCH_OPTIONS)
+      : fetch(`${STRAPI_INTERNAL_URL}${newEndpoint}`, HOMEPAGE_FETCH_OPTIONS)
           .then((res) => res.json())
           .then((newResponse: { data?: unknown[] }) => {
             const raw = newResponse?.data ?? [];
@@ -141,6 +147,7 @@ export const getHomepageSections = async (): Promise<{
       ? getProductsByIds(settings.homeDiscountedProductIds)
       : Promise.resolve<ProductCardProps[] | null>(null);
 
+    // Wait for all fetches to complete
     const [batchResponse, newProducts, discountedCurated] = await Promise.all([
       batchPromise,
       newPromise,
@@ -242,11 +249,12 @@ export const getFeaturedCategoryProductsByRating = async (
   const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?${params.toString()}`;
 
   try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    const response = await fetch(`${STRAPI_INTERNAL_URL}${endpoint}`, {
       next: { revalidate: 60 },
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
+        "Accept-Encoding": "gzip",
       },
     }).then((res) => res.json());
 
@@ -274,11 +282,12 @@ export const getDiscountedProducts = async (): Promise<ProductCardProps[]> => {
     `pagination[withCount]=false`;
 
   try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    const response = await fetch(`${STRAPI_INTERNAL_URL}${endpoint}`, {
       next: { revalidate: 60 }, // Revalidate every minute
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
+        'Accept-Encoding': 'gzip',
       },
     }).then(res => res.json());
 
@@ -346,11 +355,12 @@ export const getNewProducts = async (): Promise<ProductCardProps[]> => {
 
 
   try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    const response = await fetch(`${STRAPI_INTERNAL_URL}${endpoint}`, {
       next: { revalidate: 60 }, // Revalidate every minute
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
+        'Accept-Encoding': 'gzip',
       },
     }).then(res => res.json());
     const availableProducts = ((response as any).data || []).filter(productHasStock);
@@ -377,11 +387,12 @@ export const getFavoriteProducts = async (): Promise<ProductCardProps[]> => {
     `pagination[withCount]=false`;
 
   try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    const response = await fetch(`${STRAPI_INTERNAL_URL}${endpoint}`, {
       next: { revalidate: 60 }, // Revalidate every minute
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
+        'Accept-Encoding': 'gzip',
       },
     }).then(res => res.json());
     const availableProducts = ((response as any).data || []).filter(productHasStock);

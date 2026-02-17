@@ -60,15 +60,17 @@ export default async function middleware(request: NextRequest) {
     // Check if identifier is numeric (ID-based URL)
     if (identifier && /^\d+$/.test(identifier)) {
       try {
-        // Fetch product slug from API
+        // Fetch product slug from API using internal URL (bypasses TLS/DNS)
         const productId = identifier;
-        const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.infinitycolor.co/api';
+        // Use internal URL for server-side middleware calls to avoid hairpin routing
+        const apiBaseUrl = process.env.STRAPI_INTERNAL_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.infinitycolor.co/api';
         const apiUrl = `${apiBaseUrl}/products/${productId}?fields[0]=Slug`;
 
         const apiResponse = await fetch(apiUrl, {
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
+            'Accept-Encoding': 'gzip',
           },
           next: { revalidate: 86400 }, // Cache for 24 hours
         });

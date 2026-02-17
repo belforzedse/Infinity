@@ -26,7 +26,10 @@ export default ({ env }) => {
       },
       pool: {
         min: env.int("DATABASE_POOL_MIN", 2),
-        max: env.int("DATABASE_POOL_MAX", 10),
+        // Increased from 10 to 25 per instance to prevent connection starvation
+        // With 4 Strapi instances, this allows 100 total connections
+        // Ensure database max_connections can handle this (increase to 150+)
+        max: env.int("DATABASE_POOL_MAX", 25),
       },
     },
     mysql2: {
@@ -50,7 +53,10 @@ export default ({ env }) => {
       },
       pool: {
         min: env.int("DATABASE_POOL_MIN", 2),
-        max: env.int("DATABASE_POOL_MAX", 10),
+        // Increased from 10 to 25 per instance to prevent connection starvation
+        // With 4 Strapi instances, this allows 100 total connections
+        // Ensure database max_connections can handle this (increase to 150+)
+        max: env.int("DATABASE_POOL_MAX", 25),
       },
     },
     postgres: {
@@ -76,7 +82,10 @@ export default ({ env }) => {
       },
       pool: {
         min: env.int("DATABASE_POOL_MIN", 2),
-        max: env.int("DATABASE_POOL_MAX", 10),
+        // Increased from 10 to 25 per instance to prevent connection starvation
+        // With 4 Strapi instances, this allows 100 total connections
+        // Ensure PostgreSQL max_connections can handle this (increase to 150+)
+        max: env.int("DATABASE_POOL_MAX", 25),
       },
     },
     sqlite: {

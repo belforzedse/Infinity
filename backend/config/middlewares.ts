@@ -21,12 +21,14 @@ export default [
   {
     name: "strapi::body",
     config: {
-      jsonLimit: "500mb",
-      formLimit: "500mb",
-      textLimit: "500mb",
+      // Reduced from 500MB to reasonable limits for security and memory safety
+      // 500MB limits were a DoS vector and could cause memory pressure
+      jsonLimit: "10mb",      // JSON API requests (was 500mb)
+      formLimit: "50mb",      // Form data (was 500mb)
+      textLimit: "10mb",      // Text payloads (was 500mb)
       multipart: true,
       formidable: {
-        maxFileSize: 500 * 1024 * 1024, // 500MB cap to avoid parser rejection
+        maxFileSize: 50 * 1024 * 1024, // 50MB for file uploads (was 500MB)
       },
     },
   },

@@ -1,5 +1,7 @@
 export default ({ env }) => {
-  const restCacheProviderName = env("REST_CACHE_PROVIDER", "memory").toLowerCase();
+  // Use Redis for REST cache in production for shared cache across Strapi instances
+  // Memory provider in development for simplicity
+  const restCacheProviderName = env("REST_CACHE_PROVIDER", env("NODE_ENV") === "production" ? "redis" : "memory").toLowerCase();
   const redisConnectionName = env("REST_CACHE_REDIS_CONNECTION", "default");
   const redisUrl = env("REDIS_URL", "redis://localhost:6379");
   let redisHost = env("REDIS_HOST", "localhost");
