@@ -22,72 +22,47 @@ describe("ImageSlider", () => {
     "/image3.jpg",
   ];
 
-  it("should render all images", () => {
+  it("should render only the cover (first) image", () => {
     render(<ImageSlider images={mockImages} title="Test Product" />);
 
     const images = screen.getAllByTestId("blur-image");
-    expect(images).toHaveLength(3);
+    expect(images).toHaveLength(1);
+    expect(images[0]).toHaveAttribute("data-src", "/image1.jpg");
   });
 
-  it("should render image alt text correctly", () => {
+  it("should render image alt text as product title", () => {
     render(<ImageSlider images={mockImages} title="Test Product" />);
 
-    expect(screen.getByText("Test Product - 1")).toBeInTheDocument();
-    expect(screen.getByText("Test Product - 2")).toBeInTheDocument();
-    expect(screen.getByText("Test Product - 3")).toBeInTheDocument();
+    expect(screen.getByText("Test Product")).toBeInTheDocument();
   });
 
-  it("should set priority on first image when priority is true", () => {
+  it("should set priority on cover image when priority is true", () => {
     render(<ImageSlider images={mockImages} title="Test Product" priority={true} />);
 
     const images = screen.getAllByTestId("blur-image");
     expect(images[0]).toHaveAttribute("data-priority", "true");
-    expect(images[1]).toHaveAttribute("data-priority", "false");
   });
 
   it("should not set priority when priority is false", () => {
     render(<ImageSlider images={mockImages} title="Test Product" priority={false} />);
 
     const images = screen.getAllByTestId("blur-image");
-    images.forEach((img) => {
-      expect(img).toHaveAttribute("data-priority", "false");
-    });
+    expect(images[0]).toHaveAttribute("data-priority", "false");
   });
 
-  it("should render navigation dots when multiple images", () => {
-    const { container } = render(<ImageSlider images={mockImages} title="Test Product" />);
+  it("should render single image for single-image array", () => {
+    render(<ImageSlider images={["/single.jpg"]} title="Test Product" />);
 
-    const dots = container.querySelectorAll(".h-0\\.5");
-    expect(dots).toHaveLength(3);
-  });
-
-  it("should not render navigation dots for single image", () => {
-    const { container } = render(<ImageSlider images={["/single.jpg"]} title="Test Product" />);
-
-    const dots = container.querySelectorAll(".h-0\\.5");
-    expect(dots).toHaveLength(0);
-  });
-
-  it("should update current slide on scroll", () => {
-    const { container } = render(<ImageSlider images={mockImages} title="Test Product" />);
-
-    const scrollContainer = container.querySelector(".flex.h-full");
-    expect(scrollContainer).toBeInTheDocument();
-
-    // Initial state - first dot should be active
-    const dots = container.querySelectorAll(".h-0\\.5");
-    expect(dots[0]).toHaveClass("w-7");
-    expect(dots[1]?.classList.contains("w-[9px]")).toBe(true);
+    const images = screen.getAllByTestId("blur-image");
+    expect(images).toHaveLength(1);
+    expect(images[0]).toHaveAttribute("data-src", "/single.jpg");
   });
 
   it("should handle empty images array", () => {
-    const { container } = render(<ImageSlider images={[]} title="Test Product" />);
+    render(<ImageSlider images={[]} title="Test Product" />);
 
     const images = screen.queryAllByTestId("blur-image");
     expect(images).toHaveLength(0);
-
-    const dots = container.querySelectorAll(".h-0\\.5");
-    expect(dots).toHaveLength(0);
   });
 
   it("should apply correct container classes", () => {

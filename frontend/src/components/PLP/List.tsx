@@ -177,9 +177,10 @@ export default function PLPList({
     queryParams.append("populate[4]", "product_variations.general_discounts");
     queryParams.append("populate[5]", "product_variations.product_variation_color");
 
-    // Only fetch additional media on desktop to save bandwidth
+    // Only fetch 3 additional media on desktop (cover + 3 for hover); mobile gets cover only
     if (isDesktopForFetchRef.current) {
       queryParams.append("populate[6]", "Media");
+      queryParams.append("populate[Media][pagination][limit]", "3");
     }
 
     queryParams.append("fields[0]", "Title");

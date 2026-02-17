@@ -116,9 +116,10 @@ export function getProductImages(
           )
           .map((m: MediaItem) => `${baseUrl}${m.attributes?.url}`)
           .filter((url): url is string => Boolean(url))
+          .slice(0, 3)
       : [];
 
-  return [coverImageUrl, ...mediaImages].filter(Boolean);
+  return [coverImageUrl, ...mediaImages].filter(Boolean).slice(0, 4);
 }
 
 export const hasAvailableStock = (product: ProductWithVariations): boolean => {

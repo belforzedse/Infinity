@@ -52,6 +52,11 @@ The PLP is structured to display product listings with filtering capabilities:
   - Price (with discount if applicable)
   - Rating/popularity indicators
 
+### Product card images (performance)
+- **Desktop**: Only 4 images per product are used—cover image plus 3 media for the hover overlay. The API is asked for at most 3 Media items (`populate[Media][pagination][limit]=3`); [getProductImages](frontend/src/utils/product.ts) caps to cover + 3. The main card shows the **cover only** (no slider); the 3 extra images appear in the hover overlay ([VariationOverlay](frontend/src/components/Product/CardParts/VariationOverlay.tsx)).
+- **Mobile**: Only the cover image is fetched and shown ([ProductSmallCard](frontend/src/components/Product/SmallCard.tsx)); Media is not populated on mobile. [VirtualizedList](frontend/src/components/PLP/List/VirtualizedList.tsx) passes `includeMedia: false` when viewport is mobile.
+- **No slider**: [ImageSlider](frontend/src/components/Product/ImageSlider.tsx) on PLP displays a single cover image only (no horizontal scroll/slider) to avoid loading many images per card.
+
 ## Responsive Components
 - Desktop: Shows sidebar filter panel and grid of products
 - Mobile: Filter drawer accessed via button and product grid

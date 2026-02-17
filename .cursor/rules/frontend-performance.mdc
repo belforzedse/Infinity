@@ -1,0 +1,55 @@
+---
+description: Frontend performance and slowness troubleshooting - API URLs, duplicate fetches, populate, images.
+globs:
+alwaysApply: false
+---
+# Frontend Performance & Slowness
+
+Use this when the site feels "extremely slow", when debugging SSR/API latency, or when adding new server-side data fetches.
+
+## 1. Server-side API URL (critical)
+
+**Problem:** If the frontend server (Next.js) calls the public API URL (e.g. `https://api.infinitycolor.co`) for every SSR request, each request pays for TLS handshake, DNS, and network round-trip. That can add hundreds of ms per request and make the site feel very slow.
+
+**Solution:** Use the internal Strapi URL for all server-side fetches so requests stay on the same host or internal network.
+
+- **Constant:** [frontend/src/constants/api.ts](frontend/src/constants/api.ts) – `STRAPI_INTERNAL_URL` is used only when `typeof window === "undefined"` (server). It falls back to `API_BASE_URL` if unset.
+- **Env:** In production (e.g. Docker), set `STRAPI_INTERNAL_URL` to the backend reachable from the Next container (e.g. `http://backend:1337` or `http://host.docker.internal:1337`). See [backend-api-domain.mdc](backend-api-domain.mdc) and Docker networking docs.
+- **Usage:** Homepage, PLP, and other server fetches already use `STRAPI_INTERNAL_URL` where appropriate. When adding new server-side `fetch()` to Strapi, use `STRAPI_INTERNAL_URL`, not `API_BASE_URL`.
+
+## 2. Duplicate fetches
+
+**Problem:** The same data (e.g. public settings) fetched twice in one page load doubles latency for that data.
+
+**Solution:** Fetch once at the page level and pass data down to children that need it.
+
+- **Example:** Home page fetches `getPublicSuperAdminSettings()` once and passes `homepageSettings` into `HomeProductSections`. `getHomepageSections(optionalSettings)` accepts optional settings and skips calling `getPublicSuperAdminSettings()` when provided. See [frontend/src/app/(product)/page.tsx](frontend/src/app/(product)/page.tsx) and [frontend/src/services/product/homepage.ts](frontend/src/services/product/homepage.ts).
+
+## 3. Populate and payload size
+
+**Problem:** Large `populate=*` or unnecessary relations (e.g. full Media gallery for list views) increase response size and Strapi/DB work.
+
+**Solution:**
+
+- **Homepage products:** Use `HOMEPAGE_PRODUCT_POPULATE` in [frontend/src/services/product/homepage.ts](frontend/src/services/product/homepage.ts) – CoverImage, category, variations, stock, discounts, colors only (no Media).
+- **PLP server-side:** [frontend/src/app/(product)/plp/page.tsx](frontend/src/app/(product)/plp/page.tsx) – populate CoverImage, category, variations, stock, discounts, colors only (no Media). List view only needs one image per product.
+- **PLP client-side:** [frontend/src/components/PLP/List.tsx](frontend/src/components/PLP/List.tsx) – Media is added only for desktop (`isDesktopForFetchRef.current`). Prefer not adding Media for list cards if CoverImage is enough.
+- **Settings:** [frontend/src/services/super-admin/settings/public.ts](frontend/src/services/super-admin/settings/public.ts) uses `populate=*`. If the Strapi settings singleton has many relations, consider a dedicated public settings endpoint with limited populate on the backend.
+
+## 4. Timeouts and revalidation
+
+- **Timeouts:** [frontend/src/utils/fetchWithTimeout.ts](frontend/src/utils/fetchWithTimeout.ts) – PLP uses 15s by default. Long timeouts can make the site feel stuck when the API is slow.
+- **Revalidation:** Homepage product sections use `revalidate: 90`, PLP uses `revalidate: 60`. Lower values mean more Strapi traffic; higher values mean slightly staler data but fewer requests.
+
+## 5. Checklist when the site is slow
+
+- [ ] Is `STRAPI_INTERNAL_URL` set in the environment where Next.js runs (e.g. Docker/prod)?
+- [ ] Are we fetching the same data twice in one request (e.g. settings)? Pass from parent when possible.
+- [ ] Are product list requests asking for more than CoverImage + category + variations (e.g. full Media)? Trim populate for list views.
+- [ ] Check backend/Strapi and DB performance (indexes, Redis if used, response caching). See [backend-reports.mdc](backend-reports.mdc) for cache headers and [product-search-api.mdc](product-search-api.mdc) for search caching.
+
+## Related
+
+- [backend-api-domain.mdc](backend-api-domain.mdc) – Production API domain and env overrides
+- [home-page-layout.mdc](home-page-layout.mdc) – Home page data fetching and sections
+- [plp-layout.mdc](plp-layout.mdc) – PLP data and components
