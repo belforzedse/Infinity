@@ -1,0 +1,20 @@
+# Backend CORS (Strapi)
+
+## Config
+
+- **File:** `backend/config/middlewares.ts` – `strapi::cors` config.
+
+## Allowed headers
+
+The `headers` array in the CORS config is sent as `Access-Control-Allow-Headers`. Any **custom request header** the frontend sends to the API must be listed here, or the browser will block the request with:
+
+`Request header field X is not allowed by Access-Control-Allow-Headers in preflight response.`
+
+Current allowed headers include:
+
+- `Content-Type`, `Authorization`, `Origin`, `Accept`, `Accept-Language`
+- **`x-skip-global-loader`** – used by frontend product fetches to skip the global loading overlay (`frontend/src/services/product/product.ts`). If you add other custom headers in frontend API calls, add them here too.
+
+## After changing CORS
+
+Redeploy the backend so the new config is applied; preflight (OPTIONS) and GET responses will then allow the new headers.
