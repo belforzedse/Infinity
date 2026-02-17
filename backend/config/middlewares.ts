@@ -1,9 +1,11 @@
 const frontendUrl = process.env.FRONTEND_URL || process.env.FRONTEND_BASE_URL || "https://infinitycolor.co";
 const corsOrigins = [
   frontendUrl.replace(/\/$/, ""),
+  "https://new.infinitycolor.co",
+  "https://infinitycolor.co",
   "http://localhost:2888",
   "http://127.0.0.1:2888",
-];
+].filter((origin, i, arr) => arr.indexOf(origin) === i); // dedupe
 
 export default [
   "strapi::logger",
