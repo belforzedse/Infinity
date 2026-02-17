@@ -1,0 +1,41 @@
+---
+description: Strapi URL at build vs runtime and Next.js 16 env behavior. Use when configuring STRAPI_INTERNAL_URL, STRAPI_BUILD_TIME_URL, or debugging empty PLP/homepage.
+globs:
+alwaysApply: false
+---
+
+# Strapi URL: Build vs Runtime (Next.js 16)
+
+## Why two URLs?
+
+- **Runtime (e.g. Docker container):** Frontend and Strapi are on the same host. Use an internal URL (`STRAPI_INTERNAL_URL`, e.g. `http://host.docker.internal:8080/api`) to skip TLS and public Nginx.
+- **Build (e.g. CI / Docker build stage):** The build runner is not in the same network as the running container. It cannot reach `host.docker.internal` or internal hostnames. Use a public URL (`STRAPI_BUILD_TIME_URL`, e.g. `https://api.infinitycolor.co/api`) so Server Component fetches during `next build` succeed.
+
+Per **Next.js 16** docs ([environment variables](https://nextjs.org/docs/app/building-your-application/configuring/environment-variables), [version 16 upgrade](https://nextjs.org/docs/app/building-your-application/upgrading/version-16)): `process.env` is replaced at build time for static references. Reading env inside a **function** (`getStrapiServerUrl()`) ensures the value is read when the code runs—at build time in the build process, at request time in the server process—so build and runtime can use different env vars.
+
+For reading env **at request time** in dynamic routes, Next.js 16 recommends calling `connection()` from `next/server` before reading `process.env` so the value is not inlined at build.
+
+## Env vars
+
+| Variable | When | Example |
+|----------|------|--------|
+| `STRAPI_BUILD_TIME_URL` | Set only in **build** (CI / Docker build). Leave unset in runtime container. | `https://api.infinitycolor.co/api` |
+| `STRAPI_INTERNAL_URL` | Set in **runtime** container. Optional at build if `STRAPI_BUILD_TIME_URL` is set. | `http://host.docker.internal:8080/api` |
+
+**Priority:** `STRAPI_BUILD_TIME_URL` > `STRAPI_INTERNAL_URL` > `API_BASE_URL`
+
+## Code
+
+- **Use** `getStrapiServerUrl()` from `@/constants/api` for all server-side Strapi fetches (PLP, homepage, settings, categories). Do not use `STRAPI_INTERNAL_URL` or `STRAPI_SERVER_URL` for new server fetch code.
+- **Defined in:** [frontend/src/constants/api.ts](frontend/src/constants/api.ts)
+- **Used in:** PLP page, homepage service, public settings service, categories service.
+
+## Nginx + host.docker.internal
+
+- Nginx on the host can use `upstream` with `127.0.0.1:8080` (Strapi). The frontend container using `STRAPI_INTERNAL_URL=http://host.docker.internal:8080/api` reaches the **host’s** port 8080, which is the same place Nginx’s `127.0.0.1:8080` points to. So the setup is compatible.
+- On Linux Docker, if `host.docker.internal` is not available, add `extra_hosts: host.docker.internal:host-gateway` to the frontend service.
+
+## Related
+
+- [backend-api-domain.mdc](backend-api-domain.mdc) – production API domain
+- Next.js 16: [Environment Variables](https://nextjs.org/docs/app/building-your-application/configuring/environment-variables), [connection() for runtime env](https://nextjs.org/docs/app/building-your-application/upgrading/version-16)

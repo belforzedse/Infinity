@@ -1,5 +1,5 @@
 import { apiClient } from "@/services";
-import { ENDPOINTS, API_BASE_URL, STRAPI_INTERNAL_URL } from "@/constants/api";
+import { ENDPOINTS, API_BASE_URL, getStrapiServerUrl } from "@/constants/api";
 import { buildTitleKeywordFilter } from "@/constants/productKeywords";
 import type { ProductCardProps } from "@/components/Product/Card";
 import { formatProductsToCardProps } from "./product";
@@ -70,7 +70,7 @@ export const getProductsByIds = async (ids: number[]): Promise<ProductCardProps[
     `pagination[limit]=${Math.max(ids.length, 20)}&` +
     `pagination[withCount]=false`;
   try {
-    const response = await fetch(`${STRAPI_INTERNAL_URL}${endpoint}`, HOMEPAGE_FETCH_OPTIONS).then((res) =>
+    const response = await fetch(`${getStrapiServerUrl()}${endpoint}`, HOMEPAGE_FETCH_OPTIONS).then((res) =>
       res.json(),
     );
     const rawList = (response as { data?: unknown[] })?.data ?? [];
@@ -123,10 +123,19 @@ export const getHomepageSections = async (): Promise<{
   try {
     // Start settings fetch and default batch fetch in parallel (eliminates waterfall)
     const settingsPromise = getPublicSuperAdminSettings();
-    const batchPromise = fetch(`${STRAPI_INTERNAL_URL}${batchEndpoint}`, HOMEPAGE_FETCH_OPTIONS).then(
-      (res) => res.json(),
-    );
-    
+    const batchPromise = fetch(`${getStrapiServerUrl()}${batchEndpoint}`, HOMEPAGE_FETCH_OPTIONS)
+      .then(async (res) => {
+        const data = await res.json();
+        if (!res.ok) {
+          logger.error("[Homepage] Batch products API error", {
+            status: res.status,
+            error: (data as { error?: { message?: string } })?.error?.message ?? data,
+          });
+          return { data: [] };
+        }
+        return data as { data?: unknown[] };
+      });
+
     // Wait for settings to determine strategy for "new" and "discounted" sections
     const settings = await settingsPromise;
     const curatedNewest = settings.homeNewestProductIds.length > 0;
@@ -135,8 +144,18 @@ export const getHomepageSections = async (): Promise<{
     // Start new products and curated discounted fetches in parallel
     const newPromise = curatedNewest
       ? getProductsByIds(settings.homeNewestProductIds)
-      : fetch(`${STRAPI_INTERNAL_URL}${newEndpoint}`, HOMEPAGE_FETCH_OPTIONS)
-          .then((res) => res.json())
+      : fetch(`${getStrapiServerUrl()}${newEndpoint}`, HOMEPAGE_FETCH_OPTIONS)
+          .then(async (res) => {
+            const data = await res.json();
+            if (!res.ok) {
+              logger.error("[Homepage] New products API error", {
+                status: res.status,
+                error: (data as { error?: { message?: string } })?.error?.message ?? data,
+              });
+              return { data: [] };
+            }
+            return data as { data?: unknown[] };
+          })
           .then((newResponse: { data?: unknown[] }) => {
             const raw = newResponse?.data ?? [];
             return formatProductsToCardProps(
@@ -249,7 +268,7 @@ export const getFeaturedCategoryProductsByRating = async (
   const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?${params.toString()}`;
 
   try {
-    const response = await fetch(`${STRAPI_INTERNAL_URL}${endpoint}`, {
+    const response = await fetch(`${getStrapiServerUrl()}${endpoint}`, {
       next: { revalidate: 60 },
       headers: {
         "Content-Type": "application/json",
@@ -282,7 +301,7 @@ export const getDiscountedProducts = async (): Promise<ProductCardProps[]> => {
     `pagination[withCount]=false`;
 
   try {
-    const response = await fetch(`${STRAPI_INTERNAL_URL}${endpoint}`, {
+    const response = await fetch(`${getStrapiServerUrl()}${endpoint}`, {
       next: { revalidate: 60 }, // Revalidate every minute
       headers: {
         'Content-Type': 'application/json',
@@ -355,7 +374,7 @@ export const getNewProducts = async (): Promise<ProductCardProps[]> => {
 
 
   try {
-    const response = await fetch(`${STRAPI_INTERNAL_URL}${endpoint}`, {
+    const response = await fetch(`${getStrapiServerUrl()}${endpoint}`, {
       next: { revalidate: 60 }, // Revalidate every minute
       headers: {
         'Content-Type': 'application/json',
@@ -387,7 +406,7 @@ export const getFavoriteProducts = async (): Promise<ProductCardProps[]> => {
     `pagination[withCount]=false`;
 
   try {
-    const response = await fetch(`${STRAPI_INTERNAL_URL}${endpoint}`, {
+    const response = await fetch(`${getStrapiServerUrl()}${endpoint}`, {
       next: { revalidate: 60 }, // Revalidate every minute
       headers: {
         'Content-Type': 'application/json',

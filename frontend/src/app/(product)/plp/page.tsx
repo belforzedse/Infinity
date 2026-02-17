@@ -6,7 +6,7 @@ import PLPHeroBanner from "@/components/PLP/HeroBanner";
 import PLPList from "@/components/PLP/List";
 import PageContainer from "@/components/layout/PageContainer";
 import ProductListSkeleton from "@/components/Skeletons/ProductListSkeleton";
-import { API_BASE_URL, IMAGE_BASE_URL, STRAPI_INTERNAL_URL } from "@/constants/api";
+import { API_BASE_URL, IMAGE_BASE_URL, getStrapiServerUrl } from "@/constants/api";
 import fetchWithTimeout from "@/utils/fetchWithTimeout";
 import { searchProducts } from "@/services/product/search";
 import AsyncSidebarProducts from "@/components/PLP/List/AsyncSidebarProducts";
@@ -203,7 +203,7 @@ async function getProducts(
 
   // Build query parameters for regular product listing
   // Use internal URL for server-side fetches to bypass TLS/DNS (50-200ms faster)
-  const baseUrl = `${STRAPI_INTERNAL_URL}/products`;
+  const baseUrl = `${getStrapiServerUrl()}/products`;
 
   // Add required fields
   const queryParams = new URLSearchParams();
@@ -293,9 +293,22 @@ async function getProducts(
     });
     const data = await response.json();
 
+    if (!response.ok) {
+      logger.error("[PLP] Products API error", {
+        status: response.status,
+        url: url.replace(/\?.*/, "?…"),
+        error: data?.error?.message ?? String(data),
+      });
+      return {
+        products: [],
+        pagination: { page, pageSize, pageCount: 0, total: 0 },
+      };
+    }
+
+    const rawProducts = Array.isArray(data?.data) ? data.data : [];
     // Post-fetch filtering: We filter for images here since API-level filtering for relations is limited
     // Price filtering is done at API level, but we double-check for edge cases
-    let filteredProducts = data.data.filter((product: Product) => {
+    let filteredProducts = rawProducts.filter((product: Product) => {
       // Filter out products without images (can't filter at API level for relations)
       const hasImage = !!(
         product.attributes.CoverImage?.data?.attributes?.url ||

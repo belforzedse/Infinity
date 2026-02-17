@@ -1,4 +1,4 @@
-import { API_BASE_URL, STRAPI_INTERNAL_URL, CHECKOUT_REQUEST_TIMEOUT_MS, ENDPOINTS } from "@/constants/api";
+import { API_BASE_URL, getStrapiServerUrl, CHECKOUT_REQUEST_TIMEOUT_MS, ENDPOINTS } from "@/constants/api";
 import logger from "@/utils/logger";
 import { resolveAssetUrl } from "@/utils/resolveAssetUrl";
 import fetchWithTimeout from "@/utils/fetchWithTimeout";
@@ -162,7 +162,7 @@ export async function getProductCategories(
   }
 
   // Use internal URL for server-side fetches to bypass TLS/DNS overhead
-  const baseUrl = typeof window === "undefined" ? STRAPI_INTERNAL_URL : API_BASE_URL;
+  const baseUrl = typeof window === "undefined" ? getStrapiServerUrl() : API_BASE_URL;
   const url = `${baseUrl}${ENDPOINTS.PRODUCT.CATEGORY}?${params.toString()}`;
 
   // Server-side: when revalidate is set, use cacheable fetch so Next.js Data Cache is used.

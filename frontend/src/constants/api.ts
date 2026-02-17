@@ -20,15 +20,50 @@ export const IMAGE_BASE_URL =
   process.env.NEXT_PUBLIC_IMAGE_BASE_URL || DEFAULT_IMAGE_BASE_URL;
 
 /**
- * Internal Strapi URL for server-side calls (bypasses TLS + Nginx + DNS)
+ * Internal Strapi URL for server-side calls at runtime (e.g. in Docker container).
+ * Bypasses TLS + public Nginx + DNS when frontend and backend are on the same host.
  *
  * DOCKER: 127.0.0.1 inside a container = the container itself, NOT the host.
- * Use host.docker.internal:8080 (add extra_hosts on Linux). If unreachable,
- * homepage product sections will be empty - leave unset to use public API.
+ * Use host.docker.internal:8080 so the container reaches the host's port 8080.
+ * Nginx on the host can use upstream 127.0.0.1:8080 (Strapi); the container
+ * using host.docker.internal:8080 hits the same host port, so it's compatible.
+ * On Linux add extra_hosts: host.docker.internal:host-gateway if needed.
  */
 export const STRAPI_INTERNAL_URL =
   typeof window === "undefined"
     ? (process.env.STRAPI_INTERNAL_URL || API_BASE_URL)
+    : API_BASE_URL;
+
+/**
+ * Returns the Strapi base URL for server-side fetches. Use this instead of
+ * STRAPI_INTERNAL_URL so build and runtime can use different URLs.
+ *
+ * Next.js 16: process.env is replaced at build time for static references, so
+ * we read env inside a function. When Server Components run during `next build`
+ * (static generation), this sees build env (e.g. STRAPI_BUILD_TIME_URL in CI).
+ * When they run at request time (revalidate, dynamic), this sees runtime env
+ * (e.g. STRAPI_INTERNAL_URL in the container). See Next.js 16 env docs and
+ * connection() for reading env at request time if needed.
+ *
+ * Priority: STRAPI_BUILD_TIME_URL > STRAPI_INTERNAL_URL > API_BASE_URL
+ * - Build (CI / Docker build): set STRAPI_BUILD_TIME_URL to public API URL.
+ * - Runtime (container): set STRAPI_INTERNAL_URL; leave STRAPI_BUILD_TIME_URL unset.
+ */
+export function getStrapiServerUrl(): string {
+  if (typeof window !== "undefined") return API_BASE_URL;
+  return (
+    process.env.STRAPI_BUILD_TIME_URL ||
+    process.env.STRAPI_INTERNAL_URL ||
+    API_BASE_URL
+  );
+}
+
+/** @deprecated Use getStrapiServerUrl() so build vs runtime URL works correctly. */
+export const STRAPI_SERVER_URL =
+  typeof window === "undefined"
+    ? (process.env.STRAPI_BUILD_TIME_URL ||
+        process.env.STRAPI_INTERNAL_URL ||
+        API_BASE_URL)
     : API_BASE_URL;
 // API Versions
 export const API_VERSION = "v1";
