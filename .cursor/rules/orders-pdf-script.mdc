@@ -1,0 +1,42 @@
+---
+description: Orders-to-PDF Python script - API, auth, and credential options
+alwaysApply: false
+---
+
+# Orders-to-PDF Script
+
+The script in `backend/scripts/orders-to-pdf/` exports orders from api.infinitycolor.co (past week) into a single Persian PDF.
+
+## How to run
+
+- **Windows:** `backend\scripts\orders-to-pdf\run.bat`
+- **Unix:** `./backend/scripts/orders-to-pdf/run.sh`
+
+First run creates `.venv` and installs dependencies; then credentials are prompted and the PDF is generated.
+
+## API
+
+- **List orders:** `GET /api/orders` with:
+  - `filters[Date][$gte]`, `filters[Date][$lte]` (ISO 8601)
+  - `sort[0]=Date:desc`
+  - `pagination[page]`, `pagination[pageSize]`
+  - Full populate: user (user_info), contract (contract_transactions, payment_gateway), order_items (product_variation with product, CoverImage, product_variation_color/size/model, product_color, product_size, product_variation_model), delivery_address (shipping_city, shipping_province), shipping
+
+## Credentials
+
+- **Option A:** API Token – `INFINITY_API_TOKEN` or prompt. Used as `Authorization: Bearer <token>`.
+- **Option B:** Phone + password – `INFINITY_PHONE` + `INFINITY_PASSWORD` or prompt. Script calls `POST /api/auth/login-with-password` and uses returned `jwt` as Bearer.
+
+Optional: `INFINITY_API_BASE_URL` (default `https://api.infinitycolor.co`).
+
+## Script args
+
+- `--days N` (default 7)
+- `--output FILE` (default orders.pdf)
+- `--base-url URL`
+
+## Key files
+
+- `backend/scripts/orders-to-pdf/orders-to-pdf.py` – main script
+- `backend/scripts/orders-to-pdf/requirements.txt` – requests, reportlab, arabic-reshaper, python-bidi
+- `backend/scripts/orders-to-pdf/README.md` – user-facing docs
