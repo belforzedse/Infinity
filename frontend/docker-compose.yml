@@ -3,6 +3,8 @@ services:
     image: ghcr.io/belforzedse/infinity-frontend:${IMAGE_TAG:-main}
     env_file:
       - ${ENV_FILE:-main.env}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     restart: unless-stopped
     ports:
       - "127.0.0.1:${HOST_PORT:-3000}:3000"

@@ -7,6 +7,8 @@ services:
     image: ghcr.io/belforzedse/infinity-frontend:${IMAGE_TAG:-main}
     env_file:
       - ${ENV_FILE:-main.env}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     restart: unless-stopped
     ports:
       - "127.0.0.1:3001:3000"
@@ -15,6 +17,8 @@ services:
     image: ghcr.io/belforzedse/infinity-frontend:${IMAGE_TAG:-main}
     env_file:
       - ${ENV_FILE:-main.env}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     restart: unless-stopped
     ports:
       - "127.0.0.1:3002:3000"
@@ -23,6 +27,8 @@ services:
     image: ghcr.io/belforzedse/infinity-frontend:${IMAGE_TAG:-main}
     env_file:
       - ${ENV_FILE:-main.env}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     restart: unless-stopped
     ports:
       - "127.0.0.1:3003:3000"
@@ -31,6 +37,8 @@ services:
     image: ghcr.io/belforzedse/infinity-frontend:${IMAGE_TAG:-main}
     env_file:
       - ${ENV_FILE:-main.env}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     restart: unless-stopped
     ports:
       - "127.0.0.1:3004:3000"

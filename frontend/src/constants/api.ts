@@ -21,20 +21,10 @@ export const IMAGE_BASE_URL =
 
 /**
  * Internal Strapi URL for server-side calls (bypasses TLS + Nginx + DNS)
- * 
- * For server-side components and middleware, use this URL instead of API_BASE_URL
- * to avoid hairpin routing through the public internet. This significantly reduces
- * latency by:
- * - Eliminating DNS lookup
- * - Skipping TLS handshake
- * - Reducing Nginx proxy hops
- * 
- * Expected TTFB improvement: 50-200ms per server-side fetch
- * 
- * Configuration:
- * - Set STRAPI_INTERNAL_URL env var to point to internal Nginx (HTTP only)
- * - Example: http://127.0.0.1:8080/api (port 8080 for internal-only server block)
- * - Falls back to API_BASE_URL if not set (for local development)
+ *
+ * DOCKER: 127.0.0.1 inside a container = the container itself, NOT the host.
+ * Use host.docker.internal:8080 (add extra_hosts on Linux). If unreachable,
+ * homepage product sections will be empty - leave unset to use public API.
  */
 export const STRAPI_INTERNAL_URL =
   typeof window === "undefined"
