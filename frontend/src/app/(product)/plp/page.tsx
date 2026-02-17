@@ -6,7 +6,7 @@ import PLPHeroBanner from "@/components/PLP/HeroBanner";
 import PLPList from "@/components/PLP/List";
 import PageContainer from "@/components/layout/PageContainer";
 import ProductListSkeleton from "@/components/Skeletons/ProductListSkeleton";
-import { API_BASE_URL, IMAGE_BASE_URL } from "@/constants/api";
+import { API_BASE_URL, IMAGE_BASE_URL, STRAPI_INTERNAL_URL } from "@/constants/api";
 import fetchWithTimeout from "@/utils/fetchWithTimeout";
 import { searchProducts } from "@/services/product/search";
 import AsyncSidebarProducts from "@/components/PLP/List/AsyncSidebarProducts";
@@ -202,7 +202,8 @@ async function getProducts(
   }
 
   // Build query parameters for regular product listing
-  const baseUrl = `${API_BASE_URL}/products`;
+  // Use internal URL for server-side fetches to bypass TLS/DNS (50-200ms faster)
+  const baseUrl = `${STRAPI_INTERNAL_URL}/products`;
 
   // Add required fields
   const queryParams = new URLSearchParams();

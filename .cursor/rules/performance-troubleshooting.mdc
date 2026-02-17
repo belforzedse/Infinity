@@ -1,0 +1,71 @@
+# Performance Troubleshooting
+
+## Slow Images (Blog, PLP, PDP)
+
+### Causes
+1. **Browser connection limit** – ~6 simultaneous requests per origin (api.infinitycolor.co)
+2. **Large image sizes** – Full-size images instead of thumbnails/formats
+3. **No lazy loading** – All images load at once
+4. **Strapi/Nginx slow** – Origin serving images slowly
+
+### Checks
+- DevTools → Network → filter by Img → check sizes and load order
+- Verify `formats.thumbnail` or `formats.small` is used where possible
+- Check if Next.js Image with `loading="lazy"` is used for below-fold images
+
+### Improvements
+- Use Strapi image formats (thumbnail, small, medium) for cards/lists
+- Add `loading="lazy"` for non-critical images
+- Consider CDN for `/uploads/` to offload from Strapi
+- Next.js Image `sizes` prop to avoid loading oversized images on mobile
+
+---
+
+## Slow PLP / General Slowness After Deployment
+
+### Possible Causes
+
+#### 1. PLP not using internal URL (FIXED)
+PLP was using `API_BASE_URL` (public) instead of `STRAPI_INTERNAL_URL`. Fixed in `frontend/src/app/(product)/plp/page.tsx`.
+
+#### 2. Redis cache cold start
+After switching `REST_CACHE_PROVIDER=redis`, the cache starts empty. First requests are all cache misses → more DB load. Cache warms over time.
+
+**Test:** Temporarily set `REST_CACHE_PROVIDER=memory` in backend env. If speed improves, Redis may be the cause (connection latency, cold cache).
+
+#### 3. Redis connection latency
+If Redis is on a different host or has network latency, every cache get/set adds delay.
+
+**Check:** Redis should be on same host or low-latency network. `redis-cli ping` from Strapi host.
+
+#### 4. STRAPI_INTERNAL_URL not set
+If `STRAPI_INTERNAL_URL` is not set in Next.js production env, server-side fetches fall back to public API → no benefit, same as before.
+
+**Verify:** In deployment env: `STRAPI_INTERNAL_URL=http://127.0.0.1:8080/api`
+
+---
+
+## Quick Diagnostics
+
+```bash
+# On server - Redis latency
+redis-cli --latency
+
+# Internal endpoint response time
+time curl -s -o /dev/null http://127.0.0.1:8080/api/products
+
+# Strapi logs - look for slow queries
+docker logs infinity-strapi 2>&1 | tail -100
+```
+
+---
+
+## Rollback if Needed
+
+**Redis → Memory:**
+```bash
+REST_CACHE_PROVIDER=memory
+# Restart Strapi
+```
+
+**Internal URL:** Remove `STRAPI_INTERNAL_URL` from Next.js env; fetches will use public API again.
