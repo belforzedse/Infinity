@@ -1,6 +1,7 @@
 export const revalidate = 60; // balance freshness with server load
 
 import { Suspense } from "react";
+import { connection } from "next/server";
 import { notFound } from "next/navigation";
 import PLPHeroBanner from "@/components/PLP/HeroBanner";
 import PLPList from "@/components/PLP/List";
@@ -482,7 +483,8 @@ export default async function PLPPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  // Await the searchParams object
+  // Ensure env (e.g. STRAPI_INTERNAL_URL) is read at request time, not build time (Next.js 16)
+  await connection();
   const params = await searchParams;
 
   // Extract parameters with default values
