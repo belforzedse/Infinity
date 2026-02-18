@@ -135,7 +135,7 @@ jobs:
           key: ${{ secrets.BACKEND_SSH_KEY }}
           port: ${{ secrets.BACKEND_PORT || '22' }}
           source: "backend/docker-compose.yml,backend/docker-compose.scale.yml"
-          target: /opt/infinity/backend/
+          target: /opt/infinity/
 
       - name: Deploy to production
         if: github.ref == 'refs/heads/main'
@@ -199,7 +199,7 @@ jobs:
           key: ${{ secrets.BACKEND_SSH_KEY }}
           port: ${{ secrets.BACKEND_PORT || '22' }}
           source: "backend/docker-compose.yml,backend/docker-compose.scale.yml"
-          target: /opt/infinity/backend/
+          target: /opt/infinity/
 
       - name: Deploy to staging
         if: github.ref == 'refs/heads/dev'
@@ -263,7 +263,7 @@ jobs:
           key: ${{ secrets.BACKEND_SSH_KEY }}
           port: ${{ secrets.BACKEND_PORT || '22' }}
           source: "backend/docker-compose.yml,backend/docker-compose.scale.yml"
-          target: /opt/infinity/backend/
+          target: /opt/infinity/
 
       - name: Deploy to experimental
         if: github.ref == 'refs/heads/experimental'
