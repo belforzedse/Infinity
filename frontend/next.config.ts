@@ -55,6 +55,7 @@ const nextConfig = {
     optimizeCss: true,
   },
   serverExternalPackages: ["jsdom"],
-  compress: true,
+  // Disabled: Nginx already compresses responses; double compression wastes CPU on all instances.
+  compress: false,
 };
 module.exports = nextConfig;
