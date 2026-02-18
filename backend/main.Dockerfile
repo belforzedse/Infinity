@@ -16,7 +16,7 @@ RUN --mount=type=cache,target=/root/.npm \
     npm ci --legacy-peer-deps
 
 COPY . .
-RUN npm run build
+RUN npm run build && rm -rf .strapi
 
 FROM node:20-alpine AS runner
 

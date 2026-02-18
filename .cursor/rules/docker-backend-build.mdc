@@ -1,0 +1,33 @@
+---
+description: Backend (Strapi) Docker image build; .strapi and containerd layer extraction
+globs: backend/*.Dockerfile, backend/.dockerignore
+---
+
+# Backend Docker Build
+
+## Strapi and `.strapi` in the image
+
+Strapi creates a `.strapi` directory (cache/CLI state) during `strapi build`. Including this path in image layers can cause **containerd layer extraction failures** on some hosts:
+
+- Error: `failed to extract layer ... UtimesNanoAt for .../fs/app/.strapi: no such file or directory`
+- Cause: overlayfs/snapshotter tries to set timestamps on `app/.strapi`; due to layer ordering or filesystem quirks the path may not exist at that moment, so extraction fails.
+
+## Required mitigations
+
+1. **backend/.dockerignore**  
+   Must ignore:
+   - `.strapi`
+   - `.strapi-updater.json`
+   - `.strapi-cloud.json`  
+   So local Strapi artifacts are never sent as build context.
+
+2. **Dockerfile (main.Dockerfile, dev.Dockerfile)**  
+   After `npm run build`, remove the directory so it is not copied into the runner stage:
+   ```dockerfile
+   RUN npm run build && rm -rf .strapi
+   ```
+   Do not remove it only in a separate `RUN` if that would leave it in an earlier layer that is still extracted.
+
+## Runtime
+
+Strapi may create `.strapi` again at runtime; that is fine. The issue is only with the path being present in the built image layers and then extracted on the deployment host.

@@ -10,6 +10,9 @@ coverage
 .tmp
 dist
 build
+.strapi
+.strapi-updater.json
+.strapi-cloud.json
 .DS_Store
 *.log
 .dockerignore
