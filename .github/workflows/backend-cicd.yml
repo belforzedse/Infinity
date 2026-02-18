@@ -164,7 +164,26 @@ jobs:
             POSTGRES_DB=${DB_NAME}
             EOF
             export IMAGE_TAG=main
-            docker compose -f docker-compose.yml -f docker-compose.scale.yml --env-file "$ENV_FILE" pull
+            # Work around intermittent containerd "lease does not exist" pull failures by pulling sequentially with retries.
+            if command -v systemctl >/dev/null 2>&1; then
+              sudo -n systemctl restart docker 2>/dev/null || systemctl restart docker 2>/dev/null || true
+            fi
+            pull_with_retry() {
+              local img="$1"
+              local attempt
+              for attempt in 1 2 3 4 5; do
+                if docker pull "$img"; then
+                  return 0
+                fi
+                echo "pull failed for $img (attempt $attempt), retrying..."
+                sleep $((attempt * 5))
+              done
+              echo "pull failed for $img after retries"
+              return 1
+            }
+            pull_with_retry "postgres:16-alpine"
+            pull_with_retry "redis:7-alpine"
+            pull_with_retry "ghcr.io/belforzedse/infinity-backend:${IMAGE_TAG}"
             docker compose -f docker-compose.yml -f docker-compose.scale.yml --env-file "$ENV_FILE" up -d infinity-postgres infinity-redis
             docker compose -f docker-compose.yml -f docker-compose.scale.yml --env-file "$ENV_FILE" up -d --remove-orphans
             if ! docker image prune -f; then
@@ -209,7 +228,26 @@ jobs:
             POSTGRES_DB=${DB_NAME}
             EOF
             export IMAGE_TAG=dev
-            docker compose -f docker-compose.yml -f docker-compose.scale.yml --env-file "$ENV_FILE" pull
+            # Work around intermittent containerd "lease does not exist" pull failures by pulling sequentially with retries.
+            if command -v systemctl >/dev/null 2>&1; then
+              sudo -n systemctl restart docker 2>/dev/null || systemctl restart docker 2>/dev/null || true
+            fi
+            pull_with_retry() {
+              local img="$1"
+              local attempt
+              for attempt in 1 2 3 4 5; do
+                if docker pull "$img"; then
+                  return 0
+                fi
+                echo "pull failed for $img (attempt $attempt), retrying..."
+                sleep $((attempt * 5))
+              done
+              echo "pull failed for $img after retries"
+              return 1
+            }
+            pull_with_retry "postgres:16-alpine"
+            pull_with_retry "redis:7-alpine"
+            pull_with_retry "ghcr.io/belforzedse/infinity-backend:${IMAGE_TAG}"
             docker compose -f docker-compose.yml -f docker-compose.scale.yml --env-file "$ENV_FILE" up -d infinity-postgres infinity-redis
             docker compose -f docker-compose.yml -f docker-compose.scale.yml --env-file "$ENV_FILE" up -d --remove-orphans
             if ! docker image prune -f; then
@@ -254,7 +292,26 @@ jobs:
             POSTGRES_DB=${DB_NAME}
             EOF
             export IMAGE_TAG=experimental
-            docker compose -f docker-compose.yml -f docker-compose.scale.yml --env-file "$ENV_FILE" pull
+            # Work around intermittent containerd "lease does not exist" pull failures by pulling sequentially with retries.
+            if command -v systemctl >/dev/null 2>&1; then
+              sudo -n systemctl restart docker 2>/dev/null || systemctl restart docker 2>/dev/null || true
+            fi
+            pull_with_retry() {
+              local img="$1"
+              local attempt
+              for attempt in 1 2 3 4 5; do
+                if docker pull "$img"; then
+                  return 0
+                fi
+                echo "pull failed for $img (attempt $attempt), retrying..."
+                sleep $((attempt * 5))
+              done
+              echo "pull failed for $img after retries"
+              return 1
+            }
+            pull_with_retry "postgres:16-alpine"
+            pull_with_retry "redis:7-alpine"
+            pull_with_retry "ghcr.io/belforzedse/infinity-backend:${IMAGE_TAG}"
             docker compose -f docker-compose.yml -f docker-compose.scale.yml --env-file "$ENV_FILE" up -d infinity-postgres infinity-redis
             docker compose -f docker-compose.yml -f docker-compose.scale.yml --env-file "$ENV_FILE" up -d --remove-orphans
             if ! docker image prune -f; then

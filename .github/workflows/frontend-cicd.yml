@@ -139,7 +139,24 @@ jobs:
             sed -i '/^STRAPI_BUILD_TIME_URL=/d' main.env
             export IMAGE_TAG=main
             export ENV_FILE=main.env
-            docker compose -f docker-compose.yml -f docker-compose.scale.yml pull
+            # Work around intermittent containerd "lease does not exist" pull failures by pulling sequentially with retries.
+            if command -v systemctl >/dev/null 2>&1; then
+              sudo -n systemctl restart docker 2>/dev/null || systemctl restart docker 2>/dev/null || true
+            fi
+            pull_with_retry() {
+              local img="$1"
+              local attempt
+              for attempt in 1 2 3 4 5; do
+                if docker pull "$img"; then
+                  return 0
+                fi
+                echo "pull failed for $img (attempt $attempt), retrying..."
+                sleep $((attempt * 5))
+              done
+              echo "pull failed for $img after retries"
+              return 1
+            }
+            pull_with_retry "ghcr.io/belforzedse/infinity-frontend:${IMAGE_TAG}"
             docker compose -f docker-compose.yml -f docker-compose.scale.yml up -d --remove-orphans
             if ! docker image prune -f; then
               echo "Skipped prune: another operation is already running."
@@ -174,7 +191,24 @@ jobs:
             sed -i '/^STRAPI_BUILD_TIME_URL=/d' dev.env
             export IMAGE_TAG=dev
             export ENV_FILE=dev.env
-            docker compose -f docker-compose.yml -f docker-compose.scale.yml pull
+            # Work around intermittent containerd "lease does not exist" pull failures by pulling sequentially with retries.
+            if command -v systemctl >/dev/null 2>&1; then
+              sudo -n systemctl restart docker 2>/dev/null || systemctl restart docker 2>/dev/null || true
+            fi
+            pull_with_retry() {
+              local img="$1"
+              local attempt
+              for attempt in 1 2 3 4 5; do
+                if docker pull "$img"; then
+                  return 0
+                fi
+                echo "pull failed for $img (attempt $attempt), retrying..."
+                sleep $((attempt * 5))
+              done
+              echo "pull failed for $img after retries"
+              return 1
+            }
+            pull_with_retry "ghcr.io/belforzedse/infinity-frontend:${IMAGE_TAG}"
             docker compose -f docker-compose.yml -f docker-compose.scale.yml up -d --remove-orphans
             if ! docker image prune -f; then
               echo "Skipped prune: another operation is already running."
@@ -209,7 +243,24 @@ jobs:
             sed -i '/^STRAPI_BUILD_TIME_URL=/d' main.env
             export IMAGE_TAG=experimental
             export ENV_FILE=main.env
-            docker compose -f docker-compose.yml -f docker-compose.scale.yml pull
+            # Work around intermittent containerd "lease does not exist" pull failures by pulling sequentially with retries.
+            if command -v systemctl >/dev/null 2>&1; then
+              sudo -n systemctl restart docker 2>/dev/null || systemctl restart docker 2>/dev/null || true
+            fi
+            pull_with_retry() {
+              local img="$1"
+              local attempt
+              for attempt in 1 2 3 4 5; do
+                if docker pull "$img"; then
+                  return 0
+                fi
+                echo "pull failed for $img (attempt $attempt), retrying..."
+                sleep $((attempt * 5))
+              done
+              echo "pull failed for $img after retries"
+              return 1
+            }
+            pull_with_retry "ghcr.io/belforzedse/infinity-frontend:${IMAGE_TAG}"
             docker compose -f docker-compose.yml -f docker-compose.scale.yml up -d --remove-orphans
             if ! docker image prune -f; then
               echo "Skipped prune: another operation is already running."
