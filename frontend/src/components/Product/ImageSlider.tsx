@@ -44,7 +44,7 @@ const ImageSlider: FC<ImageSliderProps> = ({
           className={`select-none object-cover transition-all duration-300 ${
             !isAvailable ? "opacity-60 saturate-[0.4] blur-sm" : ""
           }`}
-          sizes="(max-width: 768px) 168px, 250px"
+          sizes="(max-width: 768px) 168px, (max-width: 1024px) 200px, 250px"
           priority={priority}
           loading={priority ? "eager" : "lazy"}
           loader={imageLoader}

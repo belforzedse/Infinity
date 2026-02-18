@@ -12,6 +12,7 @@ export const slide5 = new MobileSlideBuilder()
       alt: "Hero",
       width: 600,
       height: 600,
+      sizes: "100vw",
       className: "object-contain",
     },
   })
@@ -39,8 +40,9 @@ export const slide5 = new MobileSlideBuilder()
     image: {
       src: "/images/bottomleft3.png",
       alt: "Banner",
-      width: 600,
-      height: 600,
+      width: 400,
+      height: 500,
+      sizes: "(max-width: 768px) 50vw, 350px",
       className: "h-full w-full rounded-lg object-contain md:object-cover",
     },
     className: "rounded-lg",
@@ -75,8 +77,9 @@ export const slide5 = new MobileSlideBuilder()
     image: {
       src: "/images/bottomright3.png",
       alt: "Banner",
-      width: 600,
-      height: 600,
+      width: 400,
+      height: 500,
+      sizes: "(max-width: 768px) 50vw, 350px",
       className: "h-full w-full rounded-lg object-contain md:object-cover",
     },
     className: "rounded-lg",

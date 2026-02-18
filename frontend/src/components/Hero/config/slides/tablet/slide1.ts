@@ -29,7 +29,7 @@ export const slide1 = new TabletSlideBuilder()
   .heroBanner({
     background: {
       type: "image",
-      value: "/images/HeroSlider/Square/Desktop1Background.png",
+      value: "/images/HeroSlider/Square/Desktop1Background.webp",
       alt: "Background",
       width: "100%",
       height: "80%",
@@ -42,6 +42,7 @@ export const slide1 = new TabletSlideBuilder()
       alt: "Hero Banner",
       width: 600,
       height: 600,
+      sizes: "100vw",
       priority: true,
       loading: "eager",
       className: "object-contain w-[99%] scale-125 h-[99%] translate-y-8",
@@ -55,8 +56,9 @@ export const slide1 = new TabletSlideBuilder()
     image: {
       src: "/images/HeroSlider/ActionBannerLeft/Slide1.webp",
       alt: "Category Banner",
-      width: 600,
-      height: 600,
+      width: 400,
+      height: 500,
+      sizes: "(max-width: 768px) 50vw, 350px",
       href: "/plp",
       className:
         "h-full w-full rounded-lg mb-2 scale-150 translate-x-4 -translate-y-4 object-contain",
@@ -100,8 +102,9 @@ export const slide1 = new TabletSlideBuilder()
     image: {
       src: "/images/HeroSlider/ActionBannerRight/Slide1.webp",
       alt: "Category Banner",
-      width: 800,
-      height: 900,
+      width: 400,
+      height: 500,
+      sizes: "(max-width: 768px) 50vw, 350px",
       href: "/plp",
       className: "h-full w-full rounded-lg scale-125 -translate-y-4 pl-5 object-contain",
       objectPosition: "left",

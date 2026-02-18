@@ -27,10 +27,10 @@ describe("imageLoader", () => {
     expect(result).toContain("q=90");
   });
 
-  it("should use default quality of 75", () => {
+  it("should use default quality of 70", () => {
     const result = imageLoader({ src: "/image.jpg", width: 800 });
 
-    expect(result).toContain("q=75");
+    expect(result).toContain("q=70");
   });
 
   it("should add webp format parameter", () => {

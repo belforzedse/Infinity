@@ -1,6 +1,6 @@
 import type { ImageLoaderProps } from "next/image";
 
-export default function imageLoader({ src, width, quality = 75 }: ImageLoaderProps) {
+export default function imageLoader({ src, width, quality = 70 }: ImageLoaderProps) {
   // Skip data URLs and empty sources
   if (!src || src.startsWith("data:")) return src;
 

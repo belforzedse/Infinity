@@ -49,8 +49,9 @@ export const slide1 = new DesktopSlideBuilder()
     image: {
       src: "/images/HeroSlider/ActionBannerRight/Slide1.webp",
       alt: "Category Banner",
-      width: 800,
-      height: 900,
+      width: 400,
+      height: 500,
+      sizes: "(max-width: 1280px) 25vw, 400px",
       href: "/plp",
       className: "h-full w-full rounded-lg pl-2 object-contain",
       objectPosition: "left",
@@ -94,8 +95,9 @@ export const slide1 = new DesktopSlideBuilder()
     image: {
       src: "/images/HeroSlider/ActionBannerLeft/Slide1.webp",
       alt: "Category Banner",
-      width: 600,
-      height: 600,
+      width: 400,
+      height: 500,
+      sizes: "(max-width: 1280px) 25vw, 400px",
       href: "/plp",
       className: "h-full w-full rounded-lg mb-2 -translate-y-4 object-contain",
       objectPosition: "top left ",
@@ -121,7 +123,7 @@ export const slide1 = new DesktopSlideBuilder()
   .rightBanner({
     background: {
       type: "image",
-      value: "/images/HeroSlider/Square/Desktop1Background.png",
+      value: "/images/HeroSlider/Square/Desktop1Background.webp",
       alt: "Background",
       width: "520px",
       height: "530px",
@@ -132,8 +134,9 @@ export const slide1 = new DesktopSlideBuilder()
     foregroundImage: {
       src: "",
       alt: "Hero Side Image",
-      width: 650,
-      height: 650,
+      width: 565,
+      height: 565,
+      sizes: "(max-width: 1280px) 50vw, 565px",
       priority: false,
     },
   })

@@ -900,6 +900,7 @@ class ProductImporter {
         this.duplicateTracker.recordMapping("products", wcProduct.id, productId, {
           name: wcProduct.name,
           slug: wcProduct.slug,
+          importedSlug: payload.Slug,
           type: wcProduct.type,
           status: wcProduct.status,
           rating: wcProduct.average_rating, // Track rating to detect changes
@@ -945,10 +946,18 @@ class ProductImporter {
       return true; // New product, always import
     }
 
+    const expectedImportedSlug = this.resolveWooCommerceProductSlug(wcProduct);
+    const hasTrackedImportedSlug = Object.prototype.hasOwnProperty.call(
+      existingMapping,
+      "importedSlug",
+    );
+
     // Compare key fields that matter
     const changed = {
       name: existingMapping.name !== wcProduct.name,
-      slug: existingMapping.slug !== wcProduct.slug,
+      // `importedSlug` tracks what was actually written to Strapi.
+      // If legacy mappings don't have it, force one update to sync and persist.
+      slug: !hasTrackedImportedSlug || existingMapping.importedSlug !== expectedImportedSlug,
       status: existingMapping.status !== wcProduct.status,
       description: wcProduct.description && wcProduct.description !== "",
       price: wcProduct.price && parseFloat(wcProduct.price) > 0,
@@ -1006,6 +1015,40 @@ class ProductImporter {
   }
 
   /**
+   * Resolve the product slug from WooCommerce and normalize it for Strapi.
+   * WooCommerce slug is the source-of-truth; fallback generation is used only
+   * when WooCommerce slug is missing/invalid.
+   */
+  resolveWooCommerceProductSlug(wcProduct) {
+    const rawSlug =
+      wcProduct?.slug != null && String(wcProduct.slug).trim() !== ""
+        ? String(wcProduct.slug).trim()
+        : "";
+
+    if (!rawSlug) {
+      return this.generateProductSlug(wcProduct);
+    }
+
+    let decodedSlug = rawSlug;
+    try {
+      decodedSlug = decodeURIComponent(rawSlug);
+    } catch (error) {
+      // Keep the original Woo slug when URL decoding fails.
+      this.logger.debug(`⚠️ Failed to decode slug "${rawSlug}", using raw WooCommerce slug`);
+    }
+
+    const cleanedSlug = this.cleanSlug(decodedSlug);
+    if (cleanedSlug) {
+      return cleanedSlug;
+    }
+
+    this.logger.warn(
+      `⚠️ WooCommerce slug "${rawSlug}" became empty after normalization, generating fallback slug`,
+    );
+    return this.generateProductSlug(wcProduct);
+  }
+
+  /**
    * Transform WooCommerce product to Strapi format
    */
   async transformProduct(wcProduct) {
@@ -1015,19 +1058,7 @@ class ProductImporter {
     }
 
     const normalizedName = this.normalizeProductName(wcProduct.name);
-    let slug;
-    if (wcProduct.slug != null && String(wcProduct.slug).trim() !== "") {
-      try {
-        const decoded = decodeURIComponent(String(wcProduct.slug).trim());
-        const cleaned = this.cleanSlug(decoded);
-        slug = cleaned || this.generateProductSlug(wcProduct);
-      } catch (e) {
-        this.logger.debug(`⚠️ Failed to decode slug "${wcProduct.slug}", using fallback`);
-        slug = this.generateProductSlug(wcProduct);
-      }
-    } else {
-      slug = this.generateProductSlug(wcProduct);
-    }
+    const slug = this.resolveWooCommerceProductSlug(wcProduct);
 
     // Prepare description - use main description if available, otherwise use short_description
     let descriptionContent = "";

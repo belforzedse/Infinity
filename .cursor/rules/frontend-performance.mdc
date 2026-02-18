@@ -41,15 +41,33 @@ Use this when the site feels "extremely slow", when debugging SSR/API latency, o
 - **Timeouts:** [frontend/src/utils/fetchWithTimeout.ts](frontend/src/utils/fetchWithTimeout.ts) – PLP uses 15s by default. Long timeouts can make the site feel stuck when the API is slow.
 - **Revalidation:** Homepage product sections use `revalidate: 90`, PLP uses `revalidate: 60`. Lower values mean more Strapi traffic; higher values mean slightly staler data but fewer requests.
 
-## 5. Checklist when the site is slow
+## 5. Image optimization (FCP, LCP)
+
+**Problem:** Oversized images (served larger than displayed) hurt FCP and LCP. Lighthouse flags "image larger than displayed dimensions" and "use responsive images".
+
+**Solution:**
+
+- **`sizes` attribute:** Always provide `sizes` on Next.js `<Image>` when using `fill` or responsive layouts. Without it, the browser assumes `100vw`, causing oversized downloads.
+  - Desktop hero right banner (5/12 of ~1358px): `sizes="(max-width: 1280px) 50vw, 565px"`
+  - Action banners (each ~half of 7/12): `sizes="(max-width: 1280px) 25vw, 400px"`
+  - Mobile hero full width: `sizes="100vw"`
+  - Product cards: match actual column width (e.g. `sizes="(max-width: 768px) 168px, (max-width: 1024px) 200px, 250px"` for ImageSlider).
+- **Hero slide configs:** [frontend/src/components/Hero/config/slides/](frontend/src/components/Hero/config/slides/) – add `sizes` and set `width`/`height` to match rendered dimensions. Reduce oversized action banner dimensions (e.g. 800x900 → 400x500).
+- **Static assets (CSS background):** Images loaded via `background-image` bypass Next.js Image optimization. Prefer WebP over PNG; convert with `sharp` and place in `public/images/`. Update slide configs to reference `.webp` path.
+- **Next.js 16:** `images.qualities` defaults to `[75]`; add `qualities: [50, 70, 75, 100]` in `next.config` if using `quality={70}`. Use `preload={true}` for LCP images (replaces deprecated `priority`).
+- **Lazy-load:** Use `loading="lazy"` and `priority={false}` for below-fold images. Hero first slide: `priority={true}` or `preload={true}`. Blog/category carousels: `priority={index === 0}`.
+
+## 6. Checklist when the site is slow
 
 - [ ] Is `STRAPI_INTERNAL_URL` set in the environment where Next.js runs (e.g. Docker/prod)?
 - [ ] Are we fetching the same data twice in one request (e.g. settings)? Pass from parent when possible.
 - [ ] Are product list requests asking for more than CoverImage + category + variations (e.g. full Media)? Trim populate for list views.
+- [ ] Do hero and product images have appropriate `sizes` to avoid oversized downloads?
 - [ ] Check backend/Strapi and DB performance (indexes, Redis if used, response caching). See [backend-reports.mdc](backend-reports.mdc) for cache headers and [product-search-api.mdc](product-search-api.mdc) for search caching.
 
 ## Related
 
 - [backend-api-domain.mdc](backend-api-domain.mdc) – Production API domain and env overrides
+- [hero-slider-customization.mdc](hero-slider-customization.mdc) – Hero slide configs and slot structure
 - [home-page-layout.mdc](home-page-layout.mdc) – Home page data fetching and sections
 - [plp-layout.mdc](plp-layout.mdc) – PLP data and components

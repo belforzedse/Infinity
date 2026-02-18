@@ -51,6 +51,7 @@ export const slide2 = new DesktopSlideBuilder()
       alt: "Category Banner",
       width: 400,
       height: 400,
+      sizes: "(max-width: 1280px) 25vw, 400px",
       href: "/plp",
       className: "h-auto w-auto rounded-lg pl-8 pb-4 object-contain",
       objectPosition: " left",
@@ -95,13 +96,14 @@ export const slide2 = new DesktopSlideBuilder()
     image: {
       src: "/images/HeroSlider/ActionBannerRight/Slide2.webp",
       alt: "Category Banner",
-      width: 600,
-      height: 600,
+      width: 400,
+      height: 500,
+      sizes: "(max-width: 1280px) 25vw, 400px",
       href: "/plp",
       className: " rounded-lg pl-8 object-contain",
       objectPosition: "left",
-      customWidth: "200px", // NEW: Set image display width
-      customHeight: "180px", // NEW: Set image display height
+      customWidth: "200px",
+      customHeight: "180px",
     },
     background: {
       type: "color",
@@ -135,10 +137,10 @@ export const slide2 = new DesktopSlideBuilder()
     foregroundImage: {
       src: "/images/HeroSlider/Square/Slide2Foreground.png",
       alt: "Hero Side Image",
-      width: 650,
-      height: 650,
+      width: 565,
+      height: 565,
+      sizes: "(max-width: 1280px) 50vw, 565px",
       priority: false,
-      // "center", "bottom center", "top left", etc.
     },
   })
   .build();
