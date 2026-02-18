@@ -205,7 +205,33 @@ async function getProducts(
 
   // Build query parameters for regular product listing
   // Use internal URL for server-side fetches to bypass TLS/DNS (50-200ms faster)
-  const baseUrl = `${getStrapiServerUrl()}/products`;
+  const strapiBase = getStrapiServerUrl();
+  const baseUrl = `${strapiBase}/products`;
+
+  // #region agent log
+  try {
+    const urlSource =
+      typeof process.env.STRAPI_BUILD_TIME_URL === "string" && strapiBase === process.env.STRAPI_BUILD_TIME_URL
+        ? "STRAPI_BUILD_TIME_URL"
+        : typeof process.env.STRAPI_INTERNAL_URL === "string" && strapiBase === process.env.STRAPI_INTERNAL_URL
+          ? "STRAPI_INTERNAL_URL"
+          : "API_BASE_URL";
+    const payload = {
+      location: "plp/page.tsx:getProducts:url",
+      message: "PLP getProducts URL source",
+      data: { urlSource, isServer: typeof window === "undefined", baseUrlHost: new URL(strapiBase).host },
+      timestamp: Date.now(),
+      hypothesisId: "H1",
+    };
+    console.log(JSON.stringify({ "[PLP DEBUG]": payload }));
+    logger.info("[PLP DEBUG]", payload);
+    fetch("http://127.0.0.1:7245/ingest/4b2d9201-5612-4da7-9de7-159434956c6a", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    }).catch(() => {});
+  } catch (_) {}
+  // #endregion
 
   // Add required fields
   const queryParams = new URLSearchParams();
@@ -298,7 +324,48 @@ async function getProducts(
       next: { revalidate: 60 },
     });
     data = await response.json();
+    // #region agent log
+    try {
+      const payload = {
+        location: "plp/page.tsx:getProducts:firstFetch",
+        message: "PLP first fetch result",
+        data: {
+          ok: response.ok,
+          status: response.status,
+          dataLength: Array.isArray(data?.data) ? data.data.length : "no-data",
+          usedFallback: false,
+        },
+        timestamp: Date.now(),
+        hypothesisId: "H2",
+      };
+      console.log(JSON.stringify({ "[PLP DEBUG]": payload }));
+    logger.info("[PLP DEBUG]", payload);
+      fetch("http://127.0.0.1:7245/ingest/4b2d9201-5612-4da7-9de7-159434956c6a", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      }).catch(() => {});
+    } catch (_) {}
+    // #endregion
   } catch (firstErr) {
+    // #region agent log
+    try {
+      const payload = {
+        location: "plp/page.tsx:getProducts:firstFetchCatch",
+        message: "PLP first fetch failed, using fallback",
+        data: { error: String(firstErr).slice(0, 200), usedFallback: true },
+        timestamp: Date.now(),
+        hypothesisId: "H2",
+      };
+      console.log(JSON.stringify({ "[PLP DEBUG]": payload }));
+    logger.info("[PLP DEBUG]", payload);
+      fetch("http://127.0.0.1:7245/ingest/4b2d9201-5612-4da7-9de7-159434956c6a", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      }).catch(() => {});
+    } catch (_) {}
+    // #endregion
     logger.warn("[PLP] Products fetch failed (internal URL?), retrying with public API", {
       error: String(firstErr),
       urlHint: baseUrl.replace(/\?.*/, ""),
@@ -309,6 +376,28 @@ async function getProducts(
         next: { revalidate: 60 },
       });
       data = await response.json();
+      // #region agent log
+      try {
+        const payload = {
+          location: "plp/page.tsx:getProducts:fallbackFetch",
+          message: "PLP fallback fetch result",
+          data: {
+            ok: response.ok,
+            status: response.status,
+            dataLength: Array.isArray(data?.data) ? data.data.length : "no-data",
+          },
+          timestamp: Date.now(),
+          hypothesisId: "H2",
+        };
+        console.log(JSON.stringify({ "[PLP DEBUG]": payload }));
+    logger.info("[PLP DEBUG]", payload);
+        fetch("http://127.0.0.1:7245/ingest/4b2d9201-5612-4da7-9de7-159434956c6a", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }).catch(() => {});
+      } catch (_) {}
+      // #endregion
     } catch (secondErr) {
       logger.error("[PLP] Products fetch failed (public fallback)", { error: String(secondErr) });
       return {
@@ -319,6 +408,27 @@ async function getProducts(
   }
 
   if (!response.ok) {
+    // #region agent log
+    try {
+      const payload = {
+        location: "plp/page.tsx:getProducts:responseNotOk",
+        message: "PLP products API returned non-OK",
+        data: {
+          status: response.status,
+          errorMessage: (data as { error?: { message?: string } })?.error?.message ?? String(data).slice(0, 150),
+        },
+        timestamp: Date.now(),
+        hypothesisId: "H2",
+      };
+      console.log(JSON.stringify({ "[PLP DEBUG]": payload }));
+    logger.info("[PLP DEBUG]", payload);
+      fetch("http://127.0.0.1:7245/ingest/4b2d9201-5612-4da7-9de7-159434956c6a", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      }).catch(() => {});
+    } catch (_) {}
+    // #endregion
     logger.error("[PLP] Products API error", {
       status: response.status,
       url: (response.url || url).replace(/\?.*/, "?…"),
@@ -455,6 +565,30 @@ async function getProducts(
     const total = typeof meta?.total === "number" ? meta.total : filteredProducts.length;
     const pageCount = typeof meta?.pageCount === "number" ? meta.pageCount : Math.ceil(total / pageSize);
 
+    // #region agent log
+    try {
+      const payload = {
+        location: "plp/page.tsx:getProducts:afterFilter",
+        message: "PLP after filter",
+        data: {
+          rawCount: rawProducts.length,
+          filteredCount: filteredProducts.length,
+          total,
+          pageCount,
+        },
+        timestamp: Date.now(),
+        hypothesisId: "H4",
+      };
+      console.log(JSON.stringify({ "[PLP DEBUG]": payload }));
+    logger.info("[PLP DEBUG]", payload);
+      fetch("http://127.0.0.1:7245/ingest/4b2d9201-5612-4da7-9de7-159434956c6a", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      }).catch(() => {});
+    } catch (_) {}
+    // #endregion
+
     return {
       products: filteredProducts,
       pagination: {
@@ -485,6 +619,35 @@ export default async function PLPPage({
 }) {
   // Ensure env (e.g. STRAPI_INTERNAL_URL) is read at request time, not build time (Next.js 16)
   await connection();
+  // #region agent log
+  try {
+    const runtimeUrl = getStrapiServerUrl();
+    const payload = {
+      location: "plp/page.tsx:PLPPage:afterConnection",
+      message: "PLP after connection()",
+      data: {
+        hasStrapiBuildTime: typeof process.env.STRAPI_BUILD_TIME_URL === "string",
+        hasStrapiInternal: typeof process.env.STRAPI_INTERNAL_URL === "string",
+        runtimeUrlHost: (() => {
+          try {
+            return new URL(runtimeUrl).host;
+          } catch {
+            return "invalid";
+          }
+        })(),
+      },
+      timestamp: Date.now(),
+      hypothesisId: "H5",
+    };
+    console.log(JSON.stringify({ "[PLP DEBUG]": payload }));
+    logger.info("[PLP DEBUG]", payload);
+    fetch("http://127.0.0.1:7245/ingest/4b2d9201-5612-4da7-9de7-159434956c6a", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    }).catch(() => {});
+  } catch (_) {}
+  // #endregion
   const params = await searchParams;
 
   // Extract parameters with default values
