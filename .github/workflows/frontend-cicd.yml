@@ -120,6 +120,7 @@ jobs:
           port: ${{ secrets.FRONTEND_PORT || '22' }}
           source: "frontend/docker-compose.yml,frontend/docker-compose.scale.yml"
           target: /opt/infinity/frontend/
+          strip_components: 1
 
       - name: Deploy to production
         if: github.ref == 'refs/heads/main'
