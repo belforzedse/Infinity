@@ -75,6 +75,8 @@ export default function PLPList({
 
   const [isDesktop, setIsDesktop] = useState(false);
   const isDesktopForFetchRef = useRef(false);
+  /** Remember that we have or had products from server so we never overwrite with empty client response */
+  const hadProductsFromServerRef = useRef(initialProducts.length > 0);
 
   useEffect(() => {
     const checkDesktop = () => {
@@ -115,6 +117,7 @@ export default function PLPList({
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
 
   useEffect(() => {
+    hadProductsFromServerRef.current = filteredInitialProducts.length > 0;
     setProducts(filteredInitialProducts);
     setPagination(initialPagination);
   }, [filteredInitialProducts, initialPagination]);
@@ -329,6 +332,13 @@ export default function PLPList({
             } : null,
           });
         }
+
+        // Do not overwrite server-rendered products with empty client response (e.g. public API returns [] while internal URL works)
+        if (productsArray.length === 0 && hadProductsFromServerRef.current) {
+          setIsLoading(false);
+          return;
+        }
+        if (productsArray.length > 0) hadProductsFromServerRef.current = true;
 
         setProducts(productsArray);
         setPagination(
