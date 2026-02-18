@@ -1,6 +1,4 @@
 export const revalidate = 60; // balance freshness with server load
-// Force server run every time so we don't serve cached empty PLP (debug + fix for missing products)
-export const dynamic = "force-dynamic";
 
 import { Suspense } from "react";
 import { connection } from "next/server";
@@ -24,13 +22,6 @@ import { validateCategorySlug } from "@/utils/category-validation";
 import { getCategoryAndDescendantSlugs } from "@/utils/category-descendants";
 import { getProductCategories } from "@/services/product/categories";
 import type { PLPProduct } from "@/components/PLP/types";
-
-export type PLPDebugEntry = {
-  location: string;
-  message: string;
-  data: Record<string, unknown>;
-  hypothesisId: string;
-};
 
 interface Product {
   id: number;
@@ -77,12 +68,7 @@ async function getProducts(
   search?: string,
   sort?: string,
   hasDiscount?: boolean,
-  debugCollector?: PLPDebugEntry[],
 ) {
-  const push = (entry: PLPDebugEntry) => {
-    if (debugCollector) debugCollector.push(entry);
-  };
-
   // Handle search queries differently
   if (search) {
     try {
@@ -222,23 +208,6 @@ async function getProducts(
   const strapiBase = getStrapiServerUrl();
   const baseUrl = `${strapiBase}/products`;
 
-  // #region agent log
-  try {
-    const urlSource =
-      typeof process.env.STRAPI_BUILD_TIME_URL === "string" && strapiBase === process.env.STRAPI_BUILD_TIME_URL
-        ? "STRAPI_BUILD_TIME_URL"
-        : typeof process.env.STRAPI_INTERNAL_URL === "string" && strapiBase === process.env.STRAPI_INTERNAL_URL
-          ? "STRAPI_INTERNAL_URL"
-          : "API_BASE_URL";
-    push({
-      location: "plp/page.tsx:getProducts:url",
-      message: "PLP getProducts URL source",
-      data: { urlSource, isServer: typeof window === "undefined", baseUrlHost: new URL(strapiBase).host },
-      hypothesisId: "H1",
-    });
-  } catch (_) {}
-  // #endregion
-
   // Add required fields
   const queryParams = new URLSearchParams();
   queryParams.append("populate[0]", "CoverImage");
@@ -330,28 +299,7 @@ async function getProducts(
       next: { revalidate: 60 },
     });
     data = await response.json();
-    // #region agent log
-    push({
-      location: "plp/page.tsx:getProducts:firstFetch",
-      message: "PLP first fetch result",
-      data: {
-        ok: response.ok,
-        status: response.status,
-        dataLength: Array.isArray(data?.data) ? data.data.length : "no-data",
-        usedFallback: false,
-      },
-      hypothesisId: "H2",
-    });
-    // #endregion
   } catch (firstErr) {
-    // #region agent log
-    push({
-      location: "plp/page.tsx:getProducts:firstFetchCatch",
-      message: "PLP first fetch failed, using fallback",
-      data: { error: String(firstErr).slice(0, 200), usedFallback: true },
-      hypothesisId: "H2",
-    });
-    // #endregion
     logger.warn("[PLP] Products fetch failed (internal URL?), retrying with public API", {
       error: String(firstErr),
       urlHint: baseUrl.replace(/\?.*/, ""),
@@ -362,18 +310,6 @@ async function getProducts(
         next: { revalidate: 60 },
       });
       data = await response.json();
-      // #region agent log
-      push({
-        location: "plp/page.tsx:getProducts:fallbackFetch",
-        message: "PLP fallback fetch result",
-        data: {
-          ok: response.ok,
-          status: response.status,
-          dataLength: Array.isArray(data?.data) ? data.data.length : "no-data",
-        },
-        hypothesisId: "H2",
-      });
-      // #endregion
     } catch (secondErr) {
       logger.error("[PLP] Products fetch failed (public fallback)", { error: String(secondErr) });
       return {
@@ -384,17 +320,6 @@ async function getProducts(
   }
 
   if (!response.ok) {
-    // #region agent log
-    push({
-      location: "plp/page.tsx:getProducts:responseNotOk",
-      message: "PLP products API returned non-OK",
-      data: {
-        status: response.status,
-        errorMessage: (data as { error?: { message?: string } })?.error?.message ?? String(data).slice(0, 150),
-      },
-      hypothesisId: "H2",
-    });
-    // #endregion
     logger.error("[PLP] Products API error", {
       status: response.status,
       url: (response.url || url).replace(/\?.*/, "?…"),
@@ -531,20 +456,6 @@ async function getProducts(
     const total = typeof meta?.total === "number" ? meta.total : filteredProducts.length;
     const pageCount = typeof meta?.pageCount === "number" ? meta.pageCount : Math.ceil(total / pageSize);
 
-    // #region agent log
-    push({
-      location: "plp/page.tsx:getProducts:afterFilter",
-      message: "PLP after filter",
-      data: {
-        rawCount: rawProducts.length,
-        filteredCount: filteredProducts.length,
-        total,
-        pageCount,
-      },
-      hypothesisId: "H4",
-    });
-    // #endregion
-
     return {
       products: filteredProducts,
       pagination: {
@@ -576,29 +487,6 @@ export default async function PLPPage({
   // Ensure env (e.g. STRAPI_INTERNAL_URL) is read at request time, not build time (Next.js 16)
   await connection();
   const params = await searchParams;
-  const isDebug = params.debug === "1";
-  const debugCollector: PLPDebugEntry[] | undefined = isDebug ? [] : undefined;
-  if (debugCollector) {
-    try {
-      const runtimeUrl = getStrapiServerUrl();
-      debugCollector.push({
-        location: "plp/page.tsx:PLPPage:afterConnection",
-        message: "PLP after connection()",
-        data: {
-          hasStrapiBuildTime: typeof process.env.STRAPI_BUILD_TIME_URL === "string",
-          hasStrapiInternal: typeof process.env.STRAPI_INTERNAL_URL === "string",
-          runtimeUrlHost: (() => {
-            try {
-              return new URL(runtimeUrl).host;
-            } catch {
-              return "invalid";
-            }
-          })(),
-        },
-        hypothesisId: "H5",
-      });
-    } catch (_) {}
-  }
 
   // Extract parameters with default values
   const category = typeof params.category === "string" ? params.category : undefined;
@@ -662,7 +550,6 @@ export default async function PLPPage({
     search,
     sort,
     hasDiscount,
-    isDebug ? debugCollector : undefined,
   );
 
   // Sidebar is loaded in a Suspense boundary so main PLP content is not blocked by getHomepageSections().
@@ -755,18 +642,6 @@ export default async function PLPPage({
           sidebarSlot={sidebarSlot}
         />
       </Suspense>
-
-      {debugCollector && debugCollector.length > 0 && (
-        <section
-          className="mt-8 rounded border border-amber-200 bg-amber-50 p-4 font-mono text-sm"
-          aria-label="PLP debug (remove ?debug=1 to hide)"
-        >
-          <h2 className="mb-2 font-bold text-amber-900">PLP debug (?debug=1)</h2>
-          <pre className="max-h-96 overflow-auto whitespace-pre-wrap break-all text-left">
-            {JSON.stringify(debugCollector, null, 2)}
-          </pre>
-        </section>
-      )}
     </PageContainer>
   );
 }
