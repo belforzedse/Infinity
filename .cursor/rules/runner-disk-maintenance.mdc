@@ -1,0 +1,56 @@
+# Self-Hosted Runner Disk Maintenance
+
+## Overview
+
+Frontend and Backend CI/CD use a **self-hosted** runner (`runs-on: [self-hosted, linux, x64, infinity]`). If the runner runs out of disk space, jobs fail with:
+
+```
+System.IO.IOException: No space left on device : '.../_diag/Worker_....log'
+```
+
+This is an **infrastructure issue** on the runner host, not a bug in the workflow or application code.
+
+## Immediate Fix (Ops)
+
+When you see "No space left on device" on the runner:
+
+1. **SSH to the runner host** (e.g. the machine where `actions-runner-2` runs, path `/home/gh-runner/actions-runner-2/`).
+
+2. **Check disk usage:**
+   ```bash
+   df -h
+   du -sh /home/gh-runner/actions-runner-2/* 2>/dev/null | sort -h
+   ```
+
+3. **Free space safely:**
+   - **Docker:** `docker system prune -f` (dangling images); for aggressive cleanup: `docker system prune -a -f` (removes all unused images, next build will re-pull).
+   - **Buildx cache:** `docker buildx prune -a -f` (clears build cache; next build may be slower).
+   - **Runner diag logs:** Remove or rotate old logs under `_diag/` (e.g. keep last 7 days).
+   - **Workspace dirs:** Remove old `_work` run directories if the runner keeps many runs: e.g. `find /home/gh-runner/actions-runner-2/_work -maxdepth 1 -type d -mtime +7` and delete as needed.
+   - **npm cache:** If applicable, `npm cache clean --force` in a workspace or global cache dir.
+
+4. **Restart the runner service** after cleanup so it can write logs again.
+
+## Prevention in Workflows
+
+- **Frontend:** `.github/workflows/frontend-cicd.yml`  
+- **Backend:** `.github/workflows/backend-cicd.yml`
+
+Both workflows include a **"Free disk space (runner)"** step at the start of the `build-and-deploy` job that:
+
+- Runs `docker buildx prune -f` and `docker image prune -f` (dangling only).
+- Prints `df -h` so disk usage is visible in the job log.
+
+This reduces buildup over time but does not replace periodic manual cleanup on the runner host.
+
+## When to Use This Rule
+
+- Debugging "No space left on device" in GitHub Actions.
+- Adding or changing CI steps that use disk (Docker, caches, artifacts).
+- Planning runner host maintenance (cron prune, log rotation, disk alerts).
+
+## Related
+
+- Workflows: `.github/workflows/frontend-cicd.yml`, `.github/workflows/backend-cicd.yml`
+- Docker scaling: `docker-load-scaling.mdc`
+- Backend CI: `backend-ci-build.mdc`
