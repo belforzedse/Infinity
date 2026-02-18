@@ -110,6 +110,9 @@ export default ({ env }) => {
         jwt: {
           expiresIn: "7d", // JWT token expiry (changed from default 30d to 7d)
         },
+        // Disable plugin rate limit; we rely on Nginx for general rate limiting and
+        // our own login/discount/OTP throttles for security (auth + cart middlewares).
+        ratelimit: { enabled: false },
       },
     },
     upload: {

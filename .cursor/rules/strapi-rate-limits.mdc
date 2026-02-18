@@ -1,0 +1,24 @@
+# Strapi and Application Rate Limits
+
+## Strapi / Plugin Rate Limits (Disabled)
+
+- **Global Strapi rate limit:** Not used. `backend/config/middlewares.ts` does **not** register `strapi::rateLimit`.
+- **Users-permissions plugin rate limit:** **Disabled** in `backend/config/plugins.ts` via `users-permissions.config.ratelimit.enabled: false`. The plugin’s default rate limit (e.g. 10 req/min on auth routes) is not applied.
+
+## Application-Level Throttles (Security Only)
+
+These are **custom** middlewares for brute-force and abuse protection, not general API throttling:
+
+| Middleware | Location | Purpose |
+|------------|----------|--------|
+| OTP / auth throttle | `backend/src/api/auth/middlewares/throttle.ts` | 4 requests per 2 min (OTP/auth flows) |
+| Login throttle | `backend/src/api/auth/middlewares/login-throttle.ts` | 10 attempts per 10 min per IP (login) |
+| Discount throttle | `backend/src/api/cart/middlewares/discount-throttle.ts` | 5 attempts per minute (discount code validation) |
+
+They are applied only to specific routes (auth, discount validation), not to the whole API.
+
+## Load Testing
+
+- Strapi and the users-permissions plugin do **not** apply general rate limits after the above config.
+- For load tests, ensure Nginx (or any reverse proxy) rate limiting is relaxed or disabled if you need to hit the backend at high concurrency.
+- The only remaining limits are the app’s login/discount/OTP throttles on their specific routes.
