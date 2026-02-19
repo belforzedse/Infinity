@@ -34,8 +34,15 @@ variables:
     - set -euo pipefail
     - apk add --no-cache openssh-client
     - mkdir -p ~/.ssh && chmod 700 ~/.ssh
-    - echo "$DEPLOY_SSH_KEY" | tr -d "\r" > ~/.ssh/id_rsa && chmod 600 ~/.ssh/id_rsa
-    - ssh-keyscan -p "${DEPLOY_PORT:-22}" "$DEPLOY_HOST" >> ~/.ssh/known_hosts
+    # Prefer File-type variable so the key is never echoed (more secure). Fallback to Variable content.
+    - |
+      if [ -f "$DEPLOY_SSH_KEY" ]; then
+        cp "$DEPLOY_SSH_KEY" ~/.ssh/id_rsa
+      else
+        echo "$DEPLOY_SSH_KEY" | tr -d "\r" > ~/.ssh/id_rsa
+      fi
+      chmod 600 ~/.ssh/id_rsa
+    - ssh-keyscan -p "${DEPLOY_PORT:-3031}" "$DEPLOY_HOST" >> ~/.ssh/known_hosts
 
 # -----------------------
 # BACKEND BUILD
@@ -119,16 +126,16 @@ backend:deploy:
       set -euo pipefail
 
       # Upload compose
-      scp -P "${DEPLOY_PORT:-22}" \
+      scp -P "${DEPLOY_PORT:-3031}" \
         backend/docker-compose.yml backend/docker-compose.scale.yml \
         "${DEPLOY_USER}@${DEPLOY_HOST}:/opt/infinity/backend/"
 
       # BACKEND_ENV_FILE is a *File* variable => it's a path. Copy it, don't echo it.
       cp "$BACKEND_ENV_FILE" "/tmp/$ENV_FILE"
-      scp -P "${DEPLOY_PORT:-22}" "/tmp/$ENV_FILE" \
+      scp -P "${DEPLOY_PORT:-3031}" "/tmp/$ENV_FILE" \
         "${DEPLOY_USER}@${DEPLOY_HOST}:/opt/infinity/backend/$ENV_FILE"
 
-      ssh -p "${DEPLOY_PORT:-22}" "${DEPLOY_USER}@${DEPLOY_HOST}" "bash -se" <<REMOTE
+      ssh -p "${DEPLOY_PORT:-3031}" "${DEPLOY_USER}@${DEPLOY_HOST}" "bash -se" <<REMOTE
       	set -euo pipefail
       	cd /opt/infinity/backend
 
@@ -233,16 +240,16 @@ frontend:deploy:
     - |
       set -euo pipefail
 
-      scp -P "${DEPLOY_PORT:-22}" \
+      scp -P "${DEPLOY_PORT:-3031}" \
         frontend/docker-compose.yml frontend/docker-compose.scale.yml \
         "${DEPLOY_USER}@${DEPLOY_HOST}:/opt/infinity/frontend/"
 
       # FRONTEND_ENV_FILE is a *File* variable => path
       cp "$FRONTEND_ENV_FILE" "/tmp/$ENV_FILE"
-      scp -P "${DEPLOY_PORT:-22}" "/tmp/$ENV_FILE" \
+      scp -P "${DEPLOY_PORT:-3031}" "/tmp/$ENV_FILE" \
         "${DEPLOY_USER}@${DEPLOY_HOST}:/opt/infinity/frontend/$ENV_FILE"
 
-      ssh -p "${DEPLOY_PORT:-22}" "${DEPLOY_USER}@${DEPLOY_HOST}" "bash -se" <<REMOTE
+      ssh -p "${DEPLOY_PORT:-3031}" "${DEPLOY_USER}@${DEPLOY_HOST}" "bash -se" <<REMOTE
       	set -euo pipefail
       	cd /opt/infinity/frontend
 
