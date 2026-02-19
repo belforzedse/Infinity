@@ -178,17 +178,20 @@ backend:deploy:
 frontend:build:
   extends: .docker_build
   stage: build
+  environment: $DEPLOY_ENV
   rules:
     - if: '$CI_COMMIT_REF_NAME == "dev"'
       changes: [frontend/**/*, .gitlab-ci.yml]
       variables:
         RUNTIME_TAG: "dev"
         DOCKERFILE: "frontend/dev.Dockerfile"
+        DEPLOY_ENV: "staging"
     - if: '$CI_COMMIT_REF_NAME == "main"'
       changes: [frontend/**/*, .gitlab-ci.yml]
       variables:
         RUNTIME_TAG: "main"
         DOCKERFILE: "frontend/main.Dockerfile"
+        DEPLOY_ENV: "production"
     - when: never
   script:
     - |
