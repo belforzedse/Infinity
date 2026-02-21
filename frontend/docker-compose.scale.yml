@@ -12,6 +12,12 @@ services:
     restart: unless-stopped
     ports:
       - "127.0.0.1:3001:3000"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   frontend-3:
     image: ghcr.io/belforzedse/infinity-frontend:${IMAGE_TAG:-main}
@@ -22,6 +28,12 @@ services:
     restart: unless-stopped
     ports:
       - "127.0.0.1:3002:3000"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   frontend-4:
     image: ghcr.io/belforzedse/infinity-frontend:${IMAGE_TAG:-main}
@@ -32,6 +44,12 @@ services:
     restart: unless-stopped
     ports:
       - "127.0.0.1:3003:3000"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   frontend-5:
     image: ghcr.io/belforzedse/infinity-frontend:${IMAGE_TAG:-main}
@@ -42,6 +60,12 @@ services:
     restart: unless-stopped
     ports:
       - "127.0.0.1:3004:3000"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   frontend-6:
     image: ghcr.io/belforzedse/infinity-frontend:${IMAGE_TAG:-main}
@@ -52,6 +76,12 @@ services:
     restart: unless-stopped
     ports:
       - "127.0.0.1:3005:3000"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   frontend-7:
     image: ghcr.io/belforzedse/infinity-frontend:${IMAGE_TAG:-main}
@@ -62,6 +92,12 @@ services:
     restart: unless-stopped
     ports:
       - "127.0.0.1:3006:3000"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   frontend-8:
     image: ghcr.io/belforzedse/infinity-frontend:${IMAGE_TAG:-main}
@@ -72,3 +108,9 @@ services:
     restart: unless-stopped
     ports:
       - "127.0.0.1:3007:3000"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s

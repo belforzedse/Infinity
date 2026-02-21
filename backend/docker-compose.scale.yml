@@ -21,6 +21,12 @@ services:
       - backend_uploads-data:/app/public
     networks:
       - infinity-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:1337/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   strapi-3:
     image: ghcr.io/belforzedse/infinity-backend:${IMAGE_TAG:-main}
@@ -39,6 +45,12 @@ services:
       - backend_uploads-data:/app/public
     networks:
       - infinity-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:1337/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   strapi-4:
     image: ghcr.io/belforzedse/infinity-backend:${IMAGE_TAG:-main}
@@ -57,3 +69,9 @@ services:
       - backend_uploads-data:/app/public
     networks:
       - infinity-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:1337/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s

@@ -141,14 +141,15 @@ build_frontend:
       DOCKERFILE="frontend/main.Dockerfile"
       [ "$CI_COMMIT_REF_NAME" = "dev" ] && DOCKERFILE="frontend/dev.Dockerfile"
 
+      CACHE_REF="$FRONTEND_IMAGE:buildcache-${RUNTIME_TAG}"
       docker build \
         --build-arg NEXT_PUBLIC_API_BASE_URL="${FRONTEND_API_BASE_URL}" \
         --build-arg NEXT_PUBLIC_IMAGE_BASE_URL="${FRONTEND_IMAGE_BASE_URL}" \
         --build-arg NEXT_PUBLIC_STRAPI_TOKEN="${FRONTEND_STRAPI_TOKEN}" \
         --build-arg NEXT_PUBLIC_SITE_URL="${SITE_URL}" \
         --build-arg GIT_SHA="${CI_COMMIT_SHA}" \
-        --cache-from type=registry,ref="$FRONTEND_IMAGE:${RUNTIME_TAG}" \
-        --cache-to type=inline \
+        --cache-from type=registry,ref="$CACHE_REF" \
+        --cache-to type=registry,ref="$CACHE_REF,mode=max" \
         -f "$DOCKERFILE" \
         -t "$FRONTEND_IMAGE:${CI_COMMIT_SHA}" \
         -t "$FRONTEND_IMAGE:${RUNTIME_TAG}" \
@@ -156,6 +157,9 @@ build_frontend:
 
       docker push "$FRONTEND_IMAGE:${CI_COMMIT_SHA}"
       docker push "$FRONTEND_IMAGE:${RUNTIME_TAG}"
+
+      echo "--- Build metrics (frontend) ---"
+      docker images --format "{{.Repository}}:{{.Tag}} {{.Size}}" | grep -E "infinity-frontend|$FRONTEND_IMAGE" || true
 
 # -------------------------
 # BUILD: Backend
@@ -200,10 +204,11 @@ build_backend:
         NODE_OPTIONS=""
       fi
 
+      CACHE_REF="$BACKEND_IMAGE:buildcache-${RUNTIME_TAG}"
       docker build \
         -f "$DOCKERFILE" \
-        --cache-from type=registry,ref="$BACKEND_IMAGE:${RUNTIME_TAG}" \
-        --cache-to type=inline \
+        --cache-from type=registry,ref="$CACHE_REF" \
+        --cache-to type=registry,ref="$CACHE_REF,mode=max" \
         -t "$BACKEND_IMAGE:${CI_COMMIT_SHA}" \
         -t "$BACKEND_IMAGE:${RUNTIME_TAG}" \
         --build-arg STRAPI_DISABLE_SOURCEMAPS="${STRAPI_DISABLE_SOURCEMAPS}" \
@@ -213,6 +218,9 @@ build_backend:
 
       docker push "$BACKEND_IMAGE:${CI_COMMIT_SHA}"
       docker push "$BACKEND_IMAGE:${RUNTIME_TAG}"
+
+      echo "--- Build metrics (backend) ---"
+      docker images --format "{{.Repository}}:{{.Tag}} {{.Size}}" | grep -E "infinity-backend|$BACKEND_IMAGE" || true
 
 # -------------------------
 # DEPLOY: Frontend

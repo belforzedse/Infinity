@@ -57,5 +57,8 @@ const nextConfig = {
   serverExternalPackages: ["jsdom"],
   // Disabled: Nginx already compresses responses; double compression wastes CPU on all instances.
   compress: false,
+  // Shared Redis cache across multiple Next.js instances (see src/lib/cache-handler.ts)
+  cacheHandler: require.resolve("./src/lib/cache-handler"),
+  cacheMaxMemorySize: 0,
 };
 module.exports = nextConfig;

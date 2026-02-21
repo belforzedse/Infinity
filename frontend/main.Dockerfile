@@ -4,6 +4,7 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Layer caching: deps first so code-only changes don't re-run npm ci
 COPY package*.json ./
 RUN --mount=type=cache,target=/root/.npm \
     npm ci --legacy-peer-deps

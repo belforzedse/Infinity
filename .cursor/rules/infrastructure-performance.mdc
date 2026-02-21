@@ -1,0 +1,26 @@
+---
+description: Infra performance optimizations (Brotli, Next.js Redis cache, health checks, Nginx proxy cache)
+globs: docs/nginx*.md,docs/nginx*.conf,**/docker-compose*.yml,**/Dockerfile*,frontend/next.config.*,frontend/src/lib/cache-handler*
+---
+
+# Infrastructure Performance
+
+## Implemented
+
+- **Brotli:** `docs/nginx-brotli-setup.md`, `docs/nginx-brotli-snippet.conf` – enable on server.
+- **Next.js shared cache:** `frontend/src/lib/cache-handler.ts` (Redis). Requires `REDIS_URL` in frontend env. Configured in `frontend/next.config.ts` via `cacheHandler` and `cacheMaxMemorySize: 0`.
+- **Docker layer caching:** Frontend and backend Dockerfiles copy `package*.json` first, then run `npm ci` with cache mount, then `COPY . .`.
+- **Health checks:** All app services in `backend/docker-compose.yml`, `backend/docker-compose.scale.yml`, `frontend/docker-compose.yml`, `frontend/docker-compose.scale.yml` use `wget --spider` to root URL (no dedicated health endpoint).
+- **Nginx proxy cache:** `docs/nginx-proxy-cache-api.md`, `docs/nginx-proxy-cache-api-snippet.conf` – apply on API server.
+- **GitLab CI:** Frontend and backend build jobs use a dedicated registry cache ref `buildcache-${RUNTIME_TAG}` with `--cache-from type=registry,ref=...` and `--cache-to type=registry,ref=...,mode=max` for full layer reuse across pipelines.
+- **GitHub Actions:** Frontend workflow uses `docker/build-push-action` with `cache-from: type=gha`, `cache-to: type=gha,mode=max`.
+- **Build metrics:** GitLab CI frontend and backend build jobs echo image sizes at end of script.
+- **APM:** `docs/apm-options.md` – options (Sentry, OpenTelemetry, Prometheus).
+
+## No health endpoint
+
+Do not add `/api/health` or similar; health checks use root path. Dedicated health services may be added later.
+
+## Redis for frontend
+
+When running multiple Next.js instances, set `REDIS_URL` in the frontend env (e.g. same Redis as Strapi or a dedicated DB index) so the cache handler can connect.

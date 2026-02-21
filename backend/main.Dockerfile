@@ -11,6 +11,7 @@ ENV NODE_ENV=production
 
 WORKDIR /app
 
+# Layer caching: deps first so code-only changes don't re-run npm ci
 COPY package*.json ./
 RUN --mount=type=cache,target=/root/.npm \
     npm ci --legacy-peer-deps
