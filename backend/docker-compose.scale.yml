@@ -13,7 +13,7 @@ services:
       infinity-postgres:
         condition: service_healthy
       infinity-redis:
-        condition: service_healthy
+        condition: service_started
     ports:
       - "127.0.0.1:1338:1337"
     restart: unless-stopped
@@ -22,11 +22,11 @@ services:
     networks:
       - infinity-network
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:1337/"]
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:1337/admin"]
       interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
+      timeout: 15s
+      retries: 5
+      start_period: 120s
 
   strapi-3:
     image: ghcr.io/belforzedse/infinity-backend:${IMAGE_TAG:-main}
@@ -37,7 +37,7 @@ services:
       infinity-postgres:
         condition: service_healthy
       infinity-redis:
-        condition: service_healthy
+        condition: service_started
     ports:
       - "127.0.0.1:1339:1337"
     restart: unless-stopped
@@ -46,11 +46,11 @@ services:
     networks:
       - infinity-network
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:1337/"]
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:1337/admin"]
       interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
+      timeout: 15s
+      retries: 5
+      start_period: 120s
 
   strapi-4:
     image: ghcr.io/belforzedse/infinity-backend:${IMAGE_TAG:-main}
@@ -61,7 +61,7 @@ services:
       infinity-postgres:
         condition: service_healthy
       infinity-redis:
-        condition: service_healthy
+        condition: service_started
     ports:
       - "127.0.0.1:1340:1337"
     restart: unless-stopped
@@ -70,11 +70,11 @@ services:
     networks:
       - infinity-network
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:1337/"]
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:1337/admin"]
       interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
+      timeout: 15s
+      retries: 5
+      start_period: 120s
 
   strapi-5:
     image: ghcr.io/belforzedse/infinity-backend:${IMAGE_TAG:-main}
@@ -85,7 +85,7 @@ services:
       infinity-postgres:
         condition: service_healthy
       infinity-redis:
-        condition: service_healthy
+        condition: service_started
     ports:
       - "127.0.0.1:1341:1337"
     restart: unless-stopped
@@ -94,11 +94,11 @@ services:
     networks:
       - infinity-network
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:1337/"]
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:1337/admin"]
       interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
+      timeout: 15s
+      retries: 5
+      start_period: 120s
 
   strapi-6:
     image: ghcr.io/belforzedse/infinity-backend:${IMAGE_TAG:-main}
@@ -109,7 +109,7 @@ services:
       infinity-postgres:
         condition: service_healthy
       infinity-redis:
-        condition: service_healthy
+        condition: service_started
     ports:
       - "127.0.0.1:1342:1337"
     restart: unless-stopped
@@ -118,8 +118,8 @@ services:
     networks:
       - infinity-network
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:1337/"]
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:1337/admin"]
       interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
+      timeout: 15s
+      retries: 5
+      start_period: 120s

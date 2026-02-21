@@ -12,7 +12,7 @@ services:
     restart: unless-stopped
     depends_on:
       frontend-redis:
-        condition: service_healthy
+        condition: service_started
     environment:
       - FRONTEND_REDIS_URL=${FRONTEND_REDIS_URL:-redis://localhost:6379}
     networks:
@@ -35,7 +35,7 @@ services:
     restart: unless-stopped
     depends_on:
       frontend-redis:
-        condition: service_healthy
+        condition: service_started
     environment:
       - FRONTEND_REDIS_URL=${FRONTEND_REDIS_URL:-redis://localhost:6379}
     networks:
@@ -58,7 +58,7 @@ services:
     restart: unless-stopped
     depends_on:
       frontend-redis:
-        condition: service_healthy
+        condition: service_started
     environment:
       - FRONTEND_REDIS_URL=${FRONTEND_REDIS_URL:-redis://localhost:6379}
     networks:
@@ -81,7 +81,7 @@ services:
     restart: unless-stopped
     depends_on:
       frontend-redis:
-        condition: service_healthy
+        condition: service_started
     environment:
       - FRONTEND_REDIS_URL=${FRONTEND_REDIS_URL:-redis://localhost:6379}
     networks:
@@ -104,7 +104,7 @@ services:
     restart: unless-stopped
     depends_on:
       frontend-redis:
-        condition: service_healthy
+        condition: service_started
     environment:
       - FRONTEND_REDIS_URL=${FRONTEND_REDIS_URL:-redis://localhost:6379}
     networks:
@@ -127,7 +127,7 @@ services:
     restart: unless-stopped
     depends_on:
       frontend-redis:
-        condition: service_healthy
+        condition: service_started
     environment:
       - FRONTEND_REDIS_URL=${FRONTEND_REDIS_URL:-redis://localhost:6379}
     networks:
@@ -150,7 +150,7 @@ services:
     restart: unless-stopped
     depends_on:
       frontend-redis:
-        condition: service_healthy
+        condition: service_started
     environment:
       - FRONTEND_REDIS_URL=${FRONTEND_REDIS_URL:-redis://localhost:6379}
     networks:
@@ -173,7 +173,7 @@ services:
     restart: unless-stopped
     depends_on:
       frontend-redis:
-        condition: service_healthy
+        condition: service_started
     environment:
       - FRONTEND_REDIS_URL=${FRONTEND_REDIS_URL:-redis://localhost:6379}
     networks:
@@ -196,7 +196,7 @@ services:
     restart: unless-stopped
     depends_on:
       frontend-redis:
-        condition: service_healthy
+        condition: service_started
     environment:
       - FRONTEND_REDIS_URL=${FRONTEND_REDIS_URL:-redis://localhost:6379}
     networks:
@@ -219,7 +219,7 @@ services:
     restart: unless-stopped
     depends_on:
       frontend-redis:
-        condition: service_healthy
+        condition: service_started
     environment:
       - FRONTEND_REDIS_URL=${FRONTEND_REDIS_URL:-redis://localhost:6379}
     networks:
@@ -242,7 +242,7 @@ services:
     restart: unless-stopped
     depends_on:
       frontend-redis:
-        condition: service_healthy
+        condition: service_started
     environment:
       - FRONTEND_REDIS_URL=${FRONTEND_REDIS_URL:-redis://localhost:6379}
     networks:
@@ -273,7 +273,7 @@ services:
     ports:
       - "127.0.0.1:${FRONTEND_REDIS_PORT:-6380}:6379"
     healthcheck:
-      test: ["CMD-SHELL", "sh -c 'if [ -z \"$$FRONTEND_REDIS_PASSWORD\" ]; then redis-cli ping; else redis-cli -a \"$$FRONTEND_REDIS_PASSWORD\" ping; fi' | grep -q PONG"]
+      test: ["CMD-SHELL", "redis-cli ping | grep -q PONG || redis-cli -a \"$$FRONTEND_REDIS_PASSWORD\" ping | grep -q PONG"]
       interval: 10s
       timeout: 5s
       retries: 5

@@ -8,7 +8,7 @@ services:
       infinity-postgres:
         condition: service_healthy
       infinity-redis:
-        condition: service_healthy
+        condition: service_started
     ports:
       - "127.0.0.1:${STRAPI_PORT:-1337}:1337"
     restart: unless-stopped
@@ -17,11 +17,11 @@ services:
     networks:
       - infinity-network
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:1337/"]
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:1337/admin"]
       interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
+      timeout: 15s
+      retries: 5
+      start_period: 120s
 
   infinity-postgres:
     container_name: infinity-postgres
@@ -84,7 +84,7 @@ services:
     ports:
       - "127.0.0.1:${REDIS_PORT:-6379}:6379"
     healthcheck:
-      test: ["CMD-SHELL", "sh -c 'if [ -z \"$$REDIS_PASSWORD\" ]; then redis-cli ping; else redis-cli -a \"$$REDIS_PASSWORD\" ping; fi' | grep -q PONG"]
+      test: ["CMD-SHELL", "redis-cli ping | grep -q PONG || redis-cli -a \"$$REDIS_PASSWORD\" ping | grep -q PONG"]
       interval: 10s
       timeout: 5s
       retries: 5

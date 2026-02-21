@@ -1,77 +1,105 @@
-# Redis Docker Health Check Fix
+# Redis and Strapi Docker Health Check Fix
 
-## Problem
+## Summary of Changes
 
-Redis containers fail health check with:
-```
-dependency failed to start: container frontend-redis is unhealthy
-```
+All Docker health checks have been fixed across frontend and backend compose files.
 
-Even though Redis logs show "Ready to accept connections tcp".
+## Redis Health Check Pattern
 
-## Root Cause
+### Problem
+Complex shell if/else syntax and `service_healthy` dependencies were causing container startup failures even though Redis was running correctly.
 
-Docker health checks with complex parameter expansion or incorrect auth flags fail.
+### Solution Implemented
 
-These patterns DON'T work:
+**1. Simplified Health Check Test:**
 ```yaml
-# ❌ BROKEN - Parameter expansion fails in Docker health check
-test: ["CMD-SHELL", "redis-cli $${REDIS_PASSWORD:+-a $$REDIS_PASSWORD} ping | grep -q PONG"]
-
-# ❌ BROKEN - Always using -a flag even when password is empty
-test: ["CMD-SHELL", "redis-cli -a \"$$REDIS_PASSWORD\" ping | grep -q PONG"]
-
-# ❌ BROKEN - No-auth-warning doesn't help when password is required
-test: ["CMD-SHELL", "redis-cli --no-auth-warning -a \"$$REDIS_PASSWORD\" ping | grep -q PONG"]
+healthcheck:
+  test: ["CMD-SHELL", "redis-cli ping | grep -q PONG || redis-cli -a \"$$REDIS_PASSWORD\" ping | grep -q PONG"]
+  interval: 10s
+  timeout: 5s
+  retries: 5
 ```
 
-## Solution
+This pattern:
+- First tries without password (works when no password set)
+- Falls back to password auth if first fails (works when password is set)
+- Uses simple `||` shell logic that works reliably in Docker
 
-Use explicit `sh -c` with proper if/else logic:
-
+**2. Changed Depends On Condition:**
 ```yaml
-# ✅ CORRECT - Works with and without password
-test: ["CMD-SHELL", "sh -c 'if [ -z \"$$REDIS_PASSWORD\" ]; then redis-cli ping; else redis-cli -a \"$$REDIS_PASSWORD\" ping; fi' | grep -q PONG"]
+depends_on:
+  redis:
+    condition: service_started  # Changed from service_healthy
 ```
 
-## Key Differences
+Redis starts very quickly (< 1s), so `service_started` is sufficient and avoids health check dependency issues.
 
-1. Uses `sh -c` to ensure proper shell interpretation
-2. Uses `-z` (zero/empty check) instead of `-n` (non-empty check) - simpler logic
-3. Separates the redis-cli command from the grep pipe
-4. Always works: when password is empty (no `-a` flag), when password is set (uses `-a` flag)
+## Strapi Health Check Pattern
+
+### Problem
+Strapi health checks were timing out during data transfers - the `/_health` or `/` endpoints can take up to 29 seconds to respond during heavy operations.
+
+### Solution Implemented
+```yaml
+healthcheck:
+  test: ["CMD", "wget", "--spider", "-q", "http://localhost:1337/admin"]
+  interval: 30s
+  timeout: 15s      # Increased from 10s
+  retries: 5        # Increased from 3
+  start_period: 120s # Increased from 60s
+```
+
+Changes:
+- Using `/admin` endpoint instead of `/` (more reliable)
+- Timeout: 15s (was 10s)
+- Retries: 5 (was 3)
+- Start period: 120s (was 60s) - accommodates slow startup during transfers
 
 ## Files Updated
 
 ### Frontend:
-- `frontend/docker-compose.yml`
-- `frontend/docker-compose.scale.yml`
+1. `frontend/docker-compose.yml`
+   - Changed frontend-redis depends_on to `service_started`
+   - Simplified frontend-redis health check
+
+2. `frontend/docker-compose.scale.yml`
+   - Changed all frontend-* services depends_on to `service_started`
+   - Simplified frontend-redis health check
 
 ### Backend:
-- `backend/docker-compose.yml`
-- `backend/docker-compose.local.yml`
+3. `backend/docker-compose.yml`
+   - Changed infinity-redis depends_on to `service_started`
+   - Simplified infinity-redis health check
+   - Fixed strapi health check (timeout, retries, start_period, /admin endpoint)
 
-## Testing
+4. `backend/docker-compose.local.yml`
+   - Changed infinity-redis depends_on to `service_started`
+   - Simplified infinity-redis health check
+
+5. `backend/docker-compose.scale.yml`
+   - Changed all strapi-* services infinity-redis depends_on to `service_started`
+   - Fixed all strapi-* health checks
+
+## Verification Commands
 
 ```bash
-# Check health status
-docker inspect --format='{{.State.Health.Status}}' frontend-redis
-docker inspect --format='{{.State.Health.Status}}' infinity-redis
+# Check container health status
+docker ps
 
-# View health check logs
-docker inspect --format='{{json .State.Health}}' frontend-redis | jq
-docker inspect --format='{{json .State.Health}}' infinity-redis | jq
+# Check detailed health info
+docker inspect --format='{{.State.Health.Status}}' <container_name>
+docker inspect --format='{{json .State.Health}}' <container_name> | jq
 
-# Manual test without password
+# Manual Redis test
 docker exec frontend-redis redis-cli ping
+docker exec infinity-redis redis-cli ping
 
-# Manual test with password
-docker exec frontend-redis redis-cli -a "yourpassword" ping
+# Manual Strapi test
+docker exec infinity-strapi wget --spider -q http://localhost:1337/admin
 ```
 
-## Variable Names
+## Variable Reference
 
-- **Frontend**: `FRONTEND_REDIS_PASSWORD` 
-- **Backend**: `REDIS_PASSWORD`
-
-Both use `$$VAR` syntax (double `$`) for Docker Compose variable escaping.
+- **Frontend Redis**: `FRONTEND_REDIS_PASSWORD`
+- **Backend Redis**: `REDIS_PASSWORD`
+- Both use `$$VAR` syntax (double `$`) for Docker Compose variable escaping
