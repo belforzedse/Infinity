@@ -4,35 +4,15 @@
  * If Redis is unavailable, cache misses occur (no in-memory fallback when cacheMaxMemorySize: 0).
  */
 
-import { createClient, type RedisClientType } from "redis";
-
-interface CacheEntry {
-  value: ReadableStream<Uint8Array>;
-  tags?: string[];
-  stale?: boolean;
-  timestamp: number;
-  expire?: number;
-  revalidate?: number;
-}
-
-interface StoredCacheData {
-  value: string;
-  tags?: string[];
-  stale?: boolean;
-  timestamp: number;
-  expire?: number;
-  revalidate?: number;
-}
+const { createClient } = require("redis");
 
 class RedisCacheHandler {
-  private client: RedisClientType;
-  private isConnected = false;
-
   constructor() {
     const redisUrl = process.env.FRONTEND_REDIS_URL ?? "redis://localhost:6379";
     this.client = createClient({ url: redisUrl });
+    this.isConnected = false;
 
-    this.client.on("error", (err: Error) => {
+    this.client.on("error", (err) => {
       console.error("Redis Cache Handler Error:", err);
     });
 
@@ -42,22 +22,19 @@ class RedisCacheHandler {
         this.isConnected = true;
         console.log("Redis Cache Handler connected");
       })
-      .catch((err: Error) => {
+      .catch((err) => {
         console.error("Redis Cache Handler connection failed:", err);
       });
   }
 
-  async get(
-    cacheKey: string,
-    _softTags?: string[]
-  ): Promise<CacheEntry | undefined> {
+  async get(cacheKey, _softTags) {
     if (!this.isConnected) return undefined;
 
     try {
       const stored = await this.client.get(cacheKey);
       if (!stored) return undefined;
 
-      const data: StoredCacheData = JSON.parse(stored);
+      const data = JSON.parse(stored);
 
       return {
         value: new ReadableStream({
@@ -78,17 +55,14 @@ class RedisCacheHandler {
     }
   }
 
-  async set(
-    cacheKey: string,
-    pendingEntry: Promise<CacheEntry>
-  ): Promise<void> {
+  async set(cacheKey, pendingEntry) {
     if (!this.isConnected) return;
 
     try {
       const entry = await pendingEntry;
 
       const reader = entry.value.getReader();
-      const chunks: Uint8Array[] = [];
+      const chunks = [];
 
       try {
         while (true) {
@@ -102,7 +76,7 @@ class RedisCacheHandler {
 
       const data = Buffer.concat(chunks.map((chunk) => Buffer.from(chunk)));
 
-      const cacheData: StoredCacheData = {
+      const cacheData = {
         value: data.toString("base64"),
         tags: entry.tags,
         stale: entry.stale,
@@ -120,11 +94,11 @@ class RedisCacheHandler {
     }
   }
 
-  async revalidateTag(_tag: string): Promise<void> {
+  async revalidateTag(_tag) {
     if (!this.isConnected) return;
     // Tag-based invalidation would require tracking keys by tag in Redis.
     // Entries expire based on TTL; optional: maintain a Redis set per tag and delete those keys here.
   }
 }
 
-export default RedisCacheHandler;
+module.exports = RedisCacheHandler;
