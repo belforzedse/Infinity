@@ -34,6 +34,8 @@ const nextConfig = {
   },
   images: {
     unoptimized: false,
+    // Use the same cache handler (Redis/LRU) for optimized images when cacheHandler is set
+    customCacheHandler: process.env.NODE_ENV === "production",
     // Allow local backend image URLs (localhost/127.0.0.1) during local development.
     dangerouslyAllowLocalIP: process.env.NODE_ENV !== "production",
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],

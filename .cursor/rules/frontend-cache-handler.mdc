@@ -1,0 +1,47 @@
+---
+description: Next.js custom cache handler (Redis + LRU fallback) implementation and correctness
+globs: frontend/cache-handler.mjs, frontend/next.config.ts
+---
+
+# Frontend Cache Handler (Next.js ISR / Data Cache)
+
+## Overview
+
+The frontend uses a **custom cache handler** for Next.js so that ISR, route handler responses, and (when enabled) optimized images use shared or fallback storage instead of only in-process memory.
+
+- **Package:** `@neshca/cache-handler` (redis-strings + local-lru).
+- **Entry:** `frontend/cache-handler.mjs` (ESM).
+- **Config:** `frontend/next.config.ts` — `cacheHandler`, `cacheMaxMemorySize`, `images.customCacheHandler`.
+
+## Correctness (per Next.js and @neshca docs)
+
+1. **Export:** The module must `export default CacheHandler`. Next.js loads the handler via `require.resolve('./cache-handler.mjs')` and expects this default export.
+
+2. **onCreation:** `CacheHandler.onCreation(async () => { ... })` must return (or resolve to) `{ handlers: [handler] }`. The hook can be async. Optional: `ttl: { defaultStaleAge, estimateExpireAge }` for TTL policy.
+
+3. **Redis handler (redis-strings):**
+   - Client must be **ready** before calling `createRedisHandler({ client, ... })`.
+   - Options: `client`, `keyPrefix`, `timeoutMs`, `keyExpirationStrategy`: `'EXAT'` (Redis 6.2+) or `'EXPIREAT'`.
+   - Do not create multiple Redis clients per process: cache the result of `onCreation` in `global` and return the same config on subsequent calls.
+
+4. **LRU handler (local-lru):** Used when `FRONTEND_REDIS_URL` is unset or Redis is unavailable. Options: `maxItemSizeBytes`, `maxItemsNumber`. Not suitable as sole production cache; used as fallback or for build/dev.
+
+5. **next.config:**
+   - `cacheHandler`: set only in production to the path of `cache-handler.mjs`.
+   - `cacheMaxMemorySize`: 256MB is intentional (L1 in-memory + L2 Redis/LRU). Do not set to 0 unless you want to disable in-memory and use only the custom handler.
+   - `images.customCacheHandler: true` (in production): so optimized images use the same handler (Redis/LRU).
+
+## Environment
+
+- **FRONTEND_REDIS_URL:** When set, the handler tries to use Redis; when unset, only LRU is used (build-safe).
+- **NEXT_PRIVATE_DEBUG_CACHE:** When set, Redis client errors are logged.
+
+## References
+
+- Next.js: `cacheHandler`, `incrementalCacheHandlerPath`, self-hosting guide, `cacheHandlers` (plural) for `'use cache'`.
+- @neshca: [next-shared-cache](https://caching-tools.github.io/next-shared-cache/) — onCreation, redis-strings, local-lru.
+
+## Related
+
+- [frontend-redis-gitlab.mdc](frontend-redis-gitlab.mdc) — Redis URL, CI, and deployment.
+- [frontend-server-capacity.mdc](frontend-server-capacity.mdc) — Scaling and shared cache rationale.
