@@ -72,7 +72,7 @@ services:
     command: >-
       redis-server
       --appendonly yes
-      --maxmemory 16gb
+      --maxmemory 64gb
       --maxmemory-policy allkeys-lru
       ${REDIS_PASSWORD:+--requirepass $REDIS_PASSWORD}
     env_file:

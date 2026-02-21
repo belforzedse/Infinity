@@ -241,7 +241,7 @@ services:
     command: >-
       redis-server
       --appendonly yes
-      --maxmemory 4gb
+      --maxmemory 32gb
       --maxmemory-policy allkeys-lru
     volumes:
       - frontend_redis_data:/data
