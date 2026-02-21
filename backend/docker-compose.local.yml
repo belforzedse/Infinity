@@ -70,7 +70,7 @@ services:
     ports:
       - "127.0.0.1:6379:6379"
     healthcheck:
-      test: ["CMD-SHELL", "redis-cli --no-auth-warning -a \"$$REDIS_PASSWORD\" ping | grep -q PONG"]
+      test: ["CMD-SHELL", "sh -c 'if [ -z \"$$REDIS_PASSWORD\" ]; then redis-cli ping; else redis-cli -a \"$$REDIS_PASSWORD\" ping; fi' | grep -q PONG"]
       interval: 10s
       timeout: 5s
       retries: 5
