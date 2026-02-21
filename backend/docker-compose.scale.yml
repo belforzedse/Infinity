@@ -1,7 +1,7 @@
 # Scale override: extra Strapi instances. Use with:
 #   docker compose -f docker-compose.yml -f docker-compose.scale.yml up -d
 # All Strapis share the same Postgres, Redis, and uploads volume.
-# Nginx should proxy to strapi_upstream (1337, 1338, 1339, 1340).
+# Nginx should proxy to strapi_upstream (1337–1342).
 
 services:
   strapi-2:
@@ -52,6 +52,42 @@ services:
         condition: service_healthy
     ports:
       - "127.0.0.1:1340:1337"
+    restart: unless-stopped
+    volumes:
+      - backend_uploads-data:/app/public
+    networks:
+      - infinity-network
+
+  strapi-5:
+    image: ghcr.io/belforzedse/infinity-backend:${IMAGE_TAG:-main}
+    container_name: infinity-strapi-5
+    env_file:
+      - ${ENV_FILE:-main.env}
+    depends_on:
+      infinity-postgres:
+        condition: service_healthy
+      infinity-redis:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:1341:1337"
+    restart: unless-stopped
+    volumes:
+      - backend_uploads-data:/app/public
+    networks:
+      - infinity-network
+
+  strapi-6:
+    image: ghcr.io/belforzedse/infinity-backend:${IMAGE_TAG:-main}
+    container_name: infinity-strapi-6
+    env_file:
+      - ${ENV_FILE:-main.env}
+    depends_on:
+      infinity-postgres:
+        condition: service_healthy
+      infinity-redis:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:1342:1337"
     restart: unless-stopped
     volumes:
       - backend_uploads-data:/app/public

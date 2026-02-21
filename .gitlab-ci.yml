@@ -127,7 +127,7 @@ backend:deploy:
 
       # Upload compose (base + scale + CI registry override)
       scp -P "${DEPLOY_PORT:-3031}" \
-        backend/docker-compose.yml backend/docker-compose.scale.yml backend/docker-compose.ci.yml \
+        backend/docker-compose.yml backend/docker-compose.scale.yml backend/docker-compose.ci.yml backend/docker-compose.scale.ci.yml \
         "${DEPLOY_USER}@${DEPLOY_HOST}:/opt/infinity/backend/"
 
       # BACKEND_ENV_FILE: File type => path; Variable type => env content. Avoid echoing content to log.
@@ -173,10 +173,10 @@ backend:deploy:
       	pull_with_retry "redis:7-alpine"
       	pull_with_retry "$CI_REGISTRY_IMAGE/infinity-backend:$IMAGE_TAG"
 
-      	docker compose -f docker-compose.yml -f docker-compose.scale.yml -f docker-compose.ci.yml --env-file "\$ENV_FILE" down --remove-orphans || true
-      	for c in infinity-strapi infinity-strapi-2 infinity-strapi-3 infinity-strapi-4; do docker rm -f "\$c" 2>/dev/null || true; done
-      	docker compose -f docker-compose.yml -f docker-compose.scale.yml -f docker-compose.ci.yml --env-file "\$ENV_FILE" up -d infinity-postgres infinity-redis
-      	docker compose -f docker-compose.yml -f docker-compose.scale.yml -f docker-compose.ci.yml --env-file "\$ENV_FILE" up -d --remove-orphans
+      	docker compose -f docker-compose.yml -f docker-compose.ci.yml -f docker-compose.scale.yml -f docker-compose.scale.ci.yml --env-file "\$ENV_FILE" down --remove-orphans || true
+      	for c in infinity-strapi infinity-strapi-2 infinity-strapi-3 infinity-strapi-4 infinity-strapi-5 infinity-strapi-6; do docker rm -f "\$c" 2>/dev/null || true; done
+      	docker compose -f docker-compose.yml -f docker-compose.ci.yml -f docker-compose.scale.yml -f docker-compose.scale.ci.yml --env-file "\$ENV_FILE" up -d infinity-postgres infinity-redis
+      	docker compose -f docker-compose.yml -f docker-compose.ci.yml -f docker-compose.scale.yml -f docker-compose.scale.ci.yml --env-file "\$ENV_FILE" up -d --remove-orphans
       	docker image prune -f || true
       REMOTE
 
@@ -252,7 +252,7 @@ frontend:deploy:
       set -euo pipefail
 
       scp -P "${DEPLOY_PORT:-3031}" \
-        frontend/docker-compose.yml frontend/docker-compose.scale.yml frontend/docker-compose.ci.yml \
+        frontend/docker-compose.yml frontend/docker-compose.scale.yml frontend/docker-compose.ci.yml frontend/docker-compose.scale.ci.yml \
         "${DEPLOY_USER}@${DEPLOY_HOST}:/opt/infinity/frontend/"
 
       # FRONTEND_ENV_FILE: File type => path; Variable type => env content. Avoid echoing content to log.
@@ -286,8 +286,8 @@ frontend:deploy:
       	}
 
       	pull_with_retry "$CI_REGISTRY_IMAGE/infinity-frontend:$IMAGE_TAG"
-      	docker compose -f docker-compose.yml -f docker-compose.scale.yml -f docker-compose.ci.yml --env-file "\$ENV_FILE" down --remove-orphans || true
-      	for c in infinity-frontend infinity-frontend-2 infinity-frontend-3 infinity-frontend-4 infinity-frontend-5 infinity-frontend-6 infinity-frontend-7 infinity-frontend-8; do docker rm -f "\$c" 2>/dev/null || true; done
-      	docker compose -f docker-compose.yml -f docker-compose.scale.yml -f docker-compose.ci.yml --env-file "\$ENV_FILE" up -d --remove-orphans
+      	docker compose -f docker-compose.yml -f docker-compose.ci.yml -f docker-compose.scale.yml -f docker-compose.scale.ci.yml --env-file "\$ENV_FILE" down --remove-orphans || true
+      	for c in infinity-frontend infinity-frontend-2 infinity-frontend-3 infinity-frontend-4 infinity-frontend-5 infinity-frontend-6 infinity-frontend-7 infinity-frontend-8 infinity-frontend-9 infinity-frontend-10 infinity-frontend-11 infinity-frontend-12; do docker rm -f "\$c" 2>/dev/null || true; done
+      	docker compose -f docker-compose.yml -f docker-compose.ci.yml -f docker-compose.scale.yml -f docker-compose.scale.ci.yml --env-file "\$ENV_FILE" up -d --remove-orphans
       	docker image prune -f || true
       REMOTE

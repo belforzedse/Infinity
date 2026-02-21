@@ -1,28 +1,7 @@
-# CI/GitLab override: pull app image from registry.cyandm.org instead of ghcr.io.
+# CI/GitLab override for main compose: use registry.cyandm.org instead of ghcr.io.
 # Used by .gitlab-ci.yml deploy. REGISTRY_IMAGE_BASE is set on the server (e.g. registry.cyandm.org/bel4/infinity).
-# Usage: docker compose -f docker-compose.yml -f docker-compose.scale.yml -f docker-compose.ci.yml --env-file ... up -d
+# Usage: docker compose -f docker-compose.yml -f docker-compose.ci.yml -f docker-compose.scale.yml -f docker-compose.scale.ci.yml --env-file ... up -d
 
 services:
   frontend:
-    image: ${REGISTRY_IMAGE_BASE}/infinity-frontend:${IMAGE_TAG:-main}
-
-  frontend-2:
-    image: ${REGISTRY_IMAGE_BASE}/infinity-frontend:${IMAGE_TAG:-main}
-
-  frontend-3:
-    image: ${REGISTRY_IMAGE_BASE}/infinity-frontend:${IMAGE_TAG:-main}
-
-  frontend-4:
-    image: ${REGISTRY_IMAGE_BASE}/infinity-frontend:${IMAGE_TAG:-main}
-
-  frontend-5:
-    image: ${REGISTRY_IMAGE_BASE}/infinity-frontend:${IMAGE_TAG:-main}
-
-  frontend-6:
-    image: ${REGISTRY_IMAGE_BASE}/infinity-frontend:${IMAGE_TAG:-main}
-
-  frontend-7:
-    image: ${REGISTRY_IMAGE_BASE}/infinity-frontend:${IMAGE_TAG:-main}
-
-  frontend-8:
     image: ${REGISTRY_IMAGE_BASE}/infinity-frontend:${IMAGE_TAG:-main}
