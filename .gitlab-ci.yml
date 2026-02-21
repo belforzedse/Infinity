@@ -173,6 +173,7 @@ backend:deploy:
       	pull_with_retry "redis:7-alpine"
       	pull_with_retry "$CI_REGISTRY_IMAGE/infinity-backend:$IMAGE_TAG"
 
+      	docker compose -f docker-compose.yml -f docker-compose.scale.yml -f docker-compose.ci.yml --env-file "\$ENV_FILE" down --remove-orphans || true
       	docker compose -f docker-compose.yml -f docker-compose.scale.yml -f docker-compose.ci.yml --env-file "\$ENV_FILE" up -d infinity-postgres infinity-redis
       	docker compose -f docker-compose.yml -f docker-compose.scale.yml -f docker-compose.ci.yml --env-file "\$ENV_FILE" up -d --remove-orphans
       	docker image prune -f || true
@@ -284,6 +285,7 @@ frontend:deploy:
       	}
 
       	pull_with_retry "$CI_REGISTRY_IMAGE/infinity-frontend:$IMAGE_TAG"
+      	docker compose -f docker-compose.yml -f docker-compose.scale.yml -f docker-compose.ci.yml --env-file "\$ENV_FILE" down --remove-orphans || true
       	docker compose -f docker-compose.yml -f docker-compose.scale.yml -f docker-compose.ci.yml --env-file "\$ENV_FILE" up -d --remove-orphans
       	docker image prune -f || true
       REMOTE
