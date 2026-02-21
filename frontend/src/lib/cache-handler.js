@@ -68,6 +68,12 @@ class RedisCacheHandler {
     try {
       const entry = await pendingEntry;
 
+      // Validate entry and its value property
+      if (!entry || !entry.value || typeof entry.value.getReader !== 'function') {
+        console.warn(`Cache set skipped for key "${cacheKey}": entry.value is not a ReadableStream`, entry);
+        return;
+      }
+
       const reader = entry.value.getReader();
       const chunks = [];
 
