@@ -130,8 +130,12 @@ backend:deploy:
         backend/docker-compose.yml backend/docker-compose.scale.yml \
         "${DEPLOY_USER}@${DEPLOY_HOST}:/opt/infinity/backend/"
 
-      # BACKEND_ENV_FILE is a *File* variable => it's a path. Copy it, don't echo it.
-      cp "$BACKEND_ENV_FILE" "/tmp/$ENV_FILE"
+      # BACKEND_ENV_FILE: File type => path; Variable type => env content. Avoid echoing content to log.
+      if [ -f "$BACKEND_ENV_FILE" ]; then
+        cp "$BACKEND_ENV_FILE" "/tmp/$ENV_FILE"
+      else
+        printf '%s' "$BACKEND_ENV_FILE" > "/tmp/$ENV_FILE"
+      fi
       scp -P "${DEPLOY_PORT:-3031}" "/tmp/$ENV_FILE" \
         "${DEPLOY_USER}@${DEPLOY_HOST}:/opt/infinity/backend/$ENV_FILE"
 
@@ -203,7 +207,7 @@ frontend:build:
       docker buildx build \
         --build-arg NEXT_PUBLIC_API_BASE_URL="$FRONTEND_API_BASE_URL" \
         --build-arg NEXT_PUBLIC_IMAGE_BASE_URL="$FRONTEND_IMAGE_BASE_URL" \
-        --build-arg NEXT_PUBLIC_STRAPI_TOKEN="$FRONTEND_STRAPI_TOKEN" \
+        --build-arg NEXT_PUBLIC_STRAPI_TOKEN="${FRONTEND_STRAPI_TOKEN:-}" \
         --build-arg NEXT_PUBLIC_SITE_URL="$SITE_URL" \
         --build-arg NEXT_PUBLIC_MATOMO_URL="$FRONTEND_MATOMO_URL" \
         --build-arg NEXT_PUBLIC_MATOMO_SITE_ID="$FRONTEND_MATOMO_SITE_ID" \
@@ -247,8 +251,12 @@ frontend:deploy:
         frontend/docker-compose.yml frontend/docker-compose.scale.yml \
         "${DEPLOY_USER}@${DEPLOY_HOST}:/opt/infinity/frontend/"
 
-      # FRONTEND_ENV_FILE is a *File* variable => path
-      cp "$FRONTEND_ENV_FILE" "/tmp/$ENV_FILE"
+      # FRONTEND_ENV_FILE: File type => path; Variable type => env content. Avoid echoing content to log.
+      if [ -f "$FRONTEND_ENV_FILE" ]; then
+        cp "$FRONTEND_ENV_FILE" "/tmp/$ENV_FILE"
+      else
+        printf '%s' "$FRONTEND_ENV_FILE" > "/tmp/$ENV_FILE"
+      fi
       scp -P "${DEPLOY_PORT:-3031}" "/tmp/$ENV_FILE" \
         "${DEPLOY_USER}@${DEPLOY_HOST}:/opt/infinity/frontend/$ENV_FILE"
 
