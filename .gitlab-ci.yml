@@ -174,6 +174,7 @@ backend:deploy:
       	pull_with_retry "$CI_REGISTRY_IMAGE/infinity-backend:$IMAGE_TAG"
 
       	docker compose -f docker-compose.yml -f docker-compose.scale.yml -f docker-compose.ci.yml --env-file "\$ENV_FILE" down --remove-orphans || true
+      	for c in infinity-strapi infinity-strapi-2 infinity-strapi-3 infinity-strapi-4; do docker rm -f "\$c" 2>/dev/null || true; done
       	docker compose -f docker-compose.yml -f docker-compose.scale.yml -f docker-compose.ci.yml --env-file "\$ENV_FILE" up -d infinity-postgres infinity-redis
       	docker compose -f docker-compose.yml -f docker-compose.scale.yml -f docker-compose.ci.yml --env-file "\$ENV_FILE" up -d --remove-orphans
       	docker image prune -f || true
@@ -286,6 +287,7 @@ frontend:deploy:
 
       	pull_with_retry "$CI_REGISTRY_IMAGE/infinity-frontend:$IMAGE_TAG"
       	docker compose -f docker-compose.yml -f docker-compose.scale.yml -f docker-compose.ci.yml --env-file "\$ENV_FILE" down --remove-orphans || true
+      	for c in infinity-frontend infinity-frontend-2 infinity-frontend-3 infinity-frontend-4 infinity-frontend-5 infinity-frontend-6 infinity-frontend-7 infinity-frontend-8; do docker rm -f "\$c" 2>/dev/null || true; done
       	docker compose -f docker-compose.yml -f docker-compose.scale.yml -f docker-compose.ci.yml --env-file "\$ENV_FILE" up -d --remove-orphans
       	docker image prune -f || true
       REMOTE
