@@ -11,7 +11,8 @@ variables:
   STRAPI_TELEMETRY_DISABLED: "true"
   ENABLE_LARGE_HEAP: "false"
 
-  # Docker-in-Docker for buildx
+  # Docker-in-Docker for buildx (dind service). Runner waits ~30s for services;
+  # if dind is slow, .docker_build before_script waits up to ~90s for docker info.
   DOCKER_HOST: "tcp://docker:2375"
   DOCKER_TLS_CERTDIR: ""
 
