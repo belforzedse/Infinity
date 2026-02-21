@@ -2,6 +2,34 @@ import type { Strapi } from "@strapi/strapi";
 
 const MAX_CONSECUTIVE_FAILURES = 5;
 let consecutiveFailures = 0;
+const ERROR_STACK_LIMIT = 2_000;
+
+function formatError(error: unknown) {
+  const asRecord = (error && typeof error === "object" ? error : {}) as {
+    message?: unknown;
+    code?: unknown;
+    stack?: unknown;
+  };
+
+  const message =
+    typeof asRecord.message === "string"
+      ? asRecord.message
+      : error instanceof Error
+        ? error.message
+        : String(error);
+
+  const code =
+    typeof asRecord.code === "string" || typeof asRecord.code === "number"
+      ? asRecord.code
+      : undefined;
+
+  const stack =
+    typeof asRecord.stack === "string"
+      ? asRecord.stack.slice(0, ERROR_STACK_LIMIT)
+      : undefined;
+
+  return { message, code, stack };
+}
 
 /**
  * Clears isReserveOrder and reserveExpiresAt on orders whose reserve window has expired.
@@ -27,7 +55,7 @@ export function startExpireReserveOrdersJob(strapi: Strapi) {
           isReserveOrder: true,
           reserveExpiresAt: { $lte: now.toISOString() },
         },
-        select: ["id", "reserveGroupId", "user"],
+        select: ["id", "reserveGroupId"],
       });
 
       const groupIds = [
@@ -56,7 +84,10 @@ export function startExpireReserveOrdersJob(strapi: Strapi) {
       consecutiveFailures = 0;
     } catch (e) {
       consecutiveFailures += 1;
-      strapi.log.error("expireReserveOrders job failed", { error: e, consecutiveFailures });
+      strapi.log.error("expireReserveOrders job failed", {
+        ...formatError(e),
+        consecutiveFailures,
+      });
       if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
         strapi.log.warn("expireReserveOrders consecutive failure threshold exceeded", {
           consecutiveFailures,

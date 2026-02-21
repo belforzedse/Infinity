@@ -65,15 +65,38 @@ class RedisCacheHandler {
   async set(cacheKey, pendingEntry) {
     if (!this.client || !this.isConnected) return;
 
+    // Validate pendingEntry is provided
+    if (!pendingEntry) {
+      console.warn(`Cache set skipped for key "${cacheKey}": pendingEntry is null/undefined`);
+      return;
+    }
+
+    let entry;
     try {
-      const entry = await pendingEntry;
+      entry = await pendingEntry;
+    } catch (fetchError) {
+      console.warn(`Cache set skipped for key "${cacheKey}": pendingEntry rejected with error`, fetchError.message);
+      return;
+    }
 
-      // Validate entry and its value property
-      if (!entry || !entry.value || typeof entry.value.getReader !== 'function') {
-        console.warn(`Cache set skipped for key "${cacheKey}": entry.value is not a ReadableStream`, entry);
-        return;
-      }
+    // Validate entry exists
+    if (!entry) {
+      console.warn(`Cache set skipped for key "${cacheKey}": entry is null/undefined after awaiting`);
+      return;
+    }
 
+    // Validate entry.value exists and is a ReadableStream
+    if (!entry.value || typeof entry.value.getReader !== 'function') {
+      console.warn(
+        `Cache set skipped for key "${cacheKey}": entry.value is not a ReadableStream. ` +
+        `Type: ${typeof entry.value}, ` +
+        `Keys: ${entry.value ? Object.keys(entry.value).join(', ') : 'N/A'}, ` +
+        `Entry keys: ${Object.keys(entry).join(', ')}`
+      );
+      return;
+    }
+
+    try {
       const reader = entry.value.getReader();
       const chunks = [];
 

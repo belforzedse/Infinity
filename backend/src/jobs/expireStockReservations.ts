@@ -3,6 +3,34 @@ import { releaseOrderReservation } from "../utils/stockReservations";
 
 const MAX_CONSECUTIVE_FAILURES = 5;
 let consecutiveFailures = 0;
+const ERROR_STACK_LIMIT = 2_000;
+
+function formatError(error: unknown) {
+  const asRecord = (error && typeof error === "object" ? error : {}) as {
+    message?: unknown;
+    code?: unknown;
+    stack?: unknown;
+  };
+
+  const message =
+    typeof asRecord.message === "string"
+      ? asRecord.message
+      : error instanceof Error
+        ? error.message
+        : String(error);
+
+  const code =
+    typeof asRecord.code === "string" || typeof asRecord.code === "number"
+      ? asRecord.code
+      : undefined;
+
+  const stack =
+    typeof asRecord.stack === "string"
+      ? asRecord.stack.slice(0, ERROR_STACK_LIMIT)
+      : undefined;
+
+  return { message, code, stack };
+}
 
 const incrementMetric = (
   strapi: Strapi,
@@ -45,6 +73,7 @@ export function startExpireStockReservationsJob(strapi: Strapi) {
     if (running) return;
     running = true;
     try {
+      let hadFailures = false;
       const now = new Date();
       const expiredOrders = (await strapi.entityService.findMany("api::order.order", {
         filters: {
@@ -61,61 +90,97 @@ export function startExpireStockReservationsJob(strapi: Strapi) {
         const orderId = Number(o?.id);
         if (!Number.isFinite(orderId)) continue;
 
-        await strapi.db.transaction(async ({ trx }) => {
-          const rel = await releaseOrderReservation(
-            strapi as any,
-            orderId,
-            "Expired",
-            trx
-          );
-          if (rel.skipped) return;
+        let shouldWriteExpiryLog = false;
+        try {
+          await strapi.db.transaction(async ({ trx }) => {
+            const rel = await releaseOrderReservation(
+              strapi as any,
+              orderId,
+              "Expired",
+              trx
+            );
+            if (rel.skipped) return;
+            if (!rel.success) {
+              throw new Error(rel.error || "release_order_reservation_failed");
+            }
 
-          // Mark order + contract cancelled (idempotent)
-          const order = await strapi.db.query("api::order.order").findOne({
-            where: { id: orderId },
-            populate: { contract: true },
-            ...(trx ? { transacting: trx } : {}),
-          });
+            // Mark order + contract cancelled (idempotent)
+            const order = await strapi.db.query("api::order.order").findOne({
+              where: { id: orderId },
+              populate: { contract: true },
+              ...(trx ? { transacting: trx } : {}),
+            });
 
-          await strapi.db.query("api::order.order").update({
-            where: { id: orderId },
-            data: { Status: "Cancelled" },
-            ...(trx ? { transacting: trx } : {}),
-          });
-
-          const contractId =
-            typeof order?.contract === "object" && order.contract
-              ? Number(order.contract.id)
-              : Number(order?.contract);
-          if (Number.isFinite(contractId)) {
-            await strapi.db.query("api::contract.contract").update({
-              where: { id: contractId },
+            await strapi.db.query("api::order.order").update({
+              where: { id: orderId },
               data: { Status: "Cancelled" },
               ...(trx ? { transacting: trx } : {}),
             });
-          }
 
-          try {
-            await strapi.db.query("api::order-log.order-log").create({
-              data: {
-                order: orderId,
-                Action: "Update",
-                Description: "Reservation expired; order cancelled automatically",
-                Changes: { ReservationStatus: "Expired" },
-              },
-              ...(trx ? { transacting: trx } : {}),
-            } as any);
-          } catch (logErr) {
-            strapi.log.error("Failed to create order-log for expired reservation", { orderId, error: logErr });
-          }
-        });
+            const contractId =
+              typeof order?.contract === "object" && order.contract
+                ? Number(order.contract.id)
+                : Number(order?.contract);
+            if (Number.isFinite(contractId)) {
+              await strapi.db.query("api::contract.contract").update({
+                where: { id: contractId },
+                data: { Status: "Cancelled" },
+                ...(trx ? { transacting: trx } : {}),
+              });
+            }
+
+            shouldWriteExpiryLog = true;
+          });
+        } catch (orderErr) {
+          hadFailures = true;
+          incrementMetric(strapi, "expire_stock_reservations_failures_total");
+          strapi.log.error("expireStockReservations per-order transaction failed", {
+            orderId,
+            stage: "transaction",
+            ...formatError(orderErr),
+          });
+          continue;
+        }
+
+        if (!shouldWriteExpiryLog) continue;
+
+        try {
+          await strapi.db.query("api::order-log.order-log").create({
+            data: {
+              order: orderId,
+              Action: "Update",
+              Description: "Reservation expired; order cancelled automatically",
+              Changes: { ReservationStatus: "Expired" },
+            },
+          } as any);
+        } catch (logErr) {
+          hadFailures = true;
+          incrementMetric(strapi, "expire_stock_reservations_failures_total");
+          strapi.log.error("Failed to create order-log for expired reservation", {
+            orderId,
+            stage: "post_commit_order_log",
+            ...formatError(logErr),
+          });
+        }
       }
-      consecutiveFailures = 0;
+      if (hadFailures) {
+        consecutiveFailures += 1;
+        if (consecutiveFailures === MAX_CONSECUTIVE_FAILURES) {
+          incrementMetric(strapi, "expire_stock_reservations_failure_threshold_total");
+          strapi.log.warn("expireStockReservations consecutive failure threshold exceeded", {
+            consecutiveFailures,
+            threshold: MAX_CONSECUTIVE_FAILURES,
+          });
+        }
+      } else {
+        consecutiveFailures = 0;
+      }
     } catch (e) {
       consecutiveFailures += 1;
       incrementMetric(strapi, "expire_stock_reservations_failures_total");
       strapi.log.error("expireStockReservations job failed", {
-        error: e,
+        stage: "tick",
+        ...formatError(e),
         consecutiveFailures,
       });
       if (consecutiveFailures === MAX_CONSECUTIVE_FAILURES) {
