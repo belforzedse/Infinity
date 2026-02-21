@@ -17,10 +17,10 @@ services:
     networks:
       - infinity-network
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:1337/_health"]
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:1337/api/_health"]
       interval: 30s
-      timeout: 15s
-      retries: 5
+      timeout: 30s
+      retries: 6
       start_period: 120s
 
   infinity-postgres:
@@ -43,7 +43,7 @@ services:
       -c max_parallel_workers_per_gather=4
       -c max_parallel_workers=8
       -c log_min_duration_statement=500
-      -c idle_in_transaction_session_timeout=30000
+      -c idle_in_transaction_session_timeout=90000
       -c statement_timeout=60000
     restart: unless-stopped
     env_file:

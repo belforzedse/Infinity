@@ -22,10 +22,10 @@ services:
     networks:
       - infinity-network
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:1337/_health"]
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:1337/api/_health"]
       interval: 30s
-      timeout: 15s
-      retries: 5
+      timeout: 30s
+      retries: 6
       start_period: 120s
 
   strapi-3:
@@ -46,10 +46,10 @@ services:
     networks:
       - infinity-network
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:1337/_health"]
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:1337/api/_health"]
       interval: 30s
-      timeout: 15s
-      retries: 5
+      timeout: 30s
+      retries: 6
       start_period: 120s
 
   strapi-4:
@@ -70,10 +70,10 @@ services:
     networks:
       - infinity-network
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:1337/_health"]
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:1337/api/_health"]
       interval: 30s
-      timeout: 15s
-      retries: 5
+      timeout: 30s
+      retries: 6
       start_period: 120s
 
   strapi-5:
@@ -94,10 +94,10 @@ services:
     networks:
       - infinity-network
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:1337/_health"]
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:1337/api/_health"]
       interval: 30s
-      timeout: 15s
-      retries: 5
+      timeout: 30s
+      retries: 6
       start_period: 120s
 
   strapi-6:
@@ -118,8 +118,8 @@ services:
     networks:
       - infinity-network
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:1337/_health"]
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:1337/api/_health"]
       interval: 30s
-      timeout: 15s
-      retries: 5
+      timeout: 30s
+      retries: 6
       start_period: 120s

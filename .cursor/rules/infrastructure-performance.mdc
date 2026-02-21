@@ -10,16 +10,24 @@ globs: docs/nginx*.md,docs/nginx*.conf,**/docker-compose*.yml,**/Dockerfile*,fro
 - **Brotli:** `docs/nginx-brotli-setup.md`, `docs/nginx-brotli-snippet.conf` – enable on server.
 - **Next.js shared cache:** `frontend/src/lib/cache-handler.ts` (Redis). Uses dedicated `frontend-redis` service; `FRONTEND_REDIS_URL` from env (see [frontend-redis-gitlab.mdc](.cursor/rules/frontend-redis-gitlab.mdc)). Configured in `frontend/next.config.ts` via `cacheHandler` and `cacheMaxMemorySize: 0`.
 - **Docker layer caching:** Frontend and backend Dockerfiles copy `package*.json` first, then run `npm ci` with cache mount, then `COPY . .`.
-- **Health checks:** All app services in `backend/docker-compose.yml`, `backend/docker-compose.scale.yml`, `frontend/docker-compose.yml`, `frontend/docker-compose.scale.yml` use `wget --spider` to root URL (no dedicated health endpoint).
+- **Health checks:** All Strapi services in `backend/docker-compose.yml`, `backend/docker-compose.scale.yml` use `wget --spider` to `/api/_health` endpoint. Frontend services use root path `/`. Health check config: interval 30s, timeout 30s, retries 6 (3 min tolerance), start_period 120s.
 - **Nginx proxy cache:** `docs/nginx-proxy-cache-api.md`, `docs/nginx-proxy-cache-api-snippet.conf` – apply on API server.
 - **GitLab CI:** Frontend and backend build jobs use a dedicated registry cache ref `buildcache-${RUNTIME_TAG}` with `--cache-from type=registry,ref=...` and `--cache-to type=registry,ref=...,mode=max` for full layer reuse across pipelines.
 - **GitHub Actions:** Frontend workflow uses `docker/build-push-action` with `cache-from: type=gha`, `cache-to: type=gha,mode=max`.
 - **Build metrics:** GitLab CI frontend and backend build jobs echo image sizes at end of script.
 - **APM:** `docs/apm-options.md` – options (Sentry, OpenTelemetry, Prometheus).
 
-## No health endpoint
+## Health endpoint
 
-Do not add `/api/health` or similar; health checks use root path. Dedicated health services may be added later.
+Backend health endpoint is at `GET /api/_health` (registered in `src/api/health/`). It checks database (`SELECT 1`) and Redis (ping) and returns 200/503 based on DB connectivity. Docker health checks use this endpoint, not the root path.
+
+## PostgreSQL Timeouts
+
+Key timeout settings in `backend/docker-compose.yml`:
+- `statement_timeout=60000` (60s) - kills queries taking too long
+- `idle_in_transaction_session_timeout=90000` (90s) - kills idle connections in transactions (must be > statement_timeout)
+
+Rationale: `idle_in_transaction` must exceed `statement_timeout` so multi-step transactions don't get killed between statements.
 
 ## Redis for frontend
 
