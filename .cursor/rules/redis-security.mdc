@@ -43,6 +43,17 @@ The `REDIS_URL` should **NOT** include the password in the URL:
 
 The password is provided separately via the `password` parameter in the Redis client configuration.
 
+### Frontend Redis URL Format (node-redis v4)
+
+For the frontend's Next.js cache handler using node-redis v4, the URL **must** include the username `default`:
+
+- ✅ Correct: `redis://default:password@frontend-redis:6379`
+- ❌ Wrong (causes WRONGPASS): `redis://:password@frontend-redis:6379`
+
+**Why:** node-redis v4 sends `AUTH username password`. An empty username (`redis://:password@...`) causes Redis 6+ ACL to look up a user named `""` (empty string), which doesn't exist, resulting in `WRONGPASS invalid username-password pair`.
+
+Always use the `default` user explicitly in the frontend Redis URL.
+
 ### Security Notes
 
 - **Never commit passwords**: `.env`, `main.env`, `dev.env` should be in `.gitignore`
@@ -69,3 +80,9 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 - Verify environment variable is passed to container
 - Check password format (no extra quotes or spaces)
 - Test manually: `docker-compose exec infinity-redis redis-cli -a "$REDIS_PASSWORD" ping`
+
+**WRONGPASS invalid username-password pair (frontend):**
+- Check the Redis URL uses `default` as username: `redis://default:password@frontend-redis:6379`
+- Empty username like `redis://:password@host` causes this error with node-redis v4 + Redis 6+
+- Verify `FRONTEND_REDIS_URL` is correctly set in the environment file
+- Ensure `FRONTEND_REDIS_PASSWORD` matches the password in the URL

@@ -20,9 +20,29 @@ In **Settings → CI/CD → Variables**, configure:
 
 | Variable | Example | Protected | Masked | Notes |
 |----------|---------|-----------|--------|--------|
-| `FRONTEND_REDIS_URL` | `redis://:yourpassword@frontend-redis:6379` | Yes | Yes | Full URL for Next.js cache handler. Format: `redis://:password@host:port`. |
+| `FRONTEND_REDIS_URL` | `redis://default:yourpassword@frontend-redis:6379` | Yes | Yes | Full URL for Next.js cache handler. Format: `redis://default:password@host:port`. **Must use `default` as username** (see warning below). |
 | `FRONTEND_REDIS_PASSWORD` | `your-secure-password` | Yes | Yes | Used by `frontend-redis` service (`--requirepass`). |
 | `FRONTEND_REDIS_PORT` | `6380` | No | No | Host port for frontend Redis (default 6380). |
+
+### Important: Redis URL Username
+
+**Always use `default` as the username in the Redis URL.**
+
+```
+redis://default:yourpassword@frontend-redis:6379
+```
+
+**Why:** node-redis v4 sends the two-argument `AUTH` command. If the URL has an empty username like `redis://:password@host`, Redis 6+ ACL interprets this as `AUTH "" password` and looks up a user named `""` (empty string). Since that user doesn't exist, Redis returns `WRONGPASS invalid username-password pair`.
+
+**❌ Wrong (causes WRONGPASS):**
+```
+redis://:Yzam13880108@frontend-redis:6379
+```
+
+**✅ Correct:**
+```
+redis://default:Yzam13880108@frontend-redis:6379
+```
 
 Use the same password in both `FRONTEND_REDIS_URL` and `FRONTEND_REDIS_PASSWORD`. Set these for the environments that run frontend build/deploy (e.g. main, dev).
 

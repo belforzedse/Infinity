@@ -13,8 +13,6 @@ services:
     depends_on:
       frontend-redis:
         condition: service_started
-    environment:
-      - FRONTEND_REDIS_URL=${FRONTEND_REDIS_URL:-redis://localhost:6379}
     networks:
       - frontend-network
     ports:
@@ -36,8 +34,6 @@ services:
     depends_on:
       frontend-redis:
         condition: service_started
-    environment:
-      - FRONTEND_REDIS_URL=${FRONTEND_REDIS_URL:-redis://localhost:6379}
     networks:
       - frontend-network
     ports:
@@ -59,8 +55,6 @@ services:
     depends_on:
       frontend-redis:
         condition: service_started
-    environment:
-      - FRONTEND_REDIS_URL=${FRONTEND_REDIS_URL:-redis://localhost:6379}
     networks:
       - frontend-network
     ports:
@@ -82,8 +76,6 @@ services:
     depends_on:
       frontend-redis:
         condition: service_started
-    environment:
-      - FRONTEND_REDIS_URL=${FRONTEND_REDIS_URL:-redis://localhost:6379}
     networks:
       - frontend-network
     ports:
@@ -105,8 +97,6 @@ services:
     depends_on:
       frontend-redis:
         condition: service_started
-    environment:
-      - FRONTEND_REDIS_URL=${FRONTEND_REDIS_URL:-redis://localhost:6379}
     networks:
       - frontend-network
     ports:
@@ -128,8 +118,6 @@ services:
     depends_on:
       frontend-redis:
         condition: service_started
-    environment:
-      - FRONTEND_REDIS_URL=${FRONTEND_REDIS_URL:-redis://localhost:6379}
     networks:
       - frontend-network
     ports:
@@ -151,8 +139,6 @@ services:
     depends_on:
       frontend-redis:
         condition: service_started
-    environment:
-      - FRONTEND_REDIS_URL=${FRONTEND_REDIS_URL:-redis://localhost:6379}
     networks:
       - frontend-network
     ports:
@@ -174,8 +160,6 @@ services:
     depends_on:
       frontend-redis:
         condition: service_started
-    environment:
-      - FRONTEND_REDIS_URL=${FRONTEND_REDIS_URL:-redis://localhost:6379}
     networks:
       - frontend-network
     ports:
@@ -197,8 +181,6 @@ services:
     depends_on:
       frontend-redis:
         condition: service_started
-    environment:
-      - FRONTEND_REDIS_URL=${FRONTEND_REDIS_URL:-redis://localhost:6379}
     networks:
       - frontend-network
     ports:
@@ -220,8 +202,6 @@ services:
     depends_on:
       frontend-redis:
         condition: service_started
-    environment:
-      - FRONTEND_REDIS_URL=${FRONTEND_REDIS_URL:-redis://localhost:6379}
     networks:
       - frontend-network
     ports:
@@ -243,8 +223,6 @@ services:
     depends_on:
       frontend-redis:
         condition: service_started
-    environment:
-      - FRONTEND_REDIS_URL=${FRONTEND_REDIS_URL:-redis://localhost:6379}
     networks:
       - frontend-network
     ports:

@@ -9,8 +9,6 @@ services:
     depends_on:
       frontend-redis:
         condition: service_started
-    environment:
-      - FRONTEND_REDIS_URL=${FRONTEND_REDIS_URL:-redis://localhost:6379}
     ports:
       - "127.0.0.1:${HOST_PORT:-3000}:3000"
     networks:
