@@ -8,6 +8,7 @@
  * - Health monitoring with periodic ping
  * - Graceful degradation on Redis failure (returns undefined for cache miss)
  * - Cache metrics logging for monitoring hit/miss rates
+ * - Handles multiple cache entry types (streaming, full page, RSC)
  *
  * If Redis is unavailable, cache misses occur (Next.js falls back to regeneration).
  * When FRONTEND_REDIS_URL is unset or empty (e.g. during Docker build), Redis is disabled: no connection, no logs.
@@ -34,7 +35,9 @@ class RedisCacheHandler {
       misses: 0,
       errors: 0,
       sets: 0,
+      skipped: 0,
     };
+    this.debug = process.env.FRONTEND_CACHE_DEBUG === "true";
 
     if (!redisUrl) {
       return;
@@ -124,6 +127,29 @@ class RedisCacheHandler {
     ]);
   }
 
+  // Check if entry is cacheable
+  isCacheableEntry(entry) {
+    if (!entry) return false;
+
+    // Check for streaming entry (has ReadableStream value)
+    if (entry.value && typeof entry.value.getReader === 'function') {
+      return { type: 'stream', entry };
+    }
+
+    // Check for full page entry (has html property)
+    if (entry.html !== undefined) {
+      return { type: 'page', entry };
+    }
+
+    // Check for RSC entry
+    if (entry.rscData !== undefined || entry.kind === 'RSC') {
+      return { type: 'rsc', entry };
+    }
+
+    // Unknown entry type - don't cache but don't spam logs
+    return { type: 'unknown', entry };
+  }
+
   async get(cacheKey, _softTags) {
     // Wait for initial connection attempt if still pending
     if (this.connectionPromise) {
@@ -159,13 +185,33 @@ class RedisCacheHandler {
         this.logMetrics();
       }
 
+      // Restore the entry based on stored type
+      if (data.type === 'stream' && data.value) {
+        return {
+          value: new ReadableStream({
+            start(controller) {
+              controller.enqueue(Buffer.from(data.value, "base64"));
+              controller.close();
+            },
+          }),
+          tags: data.tags,
+          stale: data.stale,
+          timestamp: data.timestamp,
+          expire: data.expire,
+          revalidate: data.revalidate,
+        };
+      }
+
+      // For page/rsc entries, return as-is
       return {
-        value: new ReadableStream({
-          start(controller) {
-            controller.enqueue(Buffer.from(data.value, "base64"));
-            controller.close();
-          },
-        }),
+        value: data.value,
+        html: data.html,
+        rscData: data.rscData,
+        kind: data.kind,
+        postponed: data.postponed,
+        headers: data.headers,
+        status: data.status,
+        segmentData: data.segmentData,
         tags: data.tags,
         stale: data.stale,
         timestamp: data.timestamp,
@@ -197,7 +243,10 @@ class RedisCacheHandler {
 
     // Validate pendingEntry is provided
     if (!pendingEntry) {
-      console.warn(`Cache set skipped for key "${cacheKey}": pendingEntry is null/undefined`);
+      if (this.debug) {
+        console.warn(`Cache set skipped for key "${cacheKey}": pendingEntry is null/undefined`);
+      }
+      this.metrics.skipped++;
       return;
     }
 
@@ -205,51 +254,101 @@ class RedisCacheHandler {
     try {
       entry = await pendingEntry;
     } catch (fetchError) {
-      console.warn(`Cache set skipped for key "${cacheKey}": pendingEntry rejected with error`, fetchError.message);
+      if (this.debug) {
+        console.warn(`Cache set skipped for key "${cacheKey}": pendingEntry rejected with error`, fetchError.message);
+      }
+      this.metrics.skipped++;
       return;
     }
 
     // Validate entry exists
     if (!entry) {
-      console.warn(`Cache set skipped for key "${cacheKey}": entry is null/undefined after awaiting`);
+      if (this.debug) {
+        console.warn(`Cache set skipped for key "${cacheKey}": entry is null/undefined after awaiting`);
+      }
+      this.metrics.skipped++;
       return;
     }
 
-    // Validate entry.value exists and is a ReadableStream
-    if (!entry.value || typeof entry.value.getReader !== 'function') {
-      console.warn(
-        `Cache set skipped for key "${cacheKey}": entry.value is not a ReadableStream. ` +
-        `Type: ${typeof entry.value}, ` +
-        `Keys: ${entry.value ? Object.keys(entry.value).join(', ') : 'N/A'}, ` +
-        `Entry keys: ${Object.keys(entry).join(', ')}`
-      );
+    // Check entry type
+    const cacheable = this.isCacheableEntry(entry);
+
+    if (cacheable.type === 'unknown') {
+      // Silently skip unknown entry types in production
+      if (this.debug) {
+        console.warn(
+          `Cache set skipped for key "${cacheKey}": unknown entry type. ` +
+          `Entry keys: ${Object.keys(entry).join(', ')}`
+        );
+      }
+      this.metrics.skipped++;
       return;
     }
 
     try {
-      const reader = entry.value.getReader();
-      const chunks = [];
+      let cacheData;
 
-      try {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          if (value) chunks.push(value);
+      if (cacheable.type === 'stream') {
+        // Handle streaming entry
+        const reader = entry.value.getReader();
+        const chunks = [];
+
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            if (value) chunks.push(value);
+          }
+        } finally {
+          reader.releaseLock();
         }
-      } finally {
-        reader.releaseLock();
+
+        const data = Buffer.concat(chunks.map((chunk) => Buffer.from(chunk)));
+
+        cacheData = {
+          type: 'stream',
+          value: data.toString("base64"),
+          tags: entry.tags,
+          stale: entry.stale,
+          timestamp: entry.timestamp,
+          expire: entry.expire,
+          revalidate: entry.revalidate,
+        };
+      } else if (cacheable.type === 'page') {
+        // Handle full page entry (non-streaming)
+        cacheData = {
+          type: 'page',
+          html: entry.html,
+          kind: entry.kind,
+          postponed: entry.postponed,
+          rscData: entry.rscData,
+          headers: entry.headers,
+          status: entry.status,
+          segmentData: entry.segmentData,
+          tags: entry.tags,
+          stale: entry.stale,
+          timestamp: entry.timestamp,
+          expire: entry.expire,
+          revalidate: entry.revalidate,
+        };
+      } else if (cacheable.type === 'rsc') {
+        // Handle RSC entry
+        cacheData = {
+          type: 'rsc',
+          kind: entry.kind,
+          rscData: entry.rscData,
+          html: entry.html,
+          postponed: entry.postponed,
+          headers: entry.headers,
+          status: entry.status,
+          segmentData: entry.segmentData,
+          tags: entry.tags,
+          stale: entry.stale,
+          timestamp: entry.timestamp,
+          expire: entry.expire,
+          revalidate: entry.revalidate,
+        };
       }
-
-      const data = Buffer.concat(chunks.map((chunk) => Buffer.from(chunk)));
-
-      const cacheData = {
-        value: data.toString("base64"),
-        tags: entry.tags,
-        stale: entry.stale,
-        timestamp: entry.timestamp,
-        expire: entry.expire,
-        revalidate: entry.revalidate,
-      };
 
       const options = entry.expire
         ? { EX: Math.ceil(entry.expire / 1000) }
@@ -293,7 +392,7 @@ class RedisCacheHandler {
     const hitRate = total > 0 ? ((this.metrics.hits / total) * 100).toFixed(1) : 0;
     console.log(
       `Redis Cache Metrics: hits=${this.metrics.hits}, misses=${this.metrics.misses}, ` +
-      `hitRate=${hitRate}%, sets=${this.metrics.sets}, errors=${this.metrics.errors}`
+      `hitRate=${hitRate}%, sets=${this.metrics.sets}, skipped=${this.metrics.skipped}, errors=${this.metrics.errors}`
     );
   }
 
