@@ -8,7 +8,7 @@ globs: docs/nginx*.md,docs/nginx*.conf,**/docker-compose*.yml,**/Dockerfile*,fro
 ## Implemented
 
 - **Brotli:** `docs/nginx-brotli-setup.md`, `docs/nginx-brotli-snippet.conf` – enable on server.
-- **Next.js shared cache:** `frontend/src/lib/cache-handler.ts` (Redis). Requires `REDIS_URL` in frontend env. Configured in `frontend/next.config.ts` via `cacheHandler` and `cacheMaxMemorySize: 0`.
+- **Next.js shared cache:** `frontend/src/lib/cache-handler.ts` (Redis). Uses dedicated `frontend-redis` service; `FRONTEND_REDIS_URL` from env (see [frontend-redis-gitlab.mdc](.cursor/rules/frontend-redis-gitlab.mdc)). Configured in `frontend/next.config.ts` via `cacheHandler` and `cacheMaxMemorySize: 0`.
 - **Docker layer caching:** Frontend and backend Dockerfiles copy `package*.json` first, then run `npm ci` with cache mount, then `COPY . .`.
 - **Health checks:** All app services in `backend/docker-compose.yml`, `backend/docker-compose.scale.yml`, `frontend/docker-compose.yml`, `frontend/docker-compose.scale.yml` use `wget --spider` to root URL (no dedicated health endpoint).
 - **Nginx proxy cache:** `docs/nginx-proxy-cache-api.md`, `docs/nginx-proxy-cache-api-snippet.conf` – apply on API server.
@@ -23,4 +23,4 @@ Do not add `/api/health` or similar; health checks use root path. Dedicated heal
 
 ## Redis for frontend
 
-When running multiple Next.js instances, set `REDIS_URL` in the frontend env (e.g. same Redis as Strapi or a dedicated DB index) so the cache handler can connect.
+Dedicated `frontend-redis` service; GitLab CI variables and env vars are documented in [frontend-redis-gitlab.mdc](.cursor/rules/frontend-redis-gitlab.mdc).

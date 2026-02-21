@@ -1,0 +1,30 @@
+---
+description: Frontend dedicated Redis and GitLab CI variables for build/deploy
+globs: frontend/docker-compose*.yml,frontend/src/lib/cache-handler.ts,.gitlab-ci.yml
+---
+
+# Frontend Redis and GitLab CI
+
+## Frontend Redis
+
+The frontend uses a **dedicated** Redis instance (`frontend-redis`) for Next.js ISR/Data cache, separate from the backend's Redis. It is defined in `frontend/docker-compose.yml` and `frontend/docker-compose.scale.yml` (scale file can be used standalone).
+
+- **Cache handler:** `frontend/src/lib/cache-handler.ts` reads `FRONTEND_REDIS_URL` only (fallback `redis://localhost:6379`).
+- **Port:** `FRONTEND_REDIS_PORT` (default 6380) to avoid conflict with backend (6379).
+- **Password:** Optional via `FRONTEND_REDIS_PASSWORD`; healthcheck supports with or without password.
+
+## GitLab CI Variables to Set
+
+In **Settings → CI/CD → Variables**, configure:
+
+| Variable | Example | Protected | Masked | Notes |
+|----------|---------|-----------|--------|--------|
+| `FRONTEND_REDIS_URL` | `redis://:yourpassword@frontend-redis:6379` | Yes | Yes | Full URL for Next.js cache handler. Format: `redis://:password@host:port`. |
+| `FRONTEND_REDIS_PASSWORD` | `your-secure-password` | Yes | Yes | Used by `frontend-redis` service (`--requirepass`). |
+| `FRONTEND_REDIS_PORT` | `6380` | No | No | Host port for frontend Redis (default 6380). |
+
+Use the same password in both `FRONTEND_REDIS_URL` and `FRONTEND_REDIS_PASSWORD`. Set these for the environments that run frontend build/deploy (e.g. main, dev).
+
+## Local Development
+
+For local runs without the compose stack, set `FRONTEND_REDIS_URL=redis://localhost:6379` (or your backend Redis URL) in env so the cache handler can connect.

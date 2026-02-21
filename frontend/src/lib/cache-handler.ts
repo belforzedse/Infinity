@@ -1,7 +1,7 @@
 /**
  * Redis-backed cache handler for Next.js ISR/Data Cache.
- * Shares cache across multiple Next.js instances (e.g. 12 frontend containers).
- * Requires REDIS_URL in environment. If Redis is unavailable, cache misses occur (no in-memory fallback when cacheMaxMemorySize: 0).
+ * Uses dedicated frontend Redis (FRONTEND_REDIS_URL). Shares cache across multiple Next.js instances (e.g. 12 frontend containers).
+ * If Redis is unavailable, cache misses occur (no in-memory fallback when cacheMaxMemorySize: 0).
  */
 
 import { createClient, type RedisClientType } from "redis";
@@ -29,7 +29,7 @@ class RedisCacheHandler {
   private isConnected = false;
 
   constructor() {
-    const redisUrl = process.env.REDIS_URL ?? "redis://localhost:6379";
+    const redisUrl = process.env.FRONTEND_REDIS_URL ?? "redis://localhost:6379";
     this.client = createClient({ url: redisUrl });
 
     this.client.on("error", (err: Error) => {
