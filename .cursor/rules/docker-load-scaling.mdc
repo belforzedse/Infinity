@@ -11,16 +11,19 @@ The app runs **multiple frontend and backend containers** in production when usi
 
 ## Repo pieces
 
-- **backend/docker-compose.scale.yml** – Adds `strapi-2` (1338), `strapi-3` (1339), `strapi-4` (1340). Use with `docker compose -f docker-compose.yml -f docker-compose.scale.yml`.
-- **frontend/docker-compose.scale.yml** – Adds `frontend-2` (3001), `frontend-3` (3002), `frontend-4` (3003), `frontend-5` (3004). Same image/env.
-- **CI/CD** – `frontend-cicd.yml` and `backend-cicd.yml` upload both base and scale compose files and deploy with:
-  - `docker compose -f docker-compose.yml -f docker-compose.scale.yml ...`
-  So every deploy (main/dev/experimental) brings up the scaled stack.
+- **backend/docker-compose.scale.yml** – Adds `strapi-2` (1338) through `strapi-6` (1342). Use with `docker compose -f docker-compose.yml -f docker-compose.scale.yml`.
+- **backend/docker-compose.ci.yml** – GitLab CI only: overrides main `strapi` image to registry.cyandm.org.
+- **backend/docker-compose.scale.ci.yml** – GitLab CI only: overrides scale service images (strapi-2…strapi-6) to registry.cyandm.org.
+- **frontend/docker-compose.scale.yml** – Adds `frontend-2` (3001) through `frontend-12` (3011). Same image/env.
+- **frontend/docker-compose.ci.yml** – GitLab CI only: overrides main `frontend` image to registry.cyandm.org.
+- **frontend/docker-compose.scale.ci.yml** – GitLab CI only: overrides scale service images (frontend-2…frontend-12) to registry.cyandm.org.
+- **GitLab CI** – `.gitlab-ci.yml` deploy uses compose order: `-f docker-compose.yml -f docker-compose.ci.yml -f docker-compose.scale.yml -f docker-compose.scale.ci.yml` (base → base CI override → scale → scale CI override). Copies all four files.
+- **GitHub Actions** – `frontend-cicd.yml` and `backend-cicd.yml` use base + scale only (no CI override); images from ghcr.io.
 - **Nginx** – Server config must use upstreams for load balancing. Snippet: **docs/nginx-upstream-snippet.conf** (include before `server {}`, then `proxy_pass http://next_upstream` and `proxy_pass http://strapi_upstream`). Full steps: **docs/DOCKER-LOAD-SCALING-GUIDE.md**.
 
 ## Conventions
 
-- Backend scale: three extra Strapi (`strapi-2`, `strapi-3`, `strapi-4`), same volumes/networks as base (4 Strapi total).
-- Frontend scale: four extra Next.js services (`frontend-2`–`frontend-5`), same env_file (5 Next total).
+- Backend scale: five extra Strapi (`strapi-2`…`strapi-6`), same volumes/networks as base (6 Strapi total).
+- Frontend scale: eleven extra Next.js services (`frontend-2`–`frontend-12`), same env_file (12 Next total).
 - Strapi upstream uses `ip_hash` so admin sessions stick to one instance.
 - To run single-instance on server: omit the scale file (e.g. `docker compose up -d` only).
