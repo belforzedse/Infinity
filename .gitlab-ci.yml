@@ -143,7 +143,7 @@ backend:deploy:
       	set -euo pipefail
       	cd /opt/infinity/backend
 
-      	printf '%s' "\$REGISTRY_PAT" | docker login registry.cyandm.org -u "\$REGISTRY_USER" --password-stdin
+      	printf '%s' "$REGISTRY_PAT" | docker login registry.cyandm.org -u "$REGISTRY_USER" --password-stdin
 
       	export ENV_FILE="$ENV_FILE"
       	export DB_ENV_FILE=db.env
@@ -264,7 +264,7 @@ frontend:deploy:
       	set -euo pipefail
       	cd /opt/infinity/frontend
 
-      	printf '%s' "\$REGISTRY_PAT" | docker login registry.cyandm.org -u "\$REGISTRY_USER" --password-stdin
+      	printf '%s' "$REGISTRY_PAT" | docker login registry.cyandm.org -u "$REGISTRY_USER" --password-stdin
 
       	export ENV_FILE="$ENV_FILE"
       	sed -i "/^STRAPI_BUILD_TIME_URL=/d" "\$ENV_FILE" || true
