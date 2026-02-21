@@ -1,0 +1,77 @@
+# Redis Docker Health Check Fix
+
+## Problem
+
+Redis containers fail health check with:
+```
+dependency failed to start: container frontend-redis is unhealthy
+```
+
+Even though Redis logs show "Ready to accept connections tcp".
+
+## Root Cause
+
+Docker health checks with complex parameter expansion or incorrect auth flags fail.
+
+These patterns DON'T work:
+```yaml
+# ❌ BROKEN - Parameter expansion fails in Docker health check
+test: ["CMD-SHELL", "redis-cli $${REDIS_PASSWORD:+-a $$REDIS_PASSWORD} ping | grep -q PONG"]
+
+# ❌ BROKEN - Always using -a flag even when password is empty
+test: ["CMD-SHELL", "redis-cli -a \"$$REDIS_PASSWORD\" ping | grep -q PONG"]
+
+# ❌ BROKEN - No-auth-warning doesn't help when password is required
+test: ["CMD-SHELL", "redis-cli --no-auth-warning -a \"$$REDIS_PASSWORD\" ping | grep -q PONG"]
+```
+
+## Solution
+
+Use explicit `sh -c` with proper if/else logic:
+
+```yaml
+# ✅ CORRECT - Works with and without password
+test: ["CMD-SHELL", "sh -c 'if [ -z \"$$REDIS_PASSWORD\" ]; then redis-cli ping; else redis-cli -a \"$$REDIS_PASSWORD\" ping; fi' | grep -q PONG"]
+```
+
+## Key Differences
+
+1. Uses `sh -c` to ensure proper shell interpretation
+2. Uses `-z` (zero/empty check) instead of `-n` (non-empty check) - simpler logic
+3. Separates the redis-cli command from the grep pipe
+4. Always works: when password is empty (no `-a` flag), when password is set (uses `-a` flag)
+
+## Files Updated
+
+### Frontend:
+- `frontend/docker-compose.yml`
+- `frontend/docker-compose.scale.yml`
+
+### Backend:
+- `backend/docker-compose.yml`
+- `backend/docker-compose.local.yml`
+
+## Testing
+
+```bash
+# Check health status
+docker inspect --format='{{.State.Health.Status}}' frontend-redis
+docker inspect --format='{{.State.Health.Status}}' infinity-redis
+
+# View health check logs
+docker inspect --format='{{json .State.Health}}' frontend-redis | jq
+docker inspect --format='{{json .State.Health}}' infinity-redis | jq
+
+# Manual test without password
+docker exec frontend-redis redis-cli ping
+
+# Manual test with password
+docker exec frontend-redis redis-cli -a "yourpassword" ping
+```
+
+## Variable Names
+
+- **Frontend**: `FRONTEND_REDIS_PASSWORD` 
+- **Backend**: `REDIS_PASSWORD`
+
+Both use `$$VAR` syntax (double `$`) for Docker Compose variable escaping.
