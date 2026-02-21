@@ -243,15 +243,12 @@ services:
       --appendonly yes
       --maxmemory 4gb
       --maxmemory-policy allkeys-lru
-      ${FRONTEND_REDIS_PASSWORD:+--requirepass $$FRONTEND_REDIS_PASSWORD}
-    environment:
-      - FRONTEND_REDIS_PASSWORD=${FRONTEND_REDIS_PASSWORD:-}
     volumes:
       - frontend_redis_data:/data
     ports:
       - "127.0.0.1:${FRONTEND_REDIS_PORT:-6380}:6379"
     healthcheck:
-      test: ["CMD-SHELL", "redis-cli ping | grep -q PONG || redis-cli -a \"$$FRONTEND_REDIS_PASSWORD\" ping | grep -q PONG"]
+      test: ["CMD-SHELL", "redis-cli ping | grep -q PONG"]
       interval: 10s
       timeout: 5s
       retries: 5

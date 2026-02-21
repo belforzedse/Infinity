@@ -290,9 +290,6 @@ frontend:deploy:
       	export ENV_FILE="$ENV_FILE"
       	export REGISTRY_IMAGE_BASE="$CI_REGISTRY_IMAGE"
       	export IMAGE_TAG="$IMAGE_TAG"
-      	export FRONTEND_REDIS_URL="${FRONTEND_REDIS_URL:-}"
-      	export FRONTEND_REDIS_PASSWORD="${FRONTEND_REDIS_PASSWORD:-}"
-      	export FRONTEND_REDIS_PORT="${FRONTEND_REDIS_PORT:-6380}"
       	sed -i "/^STRAPI_BUILD_TIME_URL=/d" "\$ENV_FILE" || true
 
       	pull_with_retry() {

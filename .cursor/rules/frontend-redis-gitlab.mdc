@@ -12,7 +12,7 @@ The frontend uses a **dedicated** Redis instance (`frontend-redis`) for Next.js 
 - **Cache handler:** `frontend/src/lib/cache-handler.js` reads `FRONTEND_REDIS_URL`. When unset or empty (e.g. during Docker build), Redis is disabled: no connection, no logs. At runtime, set `FRONTEND_REDIS_URL` via deploy env/compose.
 - **Build vs runtime:** `FRONTEND_REDIS_URL` is **not** passed to the frontend Docker build in CI, so the build runs without Redis and completes without connection errors. At deploy, `FRONTEND_REDIS_URL` is set on the host and passed into containers by docker-compose.
 - **Port:** `FRONTEND_REDIS_PORT` (default 6380) to avoid conflict with backend (6379).
-- **Password:** Optional via `FRONTEND_REDIS_PASSWORD`; healthcheck supports with or without password.
+- **Password:** **None.** The frontend Redis runs passwordless. It is bound to `127.0.0.1` and accessible only within the Docker bridge network, making a password unnecessary for this cache-only instance.
 
 ## GitLab CI Variables to Set
 
@@ -20,31 +20,22 @@ In **Settings → CI/CD → Variables**, configure:
 
 | Variable | Example | Protected | Masked | Notes |
 |----------|---------|-----------|--------|--------|
-| `FRONTEND_REDIS_URL` | `redis://default:yourpassword@frontend-redis:6379` | Yes | Yes | Full URL for Next.js cache handler. Format: `redis://default:password@host:port`. **Must use `default` as username** (see warning below). |
-| `FRONTEND_REDIS_PASSWORD` | `your-secure-password` | Yes | Yes | Used by `frontend-redis` service (`--requirepass`). |
+| `FRONTEND_REDIS_URL` | `redis://frontend-redis:6379` | Yes | Yes | Full URL for Next.js cache handler. No password needed (passwordless Redis). |
 | `FRONTEND_REDIS_PORT` | `6380` | No | No | Host port for frontend Redis (default 6380). |
 
-### Important: Redis URL Username
+### Passwordless Configuration
 
-**Always use `default` as the username in the Redis URL.**
+The frontend Redis runs **without authentication**. The URL is simply:
 
 ```
-redis://default:yourpassword@frontend-redis:6379
+FRONTEND_REDIS_URL=redis://frontend-redis:6379
 ```
 
-**Why:** node-redis v4 sends the two-argument `AUTH` command. If the URL has an empty username like `redis://:password@host`, Redis 6+ ACL interprets this as `AUTH "" password` and looks up a user named `""` (empty string). Since that user doesn't exist, Redis returns `WRONGPASS invalid username-password pair`.
-
-**❌ Wrong (causes WRONGPASS):**
-```
-redis://:Yzam13880108@frontend-redis:6379
-```
-
-**✅ Correct:**
-```
-redis://default:Yzam13880108@frontend-redis:6379
-```
-
-Use the same password in both `FRONTEND_REDIS_URL` and `FRONTEND_REDIS_PASSWORD`. Set these for the environments that run frontend build/deploy (e.g. main, dev).
+This is safe because:
+- The Redis container is bound to `127.0.0.1` (localhost only)
+- It is isolated within a Docker bridge network
+- It is only used as an ISR/data cache with no sensitive data
+- No password means no WRONGPASS authentication errors
 
 ## Local Development
 
