@@ -2,15 +2,22 @@
  * Redis-backed cache handler for Next.js ISR/Data Cache.
  * Uses dedicated frontend Redis (FRONTEND_REDIS_URL). Shares cache across multiple Next.js instances (e.g. 12 frontend containers).
  * If Redis is unavailable, cache misses occur (no in-memory fallback when cacheMaxMemorySize: 0).
+ * When FRONTEND_REDIS_URL is unset or empty (e.g. during Docker build), Redis is disabled: no connection, no logs.
  */
 
 const { createClient } = require("redis");
 
 class RedisCacheHandler {
   constructor() {
-    const redisUrl = process.env.FRONTEND_REDIS_URL ?? "redis://localhost:6379";
-    this.client = createClient({ url: redisUrl });
+    const redisUrl = process.env.FRONTEND_REDIS_URL?.trim() || "";
     this.isConnected = false;
+    this.client = null;
+
+    if (!redisUrl) {
+      return;
+    }
+
+    this.client = createClient({ url: redisUrl });
 
     this.client.on("error", (err) => {
       console.error("Redis Cache Handler Error:", err);
@@ -28,7 +35,7 @@ class RedisCacheHandler {
   }
 
   async get(cacheKey, _softTags) {
-    if (!this.isConnected) return undefined;
+    if (!this.client || !this.isConnected) return undefined;
 
     try {
       const stored = await this.client.get(cacheKey);
@@ -56,7 +63,7 @@ class RedisCacheHandler {
   }
 
   async set(cacheKey, pendingEntry) {
-    if (!this.isConnected) return;
+    if (!this.client || !this.isConnected) return;
 
     try {
       const entry = await pendingEntry;
@@ -95,7 +102,7 @@ class RedisCacheHandler {
   }
 
   async revalidateTag(_tag) {
-    if (!this.isConnected) return;
+    if (!this.client || !this.isConnected) return;
     // Tag-based invalidation would require tracking keys by tag in Redis.
     // Entries expire based on TTL; optional: maintain a Redis set per tag and delete those keys here.
   }

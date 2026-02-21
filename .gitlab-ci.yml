@@ -233,7 +233,6 @@ frontend:build:
         --build-arg NEXT_PUBLIC_MATOMO_SITE_ID="${FRONTEND_MATOMO_SITE_ID:-}" \
         --build-arg STRAPI_BUILD_TIME_URL="${FRONTEND_STRAPI_BUILD_TIME_URL:-}" \
         --build-arg STRAPI_INTERNAL_URL="${STRAPI_INTERNAL_URL:-}" \
-        --build-arg FRONTEND_REDIS_URL="${FRONTEND_REDIS_URL:-}" \
         --build-arg GITHUB_SHA="$CI_COMMIT_SHA" \
         --file "$DOCKERFILE" \
         --tag "$IMAGE:$CI_COMMIT_SHA" \
