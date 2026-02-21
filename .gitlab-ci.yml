@@ -148,6 +148,7 @@ backend:deploy:
       	export ENV_FILE="$ENV_FILE"
       	export DB_ENV_FILE=db.env
       	export REGISTRY_IMAGE_BASE="$CI_REGISTRY_IMAGE"
+      	export IMAGE_TAG="$IMAGE_TAG"
       	mkdir -p public/uploads
 
       	DB_USER=\$(grep -E "^DATABASE_USERNAME=" "\$ENV_FILE" | tail -1 | cut -d= -f2-)
@@ -269,6 +270,7 @@ frontend:deploy:
 
       	export ENV_FILE="$ENV_FILE"
       	export REGISTRY_IMAGE_BASE="$CI_REGISTRY_IMAGE"
+      	export IMAGE_TAG="$IMAGE_TAG"
       	sed -i "/^STRAPI_BUILD_TIME_URL=/d" "\$ENV_FILE" || true
 
       	pull_with_retry() {
