@@ -29,7 +29,7 @@ The frontend uses a **custom cache handler** for Next.js so that ISR, route hand
 5. **next.config:**
    - `cacheHandler`: set only in production to the path of `cache-handler.mjs`.
    - `cacheMaxMemorySize`: 256MB is intentional (L1 in-memory + L2 Redis/LRU). Do not set to 0 unless you want to disable in-memory and use only the custom handler.
-   - `images.customCacheHandler: true` (in production): so optimized images use the same handler (Redis/LRU).
+   - Note: `images.customCacheHandler` is not supported in Next.js 16; optimized images use the default cache unless the framework adds support later.
 
 ## Environment
 
