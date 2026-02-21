@@ -15,11 +15,17 @@ variables:
   DOCKER_HOST: "tcp://docker:2375"
   DOCKER_TLS_CERTDIR: ""
 
+# Use mirror from your registry so the runner can pull (same auth as gitlab-runner-helper).
+# If you don't have a mirror, replace with docker:27 / docker:27-dind and ensure the runner's
+# Docker daemon can pull from Docker Hub (or set pull_policy: if-not-present and pre-pull images).
 .docker_build:
-  image: docker:27
+  image:
+    name: registry.cyandm.org/bel4/infinity/docker:27
+    pull_policy: if-not-present
   services:
-    - name: docker:27-dind
+    - name: registry.cyandm.org/bel4/infinity/docker:27-dind
       alias: docker
+      pull_policy: if-not-present
   tags: ["infinity"]
   before_script:
     - set -euo pipefail
