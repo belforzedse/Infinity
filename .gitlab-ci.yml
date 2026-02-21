@@ -26,7 +26,8 @@ variables:
     - set -euo pipefail
     - docker info
     - echo "$CI_REGISTRY_PASSWORD" | docker login "$CI_REGISTRY" -u "$CI_REGISTRY_USER" --password-stdin
-    - docker buildx create --use || true
+    # Use mirrored buildkit image to avoid Docker Hub auth issues
+    - docker buildx create --use --driver docker-container --driver-opt image=registry.cyandm.org/bel4/infinity/buildkit:buildx-stable-1 || docker buildx create --use || true
 
 .deploy_ssh:
   image: alpine:3.20
