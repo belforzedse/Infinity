@@ -125,9 +125,9 @@ backend:deploy:
     - |
       set -euo pipefail
 
-      # Upload compose
+      # Upload compose (base + scale + CI registry override)
       scp -P "${DEPLOY_PORT:-3031}" \
-        backend/docker-compose.yml backend/docker-compose.scale.yml \
+        backend/docker-compose.yml backend/docker-compose.scale.yml backend/docker-compose.ci.yml \
         "${DEPLOY_USER}@${DEPLOY_HOST}:/opt/infinity/backend/"
 
       # BACKEND_ENV_FILE: File type => path; Variable type => env content. Avoid echoing content to log.
@@ -147,6 +147,7 @@ backend:deploy:
 
       	export ENV_FILE="$ENV_FILE"
       	export DB_ENV_FILE=db.env
+      	export REGISTRY_IMAGE_BASE="$CI_REGISTRY_IMAGE"
       	mkdir -p public/uploads
 
       	DB_USER=\$(grep -E "^DATABASE_USERNAME=" "\$ENV_FILE" | tail -1 | cut -d= -f2-)
@@ -171,8 +172,8 @@ backend:deploy:
       	pull_with_retry "redis:7-alpine"
       	pull_with_retry "$CI_REGISTRY_IMAGE/infinity-backend:$IMAGE_TAG"
 
-      	docker compose -f docker-compose.yml -f docker-compose.scale.yml --env-file "\$ENV_FILE" up -d infinity-postgres infinity-redis
-      	docker compose -f docker-compose.yml -f docker-compose.scale.yml --env-file "\$ENV_FILE" up -d --remove-orphans
+      	docker compose -f docker-compose.yml -f docker-compose.scale.yml -f docker-compose.ci.yml --env-file "\$ENV_FILE" up -d infinity-postgres infinity-redis
+      	docker compose -f docker-compose.yml -f docker-compose.scale.yml -f docker-compose.ci.yml --env-file "\$ENV_FILE" up -d --remove-orphans
       	docker image prune -f || true
       REMOTE
 
@@ -248,7 +249,7 @@ frontend:deploy:
       set -euo pipefail
 
       scp -P "${DEPLOY_PORT:-3031}" \
-        frontend/docker-compose.yml frontend/docker-compose.scale.yml \
+        frontend/docker-compose.yml frontend/docker-compose.scale.yml frontend/docker-compose.ci.yml \
         "${DEPLOY_USER}@${DEPLOY_HOST}:/opt/infinity/frontend/"
 
       # FRONTEND_ENV_FILE: File type => path; Variable type => env content. Avoid echoing content to log.
@@ -267,6 +268,7 @@ frontend:deploy:
       	printf '%s' "$REGISTRY_PAT" | docker login registry.cyandm.org -u "$REGISTRY_USER" --password-stdin
 
       	export ENV_FILE="$ENV_FILE"
+      	export REGISTRY_IMAGE_BASE="$CI_REGISTRY_IMAGE"
       	sed -i "/^STRAPI_BUILD_TIME_URL=/d" "\$ENV_FILE" || true
 
       	pull_with_retry() {
@@ -280,6 +282,6 @@ frontend:deploy:
       	}
 
       	pull_with_retry "$CI_REGISTRY_IMAGE/infinity-frontend:$IMAGE_TAG"
-      	docker compose -f docker-compose.yml -f docker-compose.scale.yml up -d --remove-orphans
+      	docker compose -f docker-compose.yml -f docker-compose.scale.yml -f docker-compose.ci.yml --env-file "\$ENV_FILE" up -d --remove-orphans
       	docker image prune -f || true
       REMOTE
