@@ -17,6 +17,12 @@ services:
       - frontend-network
     ports:
       - "127.0.0.1:3001:3000"
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/"]
       interval: 30s
@@ -38,6 +44,12 @@ services:
       - frontend-network
     ports:
       - "127.0.0.1:3002:3000"
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/"]
       interval: 30s
@@ -59,6 +71,12 @@ services:
       - frontend-network
     ports:
       - "127.0.0.1:3003:3000"
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/"]
       interval: 30s
@@ -80,6 +98,12 @@ services:
       - frontend-network
     ports:
       - "127.0.0.1:3004:3000"
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/"]
       interval: 30s
@@ -101,6 +125,12 @@ services:
       - frontend-network
     ports:
       - "127.0.0.1:3005:3000"
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/"]
       interval: 30s
@@ -122,6 +152,12 @@ services:
       - frontend-network
     ports:
       - "127.0.0.1:3006:3000"
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/"]
       interval: 30s
@@ -143,6 +179,12 @@ services:
       - frontend-network
     ports:
       - "127.0.0.1:3007:3000"
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/"]
       interval: 30s
@@ -164,6 +206,12 @@ services:
       - frontend-network
     ports:
       - "127.0.0.1:3008:3000"
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/"]
       interval: 30s
@@ -185,6 +233,12 @@ services:
       - frontend-network
     ports:
       - "127.0.0.1:3009:3000"
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/"]
       interval: 30s
@@ -206,6 +260,12 @@ services:
       - frontend-network
     ports:
       - "127.0.0.1:3010:3000"
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/"]
       interval: 30s
@@ -227,6 +287,12 @@ services:
       - frontend-network
     ports:
       - "127.0.0.1:3011:3000"
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/"]
       interval: 30s
