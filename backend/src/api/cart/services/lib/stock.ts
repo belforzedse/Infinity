@@ -191,10 +191,10 @@ export const decrementStockAtomic = async (
     const rows = result.rows || [];
     if (rows.length === 0) {
       // No rows updated means either stock doesn't exist or insufficient stock
-      const stock = await strapi.entityService.findOne(
-        "api::product-stock.product-stock",
-        stockId
-      );
+      const stock = await strapi.db.query("api::product-stock.product-stock").findOne({
+        where: { id: stockId },
+        ...(trx ? { transacting: trx } : {}),
+      });
 
       if (!stock) {
         return { success: false, error: "Stock record not found" };
@@ -262,10 +262,10 @@ export const reserveStockAtomic = async (
 
     const rows = result.rows || [];
     if (rows.length === 0) {
-      const stock = await strapi.entityService.findOne(
-        "api::product-stock.product-stock",
-        stockId
-      );
+      const stock = await strapi.db.query("api::product-stock.product-stock").findOne({
+        where: { id: stockId },
+        ...(trx ? { transacting: trx } : {}),
+      });
       if (!stock) return { success: false, error: "Stock record not found" };
       return {
         success: false,
@@ -319,10 +319,10 @@ export const releaseReservedStockAtomic = async (
 
     const rows = result.rows || [];
     if (rows.length === 0) {
-      const stock = await strapi.entityService.findOne(
-        "api::product-stock.product-stock",
-        stockId
-      );
+      const stock = await strapi.db.query("api::product-stock.product-stock").findOne({
+        where: { id: stockId },
+        ...(trx ? { transacting: trx } : {}),
+      });
       if (!stock) return { success: false, error: "Stock record not found" };
 
       const validation = validateAndNormalizeStock(stock);
@@ -394,10 +394,10 @@ export const consumeReservedStockAtomic = async (
 
     const rows = result.rows || [];
     if (rows.length === 0) {
-      const stock = await strapi.entityService.findOne(
-        "api::product-stock.product-stock",
-        stockId
-      );
+      const stock = await strapi.db.query("api::product-stock.product-stock").findOne({
+        where: { id: stockId },
+        ...(trx ? { transacting: trx } : {}),
+      });
       if (!stock) return { success: false, error: "Stock record not found" };
 
       const validation = validateAndNormalizeStock(stock);
