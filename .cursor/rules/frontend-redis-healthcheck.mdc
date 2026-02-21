@@ -1,0 +1,72 @@
+# Frontend Redis Health Check Configuration
+
+## Problem
+
+The Redis health check in `frontend/docker-compose.yml` was failing with:
+```
+dependency failed to start: container frontend-redis is unhealthy
+```
+
+Even though Redis logs showed it was starting successfully ("Ready to accept connections tcp").
+
+## Root Cause
+
+The original health check used complex shell parameter expansion that doesn't work reliably in Docker's health check context:
+
+```yaml
+# ❌ BROKEN - Don't use this pattern
+test: ["CMD-SHELL", "redis-cli --no-auth-warning $${FRONTEND_REDIS_PASSWORD:+-a \"$$FRONTEND_REDIS_PASSWORD\"} ping | grep -q PONG"]
+```
+
+Issues with the above:
+- `${VAR:+value}` ternary expansion syntax doesn't work correctly in Docker health checks
+- Nested quote escaping causes shell parsing errors
+- The `--no-auth-warning` flag was being applied incorrectly
+
+## Solution
+
+Use a simple `if/else` statement for conditional password handling:
+
+```yaml
+# ✅ CORRECT - Use this pattern
+test: ["CMD-SHELL", "if [ -n \"$$FRONTEND_REDIS_PASSWORD\" ]; then redis-cli -a \"$$FRONTEND_REDIS_PASSWORD\" ping | grep -q PONG; else redis-cli ping | grep -q PONG; fi"]
+```
+
+## Files to Update
+
+When changing the health check pattern, update both:
+1. `frontend/docker-compose.yml` - Base compose file
+2. `frontend/docker-compose.scale.yml` - Scale override file (also contains `frontend-redis` service)
+
+## Key Points
+
+1. **Environment variable access**: Use `$$VAR` (double `$`) in Docker Compose to escape the dollar sign for shell execution
+2. **Quote escaping**: Use `\"` for quotes inside the YAML string
+3. **Conditional logic**: Use `if [ -n "$VAR" ]` to check if variable is non-empty
+4. **Redis auth**: When password is set, use `-a "password"`; when empty, omit the flag entirely
+
+## Testing
+
+To test the health check manually:
+
+```bash
+# Without password
+docker exec frontend-redis redis-cli ping
+
+# With password
+docker exec frontend-redis redis-cli -a "yourpassword" ping
+
+# Check health status
+docker inspect --format='{{.State.Health.Status}}' frontend-redis
+```
+
+## Verification
+
+After deploying, verify the health check passes:
+```bash
+docker ps
+# Should show "healthy" status, not "unhealthy"
+
+docker compose ps
+# Should show all services up and running
+```
