@@ -57,10 +57,13 @@ const nextConfig = {
   serverExternalPackages: ["jsdom"],
   // Disabled: Nginx already compresses responses; double compression wastes CPU on all instances.
   compress: false,
-  // Shared Redis cache across multiple Next.js instances (see src/lib/cache-handler.ts)
-  // cacheMaxMemorySize enables in-memory L1 cache (256MB per instance) for hot data
-  // Redis serves as L2 shared cache for cross-instance consistency and persistence
-  cacheHandler: require.resolve("./src/lib/cache-handler.js"),
+  // Shared Redis cache across multiple Next.js instances
+  // Uses @neshca/cache-handler with redis-strings (plain Redis) and local-lru fallback
+  // L1: Next.js in-memory (256MB), L2: Redis when FRONTEND_REDIS_URL is set, else LRU
+  cacheHandler:
+    process.env.NODE_ENV === 'production'
+      ? require.resolve('./cache-handler.mjs')
+      : undefined,
   cacheMaxMemorySize: 256 * 1024 * 1024, // 256MB in-memory cache per instance (~3GB across 12 containers)
 };
 module.exports = nextConfig;

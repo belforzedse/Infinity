@@ -1,6 +1,6 @@
 ---
 description: Frontend dedicated Redis and GitLab CI variables for build/deploy
-globs: frontend/docker-compose*.yml,frontend/src/lib/cache-handler.js,.gitlab-ci.yml
+globs: frontend/docker-compose*.yml,frontend/cache-handler.mjs,.gitlab-ci.yml
 ---
 
 # Frontend Redis and GitLab CI
@@ -9,7 +9,7 @@ globs: frontend/docker-compose*.yml,frontend/src/lib/cache-handler.js,.gitlab-ci
 
 The frontend uses a **dedicated** Redis instance (`frontend-redis`) for Next.js ISR/Data cache, separate from the backend's Redis. It is defined in `frontend/docker-compose.yml` and `frontend/docker-compose.scale.yml` (scale file can be used standalone).
 
-- **Cache handler:** `frontend/src/lib/cache-handler.js` reads `FRONTEND_REDIS_URL`. When unset or empty (e.g. during Docker build), Redis is disabled: no connection, no logs. At runtime, set `FRONTEND_REDIS_URL` via deploy env/compose.
+- **Cache handler:** `frontend/cache-handler.mjs` uses `@neshca/cache-handler` with redis-strings (plain Redis) and local-lru fallback. Reads `FRONTEND_REDIS_URL`. When unset, uses local LRU handler so build and runtime work without Redis. When set, uses shared Redis cache across all 12 containers. At runtime, set `FRONTEND_REDIS_URL` via deploy env/compose.
 - **Build vs runtime:** `FRONTEND_REDIS_URL` is **not** passed to the frontend Docker build in CI, so the build runs without Redis and completes without connection errors. At deploy, `FRONTEND_REDIS_URL` is set on the host and passed into containers by docker-compose.
 - **Port:** `FRONTEND_REDIS_PORT` (default 6380) to avoid conflict with backend (6379).
 - **Password:** **None.** The frontend Redis runs passwordless. It is bound to `127.0.0.1` and accessible only within the Docker bridge network, making a password unnecessary for this cache-only instance.
