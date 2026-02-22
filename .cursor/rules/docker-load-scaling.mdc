@@ -25,5 +25,5 @@ The app runs **multiple frontend and backend containers** in production when usi
 
 - Backend scale: five extra Strapi (`strapi-2`…`strapi-6`), same volumes/networks as base (6 Strapi total).
 - Frontend scale: eleven extra Next.js services (`frontend-2`–`frontend-12`), same env_file (12 Next total).
-- Strapi upstream uses `ip_hash` so admin sessions stick to one instance.
+- Strapi upstream uses `ip_hash` so admin sessions stick to one instance. Next upstream uses `ip_hash` so the same client tends to hit the same Next.js instance and per-instance L1 cache is effective (avoids "slow then fast then slow" with Redis cache handler).
 - To run single-instance on server: omit the scale file (e.g. `docker compose up -d` only).

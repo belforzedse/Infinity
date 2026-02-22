@@ -1,4 +1,4 @@
-import { API_BASE_URL, ENDPOINTS } from "@/constants/api";
+import { API_BASE_URL, getStrapiServerUrl, ENDPOINTS } from "@/constants/api";
 import fetchWithTimeout from "@/utils/fetchWithTimeout";
 import logger from "@/utils/logger";
 
@@ -51,9 +51,10 @@ export async function validateCategorySlug(
   }
 
   try {
-    // Build API endpoint to fetch category by slug
-    const endpoint = `${API_BASE_URL}${ENDPOINTS.PRODUCT.CATEGORY}?filters[Slug][$eq]=${encodeURIComponent(sanitizedSlug)}&fields[0]=Title&fields[1]=Slug`;
-  const response = await fetchWithTimeout(    endpoint, {
+    // Use internal Strapi URL on server to avoid TLS/DNS latency (same as PLP products fetch)
+    const baseUrl = typeof window === "undefined" ? getStrapiServerUrl() : API_BASE_URL;
+    const endpoint = `${baseUrl}${ENDPOINTS.PRODUCT.CATEGORY}?filters[Slug][$eq]=${encodeURIComponent(sanitizedSlug)}&fields[0]=Title&fields[1]=Slug`;
+    const response = await fetchWithTimeout(endpoint, {
       timeoutMs: 10000,
       next: { revalidate: 3600 }, // Cache for 1 hour
     });

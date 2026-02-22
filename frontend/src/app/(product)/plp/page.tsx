@@ -1,4 +1,4 @@
-export const revalidate = 60; // balance freshness with server load
+export const revalidate = 90; // balance freshness with server load; higher helps cache hit rate with many instances
 
 import { Suspense } from "react";
 import { connection } from "next/server";
@@ -296,7 +296,7 @@ async function getProducts(
   try {
     response = await fetchWithTimeout(url, {
       timeoutMs: 15000,
-      next: { revalidate: 60 },
+      next: { revalidate: 90 },
     });
     data = await response.json();
   } catch (firstErr) {
@@ -307,7 +307,7 @@ async function getProducts(
     try {
       response = await fetchWithTimeout(fallbackUrl, {
         timeoutMs: 15000,
-        next: { revalidate: 60 },
+        next: { revalidate: 90 },
       });
       data = await response.json();
     } catch (secondErr) {

@@ -68,6 +68,10 @@ The PLP is structured to display product listings with filtering capabilities:
 - **Deferred sidebar**: Sidebar suggestions (شاید بپسندید, تخفیف های آخرماه) are loaded in a Suspense boundary via [AsyncSidebarProducts](frontend/src/components/PLP/List/AsyncSidebarProducts.tsx) so the main PLP content is not blocked by `getHomepageSections()`. The page passes `sidebarSlot={<Suspense><AsyncSidebarProducts /></Suspense>}` to PLPList.
 - Page navigation and client-side filter changes use the same pagination (page + pageSize 30) in [PLP/List.tsx](mdc:frontend/src/components/PLP/List.tsx) `fetchProducts`.
 
+### Cache and scaling (many instances + Redis)
+- PLP has **many cache keys** (every combination of category, page, sort, filters is a different URL). With many Next.js instances and a shared Redis cache handler, each instance sees only a fraction of traffic per URL, so **L1 hit rate is low** and many requests hit Redis or do a full Strapi fetch. That can make PLP feel slower after adding more instances + Redis.
+- **Mitigations**: (1) `revalidate = 90` so cached responses live longer. (2) Category validation and products fetch use **internal Strapi URL** (`getStrapiServerUrl()`) on the server to avoid public TLS/DNS latency. (3) Nginx `ip_hash` for the frontend upstream so the same client tends to hit the same instance and L1 warms up. See [frontend-cache-handler.mdc](frontend-cache-handler.mdc) and [frontend-server-capacity.mdc](frontend-server-capacity.mdc).
+
 ## No Results State
 - Dedicated component for when filters return no products
 
