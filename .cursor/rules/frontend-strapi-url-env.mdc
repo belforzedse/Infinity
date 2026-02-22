@@ -37,5 +37,6 @@ For reading env **at request time**, Next.js 16 requires calling `await connecti
 
 ## Related
 
+- [infra-diagnosis.mdc](infra-diagnosis.mdc) – step-by-step diagnosis when homepage is empty or slow (internal URL, Nginx, GitLab, scaling)
 - [backend-api-domain.mdc](backend-api-domain.mdc) – production API domain
 - Next.js 16: [Environment Variables](https://nextjs.org/docs/app/building-your-application/configuring/environment-variables), [connection() for runtime env](https://nextjs.org/docs/app/building-your-application/upgrading/version-16)

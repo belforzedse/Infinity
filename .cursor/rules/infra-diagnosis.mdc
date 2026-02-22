@@ -1,0 +1,135 @@
+---
+description: Step-by-step diagnosis for frontend issues after scaling, GitLab switch, or cache handler (empty homepage, slowness, internal API).
+globs: .gitlab-ci.yml, frontend/docker-compose*.yml, docs/nginx-internal-api-for-docker.md
+alwaysApply: false
+---
+
+# Infra Diagnosis (Empty Homepage, Slowness, After Scaling / GitLab / Cache)
+
+Use this when the homepage shows only blogs, the site is slow, or things broke after: **adding more Next instances**, **switching to GitLab**, or **adding the cache handler**.
+
+## 1. Can frontend containers reach the internal Strapi URL?
+
+Most homepage data (hero, settings, categories, product sections) uses `getStrapiServerUrl()` → **STRAPI_INTERNAL_URL** at runtime. Blog uses the public URL, so if only blog shows, internal URL is likely failing.
+
+**On the server:**
+
+```bash
+# 1) Get the gateway IP your containers use (e.g. 172.17.0.1 or 172.19.0.1)
+docker run --rm alpine ip route | grep default
+
+# 2) Pick any frontend container (list them first)
+docker ps --format '{{.Names}}' | grep frontend
+
+# 3) Test internal API from inside that container (use the IP from step 1; your env may use 172.19.0.1)
+docker exec <FRONTEND_CONTAINER> wget -qO- --timeout=5 'http://172.19.0.1:8080/api/products?pagination[page]=1&pagination[pageSize]=2&filters[Status][$eq]=Active' 2>&1 | head -c 500
+```
+
+- **If you see JSON with `"data":[...]`** → internal URL is reachable; problem is elsewhere (see sections 4–7).
+- **Connection refused / timeout** → Nginx is not listening where containers expect, or wrong IP. Fix:
+  - Nginx must listen on the **Docker bridge IP** (or `listen 8080`), not only `127.0.0.1:8080`. See [docs/nginx-internal-api-for-docker.md](../docs/nginx-internal-api-for-docker.md).
+  - `STRAPI_INTERNAL_URL` in `main.env` must use the same IP as in step 1 (e.g. `http://172.19.0.1:8080/api`). Restart frontend after changing env.
+
+---
+
+## 2. Is Nginx listening on the right address?
+
+**On the server:**
+
+```bash
+# What is listening on 8080?
+sudo ss -tlnp | grep 8080
+# or
+sudo netstat -tlnp | grep 8080
+```
+
+- **`127.0.0.1:8080` only** → Containers cannot reach it. Change Nginx to listen on the Docker bridge IP (see docs above) or `listen 8080`, then `nginx -t && systemctl reload nginx`.
+- **`172.17.0.1:8080` or `172.19.0.1:8080` or `0.0.0.0:8080`** → OK for containers. Ensure `STRAPI_INTERNAL_URL` in `main.env` uses that same IP (e.g. `http://172.17.0.1:8080/api`).
+
+---
+
+## 3. Is the env file correct on the server after GitLab deploy?
+
+GitLab deploy copies `FRONTEND_ENV_FILE` to `/opt/infinity/frontend/$ENV_FILE` (e.g. `main.env`). If the file is wrong or missing vars, runtime will fail.
+
+**On the server:**
+
+```bash
+cd /opt/infinity/frontend
+# Check that STRAPI_INTERNAL_URL and FRONTEND_REDIS_URL are set (values are sensitive; just check keys)
+grep -E '^STRAPI_INTERNAL_URL=|^FRONTEND_REDIS_URL=' "$ENV_FILE" || true
+```
+
+- **STRAPI_INTERNAL_URL** must be the internal API URL (e.g. `http://172.19.0.1:8080/api`).
+- **FRONTEND_REDIS_URL** should be `redis://frontend-redis:6379` when using the shared Redis.
+
+Then confirm containers see it:
+
+```bash
+docker exec <FRONTEND_CONTAINER> env | grep -E 'STRAPI_INTERNAL_URL|FRONTEND_REDIS_URL'
+```
+
+If vars are missing in the container, fix the GitLab **FRONTEND_ENV_FILE** (file content) or the deploy script so the copied `main.env` includes them.
+
+---
+
+## 4. Frontend Redis (cache handler)
+
+- **Cache handler is currently disabled** in `frontend/next.config.ts` (commented out). So each of the 12 Next instances uses only **in-memory** cache → low hit rate, more Strapi calls, slower responses.
+- If you re-enable the cache handler, ensure **FRONTEND_REDIS_URL** is set in the deployed env and that **frontend-redis** is healthy:
+
+```bash
+docker exec frontend-redis redis-cli ping
+```
+
+If Redis is down or unreachable and the handler is enabled, cache init can fail or slow down requests.
+
+---
+
+## 5. Too many instances / resource contention
+
+With 12 Next instances, all hit the same Nginx internal (8080) and Strapi upstream. If Strapi or Nginx is overloaded, you get timeouts and empty responses.
+
+**On the server:**
+
+- Check Strapi and Nginx logs for 502/504 or timeouts.
+- Optionally **reduce scale** to confirm: run without the scale file (only `docker-compose.yml`) so only 1 frontend + 1 Strapi run; if the homepage works, scale gradually (e.g. 6 frontends) and re-test.
+
+---
+
+## 6. Build vs runtime URL (GitLab)
+
+- **Build:** GitLab passes **STRAPI_BUILD_TIME_URL** as build-arg so `next build` can reach the public API. Set it in CI/CD Variables (e.g. `https://api.infinitycolor.co/api`).
+- **Runtime:** **STRAPI_INTERNAL_URL** must be in the **deployed env file** (not necessarily a CI variable). The deploy script strips `STRAPI_BUILD_TIME_URL` from the env file on the server so the container uses the internal URL at runtime.
+
+If the homepage is empty but build succeeded, the problem is almost always **runtime** (internal URL or Nginx), not build.
+
+---
+
+## 7. Application-level checks (if 1–6 look fine)
+
+- **Next.js logs:** `docker logs <FRONTEND_CONTAINER> 2>&1 | tail -100` for fetch errors or timeouts.
+- **Strapi health:** From the host, `curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:1337/api/_health` (or 1338–1342 if scaled).
+- **Public API:** From the server, `curl -s -o /dev/null -w "%{http_code}" 'https://api.infinitycolor.co/api/products?pagination[page]=1&pagination[pageSize]=1'` to confirm Strapi is reachable via the public URL (blog uses this).
+
+---
+
+## Quick checklist
+
+| Check | Command / action |
+|-------|------------------|
+| Internal API from container | `docker exec <frontend> wget -qO- --timeout=5 'http://<GATEWAY_IP>:8080/api/products?pagination[page]=1&pagination[pageSize]=2&filters[Status][$eq]=Active'` |
+| Nginx listen address | `ss -tlnp \| grep 8080` → must be bridge IP or 0.0.0.0, not only 127.0.0.1 |
+| Env on server | `grep STRAPI_INTERNAL_URL /opt/infinity/frontend/main.env` |
+| Env in container | `docker exec <frontend> env \| grep STRAPI_INTERNAL_URL` |
+| Frontend Redis | `docker exec frontend-redis redis-cli ping` |
+| Strapi health | `curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:1337/api/_health` |
+
+---
+
+## Related
+
+- [frontend-strapi-url-env.mdc](frontend-strapi-url-env.mdc) – build vs runtime URLs, `connection()`
+- [docker-load-scaling.mdc](docker-load-scaling.mdc) – scale files, Nginx upstreams
+- [frontend-cache-handler.mdc](frontend-cache-handler.mdc) – Redis cache handler (currently disabled)
+- [docs/nginx-internal-api-for-docker.md](../docs/nginx-internal-api-for-docker.md) – Nginx listen on bridge IP
