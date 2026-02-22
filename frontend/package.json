@@ -81,7 +81,7 @@
     "react-is": "^19.1.1",
     "react-share": "^5.2.2",
     "redis": "^4.7.0",
-    "@neshca/cache-handler": "^1.9.0",
+    "@fortedigital/nextjs-cache-handler": "^3.0.0",
     "react-window": "^2.0.2",
     "recharts": "^3.1.2",
     "shadcn": "^3.3.1",

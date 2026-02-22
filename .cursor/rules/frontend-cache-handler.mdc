@@ -9,11 +9,11 @@ globs: frontend/cache-handler.mjs, frontend/next.config.ts
 
 The frontend uses a **custom cache handler** for Next.js so that ISR, route handler responses, and (when enabled) optimized images use shared or fallback storage instead of only in-process memory.
 
-- **Package:** `@neshca/cache-handler` (redis-strings + local-lru).
+- **Package:** `@fortedigital/nextjs-cache-handler` v3+ (Next.js 16–compatible; redis-strings + local-lru). Do not use `@neshca/cache-handler` on Next.js 15/16 (causes `segmentData.get is not a function`).
 - **Entry:** `frontend/cache-handler.mjs` (ESM).
-- **Config:** `frontend/next.config.ts` — `cacheHandler`, `cacheMaxMemorySize`, `images.customCacheHandler`.
+- **Config:** `frontend/next.config.ts` — `cacheHandler`, `cacheMaxMemorySize`.
 
-## Correctness (per Next.js and @neshca docs)
+## Correctness (per Next.js and @fortedigital/nextjs-cache-handler)
 
 1. **Export:** The module must `export default CacheHandler`. Next.js loads the handler via `require.resolve('./cache-handler.mjs')` and expects this default export.
 
@@ -21,7 +21,7 @@ The frontend uses a **custom cache handler** for Next.js so that ISR, route hand
 
 3. **Redis handler (redis-strings):**
    - Client must be **ready** before calling `createRedisHandler({ client, ... })`.
-   - Options: `client`, `keyPrefix`, `timeoutMs`, `keyExpirationStrategy`: `'EXAT'` (Redis 6.2+) or `'EXPIREAT'`.
+   - Options: `client`, `keyPrefix`, `timeoutMs` (and any others the package supports).
    - Do not create multiple Redis clients per process: cache the result of `onCreation` in `global` and return the same config on subsequent calls.
 
 4. **LRU handler (local-lru):** Used when `FRONTEND_REDIS_URL` is unset or Redis is unavailable. Options: `maxItemSizeBytes`, `maxItemsNumber`. Not suitable as sole production cache; used as fallback or for build/dev.
@@ -39,7 +39,7 @@ The frontend uses a **custom cache handler** for Next.js so that ISR, route hand
 ## References
 
 - Next.js: `cacheHandler`, `incrementalCacheHandlerPath`, self-hosting guide, `cacheHandlers` (plural) for `'use cache'`.
-- @neshca: [next-shared-cache](https://caching-tools.github.io/next-shared-cache/) — onCreation, redis-strings, local-lru.
+- @fortedigital/nextjs-cache-handler: [GitHub](https://github.com/fortedigital/nextjs-cache-handler) — Next.js 16 support in v3.0.0+.
 
 ## Related
 

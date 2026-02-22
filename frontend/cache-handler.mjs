@@ -1,6 +1,6 @@
 /**
  * Redis-backed cache handler for Next.js ISR/Data Cache.
- * Uses @neshca/cache-handler with redis-strings (plain Redis) and local-lru fallback.
+ * Uses @fortedigital/nextjs-cache-handler (Next.js 16–compatible) with redis-strings and local-lru fallback.
  * Shares cache across multiple Next.js instances (e.g. 12 frontend containers).
  *
  * Architecture:
@@ -12,9 +12,9 @@
  * Uses global cache for handler config so only one Redis connection is created per process.
  */
 
-import { CacheHandler } from '@neshca/cache-handler';
-import createRedisHandler from '@neshca/cache-handler/redis-strings';
-import createLruHandler from '@neshca/cache-handler/local-lru';
+import { CacheHandler } from '@fortedigital/nextjs-cache-handler';
+import createRedisHandler from '@fortedigital/nextjs-cache-handler/redis-strings';
+import createLruHandler from '@fortedigital/nextjs-cache-handler/local-lru';
 import { createClient } from 'redis';
 
 const LRU_OPTIONS = {
@@ -94,7 +94,6 @@ CacheHandler.onCreation(async () => {
       client,
       keyPrefix: 'infinity:',
       timeoutMs: 1000,
-      keyExpirationStrategy: 'EXAT', // Requires Redis 6.2+ (e.g. redis:7-alpine)
     });
     console.info('[CacheHandler] Using redis-strings handler with shared Redis');
     const config = { handlers: [handler] };
