@@ -3,6 +3,7 @@
 export const revalidate = 60;
 
 import type { Metadata } from "next";
+import { connection } from "next/server";
 import { ALLOWED_HOME_NAV_CATEGORY_NAME_SUBSTRINGS } from "@/constants/categories";
 import { getProductCategories } from "@/services/product/categories";
 import { blogService } from "@/services/blog/blog.service";
@@ -65,6 +66,9 @@ function ProductSectionsFallback() {
 }
 
 export default async function Home() {
+  // Ensure env (e.g. STRAPI_INTERNAL_URL) is read at request time in the container, not build time (Next.js 16)
+  await connection();
+
   const [latestBlogPosts, parentCategories, homepageSettings] = await Promise.all([
     getLatestBlogPosts(),
     getProductCategories({
