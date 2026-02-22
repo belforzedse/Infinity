@@ -77,6 +77,8 @@ export default function PLPList({
   const isDesktopForFetchRef = useRef(false);
   /** Remember that we have or had products from server so we never overwrite with empty client response */
   const hadProductsFromServerRef = useRef(initialProducts.length > 0);
+  /** Skip the first fetchProducts run on mount so we don't duplicate the server-rendered products request. */
+  const didInitialMountRef = useRef(false);
 
   useEffect(() => {
     const checkDesktop = () => {
@@ -132,7 +134,18 @@ export default function PLPList({
     }
   }, [initialCategory, setCategory]);
 
+  // When server passed allCategories (e.g. category PLP), use them for filter and skip client fetch.
   useEffect(() => {
+    if (allCategoriesProp.length > 0) {
+      setAllCategoriesLocal(allCategoriesProp);
+      setCategoryOptions(
+        allCategoriesProp.map((cat) => ({
+          id: cat.slug || String(cat.id),
+          title: cat.name || cat.slug || String(cat.id),
+        })),
+      );
+      return;
+    }
     const fetchCategories = async () => {
       try {
         setIsLoadingCategories(true);
@@ -143,11 +156,12 @@ export default function PLPList({
           return;
         }
         setAllCategoriesLocal(categories);
-        const mapped = categories.map((cat) => ({
-          id: cat.slug || String(cat.id),
-          title: cat.name || cat.slug || String(cat.id),
-        }));
-        setCategoryOptions(mapped);
+        setCategoryOptions(
+          categories.map((cat) => ({
+            id: cat.slug || String(cat.id),
+            title: cat.name || cat.slug || String(cat.id),
+          })),
+        );
       } catch (error) {
         console.error("[PLP] Error fetching categories:", error);
         setCategoryOptions([]);
@@ -156,9 +170,8 @@ export default function PLPList({
         setIsLoadingCategories(false);
       }
     };
-
     fetchCategories();
-  }, []);
+  }, [allCategoriesProp]);
 
   // Define fetchProducts function with useCallback
   const fetchProducts = useCallback(() => {
@@ -382,8 +395,12 @@ export default function PLPList({
     discountOnly,
   ]);
 
-  // Fetch products when dependencies change
+  // Fetch products when dependencies change. Skip first run on mount to avoid duplicating server fetch.
   useEffect(() => {
+    if (!didInitialMountRef.current) {
+      didInitialMountRef.current = true;
+      return;
+    }
     fetchProducts();
   }, [fetchProducts]);
 

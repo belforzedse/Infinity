@@ -18,7 +18,7 @@ import { CollectionPageSchema } from "@/components/SEO/CollectionPageSchema";
 import { SITE_NAME, SITE_URL } from "@/config/site";
 import { computeDiscountForVariation } from "@/utils/discounts";
 import { productTitleHasG, getProductCreatedAt } from "@/utils/product";
-import { validateCategorySlug } from "@/utils/category-validation";
+import { getValidatedCategoryCached } from "@/utils/category-validation";
 import { getCategoryAndDescendantSlugs } from "@/utils/category-descendants";
 import { getProductCategories } from "@/services/product/categories";
 import type { PLPProduct } from "@/components/PLP/types";
@@ -505,27 +505,21 @@ export default async function PLPPage({
   const hasDiscount =
     typeof params.hasDiscount === "string" ? params.hasDiscount === "true" : undefined;
 
-  // Validate category if provided - return 404 for invalid categories
-  // Use the validated category slug to ensure we use the canonical slug (no trailing slashes)
+  // Validate category if provided - return 404 for invalid categories (cached so page + generateMetadata share one call).
   let validatedCategory = category;
   let categoryTitle: string | undefined = undefined;
   if (category && !search) {
-    // First sanitize the category slug to reject obviously invalid ones
-    // This prevents database lookups for gibberish categories
-    const categoryData = await validateCategorySlug(category);
+    const categoryData = await getValidatedCategoryCached(category);
     if (!categoryData) {
       logger.warn(`[PLP] Invalid or non-existent category requested: ${category}`);
-      // Return 404 for invalid categories to prevent indexing
       notFound();
     }
-    // Use the canonical slug from the validated category data
     validatedCategory = categoryData.attributes.Slug;
-    // Store the category title for display
     categoryTitle = categoryData.attributes.Title;
   }
 
-  // Fetch full category tree (parent + children) when a category filter is present so product list includes parent and all descendants.
-  const allCategories = validatedCategory
+  // Fetch full category tree when a category filter is present (needed for categorySlugs / descendants).
+  const allCategories = validatedCategory && !search
     ? await getProductCategories({ revalidate: 3600 })
     : [];
   const categorySlugs =
@@ -679,8 +673,8 @@ export async function generateMetadata({
   }
 
   if (category) {
-    // Validate category - if invalid, return noindex metadata as defense-in-depth
-    const categoryData = await validateCategorySlug(category);
+    // Validate category (cached with page so only one request)
+    const categoryData = await getValidatedCategoryCached(category);
 
     if (!categoryData) {
       // Invalid category - return noindex metadata (though page should return 404)

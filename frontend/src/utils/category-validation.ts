@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { API_BASE_URL, getStrapiServerUrl, ENDPOINTS } from "@/constants/api";
 import fetchWithTimeout from "@/utils/fetchWithTimeout";
 import logger from "@/utils/logger";
@@ -90,3 +91,9 @@ export async function validateCategorySlug(
     return null;
   }
 }
+
+/**
+ * Request-scoped cached version of validateCategorySlug.
+ * Use this in PLP (page + generateMetadata) so category validation runs once per request.
+ */
+export const getValidatedCategoryCached = cache(validateCategorySlug);

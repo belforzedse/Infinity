@@ -57,12 +57,19 @@ Use this when the site feels "extremely slow", when debugging SSR/API latency, o
 - **Next.js 16:** `images.qualities` defaults to `[75]`; add `qualities: [50, 70, 75, 100]` in `next.config` if using `quality={70}`. Use `preload={true}` for LCP images (replaces deprecated `priority`).
 - **Lazy-load:** Use `loading="lazy"` and `priority={false}` for below-fold images. Hero first slide: `priority={true}` or `preload={true}`. Blog/category carousels: `priority={index === 0}`.
 
-## 6. Checklist when the site is slow
+## 6. PLP-specific optimizations (avoid duplicate work)
+
+- **Category validation**: PLP page and `generateMetadata` both need category validation. Use `getValidatedCategoryCached` from [frontend/src/utils/category-validation.ts](frontend/src/utils/category-validation.ts) (React `cache()`) so validation runs once per request.
+- **Client products fetch**: On initial load the server already fetches products. [PLP/List.tsx](frontend/src/components/PLP/List.tsx) skips the first `fetchProducts()` run on mount (`didInitialMountRef`) so the same request is not sent twice. Client fetch runs when the user changes filters/page/sort.
+- **Client categories fetch**: When the server passes `allCategories` (e.g. category PLP), the client uses them for the filter dropdown and does not call `getProductCategories` again. Only when visiting `/plp` with no category does the client fetch categories for the filter.
+
+## 7. Checklist when the site is slow
 
 - [ ] Is `STRAPI_INTERNAL_URL` set in the environment where Next.js runs (e.g. Docker/prod)?
 - [ ] Are we fetching the same data twice in one request (e.g. settings)? Pass from parent when possible.
 - [ ] Are product list requests asking for more than CoverImage + category + variations (e.g. full Media)? Trim populate for list views.
 - [ ] Do hero and product images have appropriate `sizes` to avoid oversized downloads?
+- [ ] PLP: Is category validation cached (getValidatedCategoryCached)? Is initial client products fetch skipped? Are server-passed categories used when available?
 - [ ] Check backend/Strapi and DB performance (indexes, Redis if used, response caching). See [backend-reports.mdc](backend-reports.mdc) for cache headers and [product-search-api.mdc](product-search-api.mdc) for search caching.
 
 ## Related
