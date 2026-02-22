@@ -1,4 +1,4 @@
-export const revalidate = 90; // balance freshness with server load; higher helps cache hit rate with many instances
+export const revalidate = 120; // balance freshness with server load; shared Redis cache + higher revalidate improve PLP speed
 
 import { Suspense } from "react";
 import { connection } from "next/server";
@@ -296,7 +296,7 @@ async function getProducts(
   try {
     response = await fetchWithTimeout(url, {
       timeoutMs: 15000,
-      next: { revalidate: 90 },
+      next: { revalidate: 120 },
     });
     data = await response.json();
   } catch (firstErr) {
@@ -307,7 +307,7 @@ async function getProducts(
     try {
       response = await fetchWithTimeout(fallbackUrl, {
         timeoutMs: 15000,
-        next: { revalidate: 90 },
+        next: { revalidate: 120 },
       });
       data = await response.json();
     } catch (secondErr) {
