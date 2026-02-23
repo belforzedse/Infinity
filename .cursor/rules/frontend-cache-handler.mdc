@@ -36,6 +36,10 @@ The frontend uses a **custom cache handler** for Next.js so that ISR, route hand
 - **FRONTEND_REDIS_URL:** When set, the handler tries to use Redis; when unset, only LRU is used (build-safe).
 - **NEXT_PRIVATE_DEBUG_CACHE:** When set, Redis client errors are logged.
 
+## Known error: `controller[kState].transformAlgorithm is not a function`
+
+Under load, the Redis cache path can trigger this Web Streams API error when Next.js passes response streams to the cache. **Mitigation:** Run the frontend on **Node 22** (Dockerfiles use `node:22-alpine`). If it persists, unset `FRONTEND_REDIS_URL` temporarily to fall back to LRU-only and confirm.
+
 ## References
 
 - Next.js: `cacheHandler`, `incrementalCacheHandlerPath`, self-hosting guide, `cacheHandlers` (plural) for `'use cache'`.

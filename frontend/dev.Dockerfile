@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.7
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -34,7 +34,7 @@ ENV GITHUB_SHA=${GITHUB_SHA}
 
 RUN NODE_ENV=production npm run build
 
-FROM node:20-alpine AS runner
+FROM node:22-alpine AS runner
 WORKDIR /app
 
 # Runtime env: STRAPI_INTERNAL_URL, FRONTEND_REDIS_URL (STRAPI_BUILD_TIME_URL is build-only).

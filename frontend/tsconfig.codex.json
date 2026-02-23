@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "next-env.d.ts",
+    "src/components/PLP/List.tsx",
+    "src/components/PLP/List/PLPDesktopList.tsx",
+    "src/components/PLP/List/PLPMobileList.tsx",
+    "src/components/Product/Card.tsx",
+    "src/components/Product/SmallCard.tsx",
+    "src/hooks/usePLPProductLikes.ts",
+    "src/hooks/useProductLike.ts",
+    "src/app/(product)/plp/page.tsx",
+    "src/components/PLP/HeroBanner.tsx",
+    "src/components/PLP/types.ts"
+  ],
+  "exclude": ["node_modules"]
+}
