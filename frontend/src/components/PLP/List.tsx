@@ -1,9 +1,7 @@
 "use client";
 
 import NoData from "./NoData";
-import { apiClient } from "@/services";
 import { getProductCategories, type ProductCategorySummary } from "@/services/product/categories";
-import { getCategoryAndDescendantSlugs } from "@/utils/category-descendants";
 import { faNum } from "@/utils/faNum";
 import type { ProductCardProps } from "@/components/Product/Card";
 import Filter from "./List/Filter";
@@ -12,21 +10,15 @@ import HeartIcon from "./Icons/HeartIcon";
 import DiscountIcon from "./Icons/DiscountIcon";
 import SidebarSuggestions from "./List/SidebarSuggestions";
 import Pagination from "./Pagination";
-import { useQueryState } from "nuqs";
-import { useEffect, useState, useMemo, useCallback, useRef } from "react";
-import ProductListSkeleton from "@/components/Skeletons/ProductListSkeleton";
-import notify from "@/utils/notify";
+import { useQueryStates } from "nuqs";
+import { useEffect, useState, useMemo } from "react";
 import { SORT_LABELS } from "./sortOptions";
-import {
-  getMinInStockVariationPrice,
-  hasAvailableStock,
-  productTitleHasG,
-  getProductCreatedAt,
-} from "@/utils/product";
+import { hasAvailableStock, productTitleHasG } from "@/utils/product";
 import { useSidebarProducts } from "@/hooks/useSidebarProducts";
 import PLPDesktopList from "./List/PLPDesktopList";
 import PLPMobileList from "./List/PLPMobileList";
 import type { PLPProduct, PLPPagination } from "./types";
+import { plpQueryOptions, plpQueryParsers } from "./queryState";
 
 const humanize = (value: string) =>
   value
@@ -58,35 +50,27 @@ export default function PLPList({
   suggestedSidebarProducts = [],
   sidebarSlot,
 }: PLPListProps) {
-  // URL state management with nuqs
-  // These hooks are safe to use in client components - the adapter is in root layout
-  const [category, setCategory] = useQueryState("category");
-  const [available, setAvailable] = useQueryState("available");
-  const [minPrice, setMinPrice] = useQueryState("minPrice");
-  const [maxPrice, setMaxPrice] = useQueryState("maxPrice");
-  const [size, setSize] = useQueryState("size");
-  const [material, setMaterial] = useQueryState("material");
-  const [season, setSeason] = useQueryState("season");
-  const [gender, setGender] = useQueryState("gender");
-  const [usage, setUsage] = useQueryState("usage");
-  const [page, setPage] = useQueryState("page", { defaultValue: "1" });
-  const [sort, setSort] = useQueryState("sort");
-  const [discountOnly, setDiscountOnly] = useQueryState("hasDiscount");
+  const [query, setQuery] = useQueryStates(plpQueryParsers, plpQueryOptions);
+  const {
+    category,
+    available,
+    minPrice,
+    maxPrice,
+    size,
+    material,
+    season,
+    gender,
+    usage,
+    page,
+    sort,
+    hasDiscount: discountOnly,
+  } = query;
 
   const [isDesktop, setIsDesktop] = useState(false);
-  const isDesktopForFetchRef = useRef(false);
-  /** Remember that we have or had products from server so we never overwrite with empty client response */
-  const hadProductsFromServerRef = useRef(initialProducts.length > 0);
-  /** Skip the first fetchProducts run on mount so we don't duplicate the server-rendered products request. */
-  const didInitialMountRef = useRef(false);
 
   useEffect(() => {
     const checkDesktop = () => {
-      const isD = window.innerWidth >= 768;
-      setIsDesktop(isD);
-      if (!isDesktopForFetchRef.current && isD) {
-        isDesktopForFetchRef.current = true;
-      }
+      setIsDesktop(window.innerWidth >= 768);
     };
     checkDesktop();
     window.addEventListener("resize", checkDesktop);
@@ -107,37 +91,14 @@ export default function PLPList({
     [initialProducts],
   );
 
-  // Local state for products and pagination
-  const [products, setProducts] = useState<PLPProduct[]>(filteredInitialProducts);
-  const [pagination, setPagination] = useState<PLPPagination>(initialPagination);
-  const [isLoading, setIsLoading] = useState(false);
   const [categoryOptions, setCategoryOptions] = useState<Array<{ id: string; title: string }>>(
     [],
   );
-  /** Full category list from client fetch; used for descendant slugs when server did not pass allCategories (e.g. /plp with no category). */
-  const [allCategoriesLocal, setAllCategoriesLocal] = useState<ProductCategorySummary[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
-
-  useEffect(() => {
-    hadProductsFromServerRef.current = filteredInitialProducts.length > 0;
-    setProducts(filteredInitialProducts);
-    setPagination(initialPagination);
-  }, [filteredInitialProducts, initialPagination]);
-
-  // Initialize category from prop
-  const initializedCategoryRef = useRef(false);
-
-  useEffect(() => {
-    if (!initializedCategoryRef.current && initialCategory) {
-      initializedCategoryRef.current = true;
-      setCategory(initialCategory);
-    }
-  }, [initialCategory, setCategory]);
 
   // When server passed allCategories (e.g. category PLP), use them for filter and skip client fetch.
   useEffect(() => {
     if (allCategoriesProp.length > 0) {
-      setAllCategoriesLocal(allCategoriesProp);
       setCategoryOptions(
         allCategoriesProp.map((cat) => ({
           id: cat.slug || String(cat.id),
@@ -152,10 +113,8 @@ export default function PLPList({
         const categories = await getProductCategories({ sort: "Title:asc" });
         if (!categories || categories.length === 0) {
           setCategoryOptions([]);
-          setAllCategoriesLocal([]);
           return;
         }
-        setAllCategoriesLocal(categories);
         setCategoryOptions(
           categories.map((cat) => ({
             id: cat.slug || String(cat.id),
@@ -165,7 +124,6 @@ export default function PLPList({
       } catch (error) {
         console.error("[PLP] Error fetching categories:", error);
         setCategoryOptions([]);
-        setAllCategoriesLocal([]);
       } finally {
         setIsLoadingCategories(false);
       }
@@ -173,243 +131,12 @@ export default function PLPList({
     fetchCategories();
   }, [allCategoriesProp]);
 
-  // Define fetchProducts function with useCallback
-  const fetchProducts = useCallback(() => {
-    // Skip fetch if this is a search results page managed by server component
-    if (searchQuery) {
-      return;
-    }
-
-    setIsLoading(true);
-
-    // Build query parameters
-    const queryParams = new URLSearchParams();
-
-    // Add required fields
-    queryParams.append("populate[0]", "CoverImage");
-    queryParams.append("populate[1]", "product_main_category");
-    queryParams.append("populate[2]", "product_variations");
-    queryParams.append("populate[3]", "product_variations.product_stock");
-    queryParams.append("populate[4]", "product_variations.general_discounts");
-    queryParams.append("populate[5]", "product_variations.product_variation_color");
-
-    // Only fetch 3 additional media on desktop (cover + 3 for hover); mobile gets cover only
-    if (isDesktopForFetchRef.current) {
-      queryParams.append("populate[6]", "Media");
-      queryParams.append("populate[Media][pagination][limit]", "3");
-    }
-
-    queryParams.append("fields[0]", "Title");
-    queryParams.append("fields[1]", "Slug");
-    queryParams.append("fields[2]", "Description");
-    queryParams.append("fields[3]", "Status");
-    queryParams.append("fields[4]", "createdAt");
-
-    // Add pagination
-    queryParams.append("pagination[page]", page);
-    queryParams.append("pagination[pageSize]", "30"); // Match server-side pageSize
-
-    // Add filters
-    queryParams.append("filters[Status][$eq]", "Active");
-    queryParams.append("filters[removedAt][$null]", "true");
-
-    // Filter for products with valid prices (Price > 0)
-    // Note: We can't filter for CoverImage at API level (relations don't support $notNull in REST API)
-    // So we do post-fetch filtering for images, which is why we fetch more products (60) than we display
-    queryParams.append("filters[product_variations][Price][$gt]", "0");
-
-    // Category filter: include selected category and all its children (use server list or client-fetched list)
-    if (category) {
-      const categoriesForDescendants =
-        allCategoriesProp.length > 0 ? allCategoriesProp : allCategoriesLocal;
-      const slugs =
-        categoriesForDescendants.length > 0
-          ? getCategoryAndDescendantSlugs(categoriesForDescendants, category)
-          : [category];
-      if (slugs.length > 0) {
-        slugs.forEach((slug, i) => {
-          queryParams.append(`filters[product_main_category][Slug][$in][${i}]`, slug);
-        });
-      } else {
-        queryParams.append("filters[product_main_category][Slug][$eq]", category);
-      }
-    }
-
-    // Availability filter - check for actual stock (Count > 0) not just IsPublished
-    if (available === "true") {
-      queryParams.append("filters[product_variations][product_stock][Count][$gt]", "0");
-    }
-
-    // Price range filters
-    if (minPrice) {
-      queryParams.append("filters[product_variations][Price][$gte]", minPrice);
-    }
-    if (maxPrice) {
-      queryParams.append("filters[product_variations][Price][$lte]", maxPrice);
-    }
-
-    // Size filter
-    if (size) {
-      queryParams.append("filters[product_variations][Size][$eq]", size);
-    }
-
-    // Material filter
-    if (material) {
-      queryParams.append("filters[product_variations][Material][$eq]", material);
-    }
-
-    // Season filter
-    if (season) {
-      queryParams.append("filters[product_variations][Season][$eq]", season);
-    }
-
-    // Gender filter
-    if (gender) {
-      queryParams.append("filters[product_variations][Gender][$eq]", gender);
-    }
-
-    // Usage filter
-    if (usage) {
-      queryParams.append("filters[product_variations][Usage][$eq]", usage);
-    }
-
-    // Sorting - only send to backend if not price sorting (price sorting done on frontend)
-    if (sort && sort !== "price:asc" && sort !== "price:desc") {
-      queryParams.append("sort[0]", sort);
-    }
-
-    // Construct endpoint with query params
-    const endpoint = `/products?${queryParams.toString()}`;
-
-    // Use apiClient instead of native fetch for better error handling, retry logic, and consistency
-    apiClient
-      .getPublic<any>(endpoint, { suppressAuthRedirect: true })
-      .then((data) => {
-        let productsArray = Array.isArray(data?.data) ? data.data : [];
-
-        // Filter out products without images (can't filter at API level for relations)
-        productsArray = productsArray.filter(hasImage);
-
-        // CRITICAL: Sort products by stock availability FIRST; when "newest" sort or discount filter, put products with g/G in title first
-        productsArray.sort((a: any, b: any) => {
-          const aHasStock = hasAvailableStock(a);
-          const bHasStock = hasAvailableStock(b);
-
-          if (sort === "createdAt:desc") {
-            const aHasG = productTitleHasG(a);
-            const bHasG = productTitleHasG(b);
-            if (aHasG && !bHasG) return -1;
-            if (!aHasG && bHasG) return 1;
-            if (aHasStock && !bHasStock) return -1;
-            if (!aHasStock && bHasStock) return 1;
-            return getProductCreatedAt(b) - getProductCreatedAt(a);
-          }
-
-          // تخفیف های وسوسه انگیز: sort products with G in title first
-          if (discountOnly === "true") {
-            const aHasG = productTitleHasG(a);
-            const bHasG = productTitleHasG(b);
-            if (aHasG && !bHasG) return -1;
-            if (!aHasG && bHasG) return 1;
-          }
-
-          if (aHasStock && !bHasStock) return -1;
-          if (!aHasStock && bHasStock) return 1;
-          return 0;
-        });
-
-        // Frontend price sorting (applied after stock sorting)
-        if (sort === "price:asc" || sort === "price:desc") {
-          productsArray = [...productsArray].sort((a: any, b: any) => {
-            const aHasStock = hasAvailableStock(a);
-            const bHasStock = hasAvailableStock(b);
-
-            if (aHasStock && !bHasStock) return -1;
-            if (!aHasStock && bHasStock) return 1;
-
-            const priceA = getMinInStockVariationPrice(a);
-            const priceB = getMinInStockVariationPrice(b);
-            return sort === "price:asc" ? priceA - priceB : priceB - priceA;
-          });
-        }
-
-        if (process.env.NODE_ENV !== "production") {
-          console.log("[PLP] Fetched products:", {
-            count: productsArray.length,
-            endpoint,
-            firstProduct: productsArray[0] ? {
-              id: productsArray[0].id,
-              title: productsArray[0].attributes?.Title,
-              slug: productsArray[0].attributes?.Slug,
-              hasVariations: !!productsArray[0].attributes?.product_variations?.data?.length,
-            } : null,
-          });
-        }
-
-        // Do not overwrite server-rendered products with empty client response (e.g. public API returns [] while internal URL works)
-        if (productsArray.length === 0 && hadProductsFromServerRef.current) {
-          setIsLoading(false);
-          return;
-        }
-        if (productsArray.length > 0) hadProductsFromServerRef.current = true;
-
-        setProducts(productsArray);
-        setPagination(
-          data?.meta?.pagination || {
-            page: parseInt(page) || 1,
-            pageSize: 20,
-            pageCount: 0,
-            total: 0,
-          },
-        );
-      })
-      .catch((error) => {
-        console.error("[PLP] Error fetching products:", {
-          error,
-          endpoint,
-          message: error?.message || "Unknown error",
-          status: (error as any)?.status,
-        });
-        notify.error("خطا در بارگیری محصولات");
-        // Do not overwrite products/pagination on error: keep server-rendered list so PLP is not empty when client fetch fails (e.g. CORS, network).
-        // setProducts([]) and setPagination(zeros) removed so SSR data is preserved.
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, [
-    page,
-    category,
-    allCategoriesProp,
-    allCategoriesLocal,
-    available,
-    minPrice,
-    maxPrice,
-    size,
-    material,
-    season,
-    gender,
-    usage,
-    sort,
-    searchQuery,
-    discountOnly,
-  ]);
-
-  // Fetch products when dependencies change. Skip first run on mount to avoid duplicating server fetch.
-  useEffect(() => {
-    if (!didInitialMountRef.current) {
-      didInitialMountRef.current = true;
-      return;
-    }
-    fetchProducts();
-  }, [fetchProducts]);
-
 
 
   // Memoize expensive filtering operations
   const validProducts = useMemo(
     () =>
-      products.filter((product) => {
+      filteredInitialProducts.filter((product) => {
         try {
           // Basic product structure validation
           if (!product?.attributes?.product_variations?.data) {
@@ -464,7 +191,7 @@ export default function PLPList({
           return false;
         }
       }),
-    [products, available, discountOnly],
+    [filteredInitialProducts, available, discountOnly],
   );
 
   const { sidebarProducts, mappedDiscountedSidebar, mappedSuggestedSidebar } = useSidebarProducts({
@@ -528,8 +255,7 @@ export default function PLPList({
           key: "available",
           label: "فقط کالاهای موجود",
           onRemove: () => {
-            setAvailable(null);
-            setPage("1");
+            void setQuery({ available: null, page: 1 });
           },
         });
       }
@@ -539,8 +265,7 @@ export default function PLPList({
           key: "category",
           label: `دسته: ${selectedCategoryTitle || category}`,
           onRemove: () => {
-            setCategory(null);
-            setPage("1");
+            void setQuery({ category: null, page: 1 });
           },
         });
       }
@@ -550,8 +275,7 @@ export default function PLPList({
           key: "discount",
           label: "فقط با تخفیف",
           onRemove: () => {
-            setDiscountOnly(null);
-            setPage("1");
+            void setQuery({ hasDiscount: null, page: 1 });
           },
         });
       }
@@ -563,9 +287,7 @@ export default function PLPList({
           key: "price",
           label: `قیمت ${[minLabel, maxLabel].filter(Boolean).join(" ") || ""}`.trim(),
           onRemove: () => {
-            setMinPrice(null);
-            setMaxPrice(null);
-            setPage("1");
+            void setQuery({ minPrice: null, maxPrice: null, page: 1 });
           },
         });
       }
@@ -577,8 +299,7 @@ export default function PLPList({
           key: "size",
           label: `سایز ${sizeLabel}`,
           onRemove: () => {
-            setSize(null);
-            setPage("1");
+            void setQuery({ size: null, page: 1 });
           },
         });
       }
@@ -588,8 +309,7 @@ export default function PLPList({
           key: "material",
           label: `جنس: ${humanize(material)}`,
           onRemove: () => {
-            setMaterial(null);
-            setPage("1");
+            void setQuery({ material: null, page: 1 });
           },
         });
       }
@@ -599,8 +319,7 @@ export default function PLPList({
           key: "season",
           label: `فصل: ${humanize(season)}`,
           onRemove: () => {
-            setSeason(null);
-            setPage("1");
+            void setQuery({ season: null, page: 1 });
           },
         });
       }
@@ -610,8 +329,7 @@ export default function PLPList({
           key: "gender",
           label: `جنسیت: ${humanize(gender)}`,
           onRemove: () => {
-            setGender(null);
-            setPage("1");
+            void setQuery({ gender: null, page: 1 });
           },
         });
       }
@@ -621,8 +339,7 @@ export default function PLPList({
           key: "usage",
           label: `کاربری: ${humanize(usage)}`,
           onRemove: () => {
-            setUsage(null);
-            setPage("1");
+            void setQuery({ usage: null, page: 1 });
           },
         });
       }
@@ -632,8 +349,7 @@ export default function PLPList({
           key: "sort",
           label: `مرتب‌سازی: ${SORT_LABELS[sort] || humanize(sort)}`,
           onRemove: () => {
-            setSort(null);
-            setPage("1");
+            void setQuery({ sort: null, page: 1 });
           },
         });
       }
@@ -650,18 +366,7 @@ export default function PLPList({
       minPrice,
       season,
       selectedCategoryTitle,
-      setAvailable,
-      setCategory,
-      setDiscountOnly,
-      setGender,
-      setMaterial,
-      setMaxPrice,
-      setMinPrice,
-      setPage,
-      setSeason,
-      setSize,
-      setSort,
-      setUsage,
+      setQuery,
       size,
       sort,
       usage,
@@ -669,18 +374,20 @@ export default function PLPList({
   );
 
   const clearAllFilters = () => {
-    setCategory(null);
-    setAvailable(null);
-    setMinPrice(null);
-    setMaxPrice(null);
-    setSize(null);
-    setMaterial(null);
-    setSeason(null);
-    setGender(null);
-    setUsage(null);
-    setDiscountOnly(null);
-    setSort(null);
-    setPage("1");
+    void setQuery({
+      category: null,
+      available: null,
+      minPrice: null,
+      maxPrice: null,
+      size: null,
+      material: null,
+      season: null,
+      gender: null,
+      usage: null,
+      hasDiscount: null,
+      sort: null,
+      page: 1,
+    });
   };
 
   return (
@@ -748,10 +455,7 @@ export default function PLPList({
             </div>
           )}
 
-          {/* Show skeleton while loading */}
-          {isLoading ? (
-            <ProductListSkeleton />
-          ) : validProducts.length === 0 ? (
+          {validProducts.length === 0 ? (
             <NoData category={category || initialCategory} />
           ) : (
             <>
@@ -760,9 +464,11 @@ export default function PLPList({
 
               {/* Pagination */}
               <Pagination
-                currentPage={pagination.page}
-                totalPages={pagination.pageCount}
-                onPageChange={(page) => setPage(page.toString())}
+                currentPage={page}
+                totalPages={initialPagination.pageCount}
+                onPageChange={(nextPage) => {
+                  void setQuery({ page: nextPage });
+                }}
               />
             </>
           )}

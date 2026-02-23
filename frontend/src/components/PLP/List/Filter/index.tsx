@@ -4,10 +4,11 @@ import PLPListFilterCategory from "./Category";
 import AvailabilityFilter from "./Availability";
 import PriceFilter from "./Price";
 import PLPFilterBox from "@/components/Kits/PLP/FilterBox";
-import { useQueryState } from "nuqs";
+import { useQueryStates } from "nuqs";
 import { useCallback, useEffect, useState } from "react";
 import { getProductCategories } from "@/services/product/categories";
 import { SORT_OPTIONS } from "@/components/PLP/sortOptions";
+import { plpQueryOptions, plpQueryParsers } from "@/components/PLP/queryState";
 
 interface Category {
   id: string;
@@ -25,13 +26,8 @@ export default function Filter({
   categories: categoriesProp,
   isLoadingCategories: isLoadingCategoriesProp,
 }: FilterProps) {
-  // URL state management with nuqs
-  const [category, setCategory] = useQueryState("category");
-  const [available, setAvailable] = useQueryState("available");
-  const [minPrice, setMinPrice] = useQueryState("minPrice");
-  const [maxPrice, setMaxPrice] = useQueryState("maxPrice");
-  const [sort, setSort] = useQueryState("sort");
-  const [, setPage] = useQueryState("page");
+  const [query, setQuery] = useQueryStates(plpQueryParsers, plpQueryOptions);
+  const { category, available, minPrice, maxPrice, sort } = query;
   // State for categories
   const [localCategories, setLocalCategories] = useState<Category[]>([]);
   const [isFetchingCategories, setIsFetchingCategories] = useState(!categoriesProp);
@@ -74,47 +70,50 @@ export default function Filter({
   // Initialize available state from prop - run only once on mount
   useEffect(() => {
     if (showAvailableOnly && available !== "true") {
-      setAvailable("true");
+      void setQuery({ available: "true" });
     }
-  }, [showAvailableOnly, setAvailable]); // Remove 'available' from deps to prevent loops
+  }, [showAvailableOnly, available, setQuery]);
 
   // Category filter handler
   const handleCategorySelect = useCallback(
     (id: string) => {
-      setCategory(id);
+      void setQuery({ category: id });
     },
-    [setCategory],
+    [setQuery],
   );
 
   // Availability filter handler
   const handleAvailabilityChange = useCallback(
     (checked: boolean) => {
-      setAvailable(checked ? "true" : null);
+      void setQuery({ available: checked ? "true" : null });
     },
-    [setAvailable],
+    [setQuery],
   );
 
   // Price filter handler
   const handlePriceChange = useCallback(
     (min: number, max: number) => {
-      setMinPrice(min.toString());
-      setMaxPrice(max.toString());
+      void setQuery({
+        minPrice: min.toString(),
+        maxPrice: max.toString(),
+      });
     },
-    [setMinPrice, setMaxPrice],
+    [setQuery],
   );
 
   const handleSortToggle = useCallback(
     (value: string) => {
-      setPage("1");
-      setSort((prev) => (prev === value ? null : value));
+      void setQuery({
+        page: 1,
+        sort: sort === value ? null : value,
+      });
     },
-    [setSort, setPage],
+    [setQuery, sort],
   );
 
   const handleSortClear = useCallback(() => {
-    setPage("1");
-    setSort(null);
-  }, [setSort, setPage]);
+    void setQuery({ page: 1, sort: null });
+  }, [setQuery]);
 
   const resolvedCategories = categoriesProp ?? localCategories;
   const resolvedIsLoading = categoriesProp ? isLoadingCategoriesProp ?? false : isFetchingCategories;

@@ -7,7 +7,8 @@ import AvailabilityFilter from "./Filter/Availability";
 import PLPListFilter from "./Filter";
 import XIcon from "../Icons/XIcon";
 import { useState } from "react";
-import { useQueryState } from "nuqs";
+import { useQueryStates } from "nuqs";
+import { plpQueryOptions, plpQueryParsers } from "@/components/PLP/queryState";
 
 interface MobileFilterProps {
   categories?: Array<{ id: string; title: string }>;
@@ -19,13 +20,14 @@ export default function PLPListMobileFilter({
   isLoadingCategories = false,
 }: MobileFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [available, setAvailable] = useQueryState("available");
+  const [query, setQuery] = useQueryStates(plpQueryParsers, plpQueryOptions);
+  const { available } = query;
 
   const handleClose = () => setIsOpen(false);
   const handleOpen = () => setIsOpen(true);
 
   const handleAvailabilityChange = (checked: boolean) => {
-    setAvailable(checked ? "true" : null);
+    void setQuery({ available: checked ? "true" : null });
   };
 
   const handleApplyFilters = () => {
