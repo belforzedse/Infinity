@@ -335,6 +335,101 @@ export default factories.createCoreController(
     },
 
     /**
+     * Lightweight product listing for PLP.
+     * Returns only card/filter fields needed by frontend PLP and supports
+     * the same query filter structure as /products.
+     */
+    async plp(ctx, next) {
+      try {
+        const user = ctx.state.user;
+        const isAdmin = isAdminUser(user);
+        const bypassCache =
+          shouldBypassEndpointCache(ctx.request?.headers as Record<string, unknown>) || isAdmin;
+
+        const cacheKey = buildCacheKey({
+          routeId: "product.plp",
+          query: ctx.query || {},
+          locale: String(ctx.query?.locale || ""),
+          authSegment: bypassCache ? "auth" : "anon",
+        });
+
+        const payload = await withCache(
+          {
+            key: cacheKey,
+            ttlSec: getCacheTtlFromEnv("CACHE_TTL_PRODUCT_PLP_SEC", 30),
+            bypass: bypassCache,
+            onStatus: (status) => setCacheHeaderIfEnabled(ctx, status),
+            shouldCacheValue: (value) => Array.isArray((value as any)?.data),
+          },
+          async () => {
+            // Reuse existing public filter enforcement for non-admin users.
+            // @ts-expect-error Strapi controller typings require two args; we only need ctx for filtering
+            this.applyPublicProductFilters(ctx);
+
+            const incomingQuery = ctx.query || {};
+            const incomingPagination = (incomingQuery as any)?.pagination || {};
+            const page = Math.max(
+              1,
+              Number.parseInt(String(incomingPagination?.page ?? 1), 10) || 1,
+            );
+            const pageSize = Math.min(
+              60,
+              Math.max(1, Number.parseInt(String(incomingPagination?.pageSize ?? 30), 10) || 30),
+            );
+            const includeMedia = String((incomingQuery as any)?.includeMedia || "false") === "true";
+
+            const { includeMedia: _includeMedia, ...incomingRestQuery } = incomingQuery as any;
+
+            const normalizedQuery = {
+              ...incomingRestQuery,
+              fields: ["Title", "Slug", "SeenCount", "createdAt"],
+              populate: {
+                CoverImage: { fields: ["url"] },
+                product_main_category: { fields: ["Title", "Slug"] },
+                product_variations: {
+                  fields: ["Price", "DiscountPrice", "IsPublished"],
+                  populate: {
+                    product_stock: { fields: ["Count"] },
+                    general_discounts: { fields: ["Amount"] },
+                    product_variation_color: { fields: ["ColorCode"] },
+                  },
+                },
+                ...(includeMedia
+                  ? {
+                      Media: {
+                        fields: ["url", "mime"],
+                        pagination: { limit: 3 },
+                      },
+                    }
+                  : {}),
+              },
+              pagination: {
+                page,
+                pageSize,
+                withCount: true,
+              },
+            } as any;
+
+            const previousQuery = ctx.query;
+            try {
+              ctx.query = normalizedQuery;
+              const response = await (super.find as any)(ctx, next);
+              return response;
+            } finally {
+              ctx.query = previousQuery;
+            }
+          },
+        );
+
+        return payload;
+      } catch (error) {
+        return ctx.badRequest("An error occurred while fetching PLP products", {
+          error: (error as Error).message,
+        });
+      }
+    },
+
+    /**
      * Find a product by its slug
      * @param {Object} ctx - The context
      * @returns {Object} The product data

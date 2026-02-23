@@ -24,6 +24,7 @@ import {
   getProductCreatedAt,
 } from "@/utils/product";
 import { useSidebarProducts } from "@/hooks/useSidebarProducts";
+import usePLPProductLikes from "@/hooks/usePLPProductLikes";
 import PLPDesktopList from "./List/PLPDesktopList";
 import PLPMobileList from "./List/PLPMobileList";
 import type { PLPProduct, PLPPagination } from "./types";
@@ -39,6 +40,7 @@ interface PLPListProps {
   products: PLPProduct[];
   pagination: PLPPagination;
   category?: string;
+  initialIsDesktop?: boolean;
   /** All categories with parentId (for resolving category + children in filter). */
   allCategories?: ProductCategorySummary[];
   searchQuery?: string;
@@ -52,6 +54,7 @@ export default function PLPList({
   products: initialProducts,
   pagination: initialPagination,
   category: initialCategory,
+  initialIsDesktop = false,
   allCategories: allCategoriesProp = [],
   searchQuery,
   discountedSidebarProducts = [],
@@ -73,8 +76,8 @@ export default function PLPList({
   const [sort, setSort] = useQueryState("sort");
   const [discountOnly, setDiscountOnly] = useQueryState("hasDiscount");
 
-  const [isDesktop, setIsDesktop] = useState(false);
-  const isDesktopForFetchRef = useRef(false);
+  const [isDesktop, setIsDesktop] = useState(initialIsDesktop);
+  const isDesktopForFetchRef = useRef(initialIsDesktop);
   /** Remember that we have or had products from server so we never overwrite with empty client response */
   const hadProductsFromServerRef = useRef(initialProducts.length > 0);
   /** Skip the first fetchProducts run on mount so we don't duplicate the server-rendered products request. */
@@ -128,11 +131,58 @@ export default function PLPList({
   const initializedCategoryRef = useRef(false);
 
   useEffect(() => {
-    if (!initializedCategoryRef.current && initialCategory) {
+    if (!initializedCategoryRef.current && initialCategory && category !== initialCategory) {
       initializedCategoryRef.current = true;
       setCategory(initialCategory);
     }
-  }, [initialCategory, setCategory]);
+  }, [category, initialCategory, setCategory]);
+
+  const resolvedCategorySlugs = useMemo(() => {
+    if (!category) return undefined;
+    const categoriesForDescendants =
+      allCategoriesProp.length > 0 ? allCategoriesProp : allCategoriesLocal;
+    if (categoriesForDescendants.length === 0) return [category];
+    const slugs = getCategoryAndDescendantSlugs(categoriesForDescendants, category);
+    return slugs.length > 0 ? slugs : [category];
+  }, [allCategoriesLocal, allCategoriesProp, category]);
+
+  const currentQueryKey = useMemo(
+    () =>
+      JSON.stringify({
+        page,
+        category,
+        available,
+        minPrice,
+        maxPrice,
+        size,
+        material,
+        season,
+        gender,
+        usage,
+        sort,
+        discountOnly,
+        searchQuery,
+      }),
+    [
+      page,
+      category,
+      available,
+      minPrice,
+      maxPrice,
+      size,
+      material,
+      season,
+      gender,
+      usage,
+      sort,
+      discountOnly,
+      searchQuery,
+    ],
+  );
+  const initialQueryKeyRef = useRef<string | null>(null);
+  if (initialQueryKeyRef.current === null) {
+    initialQueryKeyRef.current = currentQueryKey;
+  }
 
   // When server passed allCategories (e.g. category PLP), use them for filter and skip client fetch.
   useEffect(() => {
@@ -174,214 +224,155 @@ export default function PLPList({
   }, [allCategoriesProp]);
 
   // Define fetchProducts function with useCallback
-  const fetchProducts = useCallback(() => {
+  const fetchProducts = useCallback(async () => {
     // Skip fetch if this is a search results page managed by server component
-    if (searchQuery) {
-      return;
-    }
+    if (searchQuery) return;
 
     setIsLoading(true);
 
     // Build query parameters
     const queryParams = new URLSearchParams();
 
-    // Add required fields
-    queryParams.append("populate[0]", "CoverImage");
-    queryParams.append("populate[1]", "product_main_category");
-    queryParams.append("populate[2]", "product_variations");
-    queryParams.append("populate[3]", "product_variations.product_stock");
-    queryParams.append("populate[4]", "product_variations.general_discounts");
-    queryParams.append("populate[5]", "product_variations.product_variation_color");
-
-    // Only fetch 3 additional media on desktop (cover + 3 for hover); mobile gets cover only
-    if (isDesktopForFetchRef.current) {
-      queryParams.append("populate[6]", "Media");
-      queryParams.append("populate[Media][pagination][limit]", "3");
-    }
-
-    queryParams.append("fields[0]", "Title");
-    queryParams.append("fields[1]", "Slug");
-    queryParams.append("fields[2]", "Description");
-    queryParams.append("fields[3]", "Status");
-    queryParams.append("fields[4]", "createdAt");
-
     // Add pagination
     queryParams.append("pagination[page]", page);
-    queryParams.append("pagination[pageSize]", "30"); // Match server-side pageSize
+    queryParams.append("pagination[pageSize]", "30");
+
+    // PLP endpoint-specific hint for optional media
+    queryParams.append("includeMedia", isDesktopForFetchRef.current ? "true" : "false");
 
     // Add filters
     queryParams.append("filters[Status][$eq]", "Active");
     queryParams.append("filters[removedAt][$null]", "true");
-
-    // Filter for products with valid prices (Price > 0)
-    // Note: We can't filter for CoverImage at API level (relations don't support $notNull in REST API)
-    // So we do post-fetch filtering for images, which is why we fetch more products (60) than we display
     queryParams.append("filters[product_variations][Price][$gt]", "0");
 
-    // Category filter: include selected category and all its children (use server list or client-fetched list)
-    if (category) {
-      const categoriesForDescendants =
-        allCategoriesProp.length > 0 ? allCategoriesProp : allCategoriesLocal;
-      const slugs =
-        categoriesForDescendants.length > 0
-          ? getCategoryAndDescendantSlugs(categoriesForDescendants, category)
-          : [category];
-      if (slugs.length > 0) {
-        slugs.forEach((slug, i) => {
-          queryParams.append(`filters[product_main_category][Slug][$in][${i}]`, slug);
-        });
-      } else {
-        queryParams.append("filters[product_main_category][Slug][$eq]", category);
-      }
+    // Category filter: include selected category and descendants
+    if (resolvedCategorySlugs && resolvedCategorySlugs.length > 0) {
+      resolvedCategorySlugs.forEach((slug, i) => {
+        queryParams.append(`filters[product_main_category][Slug][$in][${i}]`, slug);
+      });
     }
 
-    // Availability filter - check for actual stock (Count > 0) not just IsPublished
+    // Availability filter - check for actual stock (Count > 0)
     if (available === "true") {
       queryParams.append("filters[product_variations][product_stock][Count][$gt]", "0");
     }
 
     // Price range filters
-    if (minPrice) {
-      queryParams.append("filters[product_variations][Price][$gte]", minPrice);
-    }
-    if (maxPrice) {
-      queryParams.append("filters[product_variations][Price][$lte]", maxPrice);
-    }
+    if (minPrice) queryParams.append("filters[product_variations][Price][$gte]", minPrice);
+    if (maxPrice) queryParams.append("filters[product_variations][Price][$lte]", maxPrice);
 
-    // Size filter
-    if (size) {
-      queryParams.append("filters[product_variations][Size][$eq]", size);
-    }
-
-    // Material filter
-    if (material) {
-      queryParams.append("filters[product_variations][Material][$eq]", material);
-    }
-
-    // Season filter
-    if (season) {
-      queryParams.append("filters[product_variations][Season][$eq]", season);
-    }
-
-    // Gender filter
-    if (gender) {
-      queryParams.append("filters[product_variations][Gender][$eq]", gender);
-    }
-
-    // Usage filter
-    if (usage) {
-      queryParams.append("filters[product_variations][Usage][$eq]", usage);
-    }
+    // Attribute filters
+    if (size) queryParams.append("filters[product_variations][Size][$eq]", size);
+    if (material) queryParams.append("filters[product_variations][Material][$eq]", material);
+    if (season) queryParams.append("filters[product_variations][Season][$eq]", season);
+    if (gender) queryParams.append("filters[product_variations][Gender][$eq]", gender);
+    if (usage) queryParams.append("filters[product_variations][Usage][$eq]", usage);
 
     // Sorting - only send to backend if not price sorting (price sorting done on frontend)
     if (sort && sort !== "price:asc" && sort !== "price:desc") {
       queryParams.append("sort[0]", sort);
     }
 
-    // Construct endpoint with query params
-    const endpoint = `/products?${queryParams.toString()}`;
+    // Prefer lightweight PLP endpoint with fallback to legacy /products
+    const legacyQueryParams = new URLSearchParams(queryParams);
+    legacyQueryParams.append("populate[0]", "CoverImage");
+    legacyQueryParams.append("populate[1]", "product_main_category");
+    legacyQueryParams.append("populate[2]", "product_variations");
+    legacyQueryParams.append("populate[3]", "product_variations.product_stock");
+    legacyQueryParams.append("populate[4]", "product_variations.general_discounts");
+    legacyQueryParams.append("populate[5]", "product_variations.product_variation_color");
+    if (isDesktopForFetchRef.current) {
+      legacyQueryParams.append("populate[6]", "Media");
+      legacyQueryParams.append("populate[Media][pagination][limit]", "3");
+    }
+    legacyQueryParams.append("fields[0]", "Title");
+    legacyQueryParams.append("fields[1]", "Slug");
+    legacyQueryParams.append("fields[2]", "Description");
+    legacyQueryParams.append("fields[3]", "Status");
+    legacyQueryParams.append("fields[4]", "createdAt");
 
-    // Use apiClient instead of native fetch for better error handling, retry logic, and consistency
-    apiClient
-      .getPublic<any>(endpoint, { suppressAuthRedirect: true })
-      .then((data) => {
-        let productsArray = Array.isArray(data?.data) ? data.data : [];
+    const primaryEndpoint = `/products/plp?${queryParams.toString()}`;
+    const fallbackEndpoint = `/products?${legacyQueryParams.toString()}`;
 
-        // Filter out products without images (can't filter at API level for relations)
-        productsArray = productsArray.filter(hasImage);
+    try {
+      let data: any;
+      try {
+        data = await apiClient.getPublic<any>(primaryEndpoint, { suppressAuthRedirect: true });
+      } catch {
+        data = await apiClient.getPublic<any>(fallbackEndpoint, { suppressAuthRedirect: true });
+      }
 
-        // CRITICAL: Sort products by stock availability FIRST; when "newest" sort or discount filter, put products with g/G in title first
-        productsArray.sort((a: any, b: any) => {
+      let productsArray = Array.isArray(data?.data) ? data.data : [];
+      productsArray = productsArray.filter(hasImage);
+
+      // Sort by stock availability first; for newest/discount, prioritize G title.
+      productsArray.sort((a: any, b: any) => {
+        const aHasStock = hasAvailableStock(a);
+        const bHasStock = hasAvailableStock(b);
+
+        if (sort === "createdAt:desc") {
+          const aHasG = productTitleHasG(a);
+          const bHasG = productTitleHasG(b);
+          if (aHasG && !bHasG) return -1;
+          if (!aHasG && bHasG) return 1;
+          if (aHasStock && !bHasStock) return -1;
+          if (!aHasStock && bHasStock) return 1;
+          return getProductCreatedAt(b) - getProductCreatedAt(a);
+        }
+
+        if (discountOnly === "true") {
+          const aHasG = productTitleHasG(a);
+          const bHasG = productTitleHasG(b);
+          if (aHasG && !bHasG) return -1;
+          if (!aHasG && bHasG) return 1;
+        }
+
+        if (aHasStock && !bHasStock) return -1;
+        if (!aHasStock && bHasStock) return 1;
+        return 0;
+      });
+
+      // Frontend price sorting (applied after stock sorting)
+      if (sort === "price:asc" || sort === "price:desc") {
+        productsArray = [...productsArray].sort((a: any, b: any) => {
           const aHasStock = hasAvailableStock(a);
           const bHasStock = hasAvailableStock(b);
 
-          if (sort === "createdAt:desc") {
-            const aHasG = productTitleHasG(a);
-            const bHasG = productTitleHasG(b);
-            if (aHasG && !bHasG) return -1;
-            if (!aHasG && bHasG) return 1;
-            if (aHasStock && !bHasStock) return -1;
-            if (!aHasStock && bHasStock) return 1;
-            return getProductCreatedAt(b) - getProductCreatedAt(a);
-          }
-
-          // تخفیف های وسوسه انگیز: sort products with G in title first
-          if (discountOnly === "true") {
-            const aHasG = productTitleHasG(a);
-            const bHasG = productTitleHasG(b);
-            if (aHasG && !bHasG) return -1;
-            if (!aHasG && bHasG) return 1;
-          }
-
           if (aHasStock && !bHasStock) return -1;
           if (!aHasStock && bHasStock) return 1;
-          return 0;
+
+          const priceA = getMinInStockVariationPrice(a);
+          const priceB = getMinInStockVariationPrice(b);
+          return sort === "price:asc" ? priceA - priceB : priceB - priceA;
         });
+      }
 
-        // Frontend price sorting (applied after stock sorting)
-        if (sort === "price:asc" || sort === "price:desc") {
-          productsArray = [...productsArray].sort((a: any, b: any) => {
-            const aHasStock = hasAvailableStock(a);
-            const bHasStock = hasAvailableStock(b);
+      if (productsArray.length === 0 && hadProductsFromServerRef.current) {
+        return;
+      }
+      if (productsArray.length > 0) hadProductsFromServerRef.current = true;
 
-            if (aHasStock && !bHasStock) return -1;
-            if (!aHasStock && bHasStock) return 1;
-
-            const priceA = getMinInStockVariationPrice(a);
-            const priceB = getMinInStockVariationPrice(b);
-            return sort === "price:asc" ? priceA - priceB : priceB - priceA;
-          });
-        }
-
-        if (process.env.NODE_ENV !== "production") {
-          console.log("[PLP] Fetched products:", {
-            count: productsArray.length,
-            endpoint,
-            firstProduct: productsArray[0] ? {
-              id: productsArray[0].id,
-              title: productsArray[0].attributes?.Title,
-              slug: productsArray[0].attributes?.Slug,
-              hasVariations: !!productsArray[0].attributes?.product_variations?.data?.length,
-            } : null,
-          });
-        }
-
-        // Do not overwrite server-rendered products with empty client response (e.g. public API returns [] while internal URL works)
-        if (productsArray.length === 0 && hadProductsFromServerRef.current) {
-          setIsLoading(false);
-          return;
-        }
-        if (productsArray.length > 0) hadProductsFromServerRef.current = true;
-
-        setProducts(productsArray);
-        setPagination(
-          data?.meta?.pagination || {
-            page: parseInt(page) || 1,
-            pageSize: 20,
-            pageCount: 0,
-            total: 0,
-          },
-        );
-      })
-      .catch((error) => {
-        console.error("[PLP] Error fetching products:", {
-          error,
-          endpoint,
-          message: error?.message || "Unknown error",
-          status: (error as any)?.status,
-        });
-        notify.error("خطا در بارگیری محصولات");
-        // Do not overwrite products/pagination on error: keep server-rendered list so PLP is not empty when client fetch fails (e.g. CORS, network).
-        // setProducts([]) and setPagination(zeros) removed so SSR data is preserved.
-      })
-      .finally(() => {
-        setIsLoading(false);
+      setProducts(productsArray);
+      setPagination(
+        data?.meta?.pagination || {
+          page: parseInt(page, 10) || 1,
+          pageSize: 30,
+          pageCount: 0,
+          total: 0,
+        },
+      );
+    } catch (error) {
+      console.error("[PLP] Error fetching products:", {
+        error,
+        message: (error as any)?.message || "Unknown error",
+        status: (error as any)?.status,
       });
+      notify.error("خطا در بارگیری محصولات");
+    } finally {
+      setIsLoading(false);
+    }
   }, [
     page,
-    category,
-    allCategoriesProp,
-    allCategoriesLocal,
     available,
     minPrice,
     maxPrice,
@@ -393,16 +384,20 @@ export default function PLPList({
     sort,
     searchQuery,
     discountOnly,
+    resolvedCategorySlugs,
   ]);
 
-  // Fetch products when dependencies change. Skip first run on mount to avoid duplicating server fetch.
+  // Fetch products when query changes. Skip first run and skip no-op query key.
   useEffect(() => {
     if (!didInitialMountRef.current) {
       didInitialMountRef.current = true;
       return;
     }
+    if (hadProductsFromServerRef.current && currentQueryKey === initialQueryKeyRef.current) {
+      return;
+    }
     fetchProducts();
-  }, [fetchProducts]);
+  }, [currentQueryKey, fetchProducts]);
 
 
 
@@ -499,6 +494,13 @@ export default function PLPList({
       return 0;
     });
   }, [validProducts, discountOnly]);
+
+  const displayedProductIds = useMemo(
+    () => displayProducts.map((product) => product.id),
+    [displayProducts],
+  );
+  const { isProductLiked, isProductLikeLoading, toggleProductLike } =
+    usePLPProductLikes(displayedProductIds);
 
   const selectedCategoryTitle = useMemo(() => {
     if (!category) return null;
@@ -755,8 +757,22 @@ export default function PLPList({
             <NoData category={category || initialCategory} />
           ) : (
             <>
-              <PLPDesktopList products={displayProducts} includeMedia={isDesktop} />
-              <PLPMobileList products={displayProducts} />
+              {isDesktop ? (
+                <PLPDesktopList
+                  products={displayProducts}
+                  includeMedia
+                  isProductLiked={isProductLiked}
+                  isProductLikeLoading={isProductLikeLoading}
+                  onToggleProductLike={toggleProductLike}
+                />
+              ) : (
+                <PLPMobileList
+                  products={displayProducts}
+                  isProductLiked={isProductLiked}
+                  isProductLikeLoading={isProductLikeLoading}
+                  onToggleProductLike={toggleProductLike}
+                />
+              )}
 
               {/* Pagination */}
               <Pagination

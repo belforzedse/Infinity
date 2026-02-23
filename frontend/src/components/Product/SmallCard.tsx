@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import React, { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import imageLoader from "@/utils/imageLoader";
 import Link from "next/link";
 import dynamic from "next/dynamic";
@@ -37,9 +37,23 @@ export interface ProductSmallCardProps {
   priority?: boolean;
   colorsCount?: number;
   colorCodes?: string[];
+  /** Optional external like state/handler for PLP-level batching. */
+  isLikedOverride?: boolean;
+  isLikeLoadingOverride?: boolean;
+  onToggleLikeOverride?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
-const ProductSmallCard: React.FC<ProductSmallCardProps> = ({
+interface ProductSmallCardLikeState {
+  isLiked: boolean;
+  isLikeLoading: boolean;
+  onToggleLike: (e: React.MouseEvent<HTMLButtonElement>) => void;
+}
+
+interface ProductSmallCardViewProps extends ProductSmallCardProps {
+  likeState: ProductSmallCardLikeState;
+}
+
+const ProductSmallCardView: React.FC<ProductSmallCardViewProps> = ({
   id,
   slug,
   title,
@@ -54,6 +68,7 @@ const ProductSmallCard: React.FC<ProductSmallCardProps> = ({
   priority = false,
   colorsCount,
   colorCodes,
+  likeState,
 }) => {
   // State management
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -63,19 +78,6 @@ const ProductSmallCard: React.FC<ProductSmallCardProps> = ({
   // Refs
   const menuRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
-
-  // Hooks
-  const {
-    isLiked,
-    isLoading: isLikeLoading,
-    toggleLike,
-  } = useProductLike({
-    productId: id.toString(),
-  });
-
-  const hasDiscount = Boolean(
-    discountedPrice && discountedPrice > 0 && discountedPrice < price,
-  );
 
   // Use slug if available, otherwise fall back to ID for backwards compatibility.
   const productUrl = slug ? `/pdp/${encodeURIComponent(slug)}` : `/pdp/${id}`;
@@ -128,9 +130,9 @@ const ProductSmallCard: React.FC<ProductSmallCardProps> = ({
       e.preventDefault();
       e.stopPropagation();
       setIsMenuOpen(false);
-      toggleLike(e);
+      likeState.onToggleLike(e);
     },
-    [toggleLike],
+    [likeState],
   );
 
   return (
@@ -184,19 +186,23 @@ const ProductSmallCard: React.FC<ProductSmallCardProps> = ({
                 <button
                   type="button"
                   onClick={handleToggleLike}
-                  disabled={isLikeLoading}
+                  disabled={likeState.isLikeLoading}
                   className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs text-neutral-700 transition-colors hover:bg-pink-50 hover:text-pink-600 disabled:cursor-wait disabled:opacity-50"
                   role="menuitem"
-                  aria-label={isLiked ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها"}
+                  aria-label={
+                    likeState.isLiked ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها"
+                  }
                 >
                   <HeartIcon
                     className={clsx(
                       "h-4 w-4 transition-colors",
-                      isLiked ? "fill-pink-600 text-pink-600" : "text-neutral-400",
+                      likeState.isLiked ? "fill-pink-600 text-pink-600" : "text-neutral-400",
                     )}
-                    filled={isLiked}
+                    filled={likeState.isLiked}
                   />
-                  <span>{isLiked ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها"}</span>
+                  <span>
+                    {likeState.isLiked ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها"}
+                  </span>
                 </button>
               </li>
 
@@ -257,6 +263,43 @@ const ProductSmallCard: React.FC<ProductSmallCardProps> = ({
       )}
     </>
   );
+};
+
+const ProductSmallCardWithLocalLike: React.FC<ProductSmallCardProps> = (props) => {
+  const { id } = props;
+  const { isLiked, isLoading: isLikeLoading, toggleLike } = useProductLike({
+    productId: id.toString(),
+  });
+
+  const likeState = useMemo<ProductSmallCardLikeState>(
+    () => ({
+      isLiked,
+      isLikeLoading,
+      onToggleLike: toggleLike,
+    }),
+    [isLiked, isLikeLoading, toggleLike],
+  );
+
+  return <ProductSmallCardView {...props} likeState={likeState} />;
+};
+
+const ProductSmallCard: React.FC<ProductSmallCardProps> = (props) => {
+  const { isLikedOverride, isLikeLoadingOverride, onToggleLikeOverride } = props;
+
+  if (onToggleLikeOverride) {
+    return (
+      <ProductSmallCardView
+        {...props}
+        likeState={{
+          isLiked: Boolean(isLikedOverride),
+          isLikeLoading: Boolean(isLikeLoadingOverride),
+          onToggleLike: onToggleLikeOverride,
+        }}
+      />
+    );
+  }
+
+  return <ProductSmallCardWithLocalLike {...props} />;
 };
 
 export default ProductSmallCard;

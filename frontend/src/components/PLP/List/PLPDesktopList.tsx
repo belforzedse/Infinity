@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import type { MouseEvent } from "react";
 import { IMAGE_BASE_URL } from "@/constants/api";
 import { calculateUniqueColorsCount, getUniqueColorCodes } from "@/services/product/product";
 import {
@@ -18,9 +19,18 @@ const ProductCard = dynamic(() => import("@/components/Product/Card"), {
 interface PLPDesktopListProps {
   products: PLPProduct[];
   includeMedia: boolean;
+  isProductLiked?: (productId: number) => boolean;
+  isProductLikeLoading?: (productId: number) => boolean;
+  onToggleProductLike?: (productId: number, e: MouseEvent<HTMLButtonElement>) => void;
 }
 
-export default function PLPDesktopList({ products, includeMedia }: PLPDesktopListProps) {
+export default function PLPDesktopList({
+  products,
+  includeMedia,
+  isProductLiked,
+  isProductLikeLoading,
+  onToggleProductLike,
+}: PLPDesktopListProps) {
   return (
     <div className="hidden gap-4 md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       {products.map((product, index) => {
@@ -62,6 +72,15 @@ export default function PLPDesktopList({ products, includeMedia }: PLPDesktopLis
             colorCodes={getUniqueColorCodes(product.attributes.product_variations?.data || [])}
             isAvailable={isAvailable}
             priority={index < 6}
+            isLikedOverride={isProductLiked?.(product.id)}
+            isLikeLoadingOverride={isProductLikeLoading?.(product.id)}
+            onToggleLikeOverride={
+              onToggleProductLike
+                ? (e) => {
+                    onToggleProductLike(product.id, e);
+                  }
+                : undefined
+            }
           />
         );
       })}

@@ -1,14 +1,11 @@
-"use client";
-
-import { API_BASE_URL, IMAGE_BASE_URL } from "@/constants/api";
+import { API_BASE_URL, IMAGE_BASE_URL, getStrapiServerUrl } from "@/constants/api";
 import Image from "next/image";
 import { calculateUniqueColorsCount, getUniqueColorCodes } from "@/services/product/product";
 import imageLoader from "@/utils/imageLoader";
 import ProductSmallCard from "../Product/SmallCard";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import PageContainer from "@/components/layout/PageContainer";
-import type { ProductStatus } from "@/components/PLP/types";
+import fetchWithTimeout from "@/utils/fetchWithTimeout";
 
 interface PLPHeroBannerProps {
   category?: string;
@@ -18,36 +15,32 @@ interface ProductData {
   id: number;
   attributes: {
     Title: string;
-    Description: string;
-    Status: ProductStatus;
-    AverageRating: number | null;
-    RatingCount: number | null;
     SeenCount?: number | null;
-    CoverImage: {
-      data: {
-        attributes: {
-          url: string;
+    CoverImage?: {
+      data?: {
+        attributes?: {
+          url?: string;
         };
-      };
+      } | null;
     };
-    product_main_category: {
-      data: {
-        attributes: {
-          Title: string;
-          Slug: string;
+    product_main_category?: {
+      data?: {
+        attributes?: {
+          Title?: string;
+          Slug?: string;
         };
-      };
+      } | null;
     };
-    product_variations: {
-      data: Array<{
+    product_variations?: {
+      data?: Array<{
         attributes: {
-          SKU: string;
-          Price: string;
-          IsPublished: boolean;
+          Price?: string;
+          IsPublished?: boolean;
+          DiscountPrice?: string;
           general_discounts?: {
-            data: Array<{
-              attributes: {
-                Amount: number;
+            data?: Array<{
+              attributes?: {
+                Amount?: number;
               };
             }>;
           };
@@ -70,21 +63,32 @@ interface ProcessedProduct {
   colorCodes: string[];
 }
 
-const MAX_HERO_PRODUCTS = 6;
+interface CategoryFetchResponse {
+  data?: Array<{
+    attributes?: {
+      Title?: string;
+      CoverImage?: {
+        data?: {
+          attributes?: {
+            url?: string;
+          };
+        } | null;
+      };
+    };
+  }>;
+}
 
-const BASE_PRODUCT_FETCH_URL = `${API_BASE_URL}/products?filters[Status]=Active&filters[removedAt][$null]=true&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.product_stock&populate[4]=product_variations.product_variation_color`;
+const MAX_HERO_PRODUCTS = 8;
 
 // Helper to ensure image URLs have proper format
 const formatImageUrl = (path?: string): string => {
   if (!path) return "";
 
-  // If IMAGE_BASE_URL is empty and path exists, ensure path starts with /
   if (!IMAGE_BASE_URL && path) {
     return path.startsWith("/") ? path : `/${path}`;
   }
 
   const url = `${IMAGE_BASE_URL}${path}`;
-  // If URL doesn't start with http and doesn't start with /, add /
   if (!url.startsWith("http") && !url.startsWith("/")) {
     return `/${url}`;
   }
@@ -92,24 +96,26 @@ const formatImageUrl = (path?: string): string => {
 };
 
 const mapProduct = (product: ProductData): ProcessedProduct => {
-  const firstValidVariation = product.attributes.product_variations.data.find((variation) => {
+  const variations = product.attributes.product_variations?.data || [];
+
+  const firstValidVariation = variations.find((variation) => {
     const price = variation.attributes.Price;
     const isPublished = variation.attributes.IsPublished === true;
-    return isPublished && price && parseInt(price) > 0;
+    return isPublished && price && parseInt(price, 10) > 0;
   });
 
   if (!firstValidVariation) {
     return {
       id: product.id,
       title: product.attributes.Title,
-      category: product.attributes.product_main_category?.data?.attributes?.Title,
+      category: product.attributes.product_main_category?.data?.attributes?.Title || "",
       likedCount: product.attributes.SeenCount || 0,
       price: 0,
       discountedPrice: 0,
       discount: 0,
       image: formatImageUrl(product.attributes.CoverImage?.data?.attributes?.url),
-      colorsCount: calculateUniqueColorsCount(product.attributes.product_variations?.data || []),
-      colorCodes: getUniqueColorCodes(product.attributes.product_variations?.data || []),
+      colorsCount: calculateUniqueColorsCount(variations || []),
+      colorCodes: getUniqueColorCodes(variations || []),
     };
   }
 
@@ -118,138 +124,166 @@ const mapProduct = (product: ProductData): ProcessedProduct => {
     firstValidVariation.attributes.general_discounts.data.length > 0;
   const discount =
     hasDiscount && firstValidVariation.attributes.general_discounts?.data
-      ? firstValidVariation.attributes.general_discounts.data[0].attributes.Amount
+      ? firstValidVariation.attributes.general_discounts.data[0]?.attributes?.Amount || 0
       : 0;
-  const price = parseInt(firstValidVariation.attributes.Price || "0");
-  const discountedPrice = hasDiscount && discount ? price * (1 - discount / 100) : price;
+  const price = parseInt(firstValidVariation.attributes.Price || "0", 10);
+  const discountedPrice = hasDiscount && discount ? Math.round(price * (1 - discount / 100)) : price;
 
   return {
     id: product.id,
     title: product.attributes.Title,
-    category: product.attributes.product_main_category?.data?.attributes?.Title,
-      likedCount: product.attributes.SeenCount || 0,
+    category: product.attributes.product_main_category?.data?.attributes?.Title || "",
+    likedCount: product.attributes.SeenCount || 0,
     price,
     discountedPrice,
     discount,
     image: formatImageUrl(product.attributes.CoverImage?.data?.attributes?.url),
-    colorsCount: calculateUniqueColorsCount(product.attributes.product_variations?.data || []),
-    colorCodes: getUniqueColorCodes(product.attributes.product_variations?.data || []),
+    colorsCount: calculateUniqueColorsCount(variations || []),
+    colorCodes: getUniqueColorCodes(variations || []),
   };
 };
 
 const shuffle = <T,>(items: T[]) => [...items].sort(() => Math.random() - 0.5);
 
-const fetchProductsFromUrl = async (url: string): Promise<ProcessedProduct[]> => {
-  const response = await fetch(url);
-  const data = await response.json();
-  if (!Array.isArray(data?.data)) {
-    return [];
+async function fetchJsonWithFallback(path: string, revalidate: number = 120): Promise<any> {
+  const internalUrl = `${getStrapiServerUrl()}${path}`;
+  const publicUrl = `${API_BASE_URL}${path}`;
+
+  try {
+    const response = await fetchWithTimeout(internalUrl, {
+      timeoutMs: 10000,
+      next: { revalidate },
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "Accept-Encoding": "gzip",
+      },
+    });
+    return await response.json();
+  } catch {
+    const response = await fetchWithTimeout(publicUrl, {
+      timeoutMs: 10000,
+      next: { revalidate },
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "Accept-Encoding": "gzip",
+      },
+    });
+    return await response.json();
   }
+}
 
-  return data.data.map((product: ProductData) => mapProduct(product)).filter((product: ProcessedProduct) => product.price > 0);
-};
+async function getFeaturedProducts(category?: string): Promise<ProcessedProduct[]> {
+  const params = new URLSearchParams();
+  params.append("pagination[page]", "1");
+  params.append("pagination[pageSize]", "20");
+  params.append("includeMedia", "false");
+  params.append("filters[Status][$eq]", "Active");
+  params.append("filters[removedAt][$null]", "true");
+  params.append("filters[product_variations][Price][$gt]", "0");
 
-function getFeaturedProducts(category?: string): Promise<ProcessedProduct[]> {
-  let url = `${BASE_PRODUCT_FETCH_URL}&pagination[pageSize]=6`;
-  url += `&filters[$or][0][Title][$containsi]=کیف&filters[$or][1][Title][$containsi]=کفش&filters[$or][2][Title][$containsi]=صندل&filters[$or][3][Title][$containsi]=کتونی`;
+  // Feature-biased products (same keywords as previous implementation)
+  params.append("filters[$or][0][Title][$containsi]", "کیف");
+  params.append("filters[$or][1][Title][$containsi]", "کفش");
+  params.append("filters[$or][2][Title][$containsi]", "صندل");
+  params.append("filters[$or][3][Title][$containsi]", "کتونی");
 
   if (category) {
-    url += `&filters[product_main_category][Slug][$eq]=${category}`;
+    params.append("filters[product_main_category][Slug][$eq]", category);
   }
 
-  return fetchProductsFromUrl(url);
+  const data = await fetchJsonWithFallback(`/products/plp?${params.toString()}`, 120);
+  if (!Array.isArray(data?.data)) return [];
+
+  return (data.data as ProductData[])
+    .map(mapProduct)
+    .filter((product) => product.price > 0 && product.image && product.image !== "");
 }
 
-function getRandomProducts(): Promise<ProcessedProduct[]> {
-  const url = `${BASE_PRODUCT_FETCH_URL}&pagination[pageSize]=20`;
-  return fetchProductsFromUrl(url).then((products) => shuffle(products).slice(0, MAX_HERO_PRODUCTS));
+async function getRandomProducts(): Promise<ProcessedProduct[]> {
+  const params = new URLSearchParams();
+  params.append("pagination[page]", "1");
+  params.append("pagination[pageSize]", "24");
+  params.append("includeMedia", "false");
+  params.append("filters[Status][$eq]", "Active");
+  params.append("filters[removedAt][$null]", "true");
+  params.append("filters[product_variations][Price][$gt]", "0");
+
+  const data = await fetchJsonWithFallback(`/products/plp?${params.toString()}`, 120);
+  if (!Array.isArray(data?.data)) return [];
+
+  const mapped = (data.data as ProductData[])
+    .map(mapProduct)
+    .filter((product) => product.price > 0 && product.image && product.image !== "");
+
+  return shuffle(mapped).slice(0, MAX_HERO_PRODUCTS);
 }
 
-export default function PLPHeroBanner({ category }: PLPHeroBannerProps) {
-  const [title, setTitle] = useState("همه محصولات");
-  const [imageUrl, setImageUrl] = useState("/images/PLP.webp");
-  const [featuredProducts, setFeaturedProducts] = useState<ProcessedProduct[]>([]);
-  const [columnCount, setColumnCount] = useState(3);
+async function getCategoryMeta(category?: string): Promise<{ title: string; imageUrl: string }> {
+  if (!category) {
+    return { title: "همه محصولات", imageUrl: "/images/PLP.webp" };
+  }
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [categoryData, products] = await Promise.all([
-          category
-            ? fetch(`${API_BASE_URL}/product-categories?filters[Slug][$eq]=${category}`).then((res) =>
-                res.json(),
-              )
-            : Promise.resolve({ data: [] }),
-          getFeaturedProducts(category),
-        ]);
+  try {
+    const params = new URLSearchParams();
+    params.append("filters[Slug][$eq]", category);
+    params.append("fields[0]", "Title");
+    params.append("populate[0]", "CoverImage");
 
-        const normalizedProducts = products.length
-          ? shuffle(products).slice(0, MAX_HERO_PRODUCTS)
-          : await getRandomProducts();
-        setFeaturedProducts(normalizedProducts);
+    const data = (await fetchJsonWithFallback(
+      `/product-categories?${params.toString()}`,
+      600,
+    )) as CategoryFetchResponse;
 
-        if (category && categoryData.data.length > 0) {
-          const categoryAttributes = categoryData.data[0].attributes;
-          setTitle(categoryAttributes.Title);
+    const attrs = data?.data?.[0]?.attributes;
+    const title = attrs?.Title || "همه محصولات";
+    const imageUrl = attrs?.CoverImage?.data?.attributes?.url
+      ? formatImageUrl(attrs.CoverImage.data.attributes.url)
+      : "/images/PLP.webp";
 
-          if (categoryAttributes.CoverImage?.data?.attributes?.url) {
-            const formattedUrl = formatImageUrl(categoryAttributes.CoverImage?.data?.attributes?.url);
-            if (formattedUrl) {
-              setImageUrl(formattedUrl);
-            }
-          }
-        }
-      } catch {
-        const fallback = await getRandomProducts();
-        setFeaturedProducts(fallback);
-      }
-    };
+    return { title, imageUrl: imageUrl || "/images/PLP.webp" };
+  } catch {
+    return { title: "همه محصولات", imageUrl: "/images/PLP.webp" };
+  }
+}
 
-    fetchData();
-  }, [category]);
+export default async function PLPHeroBanner({ category }: PLPHeroBannerProps) {
+  const [categoryMeta, featured] = await Promise.all([
+    getCategoryMeta(category),
+    getFeaturedProducts(category),
+  ]);
 
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    const mediaQuery = window.matchMedia("(min-width: 1280px)");
-    const updateColumns = () => setColumnCount(mediaQuery.matches ? 4 : 3);
-
-    updateColumns();
-    mediaQuery.addEventListener("change", updateColumns);
-    return () => mediaQuery.removeEventListener("change", updateColumns);
-  }, []);
-
-  const visibleProducts = featuredProducts
-    .filter((product) => product.image && product.image !== "")
-    .slice(0, columnCount * 2);
+  const featuredProducts = featured.length > 0 ? shuffle(featured).slice(0, MAX_HERO_PRODUCTS) : await getRandomProducts();
+  const visibleProducts = featuredProducts.slice(0, MAX_HERO_PRODUCTS);
 
   return (
-    <div className="w-full bg-slate-50 rounded-2xl py-4">
+    <div className="w-full rounded-2xl bg-slate-50 py-4">
       <PageContainer
         variant="wide"
         disablePadding
         className="space-y-3 bg-transparent px-4 pb-0 md:px-4"
       >
         <div className="flex flex-col gap-3 md:flex-row">
-          <div className="xl:grid xl:flex-1 xl:grid-cols-3 xl:justify-items-center xl:gap-3 hidden">
-            {visibleProducts.map((product) => (
-              <ProductSmallCard key={product.id} {...product}  />
+          <div className="hidden xl:grid xl:flex-1 xl:grid-cols-3 xl:justify-items-center xl:gap-3 2xl:grid-cols-4">
+            {visibleProducts.map((product, index) => (
+              <div key={product.id} className={index >= 6 ? "hidden 2xl:block" : "block"}>
+                <ProductSmallCard {...product} />
+              </div>
             ))}
           </div>
 
           <Link href="/" className="flex-shrink-0">
             <div className="relative h-[244px] w-full overflow-hidden rounded-2xl md:w-[517px]">
-              {imageUrl && (
+              {categoryMeta.imageUrl && (
                 <Image
-                  src={imageUrl}
-                  alt={title}
+                  src={categoryMeta.imageUrl}
+                  alt={categoryMeta.title}
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, 517px"
                   priority
-                  loader={imageUrl.startsWith("http") ? imageLoader : undefined}
+                  loader={categoryMeta.imageUrl.startsWith("http") ? imageLoader : undefined}
                 />
               )}
             </div>

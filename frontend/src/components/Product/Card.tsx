@@ -45,9 +45,23 @@ export interface ProductCardProps {
   priority?: boolean;
   productCode?: string;
   inventoryCount?: number;
+  /** Optional external like state/handler for PLP-level batching. */
+  isLikedOverride?: boolean;
+  isLikeLoadingOverride?: boolean;
+  onToggleLikeOverride?: (e: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
-const ProductCard: FC<ProductCardProps> = ({
+interface ProductCardLikeState {
+  isLiked: boolean;
+  isLikeLoading: boolean;
+  onToggleLike: (e: React.MouseEvent<HTMLButtonElement>) => void;
+}
+
+interface ProductCardViewProps extends ProductCardProps {
+  likeState: ProductCardLikeState;
+}
+
+const ProductCardView: FC<ProductCardViewProps> = ({
   images,
   category,
   title,
@@ -62,6 +76,7 @@ const ProductCard: FC<ProductCardProps> = ({
   isAvailable = true,
   priority = false,
   inventoryCount,
+  likeState,
 }) => {
   // State
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
@@ -69,22 +84,13 @@ const ProductCard: FC<ProductCardProps> = ({
   const [enrichedImages, setEnrichedImages] = useState(images);
   const hasRequestedLazyMedia = useRef(false);
 
-  // Hooks
-  const {
-    isLiked,
-    isLoading: isLikeLoading,
-    toggleLike,
-  } = useProductLike({
-    productId: id.toString(),
-  });
-
   // Memoized values
   const imageSignature = useMemo(() => images.join("|"), [images]);
 
   useEffect(() => {
     setEnrichedImages(images);
     hasRequestedLazyMedia.current = false;
-  }, [id, imageSignature]);
+  }, [id, imageSignature, images]);
 
   const productUrl = useMemo(() => (slug ? `/pdp/${slug}` : `/pdp/${id.toString()}`), [slug, id]);
 
@@ -127,9 +133,9 @@ const ProductCard: FC<ProductCardProps> = ({
     (e: React.MouseEvent<HTMLButtonElement>) => {
       e.preventDefault();
       e.stopPropagation();
-      toggleLike(e);
+      likeState.onToggleLike(e);
     },
-    [toggleLike],
+    [likeState],
   );
 
   const maybeLoadSecondaryMedia = useCallback(async () => {
@@ -207,9 +213,7 @@ const ProductCard: FC<ProductCardProps> = ({
                 <DiscountBadge discount={discount} />
                 {isLowStock && (
                   <div className="flex items-center gap-1 rounded-full bg-orange-500/90 px-2 py-1 backdrop-blur-sm">
-                    <span className="text-xs text-white">
-                      {faNum(inventoryCount!)} عدد
-                    </span>
+                    <span className="text-xs text-white">{faNum(inventoryCount!)} عدد</span>
                   </div>
                 )}
               </div>
@@ -238,8 +242,8 @@ const ProductCard: FC<ProductCardProps> = ({
 
         {/* Floating Action Buttons */}
         <FloatingActions
-          isLiked={isLiked}
-          isLikeLoading={isLikeLoading}
+          isLiked={likeState.isLiked}
+          isLikeLoading={likeState.isLikeLoading}
           onToggleLike={handleToggleLike}
           onQuickView={handleQuickView}
           onShare={handleShare}
@@ -273,6 +277,43 @@ const ProductCard: FC<ProductCardProps> = ({
       )}
     </>
   );
+};
+
+const ProductCardWithLocalLike: FC<ProductCardProps> = (props) => {
+  const { id } = props;
+  const { isLiked, isLoading: isLikeLoading, toggleLike } = useProductLike({
+    productId: id.toString(),
+  });
+
+  const likeState = useMemo<ProductCardLikeState>(
+    () => ({
+      isLiked,
+      isLikeLoading,
+      onToggleLike: toggleLike,
+    }),
+    [isLiked, isLikeLoading, toggleLike],
+  );
+
+  return <ProductCardView {...props} likeState={likeState} />;
+};
+
+const ProductCard: FC<ProductCardProps> = (props) => {
+  const { isLikedOverride, isLikeLoadingOverride, onToggleLikeOverride } = props;
+
+  if (onToggleLikeOverride) {
+    return (
+      <ProductCardView
+        {...props}
+        likeState={{
+          isLiked: Boolean(isLikedOverride),
+          isLikeLoading: Boolean(isLikeLoadingOverride),
+          onToggleLike: onToggleLikeOverride,
+        }}
+      />
+    );
+  }
+
+  return <ProductCardWithLocalLike {...props} />;
 };
 
 export default ProductCard;

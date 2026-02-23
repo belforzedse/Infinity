@@ -6,7 +6,7 @@ import { ENDPOINTS } from "@/constants/api";
 import { atom, useAtom } from "jotai";
 
 // Global atom to store liked products
-type LikedProduct = {
+export type LikedProduct = {
   createdAt: string;
   id: number;
   product: {
@@ -16,7 +16,7 @@ type LikedProduct = {
 };
 
 export const likedProductsAtom = atom<LikedProduct[]>([]);
-const likedProductsLoadingAtom = atom<boolean>(false);
+export const likedProductsLoadingAtom = atom<boolean>(false);
 export const likedProductsLoadedAtom = atom<boolean>(false);
 
 interface UseProductLikeParams {

@@ -14,6 +14,16 @@ export default {
     },
     {
       method: "GET",
+      path: "/products/plp",
+      handler: "product.plp",
+      config: {
+        auth: false, // Public endpoint, but accepts optional auth for admin access
+        policies: [],
+        middlewares: [],
+      },
+    },
+    {
+      method: "GET",
       path: "/products/by-slug/:slug",
       handler: "product.findBySlug",
       config: {
