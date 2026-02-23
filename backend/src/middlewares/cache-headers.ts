@@ -20,8 +20,8 @@ const CACHE_STRATEGIES = {
 
   // Product data - 30 seconds cache, 1 minute stale window
   product: {
-    maxAge: 45, // 45 seconds
-    staleWhileRevalidate: 180, // 3 minutes
+    maxAge: 30, // 30 seconds
+    staleWhileRevalidate: 60, // 1 minute
     public: true,
   },
 
@@ -189,13 +189,7 @@ export default (_config: any, { strapi }: { strapi: Strapi }) => {
     }
 
     // Get cache strategy for this endpoint
-    let strategy = getCacheStrategy(path);
-
-    // Authenticated requests should not be publicly cacheable.
-    // Keep shared cache benefits for anonymous catalog traffic only.
-    if (ctx.request.headers.authorization && "public" in strategy && strategy.public) {
-      strategy = CACHE_STRATEGIES.user;
-    }
+    const strategy = getCacheStrategy(path);
 
     // Check for If-None-Match header (conditional request)
     const ifNoneMatch = ctx.request.headers["if-none-match"];

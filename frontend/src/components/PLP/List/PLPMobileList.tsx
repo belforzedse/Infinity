@@ -1,7 +1,6 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import type { MouseEvent } from "react";
 import { IMAGE_BASE_URL } from "@/constants/api";
 import { calculateUniqueColorsCount, getUniqueColorCodes } from "@/services/product/product";
 import {
@@ -17,17 +16,9 @@ const ProductSmallCard = dynamic(() => import("@/components/Product/SmallCard"),
 
 interface PLPMobileListProps {
   products: PLPProduct[];
-  isProductLiked?: (productId: number) => boolean;
-  isProductLikeLoading?: (productId: number) => boolean;
-  onToggleProductLike?: (productId: number, e: MouseEvent<HTMLButtonElement>) => void;
 }
 
-export default function PLPMobileList({
-  products,
-  isProductLiked,
-  isProductLikeLoading,
-  onToggleProductLike,
-}: PLPMobileListProps) {
+export default function PLPMobileList({ products }: PLPMobileListProps) {
   return (
     <div className="flex flex-col gap-3 md:hidden">
       {products.map((product, index) => {
@@ -60,15 +51,6 @@ export default function PLPMobileList({
               product.attributes.product_variations?.data || [],
             )}
             colorCodes={getUniqueColorCodes(product.attributes.product_variations?.data || [])}
-            isLikedOverride={isProductLiked?.(product.id)}
-            isLikeLoadingOverride={isProductLikeLoading?.(product.id)}
-            onToggleLikeOverride={
-              onToggleProductLike
-                ? (e) => {
-                    onToggleProductLike(product.id, e);
-                  }
-                : undefined
-            }
           />
         );
       })}

@@ -3,7 +3,6 @@ export const revalidate = 120; // balance freshness with server load; shared Red
 import { Suspense } from "react";
 import { connection } from "next/server";
 import { notFound } from "next/navigation";
-import { headers } from "next/headers";
 import PLPHeroBanner from "@/components/PLP/HeroBanner";
 import PLPList from "@/components/PLP/List";
 import PageContainer from "@/components/layout/PageContainer";
@@ -23,15 +22,6 @@ import { getValidatedCategoryCached } from "@/utils/category-validation";
 import { getCategoryAndDescendantSlugs } from "@/utils/category-descendants";
 import { getProductCategories } from "@/services/product/categories";
 import type { PLPProduct } from "@/components/PLP/types";
-
-function inferDesktopFromUserAgent(userAgent: string | null): boolean {
-  if (!userAgent) return true;
-  const ua = userAgent.toLowerCase();
-  const isMobile =
-    /mobile|android|iphone|ipod|blackberry|iemobile|opera mini/.test(ua) &&
-    !/ipad|tablet/.test(ua);
-  return !isMobile;
-}
 
 interface Product {
   id: number;
@@ -216,11 +206,21 @@ async function getProducts(
   // Build query parameters for regular product listing
   // Use internal URL for server-side fetches to bypass TLS/DNS (50-200ms faster)
   const strapiBase = getStrapiServerUrl();
-  const baseUrl = `${strapiBase}/products/plp`;
+  const baseUrl = `${strapiBase}/products`;
 
-  // Lightweight PLP payload fields are enforced by backend /products/plp endpoint.
+  // Add required fields
   const queryParams = new URLSearchParams();
-  queryParams.append("includeMedia", "false");
+  queryParams.append("populate[0]", "CoverImage");
+  queryParams.append("populate[1]", "product_main_category");
+  queryParams.append("populate[2]", "product_variations");
+  queryParams.append("populate[3]", "product_variations.product_stock");
+  queryParams.append("populate[4]", "product_variations.general_discounts");
+  queryParams.append("populate[5]", "product_variations.product_variation_color");
+  queryParams.append("fields[0]", "Title");
+  queryParams.append("fields[1]", "Slug");
+  queryParams.append("fields[2]", "Description");
+  queryParams.append("fields[3]", "Status");
+  queryParams.append("fields[4]", "createdAt");
 
   // API pagination: one page per request for performance (no 500-product fetch).
   queryParams.append("pagination[page]", String(page));
@@ -286,25 +286,10 @@ async function getProducts(
     queryParams.append("sort[0]", sort);
   }
 
-  // Legacy /products fallback query shape (relations + fields required by PLP mapping).
-  const legacyQueryParams = new URLSearchParams(queryParams);
-  legacyQueryParams.append("populate[0]", "CoverImage");
-  legacyQueryParams.append("populate[1]", "product_main_category");
-  legacyQueryParams.append("populate[2]", "product_variations");
-  legacyQueryParams.append("populate[3]", "product_variations.product_stock");
-  legacyQueryParams.append("populate[4]", "product_variations.general_discounts");
-  legacyQueryParams.append("populate[5]", "product_variations.product_variation_color");
-  legacyQueryParams.append("fields[0]", "Title");
-  legacyQueryParams.append("fields[1]", "Slug");
-  legacyQueryParams.append("fields[2]", "Description");
-  legacyQueryParams.append("fields[3]", "Status");
-  legacyQueryParams.append("fields[4]", "createdAt");
-
   // Construct final URL (internal first; fallback to public API if unreachable)
   const queryString = queryParams.toString();
   const url = `${baseUrl}?${queryString}`;
-  const fallbackUrl = `${API_BASE_URL}/products/plp?${queryString}`;
-  const legacyFallbackUrl = `${API_BASE_URL}/products?${legacyQueryParams.toString()}`;
+  const fallbackUrl = `${API_BASE_URL}/products?${queryString}`;
 
   let response: Response;
   let data: { data?: unknown[]; meta?: { pagination?: { total?: number; pageCount?: number } } };
@@ -326,22 +311,11 @@ async function getProducts(
       });
       data = await response.json();
     } catch (secondErr) {
-      logger.warn("[PLP] products/plp fetch failed, trying legacy /products", {
-        error: String(secondErr),
-      });
-      try {
-        response = await fetchWithTimeout(legacyFallbackUrl, {
-          timeoutMs: 15000,
-          next: { revalidate: 120 },
-        });
-        data = await response.json();
-      } catch (thirdErr) {
-        logger.error("[PLP] Products fetch failed (legacy fallback)", { error: String(thirdErr) });
-        return {
-          products: [],
-          pagination: { page, pageSize, pageCount: 0, total: 0 },
-        };
-      }
+      logger.error("[PLP] Products fetch failed (public fallback)", { error: String(secondErr) });
+      return {
+        products: [],
+        pagination: { page, pageSize, pageCount: 0, total: 0 },
+      };
     }
   }
 
@@ -513,8 +487,6 @@ export default async function PLPPage({
   // Ensure env (e.g. STRAPI_INTERNAL_URL) is read at request time, not build time (Next.js 16)
   await connection();
   const params = await searchParams;
-  const headerList = await headers();
-  const initialIsDesktop = inferDesktopFromUserAgent(headerList.get("user-agent"));
 
   // Extract parameters with default values
   const category = typeof params.category === "string" ? params.category : undefined;
@@ -659,7 +631,6 @@ export default async function PLPPage({
           products={products as PLPProduct[]}
           pagination={pagination}
           category={validatedCategory}
-          initialIsDesktop={initialIsDesktop}
           allCategories={allCategories}
           searchQuery={search}
           sidebarSlot={sidebarSlot}
