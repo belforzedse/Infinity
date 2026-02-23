@@ -1,0 +1,76 @@
+---
+description: Frontend load regression when scaling Next.js instances (e.g. 6→12) — causes other than cache handler
+globs: frontend/next.config.ts, frontend/src/services/**/*.ts, frontend/src/app/(product)/page.tsx, load-test/*.js
+alwaysApply: false
+---
+
+# Frontend Load Regression (Cache Handler Off)
+
+When the **custom cache handler is disabled** but the frontend still times out under load (e.g. ~1k VUs that used to pass with fewer instances), the bottleneck is not the cache handler code itself. This rule documents likely causes and fixes.
+
+## Context
+
+- **Symptom:** Load test (e.g. k6 against `https://new.infinitycolor.co`) fails with request timeouts / EOF when scaling to 12 Next.js instances; API-only test is fine.
+- **Config:** `next.config.ts` has `cacheHandler` commented out; each Next instance uses **in-memory Data Cache only** (no shared Redis).
+
+## Root Causes (Other Than Cache Handler)
+
+### 1. Multiple instances × in-memory cache → revalidation storm
+
+With **no shared cache**, each of N instances has its own in-memory cache. So:
+
+- **Revalidation load on Strapi scales with N.** Every 60–90s (per `revalidate` on homepage/PLP), each instance can revalidate the same routes. That’s N× more Strapi traffic than with one shared Redis cache.
+- **Effective cache “size” is split.** With 12 instances, each instance serves ~1/12 of traffic; cache hit rate per instance can be lower than with 6 instances (or one shared cache), so more cache misses and more Strapi calls.
+
+**Fix:**
+
+- Re-enable the **shared cache handler** (Redis + LRU) in production so all instances share one cache and revalidation is coherent; or
+- Reduce the number of frontend instances and rely on higher cache hit rate per instance; or
+- Increase `revalidate` values (e.g. homepage 90→180) to reduce revalidation frequency (trade-off: staler data).
+
+### 2. Nginx `ip_hash` concentrating load
+
+If Nginx upstream for Next.js uses **`ip_hash`**, all VUs from a single client IP (e.g. one k6 runner) go to the same subset of backend instances (or one). Then a few instances get most of the load and queue requests until timeouts.
+
+**Check:** In `/etc/nginx/sites-available/infinitycolor.org` (or equivalent), see how `next_upstream` is defined. If you use `ip_hash`, load tests from one IP will not spread across all 12 instances.
+
+**Fix:**
+
+- For **production traffic**, `ip_hash` can be kept for session/cache affinity.
+- For **load testing**, either run k6 from multiple IPs or temporarily use **round-robin** (or least_conn) so all instances are exercised. See [docker-load-scaling.mdc](docker-load-scaling.mdc).
+
+### 3. Homepage request fan-out to Strapi
+
+Each `GET /` triggers several server-side fetches:
+
+- `getLatestBlogPosts()`, `getProductCategories()`, `getPublicSuperAdminSettings()` (in page),
+- Then `HomeProductSections` (inside Suspense): `getHomepageSections()` (which itself does settings + batch + new/curated products) and optionally `getFeaturedCategoryProductsByRating()`.
+
+So **one homepage request ≈ 5+ Strapi calls**. At 1000 frontend RPS, Strapi could see ~5k+ RPS. If Strapi or the network to Strapi becomes the bottleneck, Next.js requests wait and time out.
+
+**Check:** Run a load test that hits **only the API** at ~5× the frontend RPS you care about (same endpoints as homepage: settings, products, categories, blog). If API latency degrades or errors rise, the bottleneck is Strapi/DB, not Next.js alone.
+
+**Fix:** Scale Strapi, add/optimize rest-cache, or reduce homepage fan-out (e.g. longer revalidate, fewer sections, or shared cache so fewer Strapi calls).
+
+### 4. Middleware cost (minor for homepage)
+
+[frontend/middleware.ts](frontend/middleware.ts) runs on almost every request. For `GET /` it only sets headers and does path checks; **no extra fetch**. For `/pdp/<numeric-id>` it performs one Strapi fetch to resolve slug. So middleware is not the main cost for homepage load.
+
+### 5. Node/Next.js server timeouts
+
+Behind Nginx, long-lived connections can be closed by the Node server if **keepAliveTimeout** is too low. [frontend-server-capacity.mdc](frontend-server-capacity.mdc) suggests `next start --keepAliveTimeout 70000` (or equivalent for standalone). Ensure Nginx and Next both use compatible timeouts so connections aren’t closed prematurely under load.
+
+## Checklist When Frontend Times Out Under Load (Cache Handler Off)
+
+- [ ] Confirm Nginx upstream for Next uses a balancing method that spreads load in your test (e.g. round-robin or least_conn for k6 from one IP).
+- [ ] Confirm Strapi can handle ~5× frontend RPS (run API-only load test at that rate).
+- [ ] Consider re-enabling shared cache handler (Redis) so 12 instances don’t each revalidate independently.
+- [ ] If keeping cache handler off, consider fewer instances or higher `revalidate` to reduce Strapi load.
+- [ ] Ensure `keepAliveTimeout` (and Nginx proxy timeouts) are high enough for long-running requests.
+
+## Related
+
+- [frontend-server-capacity.mdc](frontend-server-capacity.mdc) – Scaling and shared cache
+- [frontend-performance.mdc](frontend-performance.mdc) – API URL, duplicate fetches, revalidate
+- [docker-load-scaling.mdc](docker-load-scaling.mdc) – Nginx upstreams and scale compose
+- [frontend-cache-handler.mdc](frontend-cache-handler.mdc) – Redis cache handler when re-enabled

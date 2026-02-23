@@ -130,3 +130,22 @@ Increase **worker_connections** (and optionally **worker_processes**) so that `w
 ### 3. Optional: rule out the network
 
 Run the same k6 script **from the server** (or a pod in the same DC) against **localhost** or the internal VIP. If failures disappear, the limit is before the app (e.g. Nginx accepting from the internet, or a cloud LB). If they stay, the limit is in Nginx upstream, Node, or the API.
+
+---
+
+## Production-style load test (testing real capacity)
+
+To test whether the **cluster** can handle high concurrency (e.g. 4k users), two things matter:
+
+1. **Cache handler on**  
+   The Next.js custom cache handler (Redis + LRU in `frontend/next.config.ts`) must be **enabled** in production. With it on, all Next instances share one cache; revalidation and Strapi load stay manageable. With it off, each instance has its own cache and you get revalidation storms and timeouts at lower VUs.
+
+2. **Spread traffic across instances**  
+   Nginx uses **ip_hash** for the Next upstream, so one client IP always hits the **same** backend instance. If you run k6 from **one machine** (one IP), almost all VUs hit **one** Next.js instance; the others stay idle. So you're stress-testing a single process, not the cluster.
+
+   To test real capacity:
+
+   - **Option A:** On the server, temporarily switch the Next upstream to **round_robin** (or **least_conn**) in the Nginx site config, reload Nginx, then run k6. Traffic will spread across all 12 instances. Restore **ip_hash** after the test if you want session/cache affinity again.
+   - **Option B:** Run k6 from **multiple IPs** (e.g. distributed k6, or several runners) so ip_hash naturally distributes load.
+
+With cache handler on and traffic spread (round-robin or multi-IP), you can see whether 12 Next + 6 Strapi actually handle 4k+ concurrent users. See [.cursor/rules/frontend-load-regression.mdc](../.cursor/rules/frontend-load-regression.mdc) for details.

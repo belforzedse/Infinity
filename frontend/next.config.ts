@@ -57,12 +57,11 @@ const nextConfig = {
   serverExternalPackages: ["jsdom"],
   // Disabled: Nginx already compresses responses; double compression wastes CPU on all instances.
   compress: false,
-  // Custom cache handler TEMPORARILY DISABLED for load testing (was: Redis + LRU fallback via cache-handler.mjs).
-  // To re-enable: set cacheHandler to require.resolve("./cache-handler.mjs") in production and set cacheMaxMemorySize.
-  // cacheHandler:
-  //   process.env.NODE_ENV === "production"
-  //     ? require.resolve("./cache-handler.mjs")
-  //     : undefined,
-  // cacheMaxMemorySize: 256 * 1024 * 1024, // 256MB in-memory cache per instance
+  // Custom cache handler: Redis + LRU fallback (cache-handler.mjs). Shared cache across instances for production load.
+  cacheHandler:
+    process.env.NODE_ENV === "production"
+      ? require.resolve("./cache-handler.mjs")
+      : undefined,
+  cacheMaxMemorySize: 256 * 1024 * 1024, // 256MB in-memory cache per instance
 };
 module.exports = nextConfig;

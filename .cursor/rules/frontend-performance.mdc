@@ -63,7 +63,16 @@ Use this when the site feels "extremely slow", when debugging SSR/API latency, o
 - **Client products fetch**: On initial load the server already fetches products. [PLP/List.tsx](frontend/src/components/PLP/List.tsx) skips the first `fetchProducts()` run on mount (`didInitialMountRef`) so the same request is not sent twice. Client fetch runs when the user changes filters/page/sort.
 - **Client categories fetch**: When the server passes `allCategories` (e.g. category PLP), the client uses them for the filter dropdown and does not call `getProductCategories` again. Only when visiting `/plp` with no category does the client fetch categories for the filter.
 
-## 7. Checklist when the site is slow
+## 7. Load regression (e.g. scaling 6→12 instances, cache handler off)
+
+If the frontend times out under load (e.g. ~1k VUs) and the **custom cache handler is already disabled**, the cause is elsewhere. See **[frontend-load-regression.mdc](frontend-load-regression.mdc)** for:
+
+- Multiple instances with in-memory cache only → revalidation storm and Strapi overload
+- Nginx `ip_hash` concentrating load on few instances during single-IP load tests
+- Homepage fan-out (5+ Strapi calls per GET /) and how to verify Strapi capacity
+- Checklist and fixes (shared cache, revalidate, Nginx balancing, keepAliveTimeout)
+
+## 8. Checklist when the site is slow
 
 - [ ] Is `STRAPI_INTERNAL_URL` set in the environment where Next.js runs (e.g. Docker/prod)?
 - [ ] Are we fetching the same data twice in one request (e.g. settings)? Pass from parent when possible.
@@ -74,6 +83,7 @@ Use this when the site feels "extremely slow", when debugging SSR/API latency, o
 
 ## Related
 
+- [frontend-load-regression.mdc](frontend-load-regression.mdc) – Load regression when cache handler is off (multiple instances, Nginx, Strapi fan-out)
 - [backend-api-domain.mdc](backend-api-domain.mdc) – Production API domain and env overrides
 - [hero-slider-customization.mdc](hero-slider-customization.mdc) – Hero slide configs and slot structure
 - [home-page-layout.mdc](home-page-layout.mdc) – Home page data fetching and sections
