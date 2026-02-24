@@ -217,6 +217,7 @@ frontend:build:
         SITE_URL: $STAGING_SITE_URL
         FRONTEND_MATOMO_URL: $STAGING_FRONTEND_MATOMO_URL
         FRONTEND_MATOMO_SITE_ID: $STAGING_FRONTEND_MATOMO_SITE_ID
+        FRONTEND_SENTRY_DSN: $STAGING_FRONTEND_SENTRY_DSN
     - if: '$CI_COMMIT_REF_NAME == "main"'
       changes: [frontend/**/*, .gitlab-ci.yml]
       variables:
@@ -229,6 +230,7 @@ frontend:build:
         SITE_URL: $PROD_SITE_URL
         FRONTEND_MATOMO_URL: $PROD_FRONTEND_MATOMO_URL
         FRONTEND_MATOMO_SITE_ID: $PROD_FRONTEND_MATOMO_SITE_ID
+        FRONTEND_SENTRY_DSN: $PROD_FRONTEND_SENTRY_DSN
     - when: never
   script:
     - |
@@ -244,6 +246,7 @@ frontend:build:
         --build-arg NEXT_PUBLIC_SITE_URL="$SITE_URL" \
         --build-arg NEXT_PUBLIC_MATOMO_URL="${FRONTEND_MATOMO_URL:-}" \
         --build-arg NEXT_PUBLIC_MATOMO_SITE_ID="${FRONTEND_MATOMO_SITE_ID:-}" \
+        --build-arg NEXT_PUBLIC_SENTRY_DSN="${FRONTEND_SENTRY_DSN:-}" \
         --build-arg STRAPI_BUILD_TIME_URL="${STRAPI_BUILD_TIME_URL:-}" \
         --build-arg STRAPI_INTERNAL_URL="${STRAPI_INTERNAL_URL:-}" \
         --build-arg GITHUB_SHA="$CI_COMMIT_SHA" \

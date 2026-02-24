@@ -92,7 +92,8 @@
     "use-debounce": "^10.0.4",
     "xlsx": "^0.18.5",
     "yarn": "^1.22.22",
-    "zaman": "^2.1.1"
+    "zaman": "^2.1.1",
+    "@sentry/nextjs": "^9"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

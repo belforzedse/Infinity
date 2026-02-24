@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import Link from 'next/link';
+import * as Sentry from '@sentry/nextjs';
 
 export default function GlobalError({
   error,
@@ -12,6 +13,9 @@ export default function GlobalError({
 }) {
   useEffect(() => {
     console.error('Global error:', error);
+    if (process.env.NEXT_PUBLIC_SENTRY_DSN && typeof window !== 'undefined') {
+      Sentry.captureException(error);
+    }
   }, [error]);
 
   return (

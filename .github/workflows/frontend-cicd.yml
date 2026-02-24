@@ -109,6 +109,7 @@ jobs:
             NEXT_PUBLIC_SITE_URL=${{ secrets.SITE_URL }}
             NEXT_PUBLIC_MATOMO_URL=${{ secrets.FRONTEND_MATOMO_URL }}
             NEXT_PUBLIC_MATOMO_SITE_ID=${{ secrets.FRONTEND_MATOMO_SITE_ID }}
+            NEXT_PUBLIC_SENTRY_DSN=${{ secrets.FRONTEND_SENTRY_DSN }}
             STRAPI_BUILD_TIME_URL=${{ secrets.FRONTEND_STRAPI_BUILD_TIME_URL }}
             GITHUB_SHA=${{ github.sha }}
 

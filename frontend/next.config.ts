@@ -1,3 +1,5 @@
+import { withSentryConfig } from "@sentry/nextjs";
+
 /**
  * Load build version from generated JSON file
  * This version is used for cache invalidation and is injected as NEXT_PUBLIC_BUILD_VERSION
@@ -64,4 +66,6 @@ const nextConfig = {
       : undefined,
   cacheMaxMemorySize: 256 * 1024 * 1024, // 256MB in-memory cache per instance
 };
-module.exports = nextConfig;
+module.exports = withSentryConfig(nextConfig, {
+  silent: !process.env.CI,
+});
