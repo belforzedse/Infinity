@@ -28,14 +28,37 @@ Backend DSN is passed via the env file (see below), not as a GitHub secret.
 
 ### GitLab CI/CD (Settings → CI/CD → Variables)
 
-#### Frontend Variables (per environment)
+All frontend variables use **environment-scoped** configuration. Create variables with the same name but different values per environment:
 
-| Variable | Description | Example | Protected | Masked |
-|----------|-------------|---------|-----------|--------|
-| `PROD_FRONTEND_SENTRY_DSN` | Production DSN | `https://key@errors.infinitycolor.org/1` | Yes | Yes |
-| `STAGING_FRONTEND_SENTRY_DSN` | Staging DSN | `https://key@errors.infinitycolor.org/2` | Yes | Yes |
+#### Frontend Variables (all environment-scoped)
 
-Note: GitLab CI uses environment-specific variables like `PROD_FRONTEND_SENTRY_DSN` and `STAGING_FRONTEND_SENTRY_DSN` which are mapped to `FRONTEND_SENTRY_DSN` in the build job.
+| Variable | Description | Protected | Masked |
+|----------|-------------|-----------|--------|
+| `FRONTEND_API_BASE_URL` | API base URL | Yes | Yes |
+| `FRONTEND_IMAGE_BASE_URL` | Image base URL | Yes | Yes |
+| `FRONTEND_STRAPI_TOKEN` | Strapi API token | Yes | Yes |
+| `SITE_URL` | Public site URL | Yes | Yes |
+| `FRONTEND_MATOMO_URL` | Matomo analytics URL | Yes | Yes |
+| `FRONTEND_MATOMO_SITE_ID` | Matomo site ID | Yes | Yes |
+| `FRONTEND_SENTRY_DSN` | Sentry/Bugsink DSN | Yes | Yes |
+| `STRAPI_BUILD_TIME_URL` | Build-time Strapi URL | Yes | Yes |
+| `STRAPI_INTERNAL_URL` | Internal Strapi URL for SSR | Yes | Yes |
+
+To set up environment-scoped variables:
+1. Go to **Settings → CI/CD → Variables**
+2. Click **Add variable**
+3. Set **Key**: (e.g., `FRONTEND_SENTRY_DSN`)
+4. Set **Value**: Production value
+5. Check **Protect variable**
+6. Check **Mask variable** (recommended for sensitive values)
+7. In the **Environments** dropdown, select **Production**
+8. Save
+9. Click **Add variable** again
+10. Use the **same Key** but set Staging value
+11. Select **Staging** environment
+12. Save
+
+GitLab automatically resolves the correct value based on the deployment environment.
 
 #### Backend Variables
 
