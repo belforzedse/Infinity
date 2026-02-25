@@ -16,7 +16,7 @@ type Options = {
  */
 export default function useSmoothLoading(
   loading: boolean,
-  { showDelayMs = 120, minVisibleMs = 300 }: Options = {},
+  { showDelayMs = 400, minVisibleMs = 100 }: Options = {},
 ) {
   const [visible, setVisible] = useState(false);
   const showTimer = useRef<number | null>(null);
