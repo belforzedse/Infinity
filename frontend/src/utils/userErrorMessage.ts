@@ -3,9 +3,9 @@ import { extractErrorMessage, translateErrorMessage } from "@/lib/errorTranslati
 const DEFAULT_MESSAGE = "متأسفانه مشکلی پیش آمد. لطفاً دوباره تلاش کنید.";
 
 /**
+ * Use this for any user-visible error string (toast, inline error, notification).
  * Converts a caught error into a user-facing Persian message.
- * The raw message is preserved for logging, but only the translated string
- * is returned to the UI.
+ * The raw message is preserved for logging, but only the translated string is returned to the UI.
  */
 export function getUserFacingErrorMessage(error: unknown, fallback?: string): string {
   const rawMessage = extractErrorMessage(error);

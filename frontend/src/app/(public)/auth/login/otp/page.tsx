@@ -18,6 +18,7 @@ import {
 import { setAccessToken } from "@/utils/accessToken";
 import { isProfileIncomplete } from "@/utils/profile";
 import AuthReturnButton from "@/components/Auth/ReturnButton";
+import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -85,17 +86,7 @@ export default function LoginPage() {
           toast.error(fallbackMessage);
         }
       } catch (error: unknown) {
-        const errorMessage =
-          typeof error === "object" &&
-          error !== null &&
-          "message" in error &&
-          typeof (error as { message?: string }).message === "string"
-            ? (error as { message: string }).message
-            : typeof error === "string" && error
-              ? error
-              : fallbackMessage;
-
-        toast.error(errorMessage);
+        toast.error(getUserFacingErrorMessage(error, fallbackMessage));
       }
     }
   };

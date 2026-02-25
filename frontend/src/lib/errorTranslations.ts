@@ -40,6 +40,34 @@ export const ERROR_MESSAGE_MAP: Record<string, string> = {
   // Server errors
   "server error": "خطای سرور. لطفاً بعداً دوباره تلاش کنید.",
   "too many requests": "تعداد درخواست‌ها بیش از حد است. لطفاً چند لحظه بعد دوباره تلاش کنید.",
+
+  // Cart / order / checkout
+  "cart is empty": "سبد خرید شما خالی است.",
+  "cart empty": "سبد خرید شما خالی است.",
+  "invalid item": "برخی از کالاهای سبد خرید معتبر نیستند. لطفاً سبد خرید خود را بررسی کنید.",
+  "invalid price": "قیمت برخی از کالاها نامعتبر است. لطفاً سبد خرید خود را بروزرسانی کنید.",
+  "invalid amount": "مبلغ سفارش نامعتبر است.",
+  "shipping required": "لطفاً روش ارسال را انتخاب کنید.",
+  "address required": "لطفاً آدرس تحویل را انتخاب کنید.",
+  "address not found": "آدرس انتخاب شده یافت نشد. لطفاً آدرس دیگری انتخاب کنید.",
+  "invalid shipping": "روش ارسال انتخاب شده معتبر نیست.",
+  "reserve not found": "سفارش رزروی معتبر یافت نشد یا منقضی شده است. لطفاً سفارش جدید ثبت کنید.",
+  "order item creation failed": "خطا در ثبت اقلام سفارش. لطفاً مجدداً تلاش کنید.",
+  "contract creation failed": "خطا در ایجاد قرارداد. لطفاً مجدداً تلاش کنید.",
+
+  // Wallet / balance
+  "insufficient balance": "موجودی کیف پول کافی نیست.",
+  "insufficient funds": "موجودی کیف پول کافی نیست.",
+
+  // Discount / coupon
+  "invalid discount": "کد تخفیف نامعتبر یا منقضی شده است.",
+  "discount expired": "کد تخفیف منقضی شده است.",
+  "discount not found": "کد تخفیف یافت نشد.",
+
+  // Payment / gateway
+  "payment failed": "پرداخت ناموفق بود. لطفاً دوباره تلاش کنید.",
+  "payment error": "خطا در پرداخت. لطفاً دوباره تلاش کنید.",
+  "gateway": "درگاه پرداخت در دسترس نیست. لطفاً بعداً تلاش کنید.",
 };
 
 /**

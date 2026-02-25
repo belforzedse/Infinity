@@ -1,3 +1,7 @@
+/**
+ * Blog API service. Throws English errors for logging.
+ * Callers must use getUserFacingErrorMessage(error, fallback) in catch before showing toasts or inline errors.
+ */
 import { apiClient } from "@/services";
 import { ApiResponse, PaginatedResponse } from "@/types/api";
 import { API_BASE_URL } from "@/constants/api";
