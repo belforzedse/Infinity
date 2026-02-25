@@ -10,6 +10,7 @@ import AuthPasswordInput from "@/components/Kits/Auth/Input/Password";
 import { AuthService } from "@/services";
 import toast from "react-hot-toast";
 import AuthReturnButton from "@/components/Auth/ReturnButton";
+import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
 
 interface FormData {
   firstName: string;
@@ -94,13 +95,11 @@ export default function RegisterInfoPage() {
           router.push("/account");
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
-      const message =
-        error?.response?.data?.error?.message ||
-        error?.message ||
-        "خطا در ثبت اطلاعات. لطفا دوباره تلاش کنید";
-      toast.error(message);
+      toast.error(
+        getUserFacingErrorMessage(error, "خطا در ثبت اطلاعات. لطفا دوباره تلاش کنید"),
+      );
     } finally {
       setIsLoading(false);
     }

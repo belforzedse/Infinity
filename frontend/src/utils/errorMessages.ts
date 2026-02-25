@@ -1,4 +1,5 @@
 import { ERROR_MESSAGES, HTTP_STATUS } from "@/constants/api";
+import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
 
 interface ErrorLike {
   message?: string;
@@ -18,18 +19,15 @@ const STATUS_MESSAGE_MAP: Record<number, string> = {
 };
 
 /**
- * Maps a technical error object to a user‑friendly message.
- * Falls back to the provided default message when no match is found.
+ * Maps a technical error object to a user‑friendly Persian message.
+ * Delegates to getUserFacingErrorMessage so all messages are translated; status/network
+ * mapping is preserved first so UI never receives raw English.
  */
 export const getErrorMessage = (
   error: unknown,
   fallback: string = ERROR_MESSAGES.DEFAULT,
 ): string => {
   const err = error as ErrorLike | undefined;
-
-  if (err?.response?.data?.message) {
-    return err.response.data.message;
-  }
 
   if (err?.response?.status && STATUS_MESSAGE_MAP[err.response.status]) {
     return STATUS_MESSAGE_MAP[err.response.status];
@@ -43,11 +41,7 @@ export const getErrorMessage = (
     return ERROR_MESSAGES.TIMEOUT;
   }
 
-  if (typeof err?.message === "string") {
-    return err.message;
-  }
-
-  return fallback;
+  return getUserFacingErrorMessage(error, fallback);
 };
 
 /**

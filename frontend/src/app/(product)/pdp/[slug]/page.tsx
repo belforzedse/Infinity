@@ -12,6 +12,7 @@ import type { Metadata } from "next";
 import { IMAGE_BASE_URL, API_BASE_URL, ENDPOINTS } from "@/constants/api";
 import { SITE_NAME } from "@/config/site";
 import logger from "@/utils/logger";
+import { translateErrorMessage } from "@/lib/errorTranslations";
 import { ProductSchema } from "@/components/SEO/ProductSchema";
 import { BreadcrumbSchema } from "@/components/SEO/BreadcrumbSchema";
 import { ReviewSchema } from "@/components/SEO/ReviewSchema";
@@ -597,7 +598,7 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
             <p className="font-semibold">Debug Info (Development Mode):</p>
             <p>Original Slug: {slug}</p>
             <p>Decoded Slug: {decodedSlug}</p>
-            <p>Error: {errorDetails.message}</p>
+            <p>Error: {translateErrorMessage(errorDetails.message, "متأسفانه مشکلی پیش آمد. دوباره تلاش کنید.")}</p>
             {errorDetails.status && <p>Status: {errorDetails.status}</p>}
             {errorDetails.endpoint && <p>Endpoint: {errorDetails.endpoint}</p>}
             {API_BASE_URL && <p>API Base URL: {API_BASE_URL}</p>}

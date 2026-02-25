@@ -18,7 +18,7 @@ jest.mock("@/constants/api", () => ({
 }));
 
 describe("getErrorMessage", () => {
-  it("should return response data message if available", () => {
+  it("should return translated message for response data message (English → Persian or fallback)", () => {
     const error = {
       response: {
         data: {
@@ -26,8 +26,8 @@ describe("getErrorMessage", () => {
         },
       },
     };
-
-    expect(getErrorMessage(error)).toBe("Custom error message");
+    // getErrorMessage delegates to getUserFacingErrorMessage; unknown English uses fallback
+    expect(getErrorMessage(error)).toBe(ERROR_MESSAGES.DEFAULT);
   });
 
   it("should return status-specific message for 401", () => {
@@ -76,12 +76,12 @@ describe("getErrorMessage", () => {
     expect(getErrorMessage(error)).toBe(ERROR_MESSAGES.TIMEOUT);
   });
 
-  it("should return error message if it's a string", () => {
+  it("should return translated message for known English strings", () => {
     const error = {
       message: "Something went wrong",
     };
-
-    expect(getErrorMessage(error)).toBe("Something went wrong");
+    // "something went wrong" is in ERROR_MESSAGE_MAP → Persian
+    expect(getErrorMessage(error)).toBe("متأسفانه مشکلی پیش آمد. دوباره تلاش کنید.");
   });
 
   it("should return default fallback for unknown errors", () => {
@@ -97,7 +97,7 @@ describe("getErrorMessage", () => {
     expect(getErrorMessage(error, customFallback)).toBe(customFallback);
   });
 
-  it("should prioritize response data message over status", () => {
+  it("should prioritize status mapping over response body when status is mapped", () => {
     const error = {
       response: {
         status: 401,
@@ -106,8 +106,8 @@ describe("getErrorMessage", () => {
         },
       },
     };
-
-    expect(getErrorMessage(error)).toBe("Specific auth error");
+    // Status is checked first; 401 → UNAUTHORIZED
+    expect(getErrorMessage(error)).toBe(ERROR_MESSAGES.UNAUTHORIZED);
   });
 
   it("should handle null or undefined error", () => {
@@ -115,12 +115,12 @@ describe("getErrorMessage", () => {
     expect(getErrorMessage(undefined)).toBe(ERROR_MESSAGES.DEFAULT);
   });
 
-  it("should handle error with no response", () => {
+  it("should return fallback for unmapped error message", () => {
     const error = {
       message: "Random error",
     };
-
-    expect(getErrorMessage(error)).toBe("Random error");
+    // Unknown English message → fallback (safe for UI)
+    expect(getErrorMessage(error)).toBe(ERROR_MESSAGES.DEFAULT);
   });
 
   it("should handle errors with non-mapped status codes", () => {

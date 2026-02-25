@@ -25,6 +25,8 @@ import { useCart } from "@/contexts/CartContext";
 import { currentUserAtom, userLoadingAtom } from "@/lib/atoms/auth";
 import { ACCESS_TOKEN_STORAGE_KEY } from "@/utils/accessToken";
 import { trackFunnelStep, trackMatomoEvent } from "@/lib/analytics/matomo";
+import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
+import { translateErrorMessage } from "@/lib/errorTranslations";
 
 export type FormData = {
   fullName: string;
@@ -226,7 +228,7 @@ function ShoppingCartBillForm({}: Props) {
           setDiscountPreview({ discount: res.discount, summary: res.summary });
         }
       } catch (e) {
-        const errorMsg = e instanceof Error ? e.message : JSON.stringify(e);
+        const errorMsg = getUserFacingErrorMessage(e, "خطا در اعمال کد تخفیف. دوباره تلاش کنید.");
         console.error("applyDiscount failed:", errorMsg, e);
       }
     };
@@ -488,14 +490,20 @@ function ShoppingCartBillForm({}: Props) {
               displayError = "سفارش رزروی معتبر یافت نشد یا منقضی شده است. لطفاً سفارش جدید ثبت کنید.";
               break;
             default:
-              // Use backend message if available
+              // Use backend message translated to Persian (never show raw)
               if (errorMessage && typeof errorMessage === "string") {
-                displayError = errorMessage;
+                displayError = translateErrorMessage(
+                  errorMessage,
+                  "خطا در ثبت سفارش. لطفا مجددا تلاش کنید.",
+                );
               }
           }
         } else if (errorMessage && typeof errorMessage === "string") {
           trackCheckoutError("BACKEND_MESSAGE");
-          displayError = errorMessage;
+          displayError = translateErrorMessage(
+            errorMessage,
+            "خطا در ثبت سفارش. لطفا مجددا تلاش کنید.",
+          );
         } else {
           trackCheckoutError("FINALIZE_FAILED");
         }
@@ -602,24 +610,26 @@ function ShoppingCartBillForm({}: Props) {
               break;
             default:
               if (errorMessage && typeof errorMessage === "string") {
-                displayError = errorMessage;
+                displayError = translateErrorMessage(
+                  errorMessage,
+                  "خطا در ثبت سفارش. لطفا مجددا تلاش کنید.",
+                );
               }
           }
         } else if (errorMessage && typeof errorMessage === "string") {
           trackCheckoutError("BACKEND_MESSAGE");
-          displayError = errorMessage;
-        }
-      } else if (err.message) {
-        const normalizedError = String(err.message).toLowerCase();
-        trackCheckoutError(normalizedError.includes("network") ? "NETWORK_ERROR" : "UNKNOWN_ERROR");
-        // Network or other errors
-        if (err.message.includes("Network")) {
-          displayError = "خطا در اتصال به سرور. لطفاً اتصال اینترنت خود را بررسی کنید";
-        } else {
-          displayError = err.message;
+          displayError = translateErrorMessage(
+            errorMessage,
+            "خطا در ثبت سفارش. لطفا مجددا تلاش کنید.",
+          );
         }
       } else {
-        trackCheckoutError("UNKNOWN_ERROR");
+        const normalizedError = err?.message ? String(err.message).toLowerCase() : "";
+        trackCheckoutError(normalizedError.includes("network") ? "NETWORK_ERROR" : "UNKNOWN_ERROR");
+        displayError = getUserFacingErrorMessage(
+          err,
+          "خطا در ثبت سفارش. لطفا مجددا تلاش کنید.",
+        );
       }
 
       setError(displayError);

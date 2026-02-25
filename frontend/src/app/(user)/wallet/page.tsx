@@ -10,6 +10,7 @@ import UserContainer from "@/components/layout/UserContainer";
 import AccountQuickLinks from "@/components/User/Account/QuickLinks";
 import { AlertCircleIcon, CheckIcon, InfoIcon } from "lucide-react";
 import WalletService from "@/services/wallet";
+import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
 
 const WALLET_CHARGE_DISABLED = true;
 
@@ -153,9 +154,9 @@ export default function WalletPage() {
         });
 
         setDepositList(deposits);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Failed to fetch transactions:", err);
-        setTransactionsError(err.message || "خطا در دریافت تراکنش‌ها");
+        setTransactionsError(getUserFacingErrorMessage(err, "خطا در دریافت تراکنش‌ها"));
         setDepositList([]);
       } finally {
         setTransactionsLoading(false);

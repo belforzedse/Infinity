@@ -18,6 +18,7 @@ alwaysApply: false
 
 ## Frontend
 
+- **Always use a single path for user-visible errors:** Use `getUserFacingErrorMessage(error, fallback)` (from `frontend/src/utils/userErrorMessage.ts`), or `extractErrorMessage` + `translateErrorMessage` (from `frontend/src/lib/errorTranslations.ts`), before passing an error to `toast.error`, `setError`, or any user-visible text. **Never** show `error.message` or backend `response.data.message` directly.
 - `frontend/src/constants/api.ts`: `ERROR_MESSAGES` are all in Persian.
 - `frontend/src/lib/errorTranslations.ts`: Maps any stray English backend messages to Persian; default fallback includes "دوباره تلاش کنید".
 - Auth fallbacks (e.g. OTP page): Use Persian messages.
