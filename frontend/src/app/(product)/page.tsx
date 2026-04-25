@@ -7,7 +7,9 @@ import { connection } from "next/server";
 import { ALLOWED_HOME_NAV_CATEGORY_NAME_SUBSTRINGS } from "@/constants/categories";
 import { getProductCategories } from "@/services/product/categories";
 import { blogService } from "@/services/blog/blog.service";
+import { getActiveStories } from "@/services/story/story.service";
 import { BlogCarousel } from "@/components/Blog";
+import StoriesRail from "@/components/Home/StoriesRail";
 import DesktopSlider from "@/components/Hero/desktopSlider";
 import MobileSlider from "@/components/Hero/mobileSlider";
 import TabletSlider from "@/components/Hero/tabletSlider";
@@ -52,6 +54,15 @@ async function getLatestBlogPosts() {
   }
 }
 
+async function getStoriesForHome() {
+  try {
+    return await getActiveStories();
+  } catch (error) {
+    console.error("Error fetching active stories:", error);
+    return [];
+  }
+}
+
 function ProductSectionsFallback() {
   return (
     <section className="space-y-8">
@@ -69,7 +80,7 @@ export default async function Home() {
   // Ensure env (e.g. STRAPI_INTERNAL_URL) is read at request time in the container, not build time (Next.js 16)
   await connection();
 
-  const [latestBlogPosts, parentCategories, homepageSettings] = await Promise.all([
+  const [latestBlogPosts, parentCategories, homepageSettings, activeStories] = await Promise.all([
     getLatestBlogPosts(),
     getProductCategories({
         mainOnly: true,
@@ -79,6 +90,7 @@ export default async function Home() {
         revalidate: 90,
       }),
     getPublicSuperAdminSettings(),
+    getStoriesForHome(),
   ]);
 
   const promoBanners = [
@@ -154,6 +166,13 @@ export default async function Home() {
           />
         </Reveal>
       </section>
+
+      {/* Stories Rail */}
+      {activeStories.length > 0 && (
+        <section>
+          <StoriesRail stories={activeStories} />
+        </section>
+      )}
 
       <Suspense fallback={<ProductSectionsFallback />}>
         <HomeProductSections

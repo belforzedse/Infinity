@@ -1,5 +1,7 @@
 /* Syntax highlighting for code blocks */
 @import 'highlight.js/styles/github.css';
+/* Instagram-style Stories viewer */
+@import 'react-instagram-stories/styles.css';
 
 @tailwind base;
 @tailwind components;
@@ -20,6 +22,8 @@ body {
   background-color: white; /* Page content background */
   min-height: 100vh;
 }
+
+/* Stories rail uses custom avatar list sizing in component code. */
 
 /* Safe area support for mobile notches (PWA) - Only for side edges, not top/bottom */
 @supports (padding: max(0px)) {

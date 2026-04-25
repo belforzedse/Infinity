@@ -123,6 +123,13 @@ export const ENDPOINTS = {
     CATEGORY: "/faq-categories",
     QUESTION: "/faq-questions",
   },
+  STORIES: {
+    LIST: "/stories",
+    ACTIVE: "/stories/active",
+    DETAIL: (id: number) => `/stories/${id}`,
+    SEEN_MARK: "/story-seens/mark",
+    SEEN_MINE: "/story-seens/mine",
+  },
   FILE: {
     UPLOAD: "/upload",
     DOWNLOAD: "/upload/files",

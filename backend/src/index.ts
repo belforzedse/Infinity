@@ -125,6 +125,9 @@ const ROLE_PERMISSION_SPECS: Record<string, RolePermissionSpec> = {
       "api::faq-question": {
         "faq-question": READ_ACTIONS,
       },
+      "api::story": {
+        story: [...READ_ACTIONS, "getActive"],
+      },
     },
   },
   customer: {
@@ -179,6 +182,9 @@ const ROLE_PERMISSION_SPECS: Record<string, RolePermissionSpec> = {
       },
       "api::payment-gateway": {
         "payment-gateway": ["snappEligible", "availableGateways"],
+      },
+      "api::story-seen": {
+        "story-seen": ["markSeen", "getMine"],
       },
     },
   },

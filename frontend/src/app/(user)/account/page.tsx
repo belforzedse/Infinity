@@ -23,8 +23,9 @@ export default function AccountPage() {
   const fullName = userData
     ? `${userData.FirstName || ""} ${userData.LastName || ""}`.trim() || "کاربر"
     : "کاربر";
+  const safeUsername = isHydrated ? fullName : "کاربر";
 
-  const description = `${fullName} عزیز، از این بخش می‌توانید اطلاعات حساب، سفارش‌ها و تنظیمات شخصی خود را مدیریت کنید.`;
+  const description = `${safeUsername} عزیز، از این بخش می‌توانید اطلاعات حساب، سفارش‌ها و تنظیمات شخصی خود را مدیریت کنید.`;
 
   return (
     <UserContainer className="flex flex-col gap-6 py-6 lg:py-10" dir="rtl">
@@ -34,7 +35,7 @@ export default function AccountPage() {
         </aside>
 
         <main className="flex flex-1 flex-col gap-5">
-          <WelcomNotifBar username={fullName} />
+          <WelcomNotifBar username={safeUsername} />
           <header className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-sm lg:hidden lg:px-6 lg:py-6">
             <span className="text-sm font-semibold text-slate-400">مدیریت حساب کاربری</span>
             <h1 className="text-foreground-primary text-2xl font-semibold lg:text-3xl">حساب من</h1>

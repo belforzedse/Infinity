@@ -1,0 +1,31 @@
+{
+  "kind": "collectionType",
+  "collectionName": "story_seens",
+  "info": {
+    "singularName": "story-seen",
+    "pluralName": "story-seens",
+    "displayName": "Story Seen",
+    "description": "Tracks which users have seen which stories"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "story": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::story.story",
+      "inversedBy": "story_seens"
+    },
+    "user": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "SeenAt": {
+      "type": "datetime",
+      "required": true
+    }
+  }
+}

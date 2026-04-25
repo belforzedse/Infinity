@@ -1,0 +1,81 @@
+{
+  "kind": "collectionType",
+  "collectionName": "stories",
+  "info": {
+    "singularName": "story",
+    "pluralName": "stories",
+    "displayName": "Story",
+    "description": "Instagram-style stories displayed on the homepage"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Title": {
+      "type": "string",
+      "required": true,
+      "maxLength": 100
+    },
+    "Slug": {
+      "type": "uid",
+      "targetField": "Title",
+      "required": true
+    },
+    "IsActive": {
+      "type": "boolean",
+      "default": false
+    },
+    "SortOrder": {
+      "type": "integer",
+      "default": 0,
+      "min": 0
+    },
+    "MediaType": {
+      "type": "enumeration",
+      "enum": ["image", "video"],
+      "required": true,
+      "default": "image"
+    },
+    "Media": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images", "videos"]
+    },
+    "Thumbnail": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": ["images"]
+    },
+    "StartAt": {
+      "type": "datetime"
+    },
+    "EndAt": {
+      "type": "datetime"
+    },
+    "DurationMs": {
+      "type": "integer",
+      "default": 5000,
+      "min": 1000
+    },
+    "CtaLabel": {
+      "type": "string",
+      "maxLength": 60
+    },
+    "CtaUrl": {
+      "type": "string",
+      "maxLength": 500
+    },
+    "Overlays": {
+      "type": "json"
+    },
+    "story_seens": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::story-seen.story-seen",
+      "mappedBy": "story"
+    }
+  }
+}

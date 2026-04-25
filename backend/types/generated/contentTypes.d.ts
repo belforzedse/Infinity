@@ -2694,6 +2694,95 @@ export interface ApiShippingShipping extends Schema.CollectionType {
   };
 }
 
+export interface ApiStorySeenStorySeen extends Schema.CollectionType {
+  collectionName: "story_seens";
+  info: {
+    description: "Tracks which users have seen which stories";
+    displayName: "Story Seen";
+    pluralName: "story-seens";
+    singularName: "story-seen";
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<"api::story-seen.story-seen", "oneToOne", "admin::user"> &
+      Attribute.Private;
+    SeenAt: Attribute.DateTime & Attribute.Required;
+    story: Attribute.Relation<"api::story-seen.story-seen", "manyToOne", "api::story.story">;
+    updatedAt: Attribute.DateTime;
+    updatedBy: Attribute.Relation<"api::story-seen.story-seen", "oneToOne", "admin::user"> &
+      Attribute.Private;
+    user: Attribute.Relation<
+      "api::story-seen.story-seen",
+      "manyToOne",
+      "plugin::users-permissions.user"
+    >;
+  };
+}
+
+export interface ApiStoryStory extends Schema.CollectionType {
+  collectionName: "stories";
+  info: {
+    description: "Instagram-style stories displayed on the homepage";
+    displayName: "Story";
+    pluralName: "stories";
+    singularName: "story";
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<"api::story.story", "oneToOne", "admin::user"> &
+      Attribute.Private;
+    CtaLabel: Attribute.String &
+      Attribute.SetMinMaxLength<{
+        maxLength: 60;
+      }>;
+    CtaUrl: Attribute.String &
+      Attribute.SetMinMaxLength<{
+        maxLength: 500;
+      }>;
+    DurationMs: Attribute.Integer &
+      Attribute.SetMinMax<
+        {
+          min: 1000;
+        },
+        number
+      > &
+      Attribute.DefaultTo<5000>;
+    EndAt: Attribute.DateTime;
+    IsActive: Attribute.Boolean & Attribute.DefaultTo<false>;
+    Media: Attribute.Media<"images" | "videos">;
+    MediaType: Attribute.Enumeration<["image", "video"]> &
+      Attribute.Required &
+      Attribute.DefaultTo<"image">;
+    Overlays: Attribute.JSON;
+    Slug: Attribute.UID<"api::story.story", "Title"> & Attribute.Required;
+    SortOrder: Attribute.Integer &
+      Attribute.SetMinMax<
+        {
+          min: 0;
+        },
+        number
+      > &
+      Attribute.DefaultTo<0>;
+    StartAt: Attribute.DateTime;
+    story_seens: Attribute.Relation<"api::story.story", "oneToMany", "api::story-seen.story-seen">;
+    Thumbnail: Attribute.Media<"images">;
+    Title: Attribute.String &
+      Attribute.Required &
+      Attribute.SetMinMaxLength<{
+        maxLength: 100;
+      }>;
+    updatedAt: Attribute.DateTime;
+    updatedBy: Attribute.Relation<"api::story.story", "oneToOne", "admin::user"> &
+      Attribute.Private;
+  };
+}
+
 export interface ApiUserActivityUserActivity extends Schema.CollectionType {
   collectionName: "user_activities";
   info: {
@@ -3244,6 +3333,8 @@ declare module "@strapi/types" {
       "api::shipping-city.shipping-city": ApiShippingCityShippingCity;
       "api::shipping-province.shipping-province": ApiShippingProvinceShippingProvince;
       "api::shipping.shipping": ApiShippingShipping;
+      "api::story-seen.story-seen": ApiStorySeenStorySeen;
+      "api::story.story": ApiStoryStory;
       "api::user-activity.user-activity": ApiUserActivityUserActivity;
       "api::wallet-topup.wallet-topup": ApiWalletTopupWalletTopup;
       "plugin::content-releases.release": PluginContentReleasesRelease;
