@@ -2,15 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useAtom } from "jotai";
 import AuthTitle from "@/components/Kits/Auth/Title";
 import Text from "@/components/Kits/Text";
 import AuthInput from "@/components/Kits/Auth/Input";
 import AuthButton from "@/components/Kits/Auth/Button";
 import AuthPasswordInput from "@/components/Kits/Auth/Input/Password";
-import { AuthService } from "@/services";
+import { AuthService, UserService } from "@/services";
 import toast from "react-hot-toast";
 import AuthReturnButton from "@/components/Auth/ReturnButton";
 import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
+import { currentUserAtom, userErrorAtom, userLoadingAtom } from "@/lib/atoms/auth";
 
 interface FormData {
   firstName: string;
@@ -27,6 +29,9 @@ export default function RegisterInfoPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
+  const [, setUserData] = useAtom(currentUserAtom);
+  const [, setUserLoading] = useAtom(userLoadingAtom);
+  const [, setUserError] = useAtom(userErrorAtom);
   const [formData, setFormData] = useState<FormData>({
     firstName: "",
     lastName: "",
@@ -87,6 +92,18 @@ export default function RegisterInfoPage() {
       });
 
       if (res.token || res.message) {
+        try {
+          setUserLoading(true);
+          setUserError(null);
+          const me = await UserService.me();
+          setUserData(me);
+        } catch {
+          setUserData(null);
+          setUserError(new Error("به‌روزرسانی اطلاعات کاربر ناموفق بود. دوباره تلاش کنید"));
+        } finally {
+          setUserLoading(false);
+        }
+
         // If user came from login redirect (incomplete profile), send to their intended destination or account
         const redirectParam = searchParams.get("redirect");
         if (redirectParam && redirectParam.startsWith("/")) {
