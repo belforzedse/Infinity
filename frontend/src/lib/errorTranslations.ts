@@ -68,6 +68,14 @@ export const ERROR_MESSAGE_MAP: Record<string, string> = {
   "payment failed": "پرداخت ناموفق بود. لطفاً دوباره تلاش کنید.",
   "payment error": "خطا در پرداخت. لطفاً دوباره تلاش کنید.",
   "gateway": "درگاه پرداخت در دسترس نیست. لطفاً بعداً تلاش کنید.",
+
+  // Stories
+  "story not found": "استوری یافت نشد.",
+  "story id is required": "شناسه استوری الزامی است.",
+  "invalid story id": "شناسه استوری معتبر نیست.",
+  "error fetching active stories": "خطا در دریافت استوری‌ها. دوباره تلاش کنید.",
+  "error marking story seen": "خطا در ثبت مشاهده استوری. دوباره تلاش کنید.",
+  "authentication required to mark story": "برای ثبت مشاهده باید وارد حساب کاربری خود شوید.",
 };
 
 /**

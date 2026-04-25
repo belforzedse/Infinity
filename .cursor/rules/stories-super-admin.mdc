@@ -1,0 +1,93 @@
+---
+description: Super-admin stories management patterns: composer, overlay JSON format, sidebar registration, and role guard. Use when building or modifying the stories CRUD pages or the overlay editor.
+---
+
+# Stories Super-Admin
+
+## Routes
+
+| Path | Component | Description |
+|---|---|---|
+| `/super-admin/stories` | `stories/page.tsx` | List with search, active toggle, sort |
+| `/super-admin/stories/add` | `stories/add/page.tsx` | Create new story |
+| `/super-admin/stories/[id]/edit` | `stories/[id]/edit/page.tsx` | Edit existing story |
+
+## Role Guard
+
+Every stories page guards access with `useCurrentUser`:
+
+```tsx
+const { user, isStoreManager } = useCurrentUser();
+const isSuperAdmin = (user?.roleName ?? "").toLowerCase() === "superadmin";
+const hasAccess = isSuperAdmin || isStoreManager;
+
+useEffect(() => {
+  if (user && !hasAccess) router.replace("/super-admin");
+}, [user, hasAccess, router]);
+```
+
+Editors and Customers are redirected. Store Managers and Superadmins have full access.
+
+## Sidebar Entry
+
+In `frontend/src/constants/superAdminSidebar.tsx`, the stories item is a **top-level SidebarItem** (not under blog):
+
+```tsx
+{
+  id: "stories",
+  label: "استوری‌ها",
+  href: "/super-admin/stories",
+  icon: <FiPlayCircle className="h-5 w-5 text-pink-500" stroke="#EC4899" />,
+  children: [
+    { id: "stories-list", label: "لیست استوری‌ها", href: "/super-admin/stories" },
+    { id: "stories-add",  label: "افزودن استوری",   href: "/super-admin/stories/add" },
+  ],
+}
+```
+
+**Important:** `"stories"` is NOT in `STORE_MANAGER_HIDDEN_PARENT_IDS`, so store managers can see it. Do not add it there.
+
+## StoryForm Component
+
+`frontend/src/components/Stories/StoryForm.tsx`
+
+Shared between add and edit pages. Accepts:
+- `initialValues?: Partial<StoryFormValues>` — pre-filled for edit
+- `onSubmit: (data: CreateStoryData) => Promise<void>`
+- `isLoading: boolean`
+- `submitLabel: string`
+
+**Fields exposed in the UI:**
+- **Title** — required text input
+- **Media** — single upload (image or video), required; type auto-detected from MIME
+- **Cover image (Thumbnail)** — optional image shown on the avatar ring in the homepage rail
+- **IsActive** — published / draft toggle
+- **SortOrder** — integer, lower = shown first
+
+Media upload uses `uploadFile` from `@/services/super-admin/files/upload`.
+
+**Validation (client-side, Persian toast errors):**
+1. Title required
+2. Media required (must have uploaded `mediaId`)
+
+## Media Upload Pattern
+
+```typescript
+import { uploadFile } from "@/services/super-admin/files/upload";
+
+const result = await uploadFile(file);
+if (result?.[0]) {
+  setMediaId(result[0].id);   // Strapi media ID → send to API
+  setMediaUrl(result[0].url); // Preview URL
+}
+```
+
+The `id` (not the URL) is sent to the backend in `CreateStoryData.Media`.
+
+## Image URL Construction
+
+Media URLs from Strapi may be relative (e.g. `/uploads/image.webp`). Always prefix with `IMAGE_BASE_URL` if not absolute:
+
+```typescript
+const fullUrl = url.startsWith("http") ? url : `${IMAGE_BASE_URL}${url}`;
+```

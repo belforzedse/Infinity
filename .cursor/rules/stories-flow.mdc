@@ -1,0 +1,130 @@
+---
+description: Stories feature architecture, API endpoints, seen idempotency, permission grants, and error conventions. Use when working on the story or story-seen domain on the backend, or the homepage rail / viewer on the frontend.
+---
+
+# Stories Flow
+
+## Backend — Content Types
+
+### `api::story.story` (`story_seens` table)
+| Field | Type | Notes |
+|---|---|---|
+| `Title` | string, required | PascalCase → `title` column |
+| `Slug` | uid → Title | auto-generated |
+| `IsActive` | boolean, default false | `is_active` column |
+| `SortOrder` | integer, default 0 | `sort_order` column |
+| `MediaType` | enum: image \| video | `media_type` column |
+| `Media` | media (images, videos) | |
+| `Thumbnail` | media (images) | for video stories |
+| `StartAt` | datetime | schedule start |
+| `EndAt` | datetime | schedule end |
+| `DurationMs` | integer, default 5000 | `duration_ms` column |
+| `CtaLabel` | string, max 60 | `cta_label` column |
+| `CtaUrl` | string, max 500 | `cta_url` column |
+| `Overlays` | json | array of `StoryOverlay` objects |
+
+### `api::story-seen.story-seen` (`story_seens` table)
+| Field | Type | Notes |
+|---|---|---|
+| `story` | manyToOne → story | inverse: `story_seens` |
+| `user` | manyToOne → plugin::users-permissions.user | NOT local-user |
+| `SeenAt` | datetime, required | |
+
+## API Endpoints
+
+| Method | Path | Auth | Handler |
+|---|---|---|---|
+| GET | `/api/stories` | public | core find |
+| GET | `/api/stories/active` | public | `story.getActive` |
+| GET | `/api/stories/:id` | public | core findOne |
+| POST | `/api/stories` | superadmin/store-manager | core create |
+| PUT | `/api/stories/:id` | superadmin/store-manager | core update |
+| DELETE | `/api/stories/:id` | superadmin/store-manager | core delete |
+| POST | `/api/story-seens/mark` | customer+ | `story-seen.markSeen` |
+| GET | `/api/story-seens/mine` | customer+ | `story-seen.getMine` |
+
+## `getActive` Filter Logic
+
+```typescript
+filters: {
+  IsActive: true,
+  $or: [{ StartAt: { $null: true } }, { StartAt: { $lte: now } }],
+  $and: [{ $or: [{ EndAt: { $null: true } }, { EndAt: { $gte: now } }] }],
+}
+sort: { SortOrder: "asc" }
+```
+
+## Seen Idempotency
+
+`markSeen` in `story-seen.service.ts` uses **create-once** logic:
+1. `findOne({ where: { user: userId, story: storyId } })`
+2. If exists → return `{ created: false }` — no duplicate created
+3. If not → create with `SeenAt: new Date()`
+
+Never add a unique DB constraint for V1 (no race-condition handling needed at this scale).
+
+## Permission Grants (`backend/src/index.ts`)
+
+```typescript
+// public
+"api::story": { story: ["find", "findOne", "getActive"] }
+
+// customer (inherits public)
+"api::story-seen": { "story-seen": ["markSeen", "getMine"] }
+
+// editor / store-manager / superadmin: mode: "all" (already covers everything)
+```
+
+## Auth Pattern
+
+Always use `plugin::users-permissions.user` (NOT `local-user`) for user relations in seen tracking. Access via `ctx.state.user.id` in controllers.
+
+## Persian Error Messages
+
+All backend error responses must be Persian. Examples from `story` controller:
+- `ctx.forbidden("شما مجاز به ایجاد استوری نیستید.")`
+- `ctx.notFound("استوری یافت نشد.")`
+- `ctx.unauthorized("برای ثبت مشاهده باید وارد حساب کاربری خود شوید.")`
+- `ctx.internalServerError("خطا در دریافت استوری‌ها. دوباره تلاش کنید.")`
+
+Add frontend translations to `frontend/src/lib/errorTranslations.ts` → `ERROR_MESSAGE_MAP`.
+
+## Frontend Service
+
+File: `frontend/src/services/story/story.service.ts`
+
+| Function | Auth | Notes |
+|---|---|---|
+| `getActiveStories()` | public | SSR-safe; uses `getStrapiServerUrl()` + `fetch()` with `next: { revalidate: 60 }` |
+| `getMySeenStoryIds()` | authenticated | uses `apiClient.get` |
+| `markStorySeen(storyId)` | authenticated | idempotent |
+| `listStories(params)` | admin | pagination, search, isActive filter |
+| `getStory(id)` | admin | single story |
+| `createStory(data)` | admin | |
+| `updateStory(id, data)` | admin | |
+| `deleteStory(id)` | admin | |
+
+Endpoints are registered in `frontend/src/constants/api.ts` → `ENDPOINTS.STORIES`.
+
+## Seen State Hook
+
+`frontend/src/hooks/useStoriesSeenState.ts`
+- **Guests**: localStorage (`story_seen_ids` key) only
+- **Authenticated**: merges server IDs on mount, calls API on each `markSeen`
+- Returns `{ seenIds, markSeen, hasSeen }`
+
+## Homepage Integration
+
+`frontend/src/app/(product)/page.tsx`:
+- `getStoriesForHome()` added to `Promise.all` block
+- `<StoriesRail stories={activeStories} />` renders after hero, before `<HomeProductSections>`
+- Hidden when `activeStories.length === 0`
+
+## Story Viewer Library
+
+Package: `react-instagram-stories`
+- Import styles in `globals.css` before Tailwind: `@import 'react-instagram-stories/styles.css'`
+- `User` shape: `{ id: string, username: string, avatarUrl: string, stories: StoryItem[], hasUnreadStories?: boolean }`
+- Our mapping: each `Story` → one `User` with one `StoryItem` (image or video)
+- `hasUnreadStories = !seenIds.has(story.id)` — drives the ring indicator
+- Use **controlled mode** (`isOpen`, `onClose`, `onStoryChange`) to avoid URL param conflicts

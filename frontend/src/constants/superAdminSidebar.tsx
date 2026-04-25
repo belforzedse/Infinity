@@ -22,6 +22,7 @@ import {
   FiTag,
   FiEdit3,
   FiMessageSquare,
+  FiPlayCircle,
 } from "react-icons/fi";
 
 // Create a styled layout/menu icons (unused definitions removed)
@@ -144,6 +145,24 @@ const superAdminSidebar: SidebarItem[] = [
         id: "blog-comments",
         label: "مدیریت نظرات",
         href: "/super-admin/blog/comments",
+      },
+    ],
+  },
+  {
+    id: "stories",
+    label: "استوری‌ها",
+    href: "/super-admin/stories",
+    icon: <FiPlayCircle className="h-5 w-5 text-pink-500" stroke="#EC4899" />,
+    children: [
+      {
+        id: "stories-list",
+        label: "لیست استوری‌ها",
+        href: "/super-admin/stories",
+      },
+      {
+        id: "stories-add",
+        label: "افزودن استوری",
+        href: "/super-admin/stories/add",
       },
     ],
   },
