@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.7
+# syntax=registry.cyandm.org/bel4/infinity/dockerfile:1.7
 FROM node:20-alpine AS builder
 
 ARG STRAPI_DISABLE_SOURCEMAPS=true
