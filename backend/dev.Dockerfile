@@ -11,6 +11,10 @@ ENV NODE_ENV=production
 
 WORKDIR /app
 
+# Arvan APK mirror + build deps so sharp compiles against system libvips (no GitHub binary)
+RUN sed -i 's|https://dl-cdn.alpinelinux.org/alpine|https://mirror.arvancloud.ir/alpine|g' /etc/apk/repositories \
+    && apk add --no-cache build-base python3 vips-dev fftw-dev
+
 COPY package*.json ./
 RUN --mount=type=cache,target=/root/.npm \
     npm ci --legacy-peer-deps
@@ -27,6 +31,9 @@ ENV NODE_ENV=production \
     STRAPI_TELEMETRY_DISABLED=${STRAPI_TELEMETRY_DISABLED} \
     STRAPI_DISABLE_SOURCEMAPS=${STRAPI_DISABLE_SOURCEMAPS} \
     NODE_OPTIONS=${NODE_OPTIONS}
+
+RUN sed -i 's|https://dl-cdn.alpinelinux.org/alpine|https://mirror.arvancloud.ir/alpine|g' /etc/apk/repositories \
+    && apk add --no-cache vips
 
 WORKDIR /app
 

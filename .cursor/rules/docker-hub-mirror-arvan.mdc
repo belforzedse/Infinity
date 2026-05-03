@@ -60,3 +60,11 @@ RUN sed -i 's|https://dl-cdn.alpinelinux.org/alpine|https://mirror.arvancloud.ir
 ```
 
 See `backend/main.Dockerfile` and `ci/deploy-tools/Dockerfile`. If a new Alpine release is not mirrored yet, temporarily use an official mirror that your runner can reach, or pin the base image to an Alpine version present on the mirror.
+
+## Sharp (`@strapi/plugin-upload`) in Alpine Docker builds
+
+Strapi pins **sharp** (e.g. 0.32.x), whose install script normally downloads prebuilt **libvips** from **GitHub releases**. If CI hits `ECONNRESET` or timeouts on that URL, do **not** remove sharp (the upload plugin needs it).
+
+**Fix used in this repo:** before `npm ci`, install Alpine `vips-dev`, `fftw-dev`, `build-base`, and `python3` (with the same Arvan `apk` mirror `sed` as above). Sharp then detects global libvips and runs **`node-gyp rebuild`** instead of downloading binaries. The **runner** stage must also `apk add vips` so the compiled native module can load `libvips` at runtime.
+
+**Optional:** set `SHARP_DIST_BASE_URL` (or `npm_config_sharp_dist_base_url`) to a mirror whose layout matches `lovell/sharp-libvips` releases (e.g. base URL ending in `v8.14.5/` for sharp 0.32.6) only if that mirror is reachable from your runner.

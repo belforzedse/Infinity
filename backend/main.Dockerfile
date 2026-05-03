@@ -11,6 +11,11 @@ ENV NODE_ENV=production
 
 WORKDIR /app
 
+# Arvan APK mirror + build deps required to compile sharp against Alpine's libvips
+# (avoids GitHub binary download which fails in CI due to network restrictions)
+RUN sed -i 's|https://dl-cdn.alpinelinux.org/alpine|https://mirror.arvancloud.ir/alpine|g' /etc/apk/repositories \
+    && apk add --no-cache build-base python3 vips-dev fftw-dev
+
 # Layer caching: deps first so code-only changes don't re-run npm ci
 COPY package*.json ./
 RUN --mount=type=cache,target=/root/.npm \
@@ -32,7 +37,7 @@ ENV NODE_ENV=production \
 # su-exec so entrypoint can create uploads dir then run as node
 # Alpine default CDN (dl-cdn.alpinelinux.org) is often unreachable from same networks as Docker Hub; use Arvan APK mirror
 RUN sed -i 's|https://dl-cdn.alpinelinux.org/alpine|https://mirror.arvancloud.ir/alpine|g' /etc/apk/repositories \
-    && apk add --no-cache su-exec
+    && apk add --no-cache su-exec vips
 
 WORKDIR /app
 
