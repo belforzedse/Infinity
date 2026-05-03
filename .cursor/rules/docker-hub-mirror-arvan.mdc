@@ -47,3 +47,16 @@ command: ["--registry-mirror=https://docker.arvancloud.ir"]
 ## نکته درباره `insecure-registries` در صفحه آروان
 
 صفحه کمک آروان گاهی `insecure-registries` را همراه `https://docker.arvancloud.ir` نشان می‌دهد؛ برای رجیستری HTTPS معمولاً فقط `registry-mirrors` کافی است. تنظیم `insecure-registries` را فقط در صورت خطای TLS واقعی و طبق پشتیبانی آروان اعمال کنید.
+
+## Alpine `apk` inside Docker builds (separate from Docker registry mirrors)
+
+Docker image pulls use `docker.arvancloud.ir` or `registry-mirrors` for **Docker Hub**. `RUN apk add` uses **Alpine’s package CDN** (`dl-cdn.alpinelinux.org`), which can still fail (e.g. DNS: transient error) from the same CI network.
+
+Before `apk add`, repoint repositories to Arvan’s Alpine mirror:
+
+```dockerfile
+RUN sed -i 's|https://dl-cdn.alpinelinux.org/alpine|https://mirror.arvancloud.ir/alpine|g' /etc/apk/repositories \
+    && apk add --no-cache …
+```
+
+See `backend/main.Dockerfile` and `ci/deploy-tools/Dockerfile`. If a new Alpine release is not mirrored yet, temporarily use an official mirror that your runner can reach, or pin the base image to an Alpine version present on the mirror.

@@ -30,7 +30,9 @@ ENV NODE_ENV=production \
     NODE_OPTIONS=${NODE_OPTIONS}
 
 # su-exec so entrypoint can create uploads dir then run as node
-RUN apk add --no-cache su-exec
+# Alpine default CDN (dl-cdn.alpinelinux.org) is often unreachable from same networks as Docker Hub; use Arvan APK mirror
+RUN sed -i 's|https://dl-cdn.alpinelinux.org/alpine|https://mirror.arvancloud.ir/alpine|g' /etc/apk/repositories \
+    && apk add --no-cache su-exec
 
 WORKDIR /app
 
