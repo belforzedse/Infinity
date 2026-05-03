@@ -1,0 +1,49 @@
+---
+description: Arvan Cloud Docker image registry mirror (docker.arvancloud.ir) — explicit pulls, CI dind registry-mirror, optional host daemon.json.
+globs: "**/*Dockerfile*,**/docker-compose*.yml,.gitlab-ci.yml"
+alwaysApply: false
+---
+
+# مخزن / میرور ایمیج داکر ابر آروان (`docker.arvancloud.ir`)
+
+مستند آروان دو حالت را توصیه می‌کند:
+
+## ۱) میرور روی خود سرویس داکر (بدون عوض کردن نام ایمیج در Dockerfile)
+
+روی میزبان لینوکس (یا معادل آن در CI)، در `/etc/docker/daemon.json`:
+
+```json
+{
+  "registry-mirrors": ["https://docker.arvancloud.ir"]
+}
+```
+
+سپس `sudo systemctl restart docker` (و در صورت نیاز `docker logout`). بعد همان `FROM node:20-alpine` یا `docker pull node:20-alpine` از طریق میرور کشیده می‌شود.
+
+**GitLab CI (Docker-in-Docker):** در `.gitlab-ci.yml` برای سرویس `*-dind` فلگ زیر به `dockerd` داده شده است تا همان رفتار برای `docker.io` برقرار باشد:
+
+```yaml
+command: ["--registry-mirror=https://docker.arvancloud.ir"]
+```
+
+اگر ایمیج dind شما `command` را به شکل دیگری override می‌کند و دیند بالا نمی‌آید، این خط را حذف یا با entrypoint سازگار کنید.
+
+## ۲) بدون تنظیم daemon — نام صریح روی آروان
+
+طبق مستند آروان:
+
+`docker pull docker.arvancloud.ir/<ImageName>`
+
+یعنی همان نامی که برای Hub می‌زنید، با پیشوند `docker.arvancloud.ir/` (مثلاً `node:20-alpine` → `docker.arvancloud.ir/node:20-alpine`). در این ریپو برای سازگاری با CI و شبکه‌هایی که Hub را مستقیم نمی‌بینند، در Dockerfileها و `image:` های compose از همین شکل استفاده شده است.
+
+ایمیج غیر library روی Hub (مثل `docker/dockerfile`) روی میرور:
+
+`docker.arvancloud.ir/docker/dockerfile:1.7`
+
+## اگر pull با نام کوتاه خطا داد
+
+برخی کلاینت‌ها/نسخه‌ها برای ایمیج‌های رسمی مسیر داخلی `library/` را می‌خواهند؛ در آن صورت امتحان کنید: `docker.arvancloud.ir/library/node:20-alpine`.
+
+## نکته درباره `insecure-registries` در صفحه آروان
+
+صفحه کمک آروان گاهی `insecure-registries` را همراه `https://docker.arvancloud.ir` نشان می‌دهد؛ برای رجیستری HTTPS معمولاً فقط `registry-mirrors` کافی است. تنظیم `insecure-registries` را فقط در صورت خطای TLS واقعی و طبق پشتیبانی آروان اعمال کنید.

@@ -28,7 +28,7 @@ services:
 
   frontend-redis:
     container_name: frontend-redis
-    image: redis:7-alpine
+    image: docker.arvancloud.ir/redis:7-alpine
     restart: unless-stopped
     command: >-
       redis-server

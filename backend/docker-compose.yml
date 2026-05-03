@@ -25,7 +25,7 @@ services:
 
   infinity-postgres:
     container_name: infinity-postgres
-    image: postgres:16-alpine
+    image: docker.arvancloud.ir/postgres:16-alpine
     command: >-
       postgres
       -c shared_buffers=20GB
@@ -67,7 +67,7 @@ services:
 
   infinity-redis:
     container_name: infinity-redis
-    image: redis:7-alpine
+    image: docker.arvancloud.ir/redis:7-alpine
     restart: unless-stopped
     command: >-
       redis-server

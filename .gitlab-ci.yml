@@ -20,8 +20,10 @@ variables:
 .docker_build:
   image: registry.cyandm.org/bel4/infinity/docker:27
   services:
+    # Arvan Docker mirror: same as registry-mirrors on a host (see .cursor/rules/docker-hub-mirror-arvan.mdc)
     - name: registry.cyandm.org/bel4/infinity/docker:27-dind
       alias: docker
+      command: ["--registry-mirror=https://docker.arvancloud.ir"]
   tags: ["infinity"]
   before_script:
     - set -euo pipefail
@@ -45,7 +47,7 @@ variables:
     - docker buildx create --use --driver docker-container --driver-opt image=registry.cyandm.org/bel4/infinity/buildkit:buildx-stable-1 || docker buildx create --use || true
 
 .deploy_ssh:
-  image: alpine:3.20
+  image: docker.arvancloud.ir/alpine:3.20
   tags: ["infinity"]
   before_script:
     - set -euo pipefail
