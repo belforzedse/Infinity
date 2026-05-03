@@ -16,6 +16,10 @@ WORKDIR /app
 RUN sed -i 's|https://dl-cdn.alpinelinux.org/alpine|https://mirror.arvancloud.ir/alpine|g' /etc/apk/repositories \
     && apk add --no-cache build-base python3 vips-dev fftw-dev
 
+# node-gyp would otherwise download headers from unofficial-builds.nodejs.org (DNS failures in CI).
+# Official node:alpine already installs headers under /usr/local/include/node.
+ENV npm_config_nodedir=/usr/local
+
 # Layer caching: deps first so code-only changes don't re-run npm ci
 COPY package*.json ./
 RUN --mount=type=cache,target=/root/.npm \

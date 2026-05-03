@@ -15,6 +15,8 @@ WORKDIR /app
 RUN sed -i 's|https://dl-cdn.alpinelinux.org/alpine|https://mirror.arvancloud.ir/alpine|g' /etc/apk/repositories \
     && apk add --no-cache build-base python3 vips-dev fftw-dev
 
+ENV npm_config_nodedir=/usr/local
+
 COPY package*.json ./
 RUN --mount=type=cache,target=/root/.npm \
     npm ci --legacy-peer-deps

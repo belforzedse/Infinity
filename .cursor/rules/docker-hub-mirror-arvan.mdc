@@ -67,4 +67,6 @@ Strapi pins **sharp** (e.g. 0.32.x), whose install script normally downloads pre
 
 **Fix used in this repo:** before `npm ci`, install Alpine `vips-dev`, `fftw-dev`, `build-base`, and `python3` (with the same Arvan `apk` mirror `sed` as above). Sharp then detects global libvips and runs **`node-gyp rebuild`** instead of downloading binaries. The **runner** stage must also `apk add vips` so the compiled native module can load `libvips` at runtime.
 
+Set **`ENV npm_config_nodedir=/usr/local`** in the builder so **node-gyp** uses headers already shipped with the official `node:*-alpine` image. Otherwise node-gyp may try to download from `unofficial-builds.nodejs.org`, which often fails (`EAI_AGAIN`) on restricted CI networks.
+
 **Optional:** set `SHARP_DIST_BASE_URL` (or `npm_config_sharp_dist_base_url`) to a mirror whose layout matches `lovell/sharp-libvips` releases (e.g. base URL ending in `v8.14.5/` for sharp 0.32.6) only if that mirror is reachable from your runner.
