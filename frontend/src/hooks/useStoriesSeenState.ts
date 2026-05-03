@@ -40,7 +40,9 @@ export function useStoriesSeenState(isAuthenticated: boolean) {
     const localIds = readLocalSeenIds();
     if (!localIds.length) return;
     setSeenIds((prev) => {
-      const merged = new Set([...prev, ...localIds]);
+      const merged = new Set<number>();
+      Array.from(prev).forEach((id) => merged.add(id));
+      localIds.forEach((id) => merged.add(id));
       return merged;
     });
   }, []);
@@ -52,8 +54,10 @@ export function useStoriesSeenState(isAuthenticated: boolean) {
       try {
         const serverIds = await getMySeenStoryIds();
         setSeenIds((prev) => {
-          const merged = new Set([...prev, ...serverIds]);
-          writeLocalSeenIds([...merged]);
+          const merged = new Set<number>();
+          Array.from(prev).forEach((id) => merged.add(id));
+          serverIds.forEach((id) => merged.add(id));
+          writeLocalSeenIds(Array.from(merged));
           return merged;
         });
       } catch {
@@ -68,7 +72,7 @@ export function useStoriesSeenState(isAuthenticated: boolean) {
         if (prev.has(storyId)) return prev;
         const next = new Set(prev);
         next.add(storyId);
-        writeLocalSeenIds([...next]);
+        writeLocalSeenIds(Array.from(next));
         return next;
       });
 

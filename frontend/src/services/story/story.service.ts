@@ -96,8 +96,8 @@ export async function getActiveStories(): Promise<Story[]> {
 
 /** Returns the list of story IDs the current user has already seen. */
 export async function getMySeenStoryIds(): Promise<number[]> {
-  const res = await apiClient.get<{ data: number[] }>(ENDPOINTS.STORIES.SEEN_MINE);
-  return (res as { data: number[] }).data ?? [];
+  const res = await apiClient.get<number[]>(ENDPOINTS.STORIES.SEEN_MINE);
+  return res.data ?? [];
 }
 
 /**
@@ -109,7 +109,7 @@ export async function markStorySeen(storyId: number): Promise<{ created: boolean
     ENDPOINTS.STORIES.SEEN_MARK,
     { storyId }
   );
-  return { created: (res as { success: boolean; created: boolean }).created ?? false };
+  return { created: res.data?.created ?? false };
 }
 
 // ─── Admin (store-manager / superadmin only) ──────────────────────────────────
@@ -125,27 +125,32 @@ export async function listStories(params: StoryListParams = {}): Promise<StrapiL
   if (params.search) query.set("filters[Title][$containsi]", params.search);
 
   const endpoint = `${ENDPOINTS.STORIES.LIST}?${query.toString()}`;
-  const res = await apiClient.get<StrapiListResponse<unknown>>(endpoint);
-  const raw = res as StrapiListResponse<unknown>;
+  const res = await apiClient.get<unknown[]>(endpoint);
   return {
-    data: (raw.data ?? []).map(normalizeStory),
-    meta: raw.meta,
+    data: (res.data ?? []).map(normalizeStory),
+    meta: res.meta,
   };
 }
 
 export async function getStory(id: number): Promise<Story> {
-  const res = await apiClient.get<StrapiSingleResponse<unknown>>(ENDPOINTS.STORIES.DETAIL(id));
-  return normalizeStory((res as StrapiSingleResponse<unknown>).data ?? res);
+  const res = await apiClient.get<unknown>(ENDPOINTS.STORIES.DETAIL(id));
+  const raw = res.data;
+  if (raw === undefined) throw new Error("Invalid story response");
+  return normalizeStory(raw);
 }
 
 export async function createStory(data: CreateStoryData): Promise<Story> {
-  const res = await apiClient.post<StrapiSingleResponse<unknown>>(ENDPOINTS.STORIES.LIST, { data });
-  return normalizeStory((res as StrapiSingleResponse<unknown>).data ?? res);
+  const res = await apiClient.post<unknown>(ENDPOINTS.STORIES.LIST, { data });
+  const raw = res.data;
+  if (raw === undefined) throw new Error("Invalid story response");
+  return normalizeStory(raw);
 }
 
 export async function updateStory(id: number, data: UpdateStoryData): Promise<Story> {
-  const res = await apiClient.put<StrapiSingleResponse<unknown>>(ENDPOINTS.STORIES.DETAIL(id), { data });
-  return normalizeStory((res as StrapiSingleResponse<unknown>).data ?? res);
+  const res = await apiClient.put<unknown>(ENDPOINTS.STORIES.DETAIL(id), { data });
+  const raw = res.data;
+  if (raw === undefined) throw new Error("Invalid story response");
+  return normalizeStory(raw);
 }
 
 export async function deleteStory(id: number): Promise<void> {
