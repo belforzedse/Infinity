@@ -61,6 +61,14 @@ RUN sed -i 's|https://dl-cdn.alpinelinux.org/alpine|https://mirror.arvancloud.ir
 
 See `backend/main.Dockerfile` and `ci/deploy-tools/Dockerfile`. If a new Alpine release is not mirrored yet, temporarily use an official mirror that your runner can reach, or pin the base image to an Alpine version present on the mirror.
 
+## GitLab `.deploy_ssh` (Alpine job image)
+
+Deploy jobs use `.deploy_ssh` in `.gitlab-ci.yml` with `image: docker.arvancloud.ir/alpine:3.20`. That only mirrors **Docker** pulls; **`apk`** still defaulted to `dl-cdn.alpinelinux.org` until the same **`sed`** runs in `before_script` **before** `apk add --no-cache openssh-client`. Frontend and backend deploy both extend this template.
+
+## `mirror.arvancloud.ir/alpine` layout (operator)
+
+The browsable index at `https://mirror.arvancloud.ir/alpine` lists top-level **`v3.0`–`v3.23`**, **`edge/`**, **`project/`**, **`latest-stable/`**, plus `MIRRORS.txt` and `last-updated`. Package indexes and `.apk` files live under each release, e.g. `v3.20/{main,community}/{arch}/APKINDEX.tar.gz` (not listed on the root index page).
+
 ## Sharp (`@strapi/plugin-upload`) in Alpine Docker builds
 
 Strapi pins **sharp** (e.g. 0.32.x), whose install script normally downloads prebuilt **libvips** from **GitHub releases**. If CI hits `ECONNRESET` or timeouts on that URL, do **not** remove sharp (the upload plugin needs it).

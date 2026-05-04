@@ -51,6 +51,7 @@ variables:
   tags: ["infinity"]
   before_script:
     - set -euo pipefail
+    - sed -i 's|https://dl-cdn.alpinelinux.org/alpine|https://mirror.arvancloud.ir/alpine|g' /etc/apk/repositories
     - apk add --no-cache openssh-client
     - mkdir -p ~/.ssh && chmod 700 ~/.ssh
     # Prefer File-type variable so the key is never echoed (more secure). Fallback to Variable content.
