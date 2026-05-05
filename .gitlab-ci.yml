@@ -47,7 +47,8 @@ variables:
     - docker buildx create --use --driver docker-container --driver-opt image=registry.cyandm.org/bel4/infinity/buildkit:buildx-stable-1 || docker buildx create --use || true
 
 .deploy_ssh:
-  image: docker.arvancloud.ir/alpine:3.20
+  # Mirror alpine:3.20 into this project's registry (see .cursor/rules/docker-hub-mirror-arvan.mdc).
+  image: $CI_REGISTRY_IMAGE/alpine:3.20
   tags: ["infinity"]
   before_script:
     - set -euo pipefail

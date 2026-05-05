@@ -63,7 +63,36 @@ See `backend/main.Dockerfile` and `ci/deploy-tools/Dockerfile`. If a new Alpine 
 
 ## GitLab `.deploy_ssh` (Alpine job image)
 
-Deploy jobs use `.deploy_ssh` in `.gitlab-ci.yml` with `image: docker.arvancloud.ir/alpine:3.20`. That only mirrors **Docker** pulls; **`apk`** still defaulted to `dl-cdn.alpinelinux.org` until the same **`sed`** runs in `before_script` **before** `apk add --no-cache openssh-client`. Frontend and backend deploy both extend this template.
+Deploy jobs use `.deploy_ssh` in `.gitlab-ci.yml` with **`image: $CI_REGISTRY_IMAGE/alpine:3.20`** (this project’s GitLab Container Registry, e.g. `registry.cyandm.org/bel4/infinity/alpine:3.20`). Push `alpine:3.20` there once (see **Publishing `alpine:3.20` to your registry** below). **`apk`** still uses `dl-cdn.alpinelinux.org` in the base image until the same **`sed`** runs in `before_script` **before** `apk add --no-cache openssh-client`, repointing indexes to `mirror.arvancloud.ir`. Frontend and backend deploy both extend this template.
+
+### Publishing `alpine:3.20` to your registry (Windows + Docker Desktop)
+
+1. **Values** (from GitLab: **Settings → General → Project ID** is not the path; use the registry path shown under **Deploy → Container Registry**, or infer `registry.cyandm.org/<group>/<project>/…` — same prefix as `CI_REGISTRY_IMAGE` in any CI job log).
+
+2. **Personal Access Token** (GitLab): create a token with **`write_registry`** (and **`read_registry`**). Not the same as `CI_JOB_TOKEN` for long-term pushes from your laptop.
+
+3. In **PowerShell** or **cmd** (Docker Desktop running), use the same host and path as **`CI_REGISTRY_IMAGE`** from a CI job (example for this repo):
+
+   ```powershell
+   docker pull alpine:3.20
+   docker tag alpine:3.20 registry.cyandm.org/bel4/infinity/alpine:3.20
+   ```
+
+4. **Login** (use your GitLab username and the PAT as password):
+
+   ```powershell
+   docker login registry.cyandm.org -u "<gitlab-username-or-deploy-token-name>"
+   ```
+
+5. **Push**:
+
+   ```powershell
+   docker push registry.cyandm.org/bel4/infinity/alpine:3.20
+   ```
+
+6. Confirm in GitLab **Deploy → Container Registry** that **`alpine`** with tag **`3.20`** appears. Re-run deploy; the runner must be allowed to **pull** from this registry (same project jobs usually can; dependency projects may need a deploy token with `read_registry` on the runner or a group token).
+
+**Without Docker Hub on Windows:** save a tarball from any machine that has the image (`docker save alpine:3.20 -o alpine-3.20.tar`), copy the tar to Windows, `docker load -i alpine-3.20.tar`, then tag and push as above.
 
 ## `mirror.arvancloud.ir/alpine` layout (operator)
 
