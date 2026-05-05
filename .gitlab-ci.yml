@@ -164,7 +164,10 @@ backend:deploy:
       	set -euo pipefail
       	cd /opt/infinity/backend
 
-      	printf '%s' "${REGISTRY_PAT:-${CI_REGISTRY_PASSWORD:-}}" | docker login registry.cyandm.org -u "${REGISTRY_USER:-${CI_REGISTRY_USER:-}}" --password-stdin
+      	REGISTRY_LOGIN_USER="${CI_REGISTRY_USER:-${REGISTRY_USER:-}}"
+      	REGISTRY_LOGIN_PASS="${CI_REGISTRY_PASSWORD:-${REGISTRY_PAT:-}}"
+      	test -n "$REGISTRY_LOGIN_USER" && test -n "$REGISTRY_LOGIN_PASS"
+      	printf '%s' "$REGISTRY_LOGIN_PASS" | docker login registry.cyandm.org -u "$REGISTRY_LOGIN_USER" --password-stdin
 
       	export ENV_FILE="$ENV_FILE"
       	export DB_ENV_FILE=db.env
@@ -295,7 +298,10 @@ frontend:deploy:
       	set -euo pipefail
       	cd /opt/infinity/frontend
 
-      	printf '%s' "${REGISTRY_PAT:-${CI_REGISTRY_PASSWORD:-}}" | docker login registry.cyandm.org -u "${REGISTRY_USER:-${CI_REGISTRY_USER:-}}" --password-stdin
+      	REGISTRY_LOGIN_USER="${CI_REGISTRY_USER:-${REGISTRY_USER:-}}"
+      	REGISTRY_LOGIN_PASS="${CI_REGISTRY_PASSWORD:-${REGISTRY_PAT:-}}"
+      	test -n "$REGISTRY_LOGIN_USER" && test -n "$REGISTRY_LOGIN_PASS"
+      	printf '%s' "$REGISTRY_LOGIN_PASS" | docker login registry.cyandm.org -u "$REGISTRY_LOGIN_USER" --password-stdin
 
       	export ENV_FILE="$ENV_FILE"
       	export REGISTRY_IMAGE_BASE="$CI_REGISTRY_IMAGE"
