@@ -39,7 +39,7 @@ services:
 
   infinity-postgres:
     container_name: infinity-postgres-local
-    image: docker.arvancloud.ir/postgres:16-alpine
+    image: postgres:16-alpine
     restart: unless-stopped
     environment:
       POSTGRES_USER: infinity
@@ -60,7 +60,7 @@ services:
 
   infinity-redis:
     container_name: infinity-redis-local
-    image: docker.arvancloud.ir/redis:7-alpine
+    image: redis:7-alpine
     restart: unless-stopped
     command: redis-server --appendonly yes --requirepass 2768fwZiUEEfAJXfeo0lM5do2Ly3BPQccK36PfMQf5w=
     environment:
