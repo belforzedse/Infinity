@@ -31,7 +31,10 @@ COPY apps/backend ./apps/backend
 WORKDIR /repo/apps/backend
 RUN pnpm run build && rm -rf .strapi
 WORKDIR /repo
-RUN pnpm --filter @repo/backend deploy --legacy --prod /app
+RUN pnpm --filter @repo/backend deploy --legacy --prod /app \
+    && mkdir -p /app/dist /app/build \
+    && cp -a /repo/apps/backend/dist/. /app/dist/ \
+    && if [ -d /repo/apps/backend/build ]; then cp -a /repo/apps/backend/build/. /app/build/; fi
 
 FROM docker.arvancloud.ir/node:20-alpine AS runner
 
