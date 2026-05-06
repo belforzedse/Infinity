@@ -68,11 +68,12 @@
     "strapi-plugin-redis": "1.1.0",
     "strapi-plugin-rest-cache": "4.2.9",
     "strapi-provider-rest-cache-redis": "4.2.9",
-    "styled-components": "5.3.3"
+    "styled-components": "5.3.3",
+    "@strapi/typescript-utils": "4.25.21",
+    "typescript": "5.2.2"
   },
   "devDependencies": {
     "@jest/globals": "29.7.0",
-    "@strapi/typescript-utils": "4.25.21",
     "@types/jest": "29.5.14",
     "@types/koa": "^3.0.2",
     "@types/minimatch": "5.1.2",
@@ -80,8 +81,7 @@
     "cross-env": "10.1.0",
     "jest": "29.7.0",
     "jest-mock-extended": "3.0.7",
-    "ts-jest": "29.4.5",
-    "typescript": "5.2.2"
+    "ts-jest": "29.4.5"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",
