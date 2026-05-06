@@ -1,6 +1,6 @@
 ---
 description: Backend (Strapi) Docker image build; .strapi and containerd layer extraction
-globs: backend/*.Dockerfile, backend/.dockerignore
+globs: apps/backend/*.Dockerfile, apps/backend/.dockerignore
 ---
 
 # Backend Docker Build
@@ -14,7 +14,7 @@ Strapi creates a `.strapi` directory (cache/CLI state) during `strapi build`. In
 
 ## Required mitigations
 
-1. **backend/.dockerignore**  
+1. **apps/backend/.dockerignore**  
    Must ignore:
    - `.strapi`
    - `.strapi-updater.json`

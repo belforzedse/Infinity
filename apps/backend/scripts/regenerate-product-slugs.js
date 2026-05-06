@@ -85,7 +85,7 @@ if (!API_TOKEN) {
   console.error("❌ Error: API token is required!");
   console.error("   Options:");
   console.error("   1. Set STRAPI_TOKEN environment variable");
-  console.error("   2. Configure in backend/scripts/woocommerce-importer/config.js");
+  console.error("   2. Configure in apps/backend/scripts/woocommerce-importer/config.js");
   process.exit(1);
 }
 

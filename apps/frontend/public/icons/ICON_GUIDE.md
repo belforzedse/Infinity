@@ -2,7 +2,7 @@
 
 ## Required Icons (3 files)
 
-You need to create **3 icon files** and place them in `/frontend/public/icons/`:
+You need to create **3 icon files** and place them in `/apps/frontend/public/icons/`:
 
 ### 1. `icon-192x192.png` (192×192 pixels)
 - **Purpose**: Home screen icon for Android devices
@@ -35,13 +35,13 @@ The splash screen appears automatically while your app loads, giving a native ap
 
 The icons should be **your app logo** (`/images/full-logo.png`):
 
-1. **Open** `/frontend/public/images/full-logo.png` in an image editor
+1. **Open** `/apps/frontend/public/images/full-logo.png` in an image editor
 2. **Resize** it to each required size (192×192, 512×512, 180×180)
 3. **Add padding** around the logo (10-15% of canvas size) so it doesn't touch edges
 4. **Background**: 
    - Option A: Transparent background (recommended - will show pink behind it)
    - Option B: Pink background (#ec4899) matching your theme
-5. **Save** as PNG files in `/frontend/public/icons/`
+5. **Save** as PNG files in `/apps/frontend/public/icons/`
 
 ## Quick Generation Methods
 
@@ -52,11 +52,11 @@ The icons should be **your app logo** (`/images/full-logo.png`):
    - Android Chrome: 192×192 and 512×512
    - iOS: 180×180
    - Background color: #ec4899 (pink)
-4. Download and extract icons to `/frontend/public/icons/`
+4. Download and extract icons to `/apps/frontend/public/icons/`
 
 ### Option 2: ImageMagick (Command Line)
 ```bash
-cd frontend/public
+cd apps/frontend/public
 convert images/full-logo.png -resize 192x192 -background "#ec4899" -gravity center -extent 192x192 icons/icon-192x192.png
 convert images/full-logo.png -resize 512x512 -background "#ec4899" -gravity center -extent 512x512 icons/icon-512x512.png
 convert images/full-logo.png -resize 180x180 -background "#ec4899" -gravity center -extent 180x180 icons/apple-touch-icon.png
@@ -73,7 +73,7 @@ convert images/full-logo.png -resize 180x180 -background "#ec4899" -gravity cent
 ## File Structure After Adding Icons
 
 ```
-frontend/public/icons/
+apps/frontend/public/icons/
 ├── icon-192x192.png      ← Your logo at 192×192
 ├── icon-512x512.png      ← Your logo at 512×512 (splash screen icon!)
 ├── apple-touch-icon.png  ← Your logo at 180×180

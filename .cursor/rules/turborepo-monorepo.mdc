@@ -1,0 +1,47 @@
+# Turborepo Monorepo
+
+Use this rule when changing workspace configuration, CI, Docker, or commands after the Turborepo migration.
+
+## Workspace Layout
+
+- Frontend app: `apps/frontend`
+- Backend app: `apps/backend`
+- Future shared packages: `packages/*`
+- Root workspace files: `package.json`, `pnpm-workspace.yaml`, `turbo.json`, `pnpm-lock.yaml`
+
+## Package Manager
+
+- Use pnpm from the repository root.
+- Enable Corepack before installing in fresh environments:
+  ```bash
+  corepack enable
+  pnpm install --frozen-lockfile
+  ```
+- Do not add new app-level lockfiles. The canonical lockfile is the root `pnpm-lock.yaml`.
+
+## Commands
+
+- All apps: `pnpm build`, `pnpm lint`, `pnpm check-types`, `pnpm test`
+- Frontend only: `pnpm turbo run build --filter=@repo/frontend`
+- Backend only: `pnpm turbo run build --filter=@repo/backend`
+- Frontend dev: `pnpm turbo run dev --filter=@repo/frontend`
+- Backend dev: `pnpm turbo run develop --filter=@repo/backend`
+
+## Next.js 16
+
+- Use the ESLint CLI directly. Do not use `next lint`; it was removed in Next.js 16.
+- The frontend uses standalone output. In this monorepo, keep `outputFileTracingRoot` pointed at the repository root when runtime tracing needs files outside `apps/frontend`.
+
+## Docker And CI
+
+- Docker image builds that depend on the workspace should use the repository root as context and app Dockerfiles by path:
+  - `apps/frontend/main.Dockerfile`
+  - `apps/frontend/dev.Dockerfile`
+  - `apps/backend/main.Dockerfile`
+  - `apps/backend/dev.Dockerfile`
+- Preserve remote deployment directories such as `/opt/infinity/frontend` and `/opt/infinity/backend` unless an infrastructure task explicitly changes them.
+- Do not copy or cache Strapi runtime data:
+  - `apps/backend/public/uploads/**`
+  - `apps/backend/.tmp/**`
+  - local SQLite files
+  - `.env` files

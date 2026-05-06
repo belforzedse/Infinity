@@ -12,15 +12,15 @@ alwaysApply: false
 
 ## Backend
 
-- Auth controller (`backend/src/api/auth/controllers/auth.ts`): Uses Persian constants for OTP, login, and auth errors.
-- Phone validation (`backend/src/api/auth/utils/validations.ts`): Returns Persian messages.
+- Auth controller (`apps/backend/src/api/auth/controllers/auth.ts`): Uses Persian constants for OTP, login, and auth errors.
+- Phone validation (`apps/backend/src/api/auth/utils/validations.ts`): Returns Persian messages.
 - Prefer Persian in `ctx.badRequest()`, `ctx.unauthorized()`, and `ctx.body.message`.
 
 ## Frontend
 
-- **Always use a single path for user-visible errors:** Use `getUserFacingErrorMessage(error, fallback)` (from `frontend/src/utils/userErrorMessage.ts`), or `extractErrorMessage` + `translateErrorMessage` (from `frontend/src/lib/errorTranslations.ts`), before passing an error to `toast.error`, `setError`, or any user-visible text. **Never** show `error.message` or backend `response.data.message` directly.
-- `frontend/src/constants/api.ts`: `ERROR_MESSAGES` are all in Persian.
-- `frontend/src/lib/errorTranslations.ts`: Maps any stray English backend messages to Persian; default fallback includes "دوباره تلاش کنید".
+- **Always use a single path for user-visible errors:** Use `getUserFacingErrorMessage(error, fallback)` (from `apps/frontend/src/utils/userErrorMessage.ts`), or `extractErrorMessage` + `translateErrorMessage` (from `apps/frontend/src/lib/errorTranslations.ts`), before passing an error to `toast.error`, `setError`, or any user-visible text. **Never** show `error.message` or backend `response.data.message` directly.
+- `apps/frontend/src/constants/api.ts`: `ERROR_MESSAGES` are all in Persian.
+- `apps/frontend/src/lib/errorTranslations.ts`: Maps any stray English backend messages to Persian; default fallback includes "دوباره تلاش کنید".
 - Auth fallbacks (e.g. OTP page): Use Persian messages.
 
 ## Example Persian Messages

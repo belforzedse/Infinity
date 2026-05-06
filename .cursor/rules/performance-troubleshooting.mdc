@@ -26,7 +26,7 @@
 ### Possible Causes
 
 #### 1. PLP not using internal URL (FIXED)
-PLP was using `API_BASE_URL` (public) instead of `STRAPI_INTERNAL_URL`. Fixed in `frontend/src/app/(product)/plp/page.tsx`.
+PLP was using `API_BASE_URL` (public) instead of `STRAPI_INTERNAL_URL`. Fixed in `apps/frontend/src/app/(product)/plp/page.tsx`.
 
 #### 2. Redis cache cold start
 After switching `REST_CACHE_PROVIDER=redis`, the cache starts empty. First requests are all cache misses → more DB load. Cache warms over time.

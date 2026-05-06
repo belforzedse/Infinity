@@ -46,7 +46,7 @@ The `findBySlug` controller now logs detailed information about lookup attempts,
 
 1. **Test the endpoint directly**:
    ```bash
-   cd backend
+   cd apps/backend
    node scripts/test-product-slug-endpoint.js 73
    ```
    This will show you exactly what's happening with the product lookup.
@@ -63,7 +63,7 @@ The `findBySlug` controller now logs detailed information about lookup attempts,
 
 4. **Check if migration ran**:
    ```bash
-   cd backend
+   cd apps/backend
    npm run strapi db:migrate
    ```
 
@@ -79,7 +79,7 @@ The `findBySlug` controller now logs detailed information about lookup attempts,
 
 1. **Run the migration** (if not already done):
    ```bash
-   cd backend
+   cd apps/backend
    npm run strapi db:migrate
    ```
 
@@ -102,8 +102,8 @@ The `findBySlug` controller now logs detailed information about lookup attempts,
 ### Solution:
 
 1. **Verify API queries include Slug**:
-   - Check `frontend/src/services/product/homepage.ts`
-   - Check `frontend/src/app/(product)/plp/page.tsx`
+   - Check `apps/frontend/src/services/product/homepage.ts`
+   - Check `apps/frontend/src/app/(product)/plp/page.tsx`
    - Both should have `fields[1]=Slug` in queries
 
 2. **Check product filters**:
@@ -120,7 +120,7 @@ The `findBySlug` controller now logs detailed information about lookup attempts,
 
 1. **Check migration status**:
    ```bash
-   cd backend
+   cd apps/backend
    npm run strapi db:migrate:status
    ```
 
@@ -155,7 +155,7 @@ If the Slug field doesn't show in admin, you can still:
 ### Fix 2: Ensure Migration Ran
 
 ```bash
-cd backend
+cd apps/backend
 npm run strapi db:migrate
 ```
 

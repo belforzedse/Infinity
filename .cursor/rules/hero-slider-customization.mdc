@@ -39,12 +39,12 @@ When desktop slides are done, tablet and mobile slides are auto-generated from d
 | `bottomActionBannerLeft` | `bottomActionBannerLeft` | `bottomActionBannerLeft` |
 | `bottomActionBannerRight` | `bottomActionBannerRight` | `bottomActionBannerRight` |
 
-**Implementation**: `syncTabletAndMobileFromDesktop` in [frontend/src/types/super-admin/heroSlider.ts](frontend/src/types/super-admin/heroSlider.ts) extracts content from desktop slots and passes it through `normalizeHeadlineSlot`, `normalizeCardSlot`, `normalizeMainVisualSlot` with device-specific defaults.
+**Implementation**: `syncTabletAndMobileFromDesktop` in [apps/apps/frontend/src/types/super-admin/heroSlider.ts](apps/apps/frontend/src/types/super-admin/heroSlider.ts) extracts content from desktop slots and passes it through `normalizeHeadlineSlot`, `normalizeCardSlot`, `normalizeMainVisualSlot` with device-specific defaults.
 
 ## CMS Mapping
 
 - Editor payload (`HeroSliderPayload`) is stored via `/settings/hero-slider/draft` (PUT) and published via `/settings/hero-slider/publish` (POST).
-- `mapHeroSlideToLayoutsForEditor` in [frontend/src/components/Hero/config/fromCms.ts](frontend/src/components/Hero/config/fromCms.ts) maps `HeroSlideConfig` to `CmsHeroEditorLayouts` (desktop, tablet, mobile).
+- `mapHeroSlideToLayoutsForEditor` in [apps/apps/frontend/src/components/Hero/config/fromCms.ts](apps/apps/frontend/src/components/Hero/config/fromCms.ts) maps `HeroSlideConfig` to `CmsHeroEditorLayouts` (desktop, tablet, mobile).
 - Layout specs are applied to Hero components: `TextBanner`, `ActionBanner`, `LeftBanner`.
 
 ## Placeholders
@@ -53,20 +53,20 @@ When image URLs are empty, the editor uses slot-specific placeholders:
 - **Main visual** (`rightBanner` / `heroBanner`): `hero-main-placeholder.svg` — "تصویر اصلی - نسبت ۱:۱ توصیه می‌شود"
 - **Cards** (`bottomActionBannerLeft` / `bottomActionBannerRight`): `hero-card-placeholder.svg` — "کارت - تصویر محصول یا دسته‌بندی"
 
-Files: [frontend/public/images/placeholders/](frontend/public/images/placeholders/)
+Files: [apps/apps/frontend/public/images/placeholders/](apps/apps/frontend/public/images/placeholders/)
 
 ## Font Configuration
 
 To add new fonts for the hero font selector:
 
-1. Add font files to `frontend/public/fonts/`
-2. Register in `frontend/src/styles/fonts.ts` (e.g. `@font-face` and export)
-3. Add the font to Tailwind in `frontend/tailwind.config.ts` under `fontFamily`
-4. Add the option to `HERO_FONT_FAMILY_OPTIONS` in [frontend/src/types/super-admin/heroSlider.ts](frontend/src/types/super-admin/heroSlider.ts)
+1. Add font files to `apps/frontend/public/fonts/`
+2. Register in `apps/frontend/src/styles/fonts.ts` (e.g. `@font-face` and export)
+3. Add the font to Tailwind in `apps/frontend/tailwind.config.ts` under `fontFamily`
+4. Add the option to `HERO_FONT_FAMILY_OPTIONS` in [apps/apps/frontend/src/types/super-admin/heroSlider.ts](apps/apps/frontend/src/types/super-admin/heroSlider.ts)
 
 ## Background Image URLs
 
-Strapi stores image paths like `/uploads/...`. At **render time**, `LeftBanner` and `ActionBanner` resolve these to absolute URLs using [frontend/src/utils/resolveAssetUrl.ts](frontend/src/utils/resolveAssetUrl.ts) (and `NEXT_PUBLIC_IMAGE_BASE_URL`) so background images load correctly. Stored payloads remain path-only; resolution is not persisted.
+Strapi stores image paths like `/uploads/...`. At **render time**, `LeftBanner` and `ActionBanner` resolve these to absolute URLs using [apps/apps/frontend/src/utils/resolveAssetUrl.ts](apps/apps/frontend/src/utils/resolveAssetUrl.ts) (and `NEXT_PUBLIC_IMAGE_BASE_URL`) so background images load correctly. Stored payloads remain path-only; resolution is not persisted.
 
 ## Hero Editor File Layout
 
@@ -78,19 +78,19 @@ Strapi stores image paths like `/uploads/...`. At **render time**, `LeftBanner` 
 
 ## Style Packages (Presets)
 
-Headline and card slots support **پکیج استایل** (Apply preset). Presets are defined in [frontend/src/types/super-admin/heroSliderPackages.ts](frontend/src/types/super-admin/heroSliderPackages.ts): `HERO_HEADLINE_STYLE_PRESETS` and `HERO_CARD_STYLE_PRESETS` (e.g. مینیمال, بولد, الگنت). Selecting a preset merges its `titleStyle` / `subtitleStyle` or `titleStyle` / `buttonStyle` into the current slot.
+Headline and card slots support **پکیج استایل** (Apply preset). Presets are defined in [apps/apps/frontend/src/types/super-admin/heroSliderPackages.ts](apps/apps/frontend/src/types/super-admin/heroSliderPackages.ts): `HERO_HEADLINE_STYLE_PRESETS` and `HERO_CARD_STYLE_PRESETS` (e.g. مینیمال, بولد, الگنت). Selecting a preset merges its `titleStyle` / `subtitleStyle` or `titleStyle` / `buttonStyle` into the current slot.
 
 ## Font Size Labels (xl, 2xl, 3xl)
 
-Font size dropdowns show human-friendly labels via `getFontSizeDisplayLabel()` and [HERO_FONT_SIZE_DISPLAY_LABELS](frontend/src/types/super-admin/heroSlider.ts) (e.g. xs, sm, md, lg, xl, 2xl, 3xl). Stored values remain Tailwind tokens; only the UI labels changed.
+Font size dropdowns show human-friendly labels via `getFontSizeDisplayLabel()` and [HERO_FONT_SIZE_DISPLAY_LABELS](apps/apps/frontend/src/types/super-admin/heroSlider.ts) (e.g. xs, sm, md, lg, xl, 2xl, 3xl). Stored values remain Tailwind tokens; only the UI labels changed.
 
 ## Key Files
 
-- [frontend/src/app/(super-admin)/super-admin/settings/customization/hero-slider/page.tsx](frontend/src/app/(super-admin)/super-admin/settings/customization/hero-slider/page.tsx) — Page
-- [frontend/src/hooks/useHeroSliderEditor.ts](frontend/src/hooks/useHeroSliderEditor.ts) — **useHeroSliderEditor**: Custom hook that owns all hero slider editor state, effects, and handlers. Responsibilities: data fetch (`getHeroSliderDraftAndPublished`), draft/published/meta state, selected slide/slot/device syncing, slide CRUD (add, duplicate, delete, reorder), slot updates, save draft (with auto-sync of tablet/mobile from desktop), publish, `syncTabletMobileFromDesktop` for manual sync, link/tracking changes. Exposes minimal API: `isLoading`, `isSavingDraft`, `isPublishing`, `draft`, `published`, `meta`, `selectedSlide`, `selectedSlot`, `slotTrackingForForm`, selection setters, and handler functions.
-- [frontend/src/components/SuperAdmin/HeroSliderEditor/TemplatePreview.tsx](frontend/src/components/SuperAdmin/HeroSliderEditor/TemplatePreview.tsx) — Preview + in-place editing
-- [frontend/src/components/SuperAdmin/HeroSliderEditor/editors/](frontend/src/components/SuperAdmin/HeroSliderEditor/editors/) — Slot editors
-- [frontend/src/components/SuperAdmin/HeroSliderEditor/canvases/](frontend/src/components/SuperAdmin/HeroSliderEditor/canvases/) — Device canvases
-- [frontend/src/components/Hero/config/fromCms.ts](frontend/src/components/Hero/config/fromCms.ts) — CMS → layout mapping
-- [frontend/src/types/super-admin/heroSlider.ts](frontend/src/types/super-admin/heroSlider.ts) — Types, defaults, `syncTabletAndMobileFromDesktop`
-- [frontend/src/types/super-admin/heroSliderPackages.ts](frontend/src/types/super-admin/heroSliderPackages.ts) — Style presets
+- [apps/apps/frontend/src/app/(super-admin)/super-admin/settings/customization/hero-slider/page.tsx](apps/apps/frontend/src/app/(super-admin)/super-admin/settings/customization/hero-slider/page.tsx) — Page
+- [apps/apps/frontend/src/hooks/useHeroSliderEditor.ts](apps/apps/frontend/src/hooks/useHeroSliderEditor.ts) — **useHeroSliderEditor**: Custom hook that owns all hero slider editor state, effects, and handlers. Responsibilities: data fetch (`getHeroSliderDraftAndPublished`), draft/published/meta state, selected slide/slot/device syncing, slide CRUD (add, duplicate, delete, reorder), slot updates, save draft (with auto-sync of tablet/mobile from desktop), publish, `syncTabletMobileFromDesktop` for manual sync, link/tracking changes. Exposes minimal API: `isLoading`, `isSavingDraft`, `isPublishing`, `draft`, `published`, `meta`, `selectedSlide`, `selectedSlot`, `slotTrackingForForm`, selection setters, and handler functions.
+- [apps/apps/frontend/src/components/SuperAdmin/HeroSliderEditor/TemplatePreview.tsx](apps/apps/frontend/src/components/SuperAdmin/HeroSliderEditor/TemplatePreview.tsx) — Preview + in-place editing
+- [apps/apps/frontend/src/components/SuperAdmin/HeroSliderEditor/editors/](apps/apps/frontend/src/components/SuperAdmin/HeroSliderEditor/editors/) — Slot editors
+- [apps/apps/frontend/src/components/SuperAdmin/HeroSliderEditor/canvases/](apps/apps/frontend/src/components/SuperAdmin/HeroSliderEditor/canvases/) — Device canvases
+- [apps/apps/frontend/src/components/Hero/config/fromCms.ts](apps/apps/frontend/src/components/Hero/config/fromCms.ts) — CMS → layout mapping
+- [apps/apps/frontend/src/types/super-admin/heroSlider.ts](apps/apps/frontend/src/types/super-admin/heroSlider.ts) — Types, defaults, `syncTabletAndMobileFromDesktop`
+- [apps/apps/frontend/src/types/super-admin/heroSliderPackages.ts](apps/apps/frontend/src/types/super-admin/heroSliderPackages.ts) — Style presets

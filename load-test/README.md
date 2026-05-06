@@ -138,7 +138,7 @@ Run the same k6 script **from the server** (or a pod in the same DC) against **l
 To test whether the **cluster** can handle high concurrency (e.g. 4k users), two things matter:
 
 1. **Cache handler on**  
-   The Next.js custom cache handler (Redis + LRU in `frontend/next.config.ts`) must be **enabled** in production. With it on, all Next instances share one cache; revalidation and Strapi load stay manageable. With it off, each instance has its own cache and you get revalidation storms and timeouts at lower VUs.
+   The Next.js custom cache handler (Redis + LRU in `apps/frontend/next.config.ts`) must be **enabled** in production. With it on, all Next instances share one cache; revalidation and Strapi load stay manageable. With it off, each instance has its own cache and you get revalidation storms and timeouts at lower VUs.
 
 2. **Spread traffic across instances**  
    Nginx uses **ip_hash** for the Next upstream, so one client IP always hits the **same** backend instance. If you run k6 from **one machine** (one IP), almost all VUs hit **one** Next.js instance; the others stay idle. So you're stress-testing a single process, not the cluster.

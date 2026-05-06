@@ -5,12 +5,12 @@ alwaysApply: false
 
 # Orders-to-PDF Script
 
-The script in `backend/scripts/orders-to-pdf/` exports orders from api.infinitycolor.co (past week) into a single Persian PDF.
+The script in `apps/backend/scripts/orders-to-pdf/` exports orders from api.infinitycolor.co (past week) into a single Persian PDF.
 
 ## How to run
 
 - **Windows:** `backend\scripts\orders-to-pdf\run.bat`
-- **Unix:** `./backend/scripts/orders-to-pdf/run.sh`
+- **Unix:** `./apps/backend/scripts/orders-to-pdf/run.sh`
 
 First run creates `.venv` and installs dependencies; then credentials are prompted and the PDF is generated.
 
@@ -37,6 +37,6 @@ Optional: `INFINITY_API_BASE_URL` (default `https://api.infinitycolor.co`).
 
 ## Key files
 
-- `backend/scripts/orders-to-pdf/orders-to-pdf.py` – main script
-- `backend/scripts/orders-to-pdf/requirements.txt` – requests, reportlab, arabic-reshaper, python-bidi
-- `backend/scripts/orders-to-pdf/README.md` – user-facing docs
+- `apps/backend/scripts/orders-to-pdf/orders-to-pdf.py` – main script
+- `apps/backend/scripts/orders-to-pdf/requirements.txt` – requests, reportlab, arabic-reshaper, python-bidi
+- `apps/backend/scripts/orders-to-pdf/README.md` – user-facing docs

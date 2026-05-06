@@ -10,10 +10,10 @@ To ensure smooth operation on older/slower devices, the frontend limits heavy Ja
 
 **Hero components** use `framer-motion` for the homepage slider experience:
 
-- `frontend/src/components/Hero/desktopHero.tsx`
-- `frontend/src/components/Hero/tabletHero.tsx`
-- `frontend/src/components/Hero/mobileHero.tsx`
-- `frontend/src/components/Hero/animations.ts`
+- `apps/frontend/src/components/Hero/desktopHero.tsx`
+- `apps/frontend/src/components/Hero/tabletHero.tsx`
+- `apps/frontend/src/components/Hero/mobileHero.tsx`
+- `apps/frontend/src/components/Hero/animations.ts`
 
 These respect `prefers-reduced-motion` via `useReducedMotion` and use tuned presets.
 

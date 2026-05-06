@@ -2,7 +2,7 @@
 
 ## Overview
 
-The `Stock` interface in `backend/src/api/cart/services/lib/stock.ts` allows `Count` and `ReservedCount` to be `number | string` to handle cases where values come from database/API responses as strings. However, this can hide type bugs. To ensure type safety, we use a runtime validator that normalizes Stock objects.
+The `Stock` interface in `apps/backend/src/api/cart/services/lib/stock.ts` allows `Count` and `ReservedCount` to be `number | string` to handle cases where values come from database/API responses as strings. However, this can hide type bugs. To ensure type safety, we use a runtime validator that normalizes Stock objects.
 
 ## Key Components
 
@@ -24,7 +24,7 @@ export interface NormalizedStock {
 
 ### validateAndNormalizeStock Function
 
-**Location**: `backend/src/api/cart/services/lib/stock.ts`
+**Location**: `apps/backend/src/api/cart/services/lib/stock.ts`
 
 **Purpose**: Validates and normalizes Stock objects, converting numeric strings to numbers and ensuring all values are valid non-negative numbers.
 
@@ -86,5 +86,5 @@ const available = Math.max(0, Count - ReservedCount);
 
 ## Related Files
 
-- `backend/src/api/cart/services/lib/stock.ts` - Main implementation
-- `backend/src/api/product-stock/content-types/product-stock/schema.json` - Database schema (defines as integers)
+- `apps/backend/src/api/cart/services/lib/stock.ts` - Main implementation
+- `apps/backend/src/api/product-stock/content-types/product-stock/schema.json` - Database schema (defines as integers)

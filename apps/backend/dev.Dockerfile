@@ -9,7 +9,7 @@ ENV STRAPI_TELEMETRY_DISABLED=${STRAPI_TELEMETRY_DISABLED}
 ENV NODE_OPTIONS=${NODE_OPTIONS}
 ENV NODE_ENV=production
 
-WORKDIR /app
+WORKDIR /repo
 
 # Arvan APK mirror + build deps so sharp compiles against system libvips (no GitHub binary)
 RUN sed -i 's|https://dl-cdn.alpinelinux.org/alpine|https://mirror.arvancloud.ir/alpine|g' /etc/apk/repositories \
@@ -17,12 +17,17 @@ RUN sed -i 's|https://dl-cdn.alpinelinux.org/alpine|https://mirror.arvancloud.ir
 
 ENV npm_config_nodedir=/usr/local
 
-COPY package*.json ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
+COPY apps/backend/package.json ./apps/backend/package.json
+COPY packages ./packages
 RUN --mount=type=cache,target=/root/.npm \
-    npm ci --legacy-peer-deps
+    corepack enable && pnpm install --filter @repo/backend... --frozen-lockfile
 
-COPY . .
-RUN npm run build && rm -rf .strapi
+COPY apps/backend ./apps/backend
+WORKDIR /repo/apps/backend
+RUN pnpm run build && rm -rf .strapi
+WORKDIR /repo
+RUN pnpm --filter @repo/backend deploy --prod /app
 
 FROM docker.arvancloud.ir/node:20-alpine AS runner
 
@@ -36,11 +41,11 @@ ENV NODE_ENV=production \
 
 RUN sed -i 's|https://dl-cdn.alpinelinux.org/alpine|https://mirror.arvancloud.ir/alpine|g' /etc/apk/repositories \
     && apk add --no-cache vips
+RUN corepack enable
 
 WORKDIR /app
 
 COPY --from=builder /app /app
-RUN --mount=type=cache,target=/root/.npm npm prune --omit=dev
 
 EXPOSE 1337
-CMD ["npm", "run", "start:prod"]
+CMD ["pnpm", "run", "start:prod"]

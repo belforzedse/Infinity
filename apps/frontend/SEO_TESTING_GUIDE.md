@@ -6,7 +6,7 @@ This guide helps you test all SEO implementations locally before deploying.
 
 1. Start your development server:
 ```bash
-cd frontend
+cd apps/frontend
 npm run dev
 ```
 
@@ -287,7 +287,7 @@ Once deployed, test with these tools:
 
 ```bash
 # Start dev server
-cd frontend
+cd apps/frontend
 npm run dev
 
 # In another terminal, test sitemap

@@ -10,7 +10,7 @@ The super-admin tables now use Framer Motion to animate row additions and deleti
 
 ### 1. AnimatedTableRow Component
 
-**Location:** `frontend/src/components/SuperAdmin/Table/AnimatedTableRow.tsx`
+**Location:** `apps/frontend/src/components/SuperAdmin/Table/AnimatedTableRow.tsx`
 
 A wrapper component that provides smooth animations for table rows:
 
@@ -43,7 +43,7 @@ A wrapper component that provides smooth animations for table rows:
 
 ### 2. Table Component Updates
 
-**Location:** `frontend/src/components/SuperAdmin/Table/index.tsx`
+**Location:** `apps/frontend/src/components/SuperAdmin/Table/index.tsx`
 
 **Added State:**
 ```typescript
@@ -76,7 +76,7 @@ if (hasLoadedOnce && previousData.length > 0) {
 
 ### 3. Remove Action Button Updates
 
-**Location:** `frontend/src/components/SuperAdmin/Table/Cells/RemoveActionButton.tsx`
+**Location:** `apps/frontend/src/components/SuperAdmin/Table/Cells/RemoveActionButton.tsx`
 
 **Changes:**
 - **Removed**: `useOptimisticDelete` hook
@@ -104,8 +104,8 @@ const handleDelete = async () => {
 
 The following files are no longer used but may exist for backward compatibility:
 
-- `frontend/src/hooks/useOptimisticDelete.tsx` - Optimistic delete hook (deprecated)
-- `frontend/src/lib/atoms/optimisticDelete.ts` - Optimistic delete atoms (deprecated)
+- `apps/frontend/src/hooks/useOptimisticDelete.tsx` - Optimistic delete hook (deprecated)
+- `apps/frontend/src/lib/atoms/optimisticDelete.ts` - Optimistic delete atoms (deprecated)
 
 These can be safely removed if no other components reference them.
 
@@ -173,10 +173,10 @@ const handleCreateProduct = async () => {
 
 ## Related Files
 
-- `frontend/src/components/SuperAdmin/Table/index.tsx` - Main table component
-- `frontend/src/components/SuperAdmin/Table/AnimatedTableRow.tsx` - Animation wrapper
-- `frontend/src/components/SuperAdmin/Table/Cells/RemoveActionButton.tsx` - Delete action
-- `frontend/src/app/(super-admin)/super-admin/products/add/page.tsx` - Example usage
+- `apps/frontend/src/components/SuperAdmin/Table/index.tsx` - Main table component
+- `apps/frontend/src/components/SuperAdmin/Table/AnimatedTableRow.tsx` - Animation wrapper
+- `apps/frontend/src/components/SuperAdmin/Table/Cells/RemoveActionButton.tsx` - Delete action
+- `apps/frontend/src/app/(super-admin)/super-admin/products/add/page.tsx` - Example usage
 
 ## Migration Notes
 

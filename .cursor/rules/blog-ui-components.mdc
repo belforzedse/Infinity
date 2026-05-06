@@ -1,6 +1,6 @@
 ---
 description: Blog UI components documentation for blog cards, carousels, and banners
-globs: frontend/src/components/Blog/**/*.tsx, frontend/src/app/(blog)/**/*.tsx
+globs: apps/frontend/src/components/Blog/**/*.tsx, apps/frontend/src/app/(blog)/**/*.tsx
 ---
 
 # Blog UI Components

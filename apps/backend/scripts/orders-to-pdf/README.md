@@ -7,7 +7,7 @@ Export orders from **api.infinitycolor.co** (last 34 hours by default) into one 
 From the repo root:
 
 - **Windows:** `backend\scripts\orders-to-pdf\run.bat`
-- **Unix:** `./backend/scripts/orders-to-pdf/run.sh`
+- **Unix:** `./apps/backend/scripts/orders-to-pdf/run.sh`
 
 The first run creates a Python virtual environment (`.venv`) and installs dependencies. Then you are prompted for credentials and PDFs are written to the output directory.
 

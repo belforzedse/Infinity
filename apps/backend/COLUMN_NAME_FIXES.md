@@ -16,7 +16,7 @@ Quoted identifiers in SQL (`"Balance"`) are case-sensitive and don't match unquo
 
 ## Files Fixed
 
-### 1. ✅ `backend/src/api/local-user-wallet/services/local-user-wallet.ts`
+### 1. ✅ `apps/backend/src/api/local-user-wallet/services/local-user-wallet.ts`
 
 **Issue:** Used `"Balance"` and `"LastTransactionDate"` in raw SQL UPDATE query
 
@@ -37,7 +37,7 @@ RETURNING balance, id
 
 **Also fixed:** Changed `rows[0].Balance` → `rows[0].balance` in result access
 
-### 2. ✅ `backend/src/api/order/controllers/helpers/payment.ts`
+### 2. ✅ `apps/backend/src/api/order/controllers/helpers/payment.ts`
 
 **Issue:** Used `"UsedTimes"` in raw SQL UPDATE queries for discount usage tracking
 
@@ -56,7 +56,7 @@ RETURNING used_times
 
 **Also fixed:** Changed `rows[0].UsedTimes` → `rows[0].used_times` in result access (in 2 places)
 
-### 3. ✅ `backend/src/api/cart/services/lib/stock.ts`
+### 3. ✅ `apps/backend/src/api/cart/services/lib/stock.ts`
 
 **Issue:** Used `"Count"` in raw SQL UPDATE query for stock decrement
 
@@ -77,7 +77,7 @@ RETURNING count
 
 ## Files Verified (No Issues)
 
-### ✅ `backend/src/api/report/controllers/report.ts`
+### ✅ `apps/backend/src/api/report/controllers/report.ts`
 
 **Status:** All queries use correct lowercase/snake_case column names:
 - `ct.date` (correct - lowercase)

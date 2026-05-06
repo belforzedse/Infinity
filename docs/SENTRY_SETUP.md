@@ -84,7 +84,7 @@ Add this line to your backend env file on the server (for both GitHub and GitLab
 SENTRY_DSN=https://backendkey@errors.infinitycolor.org/2
 ```
 
-For GitLab: The backend env file is set via the `BACKEND_ENV_FILE` variable (file type or variable content) and deployed to `/opt/infinity/backend/$ENV_FILE`.
+For GitLab: The backend env file is set via the `BACKEND_ENV_FILE` variable (file type or variable content) and deployed to `/opt/infinity/apps/backend/$ENV_FILE`.
 
 ## Getting the DSN from Bugsink
 
@@ -100,24 +100,24 @@ For GitLab: The backend env file is set via the `BACKEND_ENV_FILE` variable (fil
 
 | File | Change |
 |------|--------|
-| `frontend/package.json` | Added `@sentry/nextjs` dependency |
-| `frontend/next.config.ts` | Wrapped export with `withSentryConfig()` |
-| `frontend/sentry.client.config.ts` | Created - Client-side Sentry init |
-| `frontend/sentry.server.config.ts` | Created - Server-side Sentry init |
-| `frontend/sentry.edge.config.ts` | Created - Edge runtime Sentry init |
-| `frontend/instrumentation.ts` | Created - Registers Sentry configs |
-| `frontend/src/app/error.tsx` | Added `Sentry.captureException(error)` |
-| `frontend/main.Dockerfile` | Added `NEXT_PUBLIC_SENTRY_DSN` build arg |
-| `frontend/dev.Dockerfile` | Added `NEXT_PUBLIC_SENTRY_DSN` build arg |
-| `frontend/.env.example` | Added `NEXT_PUBLIC_SENTRY_DSN` |
+| `apps/frontend/package.json` | Added `@sentry/nextjs` dependency |
+| `apps/frontend/next.config.ts` | Wrapped export with `withSentryConfig()` |
+| `apps/frontend/sentry.client.config.ts` | Created - Client-side Sentry init |
+| `apps/frontend/sentry.server.config.ts` | Created - Server-side Sentry init |
+| `apps/frontend/sentry.edge.config.ts` | Created - Edge runtime Sentry init |
+| `apps/frontend/instrumentation.ts` | Created - Registers Sentry configs |
+| `apps/frontend/src/app/error.tsx` | Added `Sentry.captureException(error)` |
+| `apps/frontend/main.Dockerfile` | Added `NEXT_PUBLIC_SENTRY_DSN` build arg |
+| `apps/frontend/dev.Dockerfile` | Added `NEXT_PUBLIC_SENTRY_DSN` build arg |
+| `apps/frontend/.env.example` | Added `NEXT_PUBLIC_SENTRY_DSN` |
 
 ### Backend
 
 | File | Change |
 |------|--------|
-| `backend/package.json` | Added `@sentry/node` dependency |
-| `backend/src/index.ts` | Added `Sentry.init()` at the top |
-| `backend/.env.example` | Added `SENTRY_DSN` |
+| `apps/backend/package.json` | Added `@sentry/node` dependency |
+| `apps/backend/src/index.ts` | Added `Sentry.init()` at the top |
+| `apps/backend/.env.example` | Added `SENTRY_DSN` |
 
 ### CI/CD
 

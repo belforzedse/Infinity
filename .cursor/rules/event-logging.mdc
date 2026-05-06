@@ -35,7 +35,7 @@ The event logging system provides:
 
 ### Content Type: `event-log`
 
-**Schema**: `backend/src/api/event-log/content-types/event-log/schema.json`
+**Schema**: `apps/backend/src/api/event-log/content-types/event-log/schema.json`
 
 **Key Fields**:
 - `EventType`: Order, Payment, User, Product, Cart, Wallet, Shipping, Admin, System
@@ -51,12 +51,12 @@ The event logging system provides:
 
 ### Utilities
 
-**Message Templates**: `backend/src/utils/eventMessages.ts`
+**Message Templates**: `apps/backend/src/utils/eventMessages.ts`
 - Contains Persian message templates for common events
 - Supports placeholders (orderId, amount, status, etc.)
 - Automatically formats currency (IRR to Toman)
 
-**Event Logger**: `backend/src/utils/eventLogger.ts`
+**Event Logger**: `apps/backend/src/utils/eventLogger.ts`
 - Main logging function: `logEvent(strapi, params)`
 - Helper functions: `logOrderEvent()`, `logPaymentEvent()`, `logAdminEvent()`, `logShippingEvent()`
 
@@ -118,7 +118,7 @@ await logAdminEvent(strapi, {
 
 ## Message Templates
 
-Messages are generated from templates in `backend/src/utils/eventMessages.ts`.
+Messages are generated from templates in `apps/backend/src/utils/eventMessages.ts`.
 
 **Template Functions**:
 - `getOrderMessage()` - Order-related events
@@ -150,7 +150,7 @@ GET /event-logs/admin?eventType=Admin&severity=warning&page=1
 
 ## Frontend Integration
 
-### Service: `frontend/src/services/event-log/index.ts`
+### Service: `apps/frontend/src/services/event-log/index.ts`
 
 **Functions**:
 - `getMyEvents(filters, params)` - User's events
@@ -159,15 +159,15 @@ GET /event-logs/admin?eventType=Admin&severity=warning&page=1
 
 ### Components
 
-**User Timeline**: `frontend/src/components/User/Orders/Detail/OrderTimeline.tsx`
+**User Timeline**: `apps/frontend/src/components/User/Orders/Detail/OrderTimeline.tsx`
 - Shows human-readable event logs for users
 - Falls back to audit logs if no events exist
 
-**Admin Gateway Logs**: `frontend/src/components/SuperAdmin/Order/GatewayLogs.tsx`
+**Admin Gateway Logs**: `apps/frontend/src/components/SuperAdmin/Order/GatewayLogs.tsx`
 - Shows both: event logs (human-readable) and audit logs (technical)
 - Tabs to switch between views
 
-**Event Viewer**: `frontend/src/components/SuperAdmin/Events/EventLogViewer.tsx`
+**Event Viewer**: `apps/frontend/src/components/SuperAdmin/Events/EventLogViewer.tsx`
 - Reusable component for viewing events
 - Supports filtering by type, severity, date range
 

@@ -17,11 +17,11 @@ This rule documents when and where the shopping cart must be cleared during chec
 
 - Order/contract creation and stock reservation occur in the cart service:
 
-  - [cart service](mdc:infinity-store-backend/src/api/cart/services/cart.ts) → `finalizeCartToOrder`
+  - [cart service](mdc:infinity-store-apps/backend/src/api/cart/services/cart.ts) → `finalizeCartToOrder`
   - The service no longer clears the cart.
 
 - Gateway initiation and cart clearing occur in the controller handler:
-  - [finalize handler](mdc:infinity-store-backend/src/api/cart/controllers/handlers/finalizeToOrder.ts)
+  - [finalize handler](mdc:infinity-store-apps/backend/src/api/cart/controllers/handlers/finalizeToOrder.ts)
   - On gateway failure: mark order/contract as Cancelled; cart remains intact.
   - On gateway success: clear the cart by setting `cart.Status = "Empty"` and deleting cart items.
 

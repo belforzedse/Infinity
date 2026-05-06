@@ -27,13 +27,13 @@ Stored on the **Settings** single type (`api::settings.settings`):
 - **Empty array** for either field means: use **algorithmic** selection (same as before curation existed).
 - Non-empty array: only those products are shown, in the given order (subject to stock/active filters).
 
-Schema: [backend/src/api/settings/content-types/settings/schema.json](backend/src/api/settings/content-types/settings/schema.json).
+Schema: [apps/apps/backend/src/api/settings/content-types/settings/schema.json](apps/apps/backend/src/api/settings/content-types/settings/schema.json).
 
 ## Super-Admin Page
 
 - **Path:** `/super-admin/products/homepage`
 - **Sidebar:** مدیریت محصولات → محصولات صفحه اصلی
-- **Config:** [frontend/src/app/(super-admin)/super-admin/products/homepage/page.tsx](frontend/src/app/(super-admin)/super-admin/products/homepage/page.tsx)
+- **Config:** [apps/apps/frontend/src/app/(super-admin)/super-admin/products/homepage/page.tsx](apps/apps/frontend/src/app/(super-admin)/super-admin/products/homepage/page.tsx)
 
 Behavior:
 
@@ -49,7 +49,7 @@ Info text: «اگر برای هر بخش محصولی انتخاب نشود، د
 ## Data Flow
 
 1. **Super-admin:** User selects/orders products → Save → `PUT /api/settings` with `homeNewestProductIds` and `homeDiscountedProductIds`.
-2. **Public homepage:** `HomeProductSections` calls `getHomepageSections()` (see [frontend/src/services/product/homepage.ts](frontend/src/services/product/homepage.ts)).
+2. **Public homepage:** `HomeProductSections` calls `getHomepageSections()` (see [apps/apps/frontend/src/services/product/homepage.ts](apps/apps/frontend/src/services/product/homepage.ts)).
 3. `getHomepageSections()`:
    - Fetches public settings via `getPublicSuperAdminSettings()`.
    - If `homeNewestProductIds.length > 0`: fetches those products with `getProductsByIds()` and uses them for «جدیدترین ها».
@@ -60,15 +60,15 @@ Info text: «اگر برای هر بخش محصولی انتخاب نشود، د
 
 ## Frontend Types
 
-- Settings type and normalizers: [frontend/src/types/super-admin/settings.ts](frontend/src/types/super-admin/settings.ts)  
+- Settings type and normalizers: [apps/apps/frontend/src/types/super-admin/settings.ts](apps/apps/frontend/src/types/super-admin/settings.ts)  
   - `SuperAdminSettings.homeNewestProductIds`, `homeDiscountedProductIds`  
   - `normalizeHomepageProductIds(value)` for safe parsing of the JSON arrays.
-- Update payload: [frontend/src/services/super-admin/settings/update.ts](frontend/src/services/super-admin/settings/update.ts) sends these two fields when provided.
+- Update payload: [apps/apps/frontend/src/services/super-admin/settings/update.ts](apps/apps/frontend/src/services/super-admin/settings/update.ts) sends these two fields when provided.
 
 ## Key Files
 
-- Backend schema: `backend/src/api/settings/content-types/settings/schema.json`
-- Homepage sections fetch + getProductsByIds: `frontend/src/services/product/homepage.ts`
-- Super-admin page: `frontend/src/app/(super-admin)/super-admin/products/homepage/page.tsx`
-- Picker component: `frontend/src/components/SuperAdmin/Products/HomepageProductPicker.tsx`
-- Product summaries by IDs (super-admin): `frontend/src/services/super-admin/product/get.ts` → `getProductSummariesByIds`
+- Backend schema: `apps/backend/src/api/settings/content-types/settings/schema.json`
+- Homepage sections fetch + getProductsByIds: `apps/frontend/src/services/product/homepage.ts`
+- Super-admin page: `apps/frontend/src/app/(super-admin)/super-admin/products/homepage/page.tsx`
+- Picker component: `apps/frontend/src/components/SuperAdmin/Products/HomepageProductPicker.tsx`
+- Product summaries by IDs (super-admin): `apps/frontend/src/services/super-admin/product/get.ts` → `getProductSummariesByIds`

@@ -1,4 +1,5 @@
 import { withSentryConfig } from "@sentry/nextjs";
+import path from "path";
 
 /**
  * Load build version from generated JSON file
@@ -8,7 +9,6 @@ let BUILD_VERSION = "dev";
 
 try {
   const fs = require("fs");
-  const path = require("path");
   const buildVersionPath = path.join(__dirname, "src/constants/build-version.json");
 
   if (fs.existsSync(buildVersionPath)) {
@@ -28,6 +28,7 @@ process.env.NEXT_PUBLIC_BUILD_VERSION = BUILD_VERSION;
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "standalone",
+  outputFileTracingRoot: path.join(__dirname, "../.."),
   reactStrictMode: true,
   // Allow sitemap and other static generation to run longer during build (default 60s)
   staticPageGenerationTimeout: 180,

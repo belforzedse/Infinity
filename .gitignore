@@ -36,8 +36,9 @@ SECRETS_REFERENCE.txt
 # Next.js
 /.next/
 /out/
-frontend/.next/
-frontend/out/
+apps/frontend/.next/
+apps/frontend/out/
+.turbo/
 
 # Strapi
 dist/
@@ -45,8 +46,9 @@ build/
 .strapi/
 .strapi-updater.json
 .strapi-cloud.json
-backend/dist/
-backend/build/
+apps/backend/dist/
+apps/backend/build/
+apps/backend/.tmp/
 
 # Production
 /build
@@ -118,7 +120,7 @@ temp/
 ############################
 
 .venv/
-backend/scripts/orders-to-pdf/.venv/
+apps/backend/scripts/orders-to-pdf/.venv/
 
 ############################
 # Misc
@@ -135,7 +137,7 @@ public/uploads/*
 nul
 
 # Generated files
-frontend/src/constants/build-version.json
+apps/frontend/src/constants/build-version.json
 
 # Lock files (optional - uncomment to ignore)
 # yarn.lock

@@ -142,8 +142,8 @@ Likely next-page resources are prefetched:
 
 ## Related Files
 
-- `frontend/src/utils/haptics.ts` - Haptic feedback utility
-- `frontend/src/hooks/usePullToRefresh.ts` - Pull-to-refresh hook
-- `frontend/src/utils/imagePreloader.ts` - Image preloading utilities
-- `frontend/src/components/Reveal.tsx` - Animation component with reduced motion
-- `frontend/src/components/Hero/animations.ts` - Animation presets
+- `apps/frontend/src/utils/haptics.ts` - Haptic feedback utility
+- `apps/frontend/src/hooks/usePullToRefresh.ts` - Pull-to-refresh hook
+- `apps/frontend/src/utils/imagePreloader.ts` - Image preloading utilities
+- `apps/frontend/src/components/Reveal.tsx` - Animation component with reduced motion
+- `apps/frontend/src/components/Hero/animations.ts` - Animation presets

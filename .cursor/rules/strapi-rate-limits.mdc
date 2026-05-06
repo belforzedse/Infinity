@@ -2,8 +2,8 @@
 
 ## Strapi / Plugin Rate Limits (Disabled)
 
-- **Global Strapi rate limit:** Not used. `backend/config/middlewares.ts` does **not** register `strapi::rateLimit`.
-- **Users-permissions plugin rate limit:** **Disabled** in `backend/config/plugins.ts` via `users-permissions.config.ratelimit.enabled: false`. The plugin’s default rate limit (e.g. 10 req/min on auth routes) is not applied.
+- **Global Strapi rate limit:** Not used. `apps/backend/config/middlewares.ts` does **not** register `strapi::rateLimit`.
+- **Users-permissions plugin rate limit:** **Disabled** in `apps/backend/config/plugins.ts` via `users-permissions.config.ratelimit.enabled: false`. The plugin’s default rate limit (e.g. 10 req/min on auth routes) is not applied.
 
 ## Application-Level Throttles (Security Only)
 
@@ -11,9 +11,9 @@ These are **custom** middlewares for brute-force and abuse protection, not gener
 
 | Middleware | Location | Purpose |
 |------------|----------|--------|
-| OTP / auth throttle | `backend/src/api/auth/middlewares/throttle.ts` | 4 requests per 2 min (OTP/auth flows) |
-| Login throttle | `backend/src/api/auth/middlewares/login-throttle.ts` | 10 attempts per 10 min per IP (login) |
-| Discount throttle | `backend/src/api/cart/middlewares/discount-throttle.ts` | 5 attempts per minute (discount code validation) |
+| OTP / auth throttle | `apps/backend/src/api/auth/middlewares/throttle.ts` | 4 requests per 2 min (OTP/auth flows) |
+| Login throttle | `apps/backend/src/api/auth/middlewares/login-throttle.ts` | 10 attempts per 10 min per IP (login) |
+| Discount throttle | `apps/backend/src/api/cart/middlewares/discount-throttle.ts` | 5 attempts per minute (discount code validation) |
 
 They are applied only to specific routes (auth, discount validation), not to the whole API.
 

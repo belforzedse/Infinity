@@ -28,11 +28,11 @@ Implemented critical performance optimizations to eliminate connection overhead,
 **Solution:** Added `STRAPI_INTERNAL_URL` constant that bypasses public internet for server-side calls
 
 **Files Modified:**
-- `frontend/src/constants/api.ts` - Added `STRAPI_INTERNAL_URL` constant with documentation
-- `frontend/src/services/product/homepage.ts` - All server-side fetches use internal URL
-- `frontend/src/services/product/categories.ts` - Server-side fetches use internal URL
-- `frontend/src/services/super-admin/settings/public.ts` - Server-side fetches use internal URL
-- `frontend/middleware.ts` - PDP redirect API call uses internal URL
+- `apps/frontend/src/constants/api.ts` - Added `STRAPI_INTERNAL_URL` constant with documentation
+- `apps/frontend/src/services/product/homepage.ts` - All server-side fetches use internal URL
+- `apps/frontend/src/services/product/categories.ts` - Server-side fetches use internal URL
+- `apps/frontend/src/services/super-admin/settings/public.ts` - Server-side fetches use internal URL
+- `apps/frontend/middleware.ts` - PDP redirect API call uses internal URL
 
 **Pattern:**
 ```typescript
@@ -51,7 +51,7 @@ const response = await fetch(`${baseUrl}/endpoint`, { ... });
 **Solution:** Updated middleware to use `STRAPI_INTERNAL_URL` env var with fallback
 
 **Files Modified:**
-- `frontend/middleware.ts` - Uses `STRAPI_INTERNAL_URL` for product slug fetches
+- `apps/frontend/middleware.ts` - Uses `STRAPI_INTERNAL_URL` for product slug fetches
 
 **Impact:** Reduces middleware latency by 50-100ms
 
@@ -65,7 +65,7 @@ const response = await fetch(`${baseUrl}/endpoint`, { ... });
 **Solution:** Start settings and batch fetch in parallel, await settings to determine strategy
 
 **Files Modified:**
-- `frontend/src/services/product/homepage.ts` - Settings and batch fetch now run in parallel
+- `apps/frontend/src/services/product/homepage.ts` - Settings and batch fetch now run in parallel
 
 **Before:**
 ```typescript
@@ -91,7 +91,7 @@ const batch = await batchPromise;
 **Solution:** Switched to Redis provider for shared cache across all instances
 
 **Files Modified:**
-- `backend/config/plugins.ts` - REST cache provider defaults to Redis in production
+- `apps/backend/config/plugins.ts` - REST cache provider defaults to Redis in production
 
 **Code Change:**
 ```typescript
@@ -114,7 +114,7 @@ const restCacheProviderName = env("REST_CACHE_PROVIDER", env("NODE_ENV") === "pr
 **Solution:** Increased pool max to 25 per instance (100 total connections)
 
 **Files Modified:**
-- `backend/config/database.ts` - Updated all database clients (mysql, mysql2, postgres)
+- `apps/backend/config/database.ts` - Updated all database clients (mysql, mysql2, postgres)
 
 **Code Change:**
 ```typescript
@@ -140,7 +140,7 @@ pool: {
 **Solution:** Reduced to reasonable limits for security
 
 **Files Modified:**
-- `backend/config/middlewares.ts` - Reduced all body parser limits
+- `apps/backend/config/middlewares.ts` - Reduced all body parser limits
 
 **Code Changes:**
 - `jsonLimit`: 500mb → 10mb

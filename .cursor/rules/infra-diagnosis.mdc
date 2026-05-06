@@ -1,6 +1,6 @@
 ---
 description: Step-by-step diagnosis for frontend issues after scaling, GitLab switch, or cache handler (empty homepage, slowness, internal API).
-globs: .gitlab-ci.yml, frontend/docker-compose*.yml, docs/nginx-internal-api-for-docker.md
+globs: .gitlab-ci.yml, apps/frontend/docker-compose*.yml, docs/nginx-internal-api-for-docker.md
 alwaysApply: false
 ---
 
@@ -50,7 +50,7 @@ sudo netstat -tlnp | grep 8080
 
 ## 3. Is the env file correct on the server after GitLab deploy?
 
-GitLab deploy copies `FRONTEND_ENV_FILE` to `/opt/infinity/frontend/$ENV_FILE` (e.g. `main.env`). If the file is wrong or missing vars, runtime will fail.
+GitLab deploy copies `FRONTEND_ENV_FILE` to `/opt/infinity/apps/frontend/$ENV_FILE` (e.g. `main.env`). If the file is wrong or missing vars, runtime will fail.
 
 **On the server:**
 
@@ -75,7 +75,7 @@ If vars are missing in the container, fix the GitLab **FRONTEND_ENV_FILE** (file
 
 ## 4. Frontend Redis (cache handler)
 
-- **Cache handler is currently disabled** in `frontend/next.config.ts` (commented out). So each of the 12 Next instances uses only **in-memory** cache → low hit rate, more Strapi calls, slower responses.
+- **Cache handler is currently disabled** in `apps/frontend/next.config.ts` (commented out). So each of the 12 Next instances uses only **in-memory** cache → low hit rate, more Strapi calls, slower responses.
 - If you re-enable the cache handler, ensure **FRONTEND_REDIS_URL** is set in the deployed env and that **frontend-redis** is healthy:
 
 ```bash
@@ -120,7 +120,7 @@ If the homepage is empty but build succeeded, the problem is almost always **run
 |-------|------------------|
 | Internal API from container | `docker exec <frontend> wget -qO- --timeout=5 'http://<GATEWAY_IP>:8080/api/products?pagination[page]=1&pagination[pageSize]=2&filters[Status][$eq]=Active'` |
 | Nginx listen address | `ss -tlnp \| grep 8080` → must be bridge IP or 0.0.0.0, not only 127.0.0.1 |
-| Env on server | `grep STRAPI_INTERNAL_URL /opt/infinity/frontend/main.env` |
+| Env on server | `grep STRAPI_INTERNAL_URL /opt/infinity/apps/frontend/main.env` |
 | Env in container | `docker exec <frontend> env \| grep STRAPI_INTERNAL_URL` |
 | Frontend Redis | `docker exec frontend-redis redis-cli ping` |
 | Strapi health | `curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:1337/api/_health` |

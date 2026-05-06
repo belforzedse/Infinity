@@ -8,8 +8,8 @@ Thank you for using Infinity Store! This document provides resources for getting
 
 1. **Check the Documentation**
    - [README.md](../README.md) - Project overview
-   - [Backend Documentation](../backend/CLAUDE.md)
-   - [Frontend Documentation](../frontend/CLAUDE.md)
+   - [Backend Documentation](../apps/backend/CLAUDE.md)
+   - [Frontend Documentation](../apps/frontend/CLAUDE.md)
    - [Cursor Rules](../.cursor/rules/) - Development patterns
 
 2. **Search Existing Issues**
@@ -17,9 +17,9 @@ Thank you for using Infinity Store! This document provides resources for getting
    - [Closed Issues](https://github.com/YOUR_ORG/Infinitycolor/issues?q=is%3Aissue+is%3Aclosed)
 
 3. **Review Troubleshooting Guides**
-   - [Backend Troubleshooting](../backend/TROUBLESHOOTING-SLUGS.md)
-   - [Local Development Setup](../backend/LOCAL_DEV_SETUP.md)
-   - [Docker Development](../backend/DOCKER_DEV.md)
+   - [Backend Troubleshooting](../apps/backend/TROUBLESHOOTING-SLUGS.md)
+   - [Local Development Setup](../apps/backend/LOCAL_DEV_SETUP.md)
+   - [Docker Development](../apps/backend/DOCKER_DEV.md)
 
 ## Ways to Get Support
 
@@ -45,8 +45,8 @@ Thank you for using Infinity Store! This document provides resources for getting
 
 - **Getting Started**
   - [Quick Start](../README.md#quick-start)
-  - [Backend Setup](../backend/LOCAL_DEV_SETUP.md)
-  - [Frontend Setup](../frontend/README.md)
+  - [Backend Setup](../apps/backend/LOCAL_DEV_SETUP.md)
+  - [Frontend Setup](../apps/frontend/README.md)
 
 - **Development Guides**
   - [Contributing Guidelines](../CONTRIBUTING.md)
@@ -55,8 +55,8 @@ Thank you for using Infinity Store! This document provides resources for getting
   - [Cart Implementation](../.cursor/rules/cart-implementation.mdc)
 
 - **Deployment**
-  - [Production Deployment](../backend/README.md#deployment)
-  - [Docker Configuration](../backend/DOCKER_DEV.md)
+  - [Production Deployment](../apps/backend/README.md#deployment)
+  - [Docker Configuration](../apps/backend/DOCKER_DEV.md)
   - [CI/CD Pipeline](../.github/workflows/)
 
 ## Common Issues and Solutions
@@ -107,13 +107,13 @@ NEXT_PUBLIC_API_URL=http://localhost:1337
 #### "Build fails with type errors"
 ```bash
 # Regenerate types
-cd backend
-npm run type:generate
+pnpm turbo run type:generate --filter=@repo/backend
 
 # Clear Next.js cache
-cd frontend
+cd apps/frontend
 rm -rf .next
-npm run build
+cd ../..
+pnpm turbo run build --filter=@repo/frontend
 ```
 
 #### "Port 2888 already in use"

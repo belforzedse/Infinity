@@ -73,10 +73,10 @@ backend:build:
   stage: build
   rules:
     - if: '$CI_COMMIT_REF_NAME == "dev"'
-      changes: [backend/**/*, .gitlab-ci.yml]
+      changes: [apps/backend/**/*, packages/**/*, package.json, pnpm-lock.yaml, pnpm-workspace.yaml, turbo.json, .gitlab-ci.yml]
       variables: { RUNTIME_TAG: "dev" }
     - if: '$CI_COMMIT_REF_NAME == "main"'
-      changes: [backend/**/*, .gitlab-ci.yml]
+      changes: [apps/backend/**/*, packages/**/*, package.json, pnpm-lock.yaml, pnpm-workspace.yaml, turbo.json, .gitlab-ci.yml]
       variables: { RUNTIME_TAG: "main" }
     - when: never
   script:
@@ -84,10 +84,10 @@ backend:build:
       set -euo pipefail
 
       # Determine backend layout
-      if [ -f backend/package.json ]; then
-        BUILD_CONTEXT="backend"
-        MAIN_DOCKERFILE="backend/main.Dockerfile"
-        DEV_DOCKERFILE="backend/dev.Dockerfile"
+      if [ -f apps/backend/package.json ]; then
+        BUILD_CONTEXT="."
+        MAIN_DOCKERFILE="apps/backend/main.Dockerfile"
+        DEV_DOCKERFILE="apps/backend/dev.Dockerfile"
       else
         BUILD_CONTEXT="."
         MAIN_DOCKERFILE="main.Dockerfile"
@@ -130,13 +130,13 @@ backend:deploy:
   environment: $DEPLOY_ENV
   rules:
     - if: '$CI_COMMIT_REF_NAME == "dev"'
-      changes: [backend/**/*, .gitlab-ci.yml]
+      changes: [apps/backend/**/*, packages/**/*, package.json, pnpm-lock.yaml, pnpm-workspace.yaml, turbo.json, .gitlab-ci.yml]
       variables:
         IMAGE_TAG: "dev"
         ENV_FILE: "dev.env"
         DEPLOY_ENV: "staging"
     - if: '$CI_COMMIT_REF_NAME == "main"'
-      changes: [backend/**/*, .gitlab-ci.yml]
+      changes: [apps/backend/**/*, packages/**/*, package.json, pnpm-lock.yaml, pnpm-workspace.yaml, turbo.json, .gitlab-ci.yml]
       variables:
         IMAGE_TAG: "main"
         ENV_FILE: "main.env"
@@ -148,7 +148,7 @@ backend:deploy:
 
       # Upload compose (base + scale + CI registry override)
       scp -P "${DEPLOY_PORT:-3031}" \
-        backend/docker-compose.yml backend/docker-compose.scale.yml backend/docker-compose.ci.yml backend/docker-compose.scale.ci.yml \
+        apps/backend/docker-compose.yml apps/backend/docker-compose.scale.yml apps/backend/docker-compose.ci.yml apps/backend/docker-compose.scale.ci.yml \
         "${DEPLOY_USER}@${DEPLOY_HOST}:/opt/infinity/backend/"
 
       # BACKEND_ENV_FILE: File type => path; Variable type => env content. Avoid echoing content to log.
@@ -213,16 +213,16 @@ frontend:build:
   environment: $DEPLOY_ENV
   rules:
     - if: '$CI_COMMIT_REF_NAME == "dev"'
-      changes: [frontend/**/*, .gitlab-ci.yml]
+      changes: [apps/frontend/**/*, packages/**/*, package.json, pnpm-lock.yaml, pnpm-workspace.yaml, turbo.json, .gitlab-ci.yml]
       variables:
         RUNTIME_TAG: "dev"
-        DOCKERFILE: "frontend/dev.Dockerfile"
+        DOCKERFILE: "apps/frontend/dev.Dockerfile"
         DEPLOY_ENV: "staging"
     - if: '$CI_COMMIT_REF_NAME == "main"'
-      changes: [frontend/**/*, .gitlab-ci.yml]
+      changes: [apps/frontend/**/*, packages/**/*, package.json, pnpm-lock.yaml, pnpm-workspace.yaml, turbo.json, .gitlab-ci.yml]
       variables:
         RUNTIME_TAG: "main"
-        DOCKERFILE: "frontend/main.Dockerfile"
+        DOCKERFILE: "apps/frontend/main.Dockerfile"
         DEPLOY_ENV: "production"
     - when: never
   script:
@@ -253,7 +253,7 @@ frontend:build:
         --cache-from "type=registry,ref=$CACHE_REF" \
         --cache-to "type=registry,ref=$CACHE_REF,mode=max" \
         --push \
-        frontend
+        .
 
 # -----------------------
 # FRONTEND DEPLOY
@@ -265,13 +265,13 @@ frontend:deploy:
   environment: $DEPLOY_ENV
   rules:
     - if: '$CI_COMMIT_REF_NAME == "dev"'
-      changes: [frontend/**/*, .gitlab-ci.yml]
+      changes: [apps/frontend/**/*, packages/**/*, package.json, pnpm-lock.yaml, pnpm-workspace.yaml, turbo.json, .gitlab-ci.yml]
       variables:
         IMAGE_TAG: "dev"
         ENV_FILE: "dev.env"
         DEPLOY_ENV: "staging"
     - if: '$CI_COMMIT_REF_NAME == "main"'
-      changes: [frontend/**/*, .gitlab-ci.yml]
+      changes: [apps/frontend/**/*, packages/**/*, package.json, pnpm-lock.yaml, pnpm-workspace.yaml, turbo.json, .gitlab-ci.yml]
       variables:
         IMAGE_TAG: "main"
         ENV_FILE: "main.env"
@@ -282,7 +282,7 @@ frontend:deploy:
       set -euo pipefail
 
       scp -P "${DEPLOY_PORT:-3031}" \
-        frontend/docker-compose.yml frontend/docker-compose.scale.yml frontend/docker-compose.ci.yml frontend/docker-compose.scale.ci.yml \
+        apps/frontend/docker-compose.yml apps/frontend/docker-compose.scale.yml apps/frontend/docker-compose.ci.yml apps/frontend/docker-compose.scale.ci.yml \
         "${DEPLOY_USER}@${DEPLOY_HOST}:/opt/infinity/frontend/"
 
       # FRONTEND_ENV_FILE: File type => path; Variable type => env content. Avoid echoing content to log.

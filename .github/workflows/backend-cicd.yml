@@ -7,14 +7,24 @@ on:
       - dev
       - experimental
     paths:
-      - 'backend/**'
+      - 'apps/backend/**'
+      - 'packages/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'turbo.json'
       - '.github/workflows/backend-cicd.yml'
-      - 'backend/docker-compose.scale.yml'
+      - 'apps/backend/docker-compose.scale.yml'
   pull_request:
     paths:
-      - 'backend/**'
+      - 'apps/backend/**'
+      - 'packages/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'turbo.json'
       - '.github/workflows/backend-cicd.yml'
-      - 'backend/docker-compose.scale.yml'
+      - 'apps/backend/docker-compose.scale.yml'
   workflow_dispatch:
 
 env:
@@ -52,9 +62,9 @@ jobs:
       - name: Determine backend layout
         id: layout
         run: |
-          if [[ -f backend/package.json ]]; then
-            echo "docker_context=backend" >> "$GITHUB_OUTPUT"
-            echo "dockerfile_base=backend" >> "$GITHUB_OUTPUT"
+          if [[ -f apps/backend/package.json ]]; then
+            echo "docker_context=." >> "$GITHUB_OUTPUT"
+            echo "dockerfile_base=apps/backend" >> "$GITHUB_OUTPUT"
           else
             echo "docker_context=." >> "$GITHUB_OUTPUT"
             echo "dockerfile_base=." >> "$GITHUB_OUTPUT"
@@ -134,8 +144,9 @@ jobs:
           username: ${{ secrets.BACKEND_USER }}
           key: ${{ secrets.BACKEND_SSH_KEY }}
           port: ${{ secrets.BACKEND_PORT || '22' }}
-          source: "backend/docker-compose.yml,backend/docker-compose.scale.yml"
-          target: /opt/infinity/
+          source: "apps/backend/docker-compose.yml,apps/backend/docker-compose.scale.yml"
+          target: /opt/infinity/backend/
+          strip_components: 2
 
       - name: Deploy to production
         if: github.ref == 'refs/heads/main'
@@ -198,8 +209,9 @@ jobs:
           username: ${{ secrets.BACKEND_USER }}
           key: ${{ secrets.BACKEND_SSH_KEY }}
           port: ${{ secrets.BACKEND_PORT || '22' }}
-          source: "backend/docker-compose.yml,backend/docker-compose.scale.yml"
-          target: /opt/infinity/
+          source: "apps/backend/docker-compose.yml,apps/backend/docker-compose.scale.yml"
+          target: /opt/infinity/backend/
+          strip_components: 2
 
       - name: Deploy to staging
         if: github.ref == 'refs/heads/dev'
@@ -262,8 +274,9 @@ jobs:
           username: ${{ secrets.BACKEND_USER }}
           key: ${{ secrets.BACKEND_SSH_KEY }}
           port: ${{ secrets.BACKEND_PORT || '22' }}
-          source: "backend/docker-compose.yml,backend/docker-compose.scale.yml"
-          target: /opt/infinity/
+          source: "apps/backend/docker-compose.yml,apps/backend/docker-compose.scale.yml"
+          target: /opt/infinity/backend/
+          strip_components: 2
 
       - name: Deploy to experimental
         if: github.ref == 'refs/heads/experimental'

@@ -577,5 +577,5 @@ Environment variables are loaded from `main.env` automatically.
 ## Related Documentation
 
 - Root `CLAUDE.md` - Project overview and structure
-- Backend `CLAUDE.md` - Strapi API architecture (`../infinity-backend/CLAUDE.md`)
+- Backend `CLAUDE.md` - Strapi API architecture (`../infinity-apps/backend/CLAUDE.md`)
 - `README.md` - Quick start guide (this file)

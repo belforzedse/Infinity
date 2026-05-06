@@ -1,6 +1,6 @@
 ---
 description: Docker load scaling: compose scale overrides, CI deploy, Nginx upstreams
-globs: backend/docker-compose*.yml, frontend/docker-compose*.yml, .github/workflows/*-cicd.yml, docs/nginx-upstream-snippet.conf, docs/DOCKER-LOAD-SCALING-GUIDE.md
+globs: apps/backend/docker-compose*.yml, apps/frontend/docker-compose*.yml, .github/workflows/*-cicd.yml, docs/nginx-upstream-snippet.conf, docs/DOCKER-LOAD-SCALING-GUIDE.md
 ---
 
 # Docker Load Scaling
@@ -11,12 +11,12 @@ The app runs **multiple frontend and backend containers** in production when usi
 
 ## Repo pieces
 
-- **backend/docker-compose.scale.yml** – Adds `strapi-2` (1338) through `strapi-6` (1342). Use with `docker compose -f docker-compose.yml -f docker-compose.scale.yml`.
-- **backend/docker-compose.ci.yml** – GitLab CI only: overrides main `strapi` image to registry.cyandm.org.
-- **backend/docker-compose.scale.ci.yml** – GitLab CI only: overrides scale service images (strapi-2…strapi-6) to registry.cyandm.org.
-- **frontend/docker-compose.scale.yml** – Adds `frontend-2` (3001) through `frontend-12` (3011). Same image/env.
-- **frontend/docker-compose.ci.yml** – GitLab CI only: overrides main `frontend` image to registry.cyandm.org.
-- **frontend/docker-compose.scale.ci.yml** – GitLab CI only: overrides scale service images (frontend-2…frontend-12) to registry.cyandm.org.
+- **apps/backend/docker-compose.scale.yml** – Adds `strapi-2` (1338) through `strapi-6` (1342). Use with `docker compose -f docker-compose.yml -f docker-compose.scale.yml`.
+- **apps/backend/docker-compose.ci.yml** – GitLab CI only: overrides main `strapi` image to registry.cyandm.org.
+- **apps/backend/docker-compose.scale.ci.yml** – GitLab CI only: overrides scale service images (strapi-2…strapi-6) to registry.cyandm.org.
+- **apps/frontend/docker-compose.scale.yml** – Adds `frontend-2` (3001) through `frontend-12` (3011). Same image/env.
+- **apps/frontend/docker-compose.ci.yml** – GitLab CI only: overrides main `frontend` image to registry.cyandm.org.
+- **apps/frontend/docker-compose.scale.ci.yml** – GitLab CI only: overrides scale service images (frontend-2…frontend-12) to registry.cyandm.org.
 - **GitLab CI** – `.gitlab-ci.yml` deploy uses compose order: `-f docker-compose.yml -f docker-compose.ci.yml -f docker-compose.scale.yml -f docker-compose.scale.ci.yml` (base → base CI override → scale → scale CI override). Copies all four files.
 - **GitHub Actions** – `frontend-cicd.yml` and `backend-cicd.yml` use base + scale only (no CI override); images from ghcr.io.
 - **Nginx** – Server config must use upstreams for load balancing. Snippet: **docs/nginx-upstream-snippet.conf** (include before `server {}`, then `proxy_pass http://next_upstream` and `proxy_pass http://strapi_upstream`). Full steps: **docs/DOCKER-LOAD-SCALING-GUIDE.md**.

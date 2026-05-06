@@ -15,10 +15,10 @@ globs: src/api/cart/**,src/api/order/**
 
 - Order creation (no stock decrement):
 
-  - [createOrderAndItems](mdc:infinity-store-backend/src/api/cart/services/lib/order.ts) creates order items but does not change stock.
+  - [createOrderAndItems](mdc:infinity-store-apps/backend/src/api/cart/services/lib/order.ts) creates order items but does not change stock.
 
 - Stock decrement after settlement (only on success):
-  - [Order controller](mdc:infinity-store-backend/src/api/order/controllers/order.ts)
+  - [Order controller](mdc:infinity-store-apps/backend/src/api/order/controllers/order.ts)
     - SnappPay: after `settle(...)` success
     - Mellat: after `settleTransaction(...)` success
   - Loads `order_items.product_variation.product_stock` and subtracts `Count`.

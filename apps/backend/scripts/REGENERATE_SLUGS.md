@@ -15,7 +15,7 @@ The script:
 ### From Your Local Machine
 
 ```bash
-cd backend
+cd apps/backend
 
 # 1. Preview changes (dry-run) - recommended first!
 node scripts/regenerate-product-slugs.js --dry-run
@@ -36,7 +36,7 @@ node scripts/regenerate-product-slugs.js --force
 
 The script uses the same configuration as the WooCommerce importer:
 
-1. **Automatic**: Uses `backend/scripts/woocommerce-importer/config.js` (same credentials)
+1. **Automatic**: Uses `apps/backend/scripts/woocommerce-importer/config.js` (same credentials)
 2. **Environment Variables**: 
    ```bash
    STRAPI_URL="https://api.infinitycolor.org/api" \
@@ -85,7 +85,7 @@ Total processed: 500
 
 ### "API token is required"
 - Set `STRAPI_TOKEN` environment variable, or
-- Configure in `backend/scripts/woocommerce-importer/config.js`
+- Configure in `apps/backend/scripts/woocommerce-importer/config.js`
 
 ### "Error fetching page"
 - Check Strapi server is accessible

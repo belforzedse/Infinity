@@ -1,6 +1,6 @@
 ---
 description: Next.js custom cache handler (Redis + LRU fallback) implementation and correctness
-globs: frontend/cache-handler.mjs, frontend/next.config.ts
+globs: apps/frontend/cache-handler.mjs, apps/frontend/next.config.ts
 ---
 
 # Frontend Cache Handler (Next.js ISR / Data Cache)
@@ -10,8 +10,8 @@ globs: frontend/cache-handler.mjs, frontend/next.config.ts
 The frontend uses a **custom cache handler** for Next.js so that ISR, route handler responses, and (when enabled) optimized images use shared or fallback storage instead of only in-process memory.
 
 - **Package:** `@fortedigital/nextjs-cache-handler` v3+ (Next.js 16–compatible; redis-strings + local-lru). Do not use `@neshca/cache-handler` on Next.js 15/16 (causes `segmentData.get is not a function`).
-- **Entry:** `frontend/cache-handler.mjs` (ESM).
-- **Config:** `frontend/next.config.ts` — `cacheHandler`, `cacheMaxMemorySize`.
+- **Entry:** `apps/frontend/cache-handler.mjs` (ESM).
+- **Config:** `apps/frontend/next.config.ts` — `cacheHandler`, `cacheMaxMemorySize`.
 
 ## Correctness (per Next.js and @fortedigital/nextjs-cache-handler)
 

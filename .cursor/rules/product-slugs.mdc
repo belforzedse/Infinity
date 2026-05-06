@@ -10,44 +10,44 @@ Products now use SEO-friendly slugs for URLs instead of numeric IDs.
 
 ### Backend Implementation
 
-1. **Schema**: `backend/src/api/product/content-types/product/schema.json`
+1. **Schema**: `apps/backend/src/api/product/content-types/product/schema.json`
    - `Slug` field: `uid` type, targets `Title` field
 
-2. **Lifecycle Hooks**: `backend/src/api/product/content-types/product/lifecycles.ts`
+2. **Lifecycle Hooks**: `apps/backend/src/api/product/content-types/product/lifecycles.ts`
    - Auto-generates slug from Title on create if not provided
-   - Uses `generateUniqueProductSlug` from `backend/src/utils/productSlug.ts`
+   - Uses `generateUniqueProductSlug` from `apps/backend/src/utils/productSlug.ts`
 
 3. **API Endpoint**: `GET /products/by-slug/:slug`
-   - Defined in `backend/src/api/product/routes/custom-router.ts`
-   - Handler in `backend/src/api/product/controllers/product.ts`
+   - Defined in `apps/backend/src/api/product/routes/custom-router.ts`
+   - Handler in `apps/backend/src/api/product/controllers/product.ts`
    - Supports Persian slugs (URL-encoded)
    - Falls back to ID lookup for numeric slugs
 
-4. **Slug Utilities**: `backend/src/utils/productSlug.ts`
+4. **Slug Utilities**: `apps/backend/src/utils/productSlug.ts`
    - `generateUniqueProductSlug()`: Creates Persian-compatible slugs
    - `isProductSlugAvailable()`: Checks uniqueness
    - `validateProductSlug()`: Full validation
 
 ### Frontend Implementation
 
-1. **Service Layer**: `frontend/src/services/product/product.ts`
+1. **Service Layer**: `apps/frontend/src/services/product/product.ts`
    - `getProductBySlug()`: Calls new backend endpoint
    - Falls back to ID-based lookup for numeric slugs
 
-2. **Product Card**: `frontend/src/components/Product/Card.tsx`
+2. **Product Card**: `apps/frontend/src/components/Product/Card.tsx`
    - Accepts `slug?: string` prop
    - Uses `slug || id` pattern for URL generation
 
-3. **Small Card**: `frontend/src/components/Product/SmallCard.tsx`
+3. **Small Card**: `apps/frontend/src/components/Product/SmallCard.tsx`
    - Same pattern as Product Card
 
-4. **Cart Context**: `frontend/src/contexts/CartContext.tsx`
+4. **Cart Context**: `apps/frontend/src/contexts/CartContext.tsx`
    - Uses product `Slug` field if available
 
-5. **Sitemap**: `frontend/src/app/sitemap.ts`
+5. **Sitemap**: `apps/frontend/src/app/sitemap.ts`
    - Fetches `Slug` field for product URLs
 
-6. **Static Generation**: `frontend/src/app/(product)/pdp/[slug]/page.tsx`
+6. **Static Generation**: `apps/frontend/src/app/(product)/pdp/[slug]/page.tsx`
    - `generateStaticParams` uses actual slugs
 
 ### Migration
@@ -55,7 +55,7 @@ Products now use SEO-friendly slugs for URLs instead of numeric IDs.
 Run the migration script to generate slugs for existing products:
 
 ```bash
-cd backend
+cd apps/backend
 npm run strapi console
 # Then run:
 await require('./scripts/generate-product-slugs.js')()
@@ -63,7 +63,7 @@ await require('./scripts/generate-product-slugs.js')()
 
 ### WooCommerce Import
 
-The importer (`backend/scripts/woocommerce-importer/importers/ProductImporter.js`) automatically:
+The importer (`apps/backend/scripts/woocommerce-importer/importers/ProductImporter.js`) automatically:
 - Uses WooCommerce slug if available
 - Generates slug from product name as fallback
 - Handles URL-encoded Persian slugs
@@ -77,8 +77,8 @@ The importer (`backend/scripts/woocommerce-importer/importers/ProductImporter.js
 
 ### References
 
-- [Product Schema](mdc:backend/src/api/product/content-types/product/schema.json)
-- [Product Slug Utils](mdc:backend/src/utils/productSlug.ts)
-- [Product Service](mdc:frontend/src/services/product/product.ts)
-- [Product Card](mdc:frontend/src/components/Product/Card.tsx)
-- [PDP Page](mdc:frontend/src/app/(product)/pdp/[slug]/page.tsx)
+- [Product Schema](mdc:apps/backend/src/api/product/content-types/product/schema.json)
+- [Product Slug Utils](mdc:apps/backend/src/utils/productSlug.ts)
+- [Product Service](mdc:apps/frontend/src/services/product/product.ts)
+- [Product Card](mdc:apps/frontend/src/components/Product/Card.tsx)
+- [PDP Page](mdc:apps/frontend/src/app/(product)/pdp/[slug]/page.tsx)

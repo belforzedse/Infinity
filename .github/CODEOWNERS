@@ -11,21 +11,21 @@
 * @belforzedse
 
 # Backend
-/backend/ @belforzedse
-/backend/src/api/ @belforzedse
-/backend/config/ @belforzedse
+/apps/backend/ @belforzedse
+/apps/backend/src/api/ @belforzedse
+/apps/backend/config/ @belforzedse
 
 # Frontend
-/frontend/ @belforzedse
-/frontend/src/app/ @belforzedse
-/frontend/src/components/ @belforzedse
+/apps/frontend/ @belforzedse
+/apps/frontend/src/app/ @belforzedse
+/apps/frontend/src/components/ @belforzedse
 
 # CI/CD and DevOps
 /.github/ @belforzedse
 /.github/workflows/ @belforzedse
-/backend/docker-compose.yml @belforzedse
-/backend/*.Dockerfile @belforzedse
-/frontend/*.Dockerfile @belforzedse
+/apps/backend/docker-compose.yml @belforzedse
+/apps/backend/*.Dockerfile @belforzedse
+/apps/frontend/*.Dockerfile @belforzedse
 
 # Documentation
 *.md @belforzedse
@@ -38,22 +38,22 @@
 *.config.* @belforzedse
 
 # Security and sensitive files
-/backend/.env.example @belforzedse
-/frontend/.env.example @belforzedse
+/apps/backend/.env.example @belforzedse
+/apps/frontend/.env.example @belforzedse
 SECURITY.md @belforzedse
 /.github/CODEOWNERS @belforzedse
 
 # Database
-/backend/database/ @belforzedse
-/backend/database/migrations/ @belforzedse
+/apps/backend/database/ @belforzedse
+/apps/backend/database/migrations/ @belforzedse
 
 # API Routes
-/backend/src/api/**/routes/ @belforzedse
+/apps/backend/src/api/**/routes/ @belforzedse
 
 # Types and Schemas
-/backend/types/ @belforzedse
-/backend/src/api/**/content-types/ @belforzedse
-/frontend/src/types/ @belforzedse
+/apps/backend/types/ @belforzedse
+/apps/backend/src/api/**/content-types/ @belforzedse
+/apps/frontend/src/types/ @belforzedse
 
 # Tests
 **/__tests__/ @belforzedse
@@ -62,14 +62,14 @@ SECURITY.md @belforzedse
 
 # Example team assignments (uncomment and customize as needed)
 # Frontend team
-# /frontend/ @frontend-team-lead @frontend-developer
+# /apps/frontend/ @frontend-team-lead @frontend-developer
 
 # Backend team
-# /backend/ @backend-team-lead @backend-developer
+# /apps/backend/ @backend-team-lead @backend-developer
 
 # DevOps team
 # /.github/workflows/ @devops-lead
-# /backend/docker-compose.yml @devops-lead
+# /apps/backend/docker-compose.yml @devops-lead
 
 # Documentation team
 # *.md @docs-lead

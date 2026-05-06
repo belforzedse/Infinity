@@ -1,12 +1,12 @@
 ---
 description: Reserve Order feature - delayed shipping with order merging within 48h window
 globs: 
-  - backend/src/api/order/**/*
-  - backend/src/api/cart/**/*
-  - frontend/src/components/ShoppingCart/**/*
-  - frontend/src/components/User/Orders/**/*
-  - frontend/src/services/order/**/*
-  - frontend/src/services/cart/**/*
+  - apps/backend/src/api/order/**/*
+  - apps/backend/src/api/cart/**/*
+  - apps/frontend/src/components/ShoppingCart/**/*
+  - apps/frontend/src/components/User/Orders/**/*
+  - apps/frontend/src/services/order/**/*
+  - apps/frontend/src/services/cart/**/*
 ---
 
 # Reserve Order Feature
@@ -41,7 +41,7 @@ Users can "reserve" shipping at checkout, delaying delivery by 48 hours. During 
 
 ### Cron Job
 
-`backend/src/jobs/expireReserveOrders.ts` — Clears IsReserveOrder on orders where ReserveExpiresAt has passed.
+`apps/backend/src/jobs/expireReserveOrders.ts` — Clears IsReserveOrder on orders where ReserveExpiresAt has passed.
 
 ## Frontend
 
@@ -67,17 +67,17 @@ Users can "reserve" shipping at checkout, delaying delivery by 48 hours. During 
 
 ## Key Files
 
-- `backend/src/api/order/content-types/order/schema.json` — Order schema
-- `backend/src/api/order/controllers/handlers/getActiveReserve.ts`
-- `backend/src/api/order/controllers/handlers/releaseReserve.ts`
-- `backend/src/api/cart/controllers/handlers/finalizeToOrder.ts` — Reserve merge logic
-- `backend/src/api/cart/services/cart.ts` — Reserve fields in finalizeCartToOrder
-- `backend/src/jobs/expireReserveOrders.ts`
-- `frontend/src/components/ShoppingCart/Bill/ReserveShipping.tsx`
-- `frontend/src/components/ShoppingCart/Bill/index.tsx` — Merge flow; SnappPay eligibility runs in merge mode without `shippingId` (shipping from parent).
-- `frontend/src/services/order/reserve.ts` — getActiveReserve, releaseReserve
-- `frontend/src/services/order/index.ts` — getMyOrders(page, pageSize, options?) with `options.reserveGroupId` for group page
-- `frontend/src/components/User/Orders/Tabs.tsx` — Reserve group rows and mixed list
-- `frontend/src/components/User/Orders/Detail/ReserveInfoCard.tsx`
-- `frontend/src/app/(user)/orders/reserve/[reserveGroupId]/page.tsx` — Reserve group detail page
-- `backend/src/api/order/controllers/order.ts` — getMyOrders accepts query `reserveGroupId`
+- `apps/backend/src/api/order/content-types/order/schema.json` — Order schema
+- `apps/backend/src/api/order/controllers/handlers/getActiveReserve.ts`
+- `apps/backend/src/api/order/controllers/handlers/releaseReserve.ts`
+- `apps/backend/src/api/cart/controllers/handlers/finalizeToOrder.ts` — Reserve merge logic
+- `apps/backend/src/api/cart/services/cart.ts` — Reserve fields in finalizeCartToOrder
+- `apps/backend/src/jobs/expireReserveOrders.ts`
+- `apps/frontend/src/components/ShoppingCart/Bill/ReserveShipping.tsx`
+- `apps/frontend/src/components/ShoppingCart/Bill/index.tsx` — Merge flow; SnappPay eligibility runs in merge mode without `shippingId` (shipping from parent).
+- `apps/frontend/src/services/order/reserve.ts` — getActiveReserve, releaseReserve
+- `apps/frontend/src/services/order/index.ts` — getMyOrders(page, pageSize, options?) with `options.reserveGroupId` for group page
+- `apps/frontend/src/components/User/Orders/Tabs.tsx` — Reserve group rows and mixed list
+- `apps/frontend/src/components/User/Orders/Detail/ReserveInfoCard.tsx`
+- `apps/frontend/src/app/(user)/orders/reserve/[reserveGroupId]/page.tsx` — Reserve group detail page
+- `apps/backend/src/api/order/controllers/order.ts` — getMyOrders accepts query `reserveGroupId`

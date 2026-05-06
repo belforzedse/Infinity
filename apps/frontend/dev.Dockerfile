@@ -1,14 +1,16 @@
 # syntax=docker.arvancloud.ir/docker/dockerfile:1.7
 FROM docker.arvancloud.ir/node:22-alpine AS builder
 
-WORKDIR /app
+WORKDIR /repo
 ENV NEXT_TELEMETRY_DISABLED=1
 
-COPY package*.json ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
+COPY apps/frontend/package.json ./apps/frontend/package.json
+COPY packages ./packages
 RUN --mount=type=cache,target=/root/.npm \
-    npm ci --legacy-peer-deps
+    corepack enable && pnpm install --filter @repo/frontend... --frozen-lockfile
 
-COPY . .
+COPY apps/frontend ./apps/frontend
 
 ARG NEXT_PUBLIC_API_BASE_URL=""
 ARG NEXT_PUBLIC_IMAGE_BASE_URL=""
@@ -34,7 +36,8 @@ ENV STRAPI_INTERNAL_URL=${STRAPI_INTERNAL_URL}
 ENV FRONTEND_REDIS_URL=${FRONTEND_REDIS_URL}
 ENV GITHUB_SHA=${GITHUB_SHA}
 
-RUN NODE_ENV=production npm run build
+WORKDIR /repo/apps/frontend
+RUN NODE_ENV=production pnpm run build
 
 FROM docker.arvancloud.ir/node:22-alpine AS runner
 WORKDIR /app
@@ -48,10 +51,10 @@ ENV NEXT_TELEMETRY_DISABLED=1 \
     STRAPI_INTERNAL_URL=${STRAPI_INTERNAL_URL} \
     FRONTEND_REDIS_URL=${FRONTEND_REDIS_URL}
 
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /repo/apps/frontend/.next/standalone ./
+COPY --from=builder /repo/apps/frontend/public ./apps/frontend/public
+COPY --from=builder /repo/apps/frontend/.next/static ./apps/frontend/.next/static
 
 EXPOSE 3000
 
-CMD ["node", "server.js"]
+CMD ["node", "apps/frontend/server.js"]

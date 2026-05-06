@@ -7,14 +7,14 @@ Enhanced haptic feedback system with iOS support, user preferences, performance 
 ## What Was Implemented
 
 ### 1. iOS Support ✅
-- **File**: `frontend/src/utils/haptics-ios.ts`
+- **File**: `apps/frontend/src/utils/haptics-ios.ts`
 - **Method**: Hidden checkbox workaround
 - **How it works**: iOS Safari provides haptic feedback for native UI elements. We create a hidden checkbox and call `.click()` on it to simulate a user click, which triggers iOS haptics. This must be called synchronously within a user interaction context (click/touch handlers).
 - **Compatibility**: Works in iOS Safari (including iOS 18) and PWA standalone mode
 - **Important**: All haptic calls are already within user interaction contexts (button clicks, swipes, etc.), so this works automatically
 
 ### 2. Device Detection ✅
-- **File**: `frontend/src/utils/device-detection.ts`
+- **File**: `apps/frontend/src/utils/device-detection.ts`
 - **Features**:
   - iOS/Android/Desktop detection
   - PWA standalone mode detection
@@ -23,7 +23,7 @@ Enhanced haptic feedback system with iOS support, user preferences, performance 
   - Cached results for performance
 
 ### 3. Enhanced Haptics Utility ✅
-- **File**: `frontend/src/utils/haptics.ts` (completely rewritten)
+- **File**: `apps/frontend/src/utils/haptics.ts` (completely rewritten)
 - **New Features**:
   - iOS support via checkbox workaround
   - Android support via Vibration API
@@ -35,7 +35,7 @@ Enhanced haptic feedback system with iOS support, user preferences, performance 
   - Enhanced haptic patterns
 
 ### 4. Testing Utilities ✅
-- **File**: `frontend/src/utils/haptics-test.ts`
+- **File**: `apps/frontend/src/utils/haptics-test.ts`
 - **Features**:
   - Test all haptic types
   - Device-specific testing
@@ -113,14 +113,14 @@ const enabled = isHapticsEnabled();
 ## Files Created/Modified
 
 ### New Files
-1. `frontend/src/utils/haptics-ios.ts` - iOS-specific implementation
-2. `frontend/src/utils/device-detection.ts` - Device detection utilities
-3. `frontend/src/utils/haptics-test.ts` - Testing utilities
-4. `frontend/docs/haptic-feedback-testing.md` - Testing guide
-5. `frontend/docs/haptic-feedback-implementation.md` - This file
+1. `apps/frontend/src/utils/haptics-ios.ts` - iOS-specific implementation
+2. `apps/frontend/src/utils/device-detection.ts` - Device detection utilities
+3. `apps/frontend/src/utils/haptics-test.ts` - Testing utilities
+4. `apps/frontend/docs/haptic-feedback-testing.md` - Testing guide
+5. `apps/frontend/docs/haptic-feedback-implementation.md` - This file
 
 ### Modified Files
-1. `frontend/src/utils/haptics.ts` - Complete rewrite with enhancements
+1. `apps/frontend/src/utils/haptics.ts` - Complete rewrite with enhancements
 
 ### Unchanged Files (No Breaking Changes)
 - All component files using haptics continue to work without modification
@@ -128,7 +128,7 @@ const enabled = isHapticsEnabled();
 
 ## Testing
 
-See `frontend/docs/haptic-feedback-testing.md` for comprehensive testing guide.
+See `apps/frontend/docs/haptic-feedback-testing.md` for comprehensive testing guide.
 
 ### Quick Test
 ```javascript
@@ -166,7 +166,7 @@ The implementation is backward compatible. Existing haptic calls will automatica
 ## Support
 
 For issues or questions:
-1. Check `frontend/docs/haptic-feedback-testing.md` for testing guide
+1. Check `apps/frontend/docs/haptic-feedback-testing.md` for testing guide
 2. Use `haptics-test.ts` utilities for debugging
 3. Check browser console for debug messages
 4. Verify device detection with `getDeviceInfo()`

@@ -16,12 +16,12 @@ This document describes the backend integration with Anipo for shipping cost pre
 - File: [src/api/shipping/services/anipo.ts](mdc:src/api/shipping/services/anipo.ts)
   - Methods:
     - `barcodePrice({ cityCode, weight, sum, isnonstandard=0, smsservice=0 })`
-      - POST `/backend/api/barcodePrice/`
+      - POST `/apps/backend/api/barcodePrice/`
       - Note: Sends `PayTypeID: 0` defensively (upstream may expect a byte)
     - `getBarcode({ orderId, provinceCode, provinceName, cityName, name, postcode, nationalCode, callNumber, address, weight, boxSizeId?, isnonstandard=0, sum })`
-      - POST `/backend/api/getBarcode/`
-    - `remaining()` → POST `/backend/api/remaining/`
-    - `paymentGatewayLink({ price, callbackUrl })` → POST `/backend/api/paymentGatewayLink/`
+      - POST `/apps/backend/api/getBarcode/`
+    - `remaining()` → POST `/apps/backend/api/remaining/`
+    - `paymentGatewayLink({ price, callbackUrl })` → POST `/apps/backend/api/paymentGatewayLink/`
   - Logging: all requests/responses/errors are logged as single strings with JSON payloads (keyword masked).
 
 ## Endpoints

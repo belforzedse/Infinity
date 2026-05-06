@@ -22,14 +22,14 @@ This migration (`2025.11.28T14.54.00.generate-product-slugs.js`) generates SEO-f
 ### Option 1: Using Strapi CLI (Recommended)
 
 ```bash
-cd backend
+cd apps/backend
 npm run strapi db:migrate
 ```
 
 ### Option 2: Using npx
 
 ```bash
-cd backend
+cd apps/backend
 npx strapi db:migrate
 ```
 
@@ -38,7 +38,7 @@ npx strapi db:migrate
 If you need to run it manually in Strapi console:
 
 ```bash
-cd backend
+cd apps/backend
 npm run strapi console
 ```
 
@@ -109,10 +109,10 @@ npm run strapi db:migrate:down
 
 ## Related Files
 
-- **Schema**: `backend/src/api/product/content-types/product/schema.json`
-- **Utilities**: `backend/src/utils/productSlug.ts`
-- **Lifecycle Hooks**: `backend/src/api/product/content-types/product/lifecycles.ts`
-- **Manual Script**: `backend/scripts/generate-product-slugs.js` (alternative method)
+- **Schema**: `apps/backend/src/api/product/content-types/product/schema.json`
+- **Utilities**: `apps/backend/src/utils/productSlug.ts`
+- **Lifecycle Hooks**: `apps/backend/src/api/product/content-types/product/lifecycles.ts`
+- **Manual Script**: `apps/backend/scripts/generate-product-slugs.js` (alternative method)
 
 
 

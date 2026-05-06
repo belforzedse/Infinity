@@ -163,11 +163,11 @@ Run the following commands when introducing dependencies or before releases:
 
 ```bash
 # Backend
-cd backend
+cd apps/backend
 npm audit
 
 # Frontend
-cd frontend
+cd apps/frontend
 npm audit
 ```
 

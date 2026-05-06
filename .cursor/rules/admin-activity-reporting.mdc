@@ -7,7 +7,7 @@
 
 ## Logging Guidelines
 
-1. Use the `logManualActivity` helper in `backend/src/utils/manualAdminActivity.ts` whenever a super-admin/store manager performs a manual operation (order adjustments, barcode generation, invoice prints, etc.).
+1. Use the `logManualActivity` helper in `apps/backend/src/utils/manualAdminActivity.ts` whenever a super-admin/store manager performs a manual operation (order adjustments, barcode generation, invoice prints, etc.).
 2. Provide as much context as possible:
    - `resourceType`, `action`, and `description` that mirror the user-facing message.
    - `metadata` or `changes` to describe what was updated.
@@ -17,13 +17,13 @@
 
 ## Report Controller
 
-- `backend/src/api/report/controllers/report.ts` now queries `api::manual-admin-activity.manual-admin-activity`.
+- `apps/backend/src/api/report/controllers/report.ts` now queries `api::manual-admin-activity.manual-admin-activity`.
 - Filters enforce `PerformedByRole` ∈ {Superadmin, Store manager} even if the helper logs a different role.
 - Pagination metadata is returned under `meta.pagination`; frontend services should read `res.data.data` for the payload.
 
 ## Frontend Expectations
 
-- `frontend/src/services/super-admin/reports/adminActivity.ts` is the canonical consumer of the report. It only expects the manual log's shape (`ResourceType`, `Action`, `PerformedByName`, `PerformedByRole`, etc.).
+- `apps/frontend/src/services/super-admin/reports/adminActivity.ts` is the canonical consumer of the report. It only expects the manual log's shape (`ResourceType`, `Action`, `PerformedByName`, `PerformedByRole`, etc.).
 - The `/super-admin/reports/admin-activity` page still applies filters and exports to Excel, but the data now originates solely from the manual log collection.
 
 ## Testing Checklist

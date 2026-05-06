@@ -6,7 +6,7 @@ Keywords used to boost products in featured sections (جدیدترین ها, ت�
 
 ## Source of Truth
 
-`frontend/src/constants/productKeywords.ts`
+`apps/frontend/src/constants/productKeywords.ts`
 
 ```typescript
 export const PRODUCT_BOOST_KEYWORDS = ["G"] as const;

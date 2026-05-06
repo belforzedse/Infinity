@@ -8,8 +8,8 @@ Complete index of all documentation files in the Infinity Store repository.
 1. [README.md](../README.md) - Start here
 2. [CONTRIBUTING.md](../CONTRIBUTING.md) - How to contribute
 3. [CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md) - Community guidelines
-4. [Backend Setup](../backend/LOCAL_DEV_SETUP.md) - Backend development
-5. [Frontend Setup](../frontend/README.md) - Frontend development
+4. [Backend Setup](../apps/backend/LOCAL_DEV_SETUP.md) - Backend development
+5. [Frontend Setup](../apps/frontend/README.md) - Frontend development
 
 ### For Maintainers
 1. [REPOSITORY_MANAGEMENT.md](REPOSITORY_MANAGEMENT.md) - Repository management guide
@@ -128,38 +128,38 @@ Complete index of all documentation files in the Infinity Store repository.
 ### Backend Documentation
 
 #### Setup & Development
-- **[backend/README.md](../backend/README.md)**
+- **[apps/backend/README.md](../apps/backend/README.md)**
   - Backend overview
   - Quick start
 
-- **[backend/CLAUDE.md](../backend/CLAUDE.md)**
+- **[apps/backend/CLAUDE.md](../apps/backend/CLAUDE.md)**
   - Architecture guide
   - Code patterns
   - Best practices
 
-- **[backend/LOCAL_DEV_SETUP.md](../backend/LOCAL_DEV_SETUP.md)**
+- **[apps/backend/LOCAL_DEV_SETUP.md](../apps/backend/LOCAL_DEV_SETUP.md)**
   - Local development setup
   - Database configuration
   - Environment variables
 
-- **[backend/LOCAL_DEV_QUICKSTART.md](../backend/LOCAL_DEV_QUICKSTART.md)**
+- **[apps/backend/LOCAL_DEV_QUICKSTART.md](../apps/backend/LOCAL_DEV_QUICKSTART.md)**
   - Quick setup guide
   - Common commands
 
-- **[backend/DOCKER_DEV.md](../backend/DOCKER_DEV.md)**
+- **[apps/backend/DOCKER_DEV.md](../apps/backend/DOCKER_DEV.md)**
   - Docker development
   - Container management
 
 #### Troubleshooting & Guides
-- **[backend/TROUBLESHOOTING-SLUGS.md](../backend/TROUBLESHOOTING-SLUGS.md)**
+- **[apps/backend/TROUBLESHOOTING-SLUGS.md](../apps/backend/TROUBLESHOOTING-SLUGS.md)**
   - Persian slug issues
   - URL handling
 
-- **[backend/COMPLETION_CHECKLIST.md](../backend/COMPLETION_CHECKLIST.md)**
+- **[apps/backend/COMPLETION_CHECKLIST.md](../apps/backend/COMPLETION_CHECKLIST.md)**
   - Feature completion checklist
   - Quality gates
 
-- **[backend/docs/](../backend/docs/)**
+- **[apps/backend/docs/](../apps/backend/docs/)**
   - Payment gateway docs
   - Cart API guide
   - API schemas
@@ -167,25 +167,25 @@ Complete index of all documentation files in the Infinity Store repository.
 ### Frontend Documentation
 
 #### Setup & Development
-- **[frontend/README.md](../frontend/README.md)**
+- **[apps/frontend/README.md](../apps/frontend/README.md)**
   - Frontend overview
   - Quick start
 
-- **[frontend/CLAUDE.md](../frontend/CLAUDE.md)**
+- **[apps/frontend/CLAUDE.md](../apps/frontend/CLAUDE.md)**
   - Architecture guide
   - Component patterns
   - State management
 
 #### Features & Guides
-- **[frontend/PWA_ASSESSMENT.md](../frontend/PWA_ASSESSMENT.md)**
+- **[apps/frontend/PWA_ASSESSMENT.md](../apps/frontend/PWA_ASSESSMENT.md)**
   - PWA implementation
   - Service worker
 
-- **[frontend/SEO_TESTING_GUIDE.md](../frontend/SEO_TESTING_GUIDE.md)**
+- **[apps/frontend/SEO_TESTING_GUIDE.md](../apps/frontend/SEO_TESTING_GUIDE.md)**
   - SEO optimization
   - Testing procedures
 
-- **[frontend/ADDRESSES_REALTIME_UPDATE.md](../frontend/ADDRESSES_REALTIME_UPDATE.md)**
+- **[apps/frontend/ADDRESSES_REALTIME_UPDATE.md](../apps/frontend/ADDRESSES_REALTIME_UPDATE.md)**
   - Address management
   - Real-time updates
 
@@ -264,9 +264,9 @@ Development patterns and guidelines (71 files):
 
 ### Getting Started
 1. [README.md](../README.md)
-2. [Backend Setup](../backend/LOCAL_DEV_SETUP.md)
-3. [Frontend Setup](../frontend/README.md)
-4. [Docker Development](../backend/DOCKER_DEV.md)
+2. [Backend Setup](../apps/backend/LOCAL_DEV_SETUP.md)
+3. [Frontend Setup](../apps/frontend/README.md)
+4. [Docker Development](../apps/backend/DOCKER_DEV.md)
 
 ### Contributing
 1. [Contributing Guidelines](../CONTRIBUTING.md)
@@ -275,8 +275,8 @@ Development patterns and guidelines (71 files):
 4. [Issue Templates](ISSUE_TEMPLATE/)
 
 ### Architecture
-1. [Backend Architecture](../backend/CLAUDE.md)
-2. [Frontend Architecture](../frontend/CLAUDE.md)
+1. [Backend Architecture](../apps/backend/CLAUDE.md)
+2. [Frontend Architecture](../apps/frontend/CLAUDE.md)
 3. [Cursor Rules](../.cursor/rules/)
 
 ### Features
@@ -293,7 +293,7 @@ Development patterns and guidelines (71 files):
 4. [Support](SUPPORT.md)
 
 ### Troubleshooting
-1. [Backend Troubleshooting](../backend/TROUBLESHOOTING-SLUGS.md)
+1. [Backend Troubleshooting](../apps/backend/TROUBLESHOOTING-SLUGS.md)
 2. [Common Issues](SUPPORT.md#common-issues-and-solutions)
 3. [Docker Issues](SUPPORT.md#docker-issues)
 
@@ -317,8 +317,8 @@ Development patterns and guidelines (71 files):
 
 **Setting up locally:**
 1. [README.md](../README.md)
-2. [Backend Setup](../backend/LOCAL_DEV_SETUP.md)
-3. [Frontend Setup](../frontend/README.md)
+2. [Backend Setup](../apps/backend/LOCAL_DEV_SETUP.md)
+3. [Frontend Setup](../apps/frontend/README.md)
 
 **Making a contribution:**
 1. [CONTRIBUTING.md](../CONTRIBUTING.md)
@@ -331,8 +331,8 @@ Development patterns and guidelines (71 files):
 
 **Understanding a feature:**
 1. Check [Cursor Rules](../.cursor/rules/)
-2. Check [CLAUDE.md](../backend/CLAUDE.md) or [frontend/CLAUDE.md](../frontend/CLAUDE.md)
-3. Check feature-specific docs in `backend/docs/` or `frontend/docs/`
+2. Check [CLAUDE.md](../apps/backend/CLAUDE.md) or [apps/frontend/CLAUDE.md](../apps/frontend/CLAUDE.md)
+3. Check feature-specific docs in `apps/backend/docs/` or `apps/frontend/docs/`
 
 ## 📝 Documentation Standards
 

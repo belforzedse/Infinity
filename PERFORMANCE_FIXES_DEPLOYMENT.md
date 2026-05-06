@@ -20,11 +20,11 @@ This document describes the performance optimizations implemented based on the p
 **Impact:** Eliminates DNS lookup + TLS handshake + double Nginx proxy for server-side calls
 
 **Files Modified:**
-- `frontend/src/constants/api.ts` - Added `STRAPI_INTERNAL_URL` constant
-- `frontend/src/services/product/homepage.ts` - Updated all server-side fetches
-- `frontend/src/services/product/categories.ts` - Updated server-side fetches
-- `frontend/src/services/super-admin/settings/public.ts` - Updated server-side fetches
-- `frontend/middleware.ts` - Updated PDP redirect fetch
+- `apps/frontend/src/constants/api.ts` - Added `STRAPI_INTERNAL_URL` constant
+- `apps/frontend/src/services/product/homepage.ts` - Updated all server-side fetches
+- `apps/frontend/src/services/product/categories.ts` - Updated server-side fetches
+- `apps/frontend/src/services/super-admin/settings/public.ts` - Updated server-side fetches
+- `apps/frontend/middleware.ts` - Updated PDP redirect fetch
 
 **Code changes:** All server-side `fetch()` calls now check `typeof window === "undefined"` and use `STRAPI_INTERNAL_URL` instead of `API_BASE_URL`.
 
@@ -32,7 +32,7 @@ This document describes the performance optimizations implemented based on the p
 **Impact:** Reduces homepage load time by 100-300ms
 
 **Files Modified:**
-- `frontend/src/services/product/homepage.ts` - Settings fetch now runs in parallel with batch fetch
+- `apps/frontend/src/services/product/homepage.ts` - Settings fetch now runs in parallel with batch fetch
 
 **Code change:** Settings and batch fetch now start simultaneously instead of sequentially.
 
@@ -47,7 +47,7 @@ This document describes the performance optimizations implemented based on the p
 **Impact:** 4x better cache hit rate across Strapi instances
 
 **Files Modified:**
-- `backend/config/plugins.ts` - Switched from memory to Redis provider in production
+- `apps/backend/config/plugins.ts` - Switched from memory to Redis provider in production
 
 **Code change:** `REST_CACHE_PROVIDER` now defaults to `"redis"` in production, `"memory"` in development.
 
@@ -55,7 +55,7 @@ This document describes the performance optimizations implemented based on the p
 **Impact:** Prevents connection starvation under load
 
 **Files Modified:**
-- `backend/config/database.ts` - Increased pool max from 10 to 25 per instance
+- `apps/backend/config/database.ts` - Increased pool max from 10 to 25 per instance
 
 **Code change:** All database clients (mysql, mysql2, postgres) now use `DATABASE_POOL_MAX=25` (was 10).
 
@@ -65,7 +65,7 @@ This document describes the performance optimizations implemented based on the p
 **Impact:** Memory safety and DoS prevention
 
 **Files Modified:**
-- `backend/config/middlewares.ts` - Reduced limits from 500MB to reasonable values
+- `apps/backend/config/middlewares.ts` - Reduced limits from 500MB to reasonable values
 
 **Code change:**
 - `jsonLimit`: 500mb → 10mb

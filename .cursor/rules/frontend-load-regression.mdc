@@ -1,6 +1,6 @@
 ---
 description: Frontend load regression when scaling Next.js instances (e.g. 6→12) — causes other than cache handler
-globs: frontend/next.config.ts, frontend/src/services/**/*.ts, frontend/src/app/(product)/page.tsx, load-test/*.js
+globs: apps/frontend/next.config.ts, apps/frontend/src/services/**/*.ts, apps/frontend/src/app/(product)/page.tsx, load-test/*.js
 alwaysApply: false
 ---
 
@@ -54,7 +54,7 @@ So **one homepage request ≈ 5+ Strapi calls**. At 1000 frontend RPS, Strapi co
 
 ### 4. Middleware cost (minor for homepage)
 
-[frontend/middleware.ts](frontend/middleware.ts) runs on almost every request. For `GET /` it only sets headers and does path checks; **no extra fetch**. For `/pdp/<numeric-id>` it performs one Strapi fetch to resolve slug. So middleware is not the main cost for homepage load.
+[apps/frontend/middleware.ts](apps/frontend/middleware.ts) runs on almost every request. For `GET /` it only sets headers and does path checks; **no extra fetch**. For `/pdp/<numeric-id>` it performs one Strapi fetch to resolve slug. So middleware is not the main cost for homepage load.
 
 ### 5. Node/Next.js server timeouts
 

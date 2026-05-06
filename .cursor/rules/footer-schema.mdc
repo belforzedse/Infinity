@@ -5,7 +5,7 @@ alwaysApply: false
 ---
 # Footer Schema Structure
 
-The footer section of the application is now managed as a **frontend component** with hardcoded data located in `frontend/src/constants/footer.ts`.
+The footer section of the application is now managed as a **frontend component** with hardcoded data located in `apps/frontend/src/constants/footer.ts`.
 
 **Note:** The backend footer API structure remains intact in Strapi but is no longer used by the frontend.
 
@@ -13,7 +13,7 @@ The footer section of the application is now managed as a **frontend component**
 
 ### Constants File
 
-Footer data is defined in: `frontend/src/constants/footer.ts`
+Footer data is defined in: `apps/frontend/src/constants/footer.ts`
 
 The `FOOTER_DATA` constant contains all footer content:
 
@@ -75,7 +75,7 @@ Text describing physical store locations.
 
 ## Component Structure
 
-- **Main Component**: `frontend/src/components/PLP/Footer/index.tsx` (Server Component)
+- **Main Component**: `apps/frontend/src/components/PLP/Footer/index.tsx` (Server Component)
 - **Sub-components**:
   - `UserAccountSection.tsx` - First column (Account links)
   - `QuickAccessSection.tsx` - Second column (Quick access links)
@@ -89,7 +89,7 @@ All components are now server components (no client-side data fetching).
 
 To update the footer:
 
-1. Edit `frontend/src/constants/footer.ts`
+1. Edit `apps/frontend/src/constants/footer.ts`
 2. Modify the `FOOTER_DATA` constant
 3. Changes will be reflected immediately (no API calls needed)
 

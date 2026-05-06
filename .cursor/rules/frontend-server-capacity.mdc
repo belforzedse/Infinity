@@ -1,6 +1,6 @@
 ---
 description: Next.js server load and capacity - how we reduce blocking and when to scale
-globs: frontend/src/app/**/*.tsx, frontend/next.config.ts
+globs: apps/frontend/src/app/**/*.tsx, apps/frontend/next.config.ts
 alwaysApply: false
 ---
 
@@ -53,4 +53,4 @@ When the Next.js server "can't handle" traffic, clicks and navigation feel unres
 ## Related
 
 - Strapi rest-cache: `.cursor/rules/strapi-rest-cache.mdc`
-- Global loading overlay (stuck UI): `frontend/src/components/ui/GlobalFetchInterceptor.tsx` (timeout) and `GlobalLoadingOverlay.tsx` (click-through after 60s)
+- Global loading overlay (stuck UI): `apps/frontend/src/components/ui/GlobalFetchInterceptor.tsx` (timeout) and `GlobalLoadingOverlay.tsx` (click-through after 60s)

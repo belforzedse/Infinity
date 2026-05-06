@@ -2,7 +2,7 @@
 
 ## Scope
 
-- **File:** `frontend/public/sw.js`
+- **File:** `apps/frontend/public/sw.js`
 - **Purpose:** Offline cart support; caches cart and some API data; offline fallback for PWA users.
 
 ## Cross-origin requests

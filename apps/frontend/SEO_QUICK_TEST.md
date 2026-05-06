@@ -4,7 +4,7 @@
 
 ### 1. Start Your Dev Server
 ```bash
-cd frontend
+cd apps/frontend
 npm run dev
 ```
 
@@ -109,6 +109,6 @@ document.querySelectorAll('script[type="application/ld+json"]').forEach((script,
 
 ## 📚 Full Testing Guide
 
-For comprehensive testing, see: `frontend/SEO_TESTING_GUIDE.md`
+For comprehensive testing, see: `apps/frontend/SEO_TESTING_GUIDE.md`
 
 

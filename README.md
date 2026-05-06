@@ -6,8 +6,13 @@ Infinity Store is a full-stack e-commerce platform built for the Iranian market 
 
 ```
 infinity/
-├── backend/          # Strapi 4.25 API (TypeScript, PostgreSQL, Redis)
-├── frontend/         # Next.js 16 App Router (TypeScript, Tailwind, Jotai)
+├── apps/
+│   ├── apps/backend/      # Strapi 4.25 API (TypeScript, PostgreSQL, Redis)
+│   └── apps/frontend/     # Next.js 16 App Router (TypeScript, Tailwind, Jotai)
+├── packages/         # Future shared workspace packages
+├── package.json      # pnpm workspace scripts
+├── pnpm-workspace.yaml
+├── turbo.json
 └── .github/          # CI/CD workflows and CODEOWNERS
 ```
 
@@ -45,32 +50,39 @@ infinity/
 - Node.js 20+
 - PostgreSQL 16
 - Redis 7
-- npm 10+ (ships with Node 20)
+- pnpm 10+ via Corepack
+
+### Install
+
+```bash
+corepack enable
+pnpm install
+```
 
 ### Backend
 
 ```bash
-cd backend
-npm install
-npm run develop      # Starts Strapi on http://localhost:1337
+pnpm turbo run develop --filter=@repo/backend
 ```
+
+Starts Strapi on http://localhost:1337.
 
 ### Frontend
 
 ```bash
-cd frontend
-npm install
-npm run dev          # Starts Next.js on http://localhost:2888
+pnpm turbo run dev --filter=@repo/frontend
 ```
 
-See the backend and frontend directories for additional environment configuration details.
+Starts Next.js on http://localhost:2888.
+
+See the backend and frontend app directories for additional environment configuration details.
 
 ## Documentation
 
-- **Backend Guide**: [`backend/CLAUDE.md`](backend/CLAUDE.md)
-- **Frontend Guide**: [`frontend/CLAUDE.md`](frontend/CLAUDE.md)
+- **Backend Guide**: [`apps/backend/CLAUDE.md`](apps/backend/CLAUDE.md)
+- **Frontend Guide**: [`apps/frontend/CLAUDE.md`](apps/frontend/CLAUDE.md)
 - **Development Rules**: `.cursor/rules/*.mdc`
-- **Troubleshooting**: [`backend/TROUBLESHOOTING-SLUGS.md`](backend/TROUBLESHOOTING-SLUGS.md), [`backend/DOCKER_DEV.md`](backend/DOCKER_DEV.md)
+- **Troubleshooting**: [`apps/backend/TROUBLESHOOTING-SLUGS.md`](apps/backend/TROUBLESHOOTING-SLUGS.md), [`apps/backend/DOCKER_DEV.md`](apps/backend/DOCKER_DEV.md)
 
 ## Deployment
 
@@ -80,7 +92,7 @@ See the backend and frontend directories for additional environment configuratio
 | `dev`         | Staging       | Integration branch for feature work    |
 | `experimental`| Experimental  | Safe space for spikes and prototypes   |
 
-Each branch has associated CI workflows defined under `.github/workflows`. Refer to the backend/frontend READMEs for deployment details.
+Each branch has associated CI workflows defined under `.github/workflows`. Refer to the apps/backend/frontend app READMEs for deployment details.
 
 ## Contributing
 

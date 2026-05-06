@@ -35,30 +35,37 @@ This project adheres to a Code of Conduct. By participating, you are expected to
    cd Infinitycolor
    ```
 
-2. **Backend Setup**
+2. **Install workspace dependencies**
 
    ```bash
-   cd backend
-   npm install
-   cp dev.env.example dev.env  # Configure your local environment
-   npm run develop
+   corepack enable
+   pnpm install
    ```
 
-3. **Frontend Setup**
+3. **Backend Setup**
 
    ```bash
-   cd frontend
-   npm install
+   cd apps/backend
    cp dev.env.example dev.env  # Configure your local environment
-   npm run dev
+   cd ../..
+   pnpm turbo run develop --filter=@repo/backend
    ```
 
-4. **Access the Application**
+4. **Frontend Setup**
+
+   ```bash
+   cd apps/frontend
+   cp dev.env.example dev.env  # Configure your local environment
+   cd ../..
+   pnpm turbo run dev --filter=@repo/frontend
+   ```
+
+5. **Access the Application**
    - Frontend: http://localhost:2888
    - Backend: http://localhost:1337
    - Admin Panel: http://localhost:1337/admin
 
-See [`LOCAL_DEV_SETUP.md`](backend/LOCAL_DEV_SETUP.md) for detailed setup instructions.
+See [`LOCAL_DEV_SETUP.md`](apps/backend/LOCAL_DEV_SETUP.md) for detailed setup instructions.
 
 ## Development Workflow
 
@@ -139,7 +146,7 @@ export function AddToCart({ productId }: { productId: string }) {
 ### File Structure
 
 ```
-backend/src/api/
+apps/apps/backend/src/api/
 ├── [content-type]/
 │   ├── controllers/
 │   │   └── [content-type].ts
@@ -151,7 +158,7 @@ backend/src/api/
 │       └── [content-type]/
 │           └── schema.json
 
-frontend/src/
+apps/apps/frontend/src/
 ├── app/
 │   └── [route]/
 │       ├── page.tsx
@@ -255,11 +262,11 @@ Add examples for discount code endpoints
 
    ```bash
    # Backend
-   cd backend
+   cd apps/backend
    npm test
 
    # Frontend
-   cd frontend
+   cd apps/frontend
    npm test
    ```
 
@@ -321,7 +328,7 @@ Add examples for discount code endpoints
 ### Backend Testing
 
 ```bash
-cd backend
+cd apps/backend
 npm test                    # Run all tests
 npm test -- --watch        # Watch mode
 npm test -- path/to/test   # Specific test
@@ -352,7 +359,7 @@ describe("Cart Service", () => {
 ### Frontend Testing
 
 ```bash
-cd frontend
+cd apps/frontend
 npm test                    # Run all tests
 npm test -- --watch        # Watch mode
 npm test -- ComponentName  # Specific test
@@ -413,8 +420,8 @@ touch .cursor/rules/my-new-feature.mdc
 Update relevant README files:
 
 - Project root: [`README.md`](README.md)
-- Backend: [`backend/README.md`](backend/README.md) or [`backend/CLAUDE.md`](backend/CLAUDE.md)
-- Frontend: [`frontend/README.md`](frontend/README.md) or [`frontend/CLAUDE.md`](frontend/CLAUDE.md)
+- Backend: [`apps/backend/README.md`](apps/backend/README.md) or [`apps/backend/CLAUDE.md`](apps/backend/CLAUDE.md)
+- Frontend: [`apps/frontend/README.md`](apps/frontend/README.md) or [`apps/frontend/CLAUDE.md`](apps/frontend/CLAUDE.md)
 
 ## Project-Specific Guidelines
 

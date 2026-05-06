@@ -22,7 +22,7 @@ git push -uf origin main
 
 ## Integrate with your tools
 
-- [ ] [Set up project integrations](https://git.rgbgroup.ir/work.vahedi/infinity-backend/-/settings/integrations)
+- [ ] [Set up project integrations](https://git.rgbgroup.ir/work.vahedi/infinity-apps/backend/-/settings/integrations)
 
 ## Collaborate with your team
 

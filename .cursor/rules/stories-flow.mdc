@@ -63,7 +63,7 @@ sort: { SortOrder: "asc" }
 
 Never add a unique DB constraint for V1 (no race-condition handling needed at this scale).
 
-## Permission Grants (`backend/src/index.ts`)
+## Permission Grants (`apps/backend/src/index.ts`)
 
 ```typescript
 // public
@@ -87,11 +87,11 @@ All backend error responses must be Persian. Examples from `story` controller:
 - `ctx.unauthorized("برای ثبت مشاهده باید وارد حساب کاربری خود شوید.")`
 - `ctx.internalServerError("خطا در دریافت استوری‌ها. دوباره تلاش کنید.")`
 
-Add frontend translations to `frontend/src/lib/errorTranslations.ts` → `ERROR_MESSAGE_MAP`.
+Add frontend translations to `apps/frontend/src/lib/errorTranslations.ts` → `ERROR_MESSAGE_MAP`.
 
 ## Frontend Service
 
-File: `frontend/src/services/story/story.service.ts`
+File: `apps/frontend/src/services/story/story.service.ts`
 
 | Function | Auth | Notes |
 |---|---|---|
@@ -104,18 +104,18 @@ File: `frontend/src/services/story/story.service.ts`
 | `updateStory(id, data)` | admin | |
 | `deleteStory(id)` | admin | |
 
-Endpoints are registered in `frontend/src/constants/api.ts` → `ENDPOINTS.STORIES`.
+Endpoints are registered in `apps/frontend/src/constants/api.ts` → `ENDPOINTS.STORIES`.
 
 ## Seen State Hook
 
-`frontend/src/hooks/useStoriesSeenState.ts`
+`apps/frontend/src/hooks/useStoriesSeenState.ts`
 - **Guests**: localStorage (`story_seen_ids` key) only
 - **Authenticated**: merges server IDs on mount, calls API on each `markSeen`
 - Returns `{ seenIds, markSeen, hasSeen }`
 
 ## Homepage Integration
 
-`frontend/src/app/(product)/page.tsx`:
+`apps/frontend/src/app/(product)/page.tsx`:
 - `getStoriesForHome()` added to `Promise.all` block
 - `<StoriesRail stories={activeStories} />` renders after hero, before `<HomeProductSections>`
 - Hidden when `activeStories.length === 0`

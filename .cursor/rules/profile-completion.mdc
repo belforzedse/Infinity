@@ -16,7 +16,7 @@ Users could end up with empty `local-user-info` records because:
 
 ## Backend Validation
 
-**File**: [backend/src/api/auth/controllers/auth.ts](backend/src/api/auth/controllers/auth.ts)
+**File**: [apps/apps/backend/src/api/auth/controllers/auth.ts](apps/apps/backend/src/api/auth/controllers/auth.ts)
 
 The `registerInfo` handler validates before any DB work:
 - `firstName`: required, non-empty string. Returns 400 with message `"نام الزامی است"` if missing.
@@ -27,7 +27,7 @@ Validation is request-scoped only: it does not modify or overwrite existing user
 
 ## Profile Completeness Check
 
-**File**: [frontend/src/utils/profile.ts](frontend/src/utils/profile.ts)
+**File**: [apps/apps/frontend/src/utils/profile.ts](apps/apps/frontend/src/utils/profile.ts)
 
 - `isProfileIncomplete(user: MeResponse): boolean` — returns `true` when `FirstName` or `LastName` is missing or whitespace-only.
 - Used by login pages (redirect logic) and by `ProfileCompletionBanner`.
@@ -40,12 +40,12 @@ When a non-admin user logs in (password or OTP) and their profile is incomplete:
 3. Otherwise, normal redirect (stored redirect URL, `/super-admin`, or `/account`).
 
 **Files**:
-- [frontend/src/app/(public)/auth/login/page.tsx](frontend/src/app/(public)/auth/login/page.tsx) — password login
-- [frontend/src/app/(public)/auth/login/otp/page.tsx](frontend/src/app/(public)/auth/login/otp/page.tsx) — OTP login
+- [apps/apps/frontend/src/app/(public)/auth/login/page.tsx](apps/apps/frontend/src/app/(public)/auth/login/page.tsx) — password login
+- [apps/apps/frontend/src/app/(public)/auth/login/otp/page.tsx](apps/apps/frontend/src/app/(public)/auth/login/otp/page.tsx) — OTP login
 
 ## Register Info Page
 
-**File**: [frontend/src/app/(public)/auth/register/info/page.tsx](frontend/src/app/(public)/auth/register/info/page.tsx)
+**File**: [apps/apps/frontend/src/app/(public)/auth/register/info/page.tsx](apps/apps/frontend/src/app/(public)/auth/register/info/page.tsx)
 
 - Used both for **new users** (after OTP during registration) and **existing users** (redirected from login when profile is incomplete).
 - Phone can come from query param `phone` or from `localStorage` key `pendingPhone`.
@@ -55,16 +55,16 @@ When a non-admin user logs in (password or OTP) and their profile is incomplete:
 
 ## Profile Completion Banner
 
-**File**: [frontend/src/components/User/Account/ProfileCompletionBanner.tsx](frontend/src/components/User/Account/ProfileCompletionBanner.tsx)
+**File**: [apps/apps/frontend/src/components/User/Account/ProfileCompletionBanner.tsx](apps/apps/frontend/src/components/User/Account/ProfileCompletionBanner.tsx)
 
 - Amber/warning banner shown when the current user’s profile is incomplete (`isProfileIncomplete(userData)`).
 - Hidden for admins and when profile is complete.
 - **Dismissal**: Stored in `sessionStorage` under key `profileCompletionBannerDismissed`; banner reappears in a new session.
 - Contains a link "تکمیل اطلاعات" to `/account` and a close button.
-- **Placement**: Rendered in [frontend/src/app/(user)/layout.tsx](frontend/src/app/(user)/layout.tsx) above `{children}`, so it appears on all authenticated user pages (account, orders, wallet, addresses, etc.).
+- **Placement**: Rendered in [apps/apps/frontend/src/app/(user)/layout.tsx](apps/apps/frontend/src/app/(user)/layout.tsx) above `{children}`, so it appears on all authenticated user pages (account, orders, wallet, addresses, etc.).
 
 ## Related Types and Services
 
-- `MeResponse`: [frontend/src/services/user/me.ts](frontend/src/services/user/me.ts) — includes `FirstName`, `LastName`, `Phone`, etc.
-- Profile update: PUT `/auth/self` (see [frontend/src/services/user/updateProfile.ts](frontend/src/services/user/updateProfile.ts)).
-- Register info API: POST `/auth/register-info` (see [frontend/src/services/auth/register.ts](frontend/src/services/auth/register.ts)).
+- `MeResponse`: [apps/apps/frontend/src/services/user/me.ts](apps/apps/frontend/src/services/user/me.ts) — includes `FirstName`, `LastName`, `Phone`, etc.
+- Profile update: PUT `/auth/self` (see [apps/apps/frontend/src/services/user/updateProfile.ts](apps/apps/frontend/src/services/user/updateProfile.ts)).
+- Register info API: POST `/auth/register-info` (see [apps/apps/frontend/src/services/auth/register.ts](apps/apps/frontend/src/services/auth/register.ts)).

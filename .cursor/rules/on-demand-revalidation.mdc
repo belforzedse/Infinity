@@ -18,20 +18,20 @@ This system implements **on-demand revalidation** for blog posts and the home-pa
 
 ## How It Works
 
-1. **Strapi Lifecycle Hook** (`backend/src/api/blog-post/content-types/blog-post/lifecycles.ts`)
+1. **Strapi Lifecycle Hook** (`apps/backend/src/api/blog-post/content-types/blog-post/lifecycles.ts`)
    - Triggers when blog posts are created, updated, or deleted
    - Calls Next.js revalidation API endpoint
 
-2. **Next.js Revalidation API** (`frontend/src/app/api/revalidate/route.ts`)
+2. **Next.js Revalidation API** (`apps/frontend/src/app/api/revalidate/route.ts`)
    - Protected by `REVALIDATION_SECRET` token
    - Supports `type`: `blog-post`, `blog-listing`, `hero-slider`, plus generic `path` and `tag`
    - `hero-slider` → revalidates `/` (home page)
 
 3. **Hero Slider** (home page)
-   - Triggered from **Settings controller** when hero is published: `publishHeroSliderDraft` in `backend/src/api/settings/controllers/settings.ts` calls `triggerHeroSliderRevalidation(strapi)` after updating `homeHeroSliderPublished`.
+   - Triggered from **Settings controller** when hero is published: `publishHeroSliderDraft` in `apps/backend/src/api/settings/controllers/settings.ts` calls `triggerHeroSliderRevalidation(strapi)` after updating `homeHeroSliderPublished`.
    - Home page uses ISR (`revalidate = 30`); on publish the root is revalidated on demand so the new hero appears immediately.
 
-4. **Blog Post Pages** (`frontend/src/app/(blog)/[slug]/page.tsx`)
+4. **Blog Post Pages** (`apps/frontend/src/app/(blog)/[slug]/page.tsx`)
    - Uses 1-hour fallback revalidation (on-demand is primary)
    - Pages are regenerated instantly when revalidation API is called
 

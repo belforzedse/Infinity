@@ -9,7 +9,7 @@ ENV STRAPI_TELEMETRY_DISABLED=${STRAPI_TELEMETRY_DISABLED}
 ENV NODE_OPTIONS=${NODE_OPTIONS}
 ENV NODE_ENV=production
 
-WORKDIR /app
+WORKDIR /repo
 
 # Arvan APK mirror + build deps required to compile sharp against Alpine's libvips
 # (avoids GitHub binary download which fails in CI due to network restrictions)
@@ -20,13 +20,18 @@ RUN sed -i 's|https://dl-cdn.alpinelinux.org/alpine|https://mirror.arvancloud.ir
 # Official node:alpine already installs headers under /usr/local/include/node.
 ENV npm_config_nodedir=/usr/local
 
-# Layer caching: deps first so code-only changes don't re-run npm ci
-COPY package*.json ./
+# Layer caching: workspace manifests first so code-only changes don't re-run install
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
+COPY apps/backend/package.json ./apps/backend/package.json
+COPY packages ./packages
 RUN --mount=type=cache,target=/root/.npm \
-    npm ci --legacy-peer-deps
+    corepack enable && pnpm install --filter @repo/backend... --frozen-lockfile
 
-COPY . .
-RUN npm run build && rm -rf .strapi
+COPY apps/backend ./apps/backend
+WORKDIR /repo/apps/backend
+RUN pnpm run build && rm -rf .strapi
+WORKDIR /repo
+RUN pnpm --filter @repo/backend deploy --prod /app
 
 FROM docker.arvancloud.ir/node:20-alpine AS runner
 
@@ -42,14 +47,14 @@ ENV NODE_ENV=production \
 # Alpine default CDN (dl-cdn.alpinelinux.org) is often unreachable from same networks as Docker Hub; use Arvan APK mirror
 RUN sed -i 's|https://dl-cdn.alpinelinux.org/alpine|https://mirror.arvancloud.ir/alpine|g' /etc/apk/repositories \
     && apk add --no-cache su-exec vips
+RUN corepack enable
 
 WORKDIR /app
 
 COPY --from=builder /app /app
-COPY docker-entrypoint.sh /app/docker-entrypoint.sh
-RUN --mount=type=cache,target=/root/.npm npm prune --omit=dev && chmod +x /app/docker-entrypoint.sh && chown -R node:node /app
+RUN chmod +x /app/docker-entrypoint.sh && chown -R node:node /app
 
 EXPOSE 1337
 USER root
 ENTRYPOINT ["/app/docker-entrypoint.sh"]
-CMD ["npm", "run", "start:prod"]
+CMD ["pnpm", "run", "start:prod"]

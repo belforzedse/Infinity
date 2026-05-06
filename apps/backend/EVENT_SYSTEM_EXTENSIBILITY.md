@@ -206,7 +206,7 @@ async function sendSMS(params: { phone: string; message: string; userId?: number
 Create a webhook service that listens to events and triggers actions:
 
 ```typescript
-// backend/src/services/webhooks/index.ts
+// apps/backend/src/services/webhooks/index.ts
 import type { Strapi } from "@strapi/strapi";
 import { EventEmitter } from "events";
 
@@ -289,7 +289,7 @@ export async function logEvent(strapi: Strapi, params: EventLoggerParams) {
 Create a webhook configuration system where admins can configure webhooks:
 
 ```typescript
-// Schema: backend/src/api/webhook-config/content-types/webhook-config/schema.json
+// Schema: apps/backend/src/api/webhook-config/content-types/webhook-config/schema.json
 {
   "attributes": {
     "Name": { "type": "string", "required": true },
@@ -418,7 +418,7 @@ export async function logEvent(strapi: Strapi, params: EventLoggerParams) {
 
 ```typescript
 // 1. SMS Service with Event Logging
-// backend/src/services/sms/index.ts
+// apps/backend/src/services/sms/index.ts
 import { logSMSEvent } from "../../utils/eventLogger";
 
 export async function sendSMS(
@@ -479,7 +479,7 @@ export async function sendSMS(
 }
 
 // 2. Use in Order Lifecycle
-// backend/src/api/order/content-types/order/lifecycles.ts
+// apps/backend/src/api/order/content-types/order/lifecycles.ts
 import { sendSMS } from "../../../../services/sms";
 
 export default {
@@ -573,7 +573,7 @@ The `user-activity` content type stores user-facing activity notifications with:
 
 ### Schema
 
-Located in: `backend/src/api/user-activity/content-types/user-activity/schema.json`
+Located in: `apps/backend/src/api/user-activity/content-types/user-activity/schema.json`
 
 Key fields:
 - `user`: Relation to plugin::users-permissions.user
@@ -589,7 +589,7 @@ Key fields:
 
 ### Service Methods
 
-Located in: `backend/src/api/user-activity/services/user-activity.ts`
+Located in: `apps/backend/src/api/user-activity/services/user-activity.ts`
 
 #### Core Methods
 
@@ -607,7 +607,7 @@ Located in: `backend/src/api/user-activity/services/user-activity.ts`
 
 ### API Endpoints
 
-Located in: `backend/src/api/user-activity/routes/custom-router.ts`
+Located in: `apps/backend/src/api/user-activity/routes/custom-router.ts`
 
 #### GET `/api/user-activities/me`
 
@@ -634,15 +634,15 @@ Get count of unread activities.
 
 User activity logging is automatically triggered in:
 
-1. **Order Creation** (`backend/src/api/order/content-types/order/lifecycles.ts`):
+1. **Order Creation** (`apps/backend/src/api/order/content-types/order/lifecycles.ts`):
    - After order is created → `logOrderPlaced()`
 
-2. **Order Status Changes** (`backend/src/api/order/content-types/order/lifecycles.ts`):
+2. **Order Status Changes** (`apps/backend/src/api/order/content-types/order/lifecycles.ts`):
    - Status → "Shipment" → `logOrderShipped()`
    - Status → "Done" → `logOrderDelivered()`
    - Status → "Cancelled" → `logOrderCancelled()`
 
-3. **Payment Events** (`backend/src/api/order/controllers/helpers/payment.ts`):
+3. **Payment Events** (`apps/backend/src/api/order/controllers/helpers/payment.ts`):
    - Payment successful → `logPaymentSuccess()`
    - Payment failed → `logPaymentFailed()`
 

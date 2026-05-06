@@ -14,7 +14,7 @@ The wallet top-up service has been migrated from **Mellat Bank v3** payment gate
 
 ### 1. Backend Controller Updates
 
-**File**: `backend/src/api/wallet-topup/controllers/wallet-topup.ts`
+**File**: `apps/backend/src/api/wallet-topup/controllers/wallet-topup.ts`
 
 #### Charge Intent Handler
 - **Changed**: Payment service from `mellat-v3` to `saman-kish`
@@ -84,7 +84,7 @@ const verification = await paymentService.verifyTransaction({
 
 ### 2. Test File Updates
 
-**File**: `backend/src/api/wallet-topup/__tests__/wallet-topup.spec.ts`
+**File**: `apps/backend/src/api/wallet-topup/__tests__/wallet-topup.spec.ts`
 
 All test cases updated to reflect Saman Kish integration:
 - Service mocks changed from `mellat-v3` to `saman-kish`
@@ -160,7 +160,7 @@ MELLAT_PAYMENT_URL
 
 ### No Changes Required
 
-The frontend wallet service (`frontend/src/services/wallet/index.ts`) does **NOT** require any changes because:
+The frontend wallet service (`apps/frontend/src/services/wallet/index.ts`) does **NOT** require any changes because:
 
 1. The API contract remains the same:
    - Request: `POST /wallet/charge-intent` with `{ amount }`
@@ -226,7 +226,7 @@ The frontend wallet service (`frontend/src/services/wallet/index.ts`) does **NOT
 All test cases have been updated in `wallet-topup.spec.ts`:
 
 ```bash
-cd backend
+cd apps/backend
 npm test -- wallet-topup.spec.ts
 ```
 
@@ -373,7 +373,7 @@ Saman Kish provides descriptive state messages in Persian:
 
 **Documentation**:
 - `.cursor/rules/wallet-flows.mdc`
-- `backend/docs/wallet-saman-kish-migration.md` (this file)
+- `apps/backend/docs/wallet-saman-kish-migration.md` (this file)
 
 ---
 
@@ -382,5 +382,5 @@ Saman Kish provides descriptive state messages in Persian:
 - Saman Kish (SEP) API Documentation: https://sep.shaparak.ir
 - Mellat Bank v3 Integration (legacy): Internal docs
 - Wallet Service Implementation: `.cursor/rules/wallet-flows.mdc`
-- Payment Gateway Abstraction: `backend/src/api/payment-gateway/services/`
+- Payment Gateway Abstraction: `apps/backend/src/api/payment-gateway/services/`
 

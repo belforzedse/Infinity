@@ -2,7 +2,7 @@
 
 ## Problem
 
-The Redis health check in `frontend/docker-compose.yml` was failing with:
+The Redis health check in `apps/frontend/docker-compose.yml` was failing with:
 ```
 dependency failed to start: container frontend-redis is unhealthy
 ```
@@ -35,8 +35,8 @@ test: ["CMD-SHELL", "if [ -n \"$$FRONTEND_REDIS_PASSWORD\" ]; then redis-cli -a 
 ## Files to Update
 
 When changing the health check pattern, update both:
-1. `frontend/docker-compose.yml` - Base compose file
-2. `frontend/docker-compose.scale.yml` - Scale override file (also contains `frontend-redis` service)
+1. `apps/frontend/docker-compose.yml` - Base compose file
+2. `apps/frontend/docker-compose.scale.yml` - Scale override file (also contains `frontend-redis` service)
 
 ## Key Points
 

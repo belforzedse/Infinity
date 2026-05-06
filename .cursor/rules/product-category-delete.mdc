@@ -38,7 +38,7 @@ Products with the deleted category as main or in other categories are updated ac
 
 ### DeleteCategoryModal
 
-- **Location:** `frontend/src/components/SuperAdmin/DeleteCategoryModal.tsx`
+- **Location:** `apps/frontend/src/components/SuperAdmin/DeleteCategoryModal.tsx`
 - Fetches all categories via `getAllCategories`, excludes the category being deleted
 - User must select a target category from the dropdown before confirming
 - Disabled when no other categories exist (cannot delete the last category)
@@ -52,7 +52,7 @@ Products with the deleted category as main or in other categories are updated ac
 
 ### Delete Service
 
-- **File:** `frontend/src/services/super-admin/product/category/delete.ts`
+- **File:** `apps/frontend/src/services/super-admin/product/category/delete.ts`
 - Signature: `deleteCategory(id: string, targetCategoryId: number): Promise<DeleteCategoryResult>`
 - Calls `POST /product-categories/:id/delete-with-reassign` with body `{ targetCategoryId }`
 

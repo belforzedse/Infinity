@@ -1,6 +1,6 @@
 ---
 description: Strapi REST cache plugin - in-memory response cache for public API to reduce DB load
-globs: backend/config/plugins.ts, backend/src/**/lifecycles.ts
+globs: apps/backend/config/plugins.ts, apps/backend/src/**/lifecycles.ts
 alwaysApply: false
 ---
 
@@ -10,7 +10,7 @@ The backend uses **strapi-plugin-rest-cache** (v4) to cache REST API GET respons
 
 ## Configuration
 
-- **File:** `backend/config/plugins.ts` under the `"rest-cache"` key.
+- **File:** `apps/backend/config/plugins.ts` under the `"rest-cache"` key.
 - **Provider:** `memory` (strapi-provider-rest-cache-memory). Uses cache-manager with an in-memory LRU store.
   - **provider.options.max:** Max number of cache entries (e.g. 100000). Passed to the underlying store.
   - **provider.getTimeout:** Max ms to wait for a cache get (default 500; we use 100).
@@ -38,11 +38,11 @@ All of the following use the same **strategy.maxAge** (5 min) and are invalidate
 
 ## Dependency
 
-- **Package:** `strapi-plugin-rest-cache` (^4.2.9) in `backend/package.json`. It depends on `strapi-provider-rest-cache-memory` (^4.2.9).
+- **Package:** `strapi-plugin-rest-cache` (^4.2.9) in `apps/backend/package.json`. It depends on `strapi-provider-rest-cache-memory` (^4.2.9).
 
 ## Other caching
 
-- **cache-headers** middleware (`backend/src/middlewares/cache-headers.ts`) sets HTTP Cache-Control and ETag for some GET requests (browser/CDN); the request still hits Strapi unless cached by CDN/browser.
+- **cache-headers** middleware (`apps/backend/src/middlewares/cache-headers.ts`) sets HTTP Cache-Control and ETag for some GET requests (browser/CDN); the request still hits Strapi unless cached by CDN/browser.
 
 ## Note on Redis
 

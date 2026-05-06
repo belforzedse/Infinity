@@ -5,7 +5,7 @@ alwaysApply: false
 
 ## Purpose
 - Documents how `GET /reports/product-sales` composes the data shown on the super-admin treemap.
-- Source file: `backend/src/api/report/controllers/report.ts` (`report.productSales` handler).
+- Source file: `apps/backend/src/api/report/controllers/report.ts` (`report.productSales` handler).
 
 ## Data Pipeline
 - **Order eligibility**: Only includes orders that have at least one `contract-transaction` with `status = 'Success'`. Failed, pending, or unpaid orders never contribute.

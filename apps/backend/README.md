@@ -16,7 +16,7 @@ up and down and up and down and
   | `main` | `deploy@193.141.65.207:3031` | `infinity-backend:main` | `main.env` |
   | `dev` | `deploy@193.141.65.208:3031` | `...:dev` | `dev.env` |
   | `experimental` | `deploy@193.141.65.212:3031` | `...:experimental` | `main.env` |
-- **CI/CD**: `.github/workflows/backend-cicd.yml` builds + pushes Docker images on every push, SCPs the compose file to `/opt/infinity/backend/`, writes the branch env file from the GitHub secret, logs into GHCR, pulls the tag, migrates (`docker compose run --rm strapi npm run strapi migrate`), then brings the stack up with `docker compose up -d --remove-orphans`.
+- **CI/CD**: `.github/workflows/backend-cicd.yml` builds + pushes Docker images on every push, SCPs the compose file to `/opt/infinity/apps/backend/`, writes the branch env file from the GitHub secret, logs into GHCR, pulls the tag, migrates (`docker compose run --rm strapi npm run strapi migrate`), then brings the stack up with `docker compose up -d --remove-orphans`.
 - **Secrets**:
   - Repository secrets per environment: `*_BACKEND_HOST`, `*_BACKEND_PORT`, `*_BACKEND_USER`, `*_BACKEND_SSH_KEY`, `*_BACKEND_ENV_FILE` (paste the full contents of `main.env`/`dev.env` into each).
   - Shared registry credentials: `GHCR_DEPLOY_USER=belforzedse`, `GHCR_DEPLOY_TOKEN=<PAT with read:packages>`.

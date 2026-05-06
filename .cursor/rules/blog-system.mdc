@@ -16,7 +16,7 @@ The blog system is a full-featured content management solution built with:
 ### Backend Structure (Strapi)
 
 ```
-backend/src/api/
+apps/backend/src/api/
 ├── blog-post/           # Main blog posts
 ├── blog-category/       # Post categories
 ├── blog-tag/           # Post tags
@@ -27,7 +27,7 @@ backend/src/api/
 ### Frontend Structure (Next.js)
 
 ```
-frontend/src/
+apps/frontend/src/
 ├── app/(blog)/         # Public blog routes
 │   ├── blog/          # Blog listing (/blog)
 │   └── [slug]/        # Individual posts (/{slug})
@@ -171,7 +171,7 @@ Protected routes that cannot be used as blog post slugs:
 
 1. **Backend Changes**:
    ```bash
-   cd backend
+   cd apps/backend
    # Add fields to content-type schema
    # Update controllers if needed
    # Add custom routes if required
@@ -180,7 +180,7 @@ Protected routes that cannot be used as blog post slugs:
 
 2. **Frontend Changes**:
    ```bash
-   cd frontend
+   cd apps/frontend
    # Update service interfaces
    # Add/modify components
    # Update form fields if needed

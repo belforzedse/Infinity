@@ -26,9 +26,9 @@ The PLP is structured to display product listings with filtering capabilities:
 
 ## Category Filter (Includes Children)
 - When filtering by a category (e.g. کت / coat), the PLP shows **that category and all its child categories**.
-- Implemented via `getCategoryAndDescendantSlugs()` in [frontend/src/utils/category-descendants.ts](mdc:frontend/src/utils/category-descendants.ts): given a category slug and the full category tree, returns the slug plus all descendant slugs.
+- Implemented via `getCategoryAndDescendantSlugs()` in [apps/apps/frontend/src/utils/category-descendants.ts](mdc:apps/frontend/src/utils/category-descendants.ts): given a category slug and the full category tree, returns the slug plus all descendant slugs.
 - The products API is called with `filters[product_main_category][Slug][$in][0]=...` etc. so Strapi returns products whose main category is the selected one or any of its children.
-- Server: [plp/page.tsx](mdc:frontend/src/app/(product)/plp/page.tsx) fetches all categories, resolves `categorySlugs`, and passes `allCategories` to `PLPList`. Client: [PLP/List.tsx](mdc:frontend/src/components/PLP/List.tsx) uses `allCategories` to resolve descendants when the user changes the category in the filter.
+- Server: [plp/page.tsx](mdc:apps/frontend/src/app/(product)/plp/page.tsx) fetches all categories, resolves `categorySlugs`, and passes `allCategories` to `PLPList`. Client: [PLP/List.tsx](mdc:apps/frontend/src/components/PLP/List.tsx) uses `allCategories` to resolve descendants when the user changes the category in the filter.
 
 ## Filter System
 - Filter parameters:
@@ -53,9 +53,9 @@ The PLP is structured to display product listings with filtering capabilities:
   - Rating/popularity indicators
 
 ### Product card images (performance)
-- **Desktop**: Only 4 images per product are used—cover image plus 3 media for the hover overlay. The API is asked for at most 3 Media items (`populate[Media][pagination][limit]=3`); [getProductImages](frontend/src/utils/product.ts) caps to cover + 3. The main card shows the **cover only** (no slider); the 3 extra images appear in the hover overlay ([VariationOverlay](frontend/src/components/Product/CardParts/VariationOverlay.tsx)).
-- **Mobile**: Only the cover image is fetched and shown ([ProductSmallCard](frontend/src/components/Product/SmallCard.tsx)); Media is not populated on mobile. [VirtualizedList](frontend/src/components/PLP/List/VirtualizedList.tsx) passes `includeMedia: false` when viewport is mobile.
-- **No slider**: [ImageSlider](frontend/src/components/Product/ImageSlider.tsx) on PLP displays a single cover image only (no horizontal scroll/slider) to avoid loading many images per card.
+- **Desktop**: Only 4 images per product are used—cover image plus 3 media for the hover overlay. The API is asked for at most 3 Media items (`populate[Media][pagination][limit]=3`); [getProductImages](apps/apps/frontend/src/utils/product.ts) caps to cover + 3. The main card shows the **cover only** (no slider); the 3 extra images appear in the hover overlay ([VariationOverlay](apps/apps/frontend/src/components/Product/CardParts/VariationOverlay.tsx)).
+- **Mobile**: Only the cover image is fetched and shown ([ProductSmallCard](apps/apps/frontend/src/components/Product/SmallCard.tsx)); Media is not populated on mobile. [VirtualizedList](apps/apps/frontend/src/components/PLP/List/VirtualizedList.tsx) passes `includeMedia: false` when viewport is mobile.
+- **No slider**: [ImageSlider](apps/apps/frontend/src/components/Product/ImageSlider.tsx) on PLP displays a single cover image only (no horizontal scroll/slider) to avoid loading many images per card.
 
 ## Responsive Components
 - Desktop: Shows sidebar filter panel and grid of products
@@ -65,8 +65,8 @@ The PLP is structured to display product listings with filtering capabilities:
 ## Pagination and Performance
 - **API pagination**: Products are fetched one page at a time (`pagination[page]`, `pagination[pageSize]=30`). No 500-product fetch; server uses Strapi `meta.pagination` for total and pageCount.
 - **Server-side sort**: Non-price sorts (e.g. `createdAt:desc`) are sent to the API (`sort[0]=...`). Price sort is applied in-memory on the current page only.
-- **Deferred sidebar**: Sidebar suggestions (شاید بپسندید, تخفیف های آخرماه) are loaded in a Suspense boundary via [AsyncSidebarProducts](frontend/src/components/PLP/List/AsyncSidebarProducts.tsx) so the main PLP content is not blocked by `getHomepageSections()`. The page passes `sidebarSlot={<Suspense><AsyncSidebarProducts /></Suspense>}` to PLPList.
-- Page navigation and client-side filter changes use the same pagination (page + pageSize 30) in [PLP/List.tsx](mdc:frontend/src/components/PLP/List.tsx) `fetchProducts`.
+- **Deferred sidebar**: Sidebar suggestions (شاید بپسندید, تخفیف های آخرماه) are loaded in a Suspense boundary via [AsyncSidebarProducts](apps/apps/frontend/src/components/PLP/List/AsyncSidebarProducts.tsx) so the main PLP content is not blocked by `getHomepageSections()`. The page passes `sidebarSlot={<Suspense><AsyncSidebarProducts /></Suspense>}` to PLPList.
+- Page navigation and client-side filter changes use the same pagination (page + pageSize 30) in [PLP/List.tsx](mdc:apps/frontend/src/components/PLP/List.tsx) `fetchProducts`.
 
 ### Cache and scaling (many instances + Redis)
 - PLP has **many cache keys** (every combination of category, page, sort, filters is a different URL). With many Next.js instances and a shared Redis cache handler, each instance sees only a fraction of traffic per URL, so **L1 hit rate is low** and many requests hit Redis or do a full Strapi fetch. That can make PLP feel slower after adding more instances + Redis.

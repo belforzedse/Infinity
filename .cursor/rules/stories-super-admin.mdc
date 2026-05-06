@@ -30,7 +30,7 @@ Editors and Customers are redirected. Store Managers and Superadmins have full a
 
 ## Sidebar Entry
 
-In `frontend/src/constants/superAdminSidebar.tsx`, the stories item is a **top-level SidebarItem** (not under blog):
+In `apps/frontend/src/constants/superAdminSidebar.tsx`, the stories item is a **top-level SidebarItem** (not under blog):
 
 ```tsx
 {
@@ -49,7 +49,7 @@ In `frontend/src/constants/superAdminSidebar.tsx`, the stories item is a **top-l
 
 ## StoryForm Component
 
-`frontend/src/components/Stories/StoryForm.tsx`
+`apps/frontend/src/components/Stories/StoryForm.tsx`
 
 Shared between add and edit pages. Accepts:
 - `initialValues?: Partial<StoryFormValues>` — pre-filled for edit

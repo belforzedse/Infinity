@@ -317,14 +317,14 @@ systemctl reload nginx
 ## Related Files
 
 **Frontend code changes (already applied):**
-- `frontend/src/constants/api.ts` - Added `STRAPI_INTERNAL_URL` constant
-- `frontend/src/services/product/homepage.ts` - Updated to use `STRAPI_INTERNAL_URL`
-- `frontend/middleware.ts` - Updated to use `STRAPI_INTERNAL_URL`
+- `apps/frontend/src/constants/api.ts` - Added `STRAPI_INTERNAL_URL` constant
+- `apps/frontend/src/services/product/homepage.ts` - Updated to use `STRAPI_INTERNAL_URL`
+- `apps/frontend/middleware.ts` - Updated to use `STRAPI_INTERNAL_URL`
 
 **Backend code changes (already applied):**
-- `backend/config/plugins.ts` - Switched REST cache to Redis
-- `backend/config/database.ts` - Increased connection pool to 25 per instance
-- `backend/config/middlewares.ts` - Reduced body limits to 10-50MB
+- `apps/backend/config/plugins.ts` - Switched REST cache to Redis
+- `apps/backend/config/database.ts` - Increased connection pool to 25 per instance
+- `apps/backend/config/middlewares.ts` - Reduced body limits to 10-50MB
 
 ---
 

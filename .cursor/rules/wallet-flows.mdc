@@ -34,7 +34,7 @@ description: Frontend wallet service and checkout wallet payment option
 
 - **Current Gateway**: Saman Kish (SEP)
 - **Service**: `api::payment-gateway.saman-kish`
-- **Controller**: `backend/src/api/wallet-topup/controllers/wallet-topup.ts`
+- **Controller**: `apps/backend/src/api/wallet-topup/controllers/wallet-topup.ts`
 
 ### Charge Intent Flow
 

@@ -170,12 +170,12 @@ Compose will forward the env values as both build args and runtime vars so the c
 
 | Branch | VM (SSH) | Image tag | Env file on server |
 | --- | --- | --- | --- |
-| `main` | `deploy@193.141.65.207:3031` | `ghcr.io/belforzedse/infinity-frontend:main` | `/opt/infinity/frontend/main.env` |
-| `dev` | `deploy@193.141.65.208:3031` | `…:dev` | `/opt/infinity/frontend/dev.env` |
-| `experimental` | `deploy@193.141.65.212:3031` | `…:experimental` | `/opt/infinity/frontend/main.env` |
+| `main` | `deploy@193.141.65.207:3031` | `ghcr.io/belforzedse/infinity-frontend:main` | `/opt/infinity/apps/frontend/main.env` |
+| `dev` | `deploy@193.141.65.208:3031` | `…:dev` | `/opt/infinity/apps/frontend/dev.env` |
+| `experimental` | `deploy@193.141.65.212:3031` | `…:experimental` | `/opt/infinity/apps/frontend/main.env` |
 
 - Deployment flow per branch:
-  1. SCP `frontend/docker-compose.yml` to `/opt/infinity/frontend/`.
+  1. SCP `apps/frontend/docker-compose.yml` to `/opt/infinity/apps/frontend/`.
   2. SSH in with the `deploy` user (key stored as `*_FRONTEND_SSH_KEY` secret).
   3. Rewrite the env file with the GitHub secrets and run `docker compose pull && docker compose up -d --remove-orphans`, then prune dangling images.
 - Required repository secrets (per environment prefix `PROD_`, `STAGING_`, `EXPERIMENTAL_`): `*_FRONTEND_HOST`, `*_FRONTEND_PORT`, `*_FRONTEND_USER`, `*_FRONTEND_SSH_KEY`, `*_FRONTEND_ENV_FILE` (paste the full contents of `main.env`/`dev.env` into each).

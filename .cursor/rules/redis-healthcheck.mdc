@@ -58,25 +58,25 @@ Changes:
 ## Files Updated
 
 ### Frontend:
-1. `frontend/docker-compose.yml`
+1. `apps/frontend/docker-compose.yml`
    - Changed frontend-redis depends_on to `service_started`
    - Simplified frontend-redis health check
 
-2. `frontend/docker-compose.scale.yml`
+2. `apps/frontend/docker-compose.scale.yml`
    - Changed all frontend-* services depends_on to `service_started`
    - Simplified frontend-redis health check
 
 ### Backend:
-3. `backend/docker-compose.yml`
+3. `apps/backend/docker-compose.yml`
    - Changed infinity-redis depends_on to `service_started`
    - Simplified infinity-redis health check
    - Fixed strapi health check (timeout, retries, start_period, /admin endpoint)
 
-4. `backend/docker-compose.local.yml`
+4. `apps/backend/docker-compose.local.yml`
    - Changed infinity-redis depends_on to `service_started`
    - Simplified infinity-redis health check
 
-5. `backend/docker-compose.scale.yml`
+5. `apps/backend/docker-compose.scale.yml`
    - Changed all strapi-* services infinity-redis depends_on to `service_started`
    - Fixed all strapi-* health checks
 

@@ -12,7 +12,7 @@ Product pages with Persian slugs (like `/pdp/بافت-موهر-یقه-گرد-m00
 **Use the regeneration script (Recommended):**
 
 ```bash
-cd backend
+cd apps/backend
 node scripts/regenerate-product-slugs.js
 ```
 
@@ -27,7 +27,7 @@ This script will:
 If the script doesn't work, you can run it in Strapi console:
 
 ```bash
-cd backend
+cd apps/backend
 npm run strapi console
 ```
 

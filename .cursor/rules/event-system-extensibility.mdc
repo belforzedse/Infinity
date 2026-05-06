@@ -141,7 +141,7 @@ async function sendSMS(strapi: Strapi, phone: string, message: string) {
 **1. Create Webhook Service**
 
 ```typescript
-// backend/src/services/webhooks/index.ts
+// apps/backend/src/services/webhooks/index.ts
 export async function triggerWebhooks(
   strapi: Strapi,
   eventType: EventType,

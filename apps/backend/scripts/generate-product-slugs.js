@@ -234,7 +234,7 @@ if (require.main === module) {
 ║  To run this script:                                           ║
 ║                                                                ║
 ║  1. Start Strapi console:                                      ║
-║     cd backend && npm run strapi console                       ║
+║     cd apps/backend && pnpm run strapi console                 ║
 ║                                                                ║
 ║  2. Run the migration:                                         ║
 ║     await require('./scripts/generate-product-slugs.js')()     ║

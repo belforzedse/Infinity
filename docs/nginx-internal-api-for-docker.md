@@ -72,7 +72,7 @@ sudo nginx -t && sudo systemctl reload nginx
 
 ## 2. Set the frontend internal URL
 
-In `main.env` on the server (e.g. `/opt/infinity/frontend/main.env`):
+In `main.env` on the server (e.g. `/opt/infinity/apps/frontend/main.env`):
 
 - If you used **Option A** (listen on `172.17.0.1:8080`):
 

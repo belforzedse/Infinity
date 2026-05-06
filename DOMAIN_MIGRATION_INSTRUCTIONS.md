@@ -9,40 +9,40 @@ All code changes have been completed to migrate from the old domains to the new 
 ### Files Updated
 
 #### Backend Files (29 files)
-- `backend/.env.example` - Updated SAMAN_CALLBACK_URL
-- `backend/src/api/wallet-topup/controllers/wallet-topup.ts` - Updated FRONTEND_URL and API URL fallbacks
-- `backend/src/api/payment-gateway/services/saman-kish.ts` - Updated callback URL
-- `backend/src/api/payment-gateway/services/mellat-v3.ts` - Updated API URL fallback
-- `backend/src/api/order/controllers/helpers/payment.ts` - Updated FRONTEND_URL fallback
-- `backend/src/api/cart/controllers/handlers/finalizeToOrder.ts` - Updated API URL fallback
-- `backend/src/api/blog-post/content-types/blog-post/lifecycles.ts` - Updated revalidation URLs
+- `apps/backend/.env.example` - Updated SAMAN_CALLBACK_URL
+- `apps/backend/src/api/wallet-topup/controllers/wallet-topup.ts` - Updated FRONTEND_URL and API URL fallbacks
+- `apps/backend/src/api/payment-gateway/services/saman-kish.ts` - Updated callback URL
+- `apps/backend/src/api/payment-gateway/services/mellat-v3.ts` - Updated API URL fallback
+- `apps/backend/src/api/order/controllers/helpers/payment.ts` - Updated FRONTEND_URL fallback
+- `apps/backend/src/api/cart/controllers/handlers/finalizeToOrder.ts` - Updated API URL fallback
+- `apps/backend/src/api/blog-post/content-types/blog-post/lifecycles.ts` - Updated revalidation URLs
 - Test files updated:
-  - `backend/src/api/wallet-topup/__tests__/wallet-topup.spec.ts`
-  - `backend/src/api/payment-gateway/__tests__/mellat-v3.spec.ts`
-  - `backend/src/api/payment-gateway/__tests__/mellat-v3-improved.spec.ts`
-  - `backend/src/api/payment-gateway/__tests__/callbacks.spec.ts`
-  - `backend/src/__tests__/setup.ts`
-  - `backend/src/__tests__/helpers/test-utils.ts`
+  - `apps/backend/src/api/wallet-topup/__tests__/wallet-topup.spec.ts`
+  - `apps/backend/src/api/payment-gateway/__tests__/mellat-v3.spec.ts`
+  - `apps/backend/src/api/payment-gateway/__tests__/mellat-v3-improved.spec.ts`
+  - `apps/backend/src/api/payment-gateway/__tests__/callbacks.spec.ts`
+  - `apps/backend/src/__tests__/setup.ts`
+  - `apps/backend/src/__tests__/helpers/test-utils.ts`
 
 #### Frontend Files (16 files)
-- `frontend/src/utils/seo.ts` - Updated site URL
-- `frontend/src/config/site.ts` - Updated SITE_URL constant
-- `frontend/src/components/User/Orders/Tabs.tsx` - Updated image base URL
-- `frontend/src/components/SuperAdmin/Blog/Sidebar/PermalinkPanel.tsx` - Updated base URL
+- `apps/frontend/src/utils/seo.ts` - Updated site URL
+- `apps/frontend/src/config/site.ts` - Updated SITE_URL constant
+- `apps/frontend/src/components/User/Orders/Tabs.tsx` - Updated image base URL
+- `apps/frontend/src/components/SuperAdmin/Blog/Sidebar/PermalinkPanel.tsx` - Updated base URL
 - SEO component files:
-  - `frontend/src/components/SEO/ProductSchema.tsx`
-  - `frontend/src/components/SEO/OrganizationSchema.tsx`
-  - `frontend/src/components/SEO/HowToSchema.tsx`
-  - `frontend/src/components/SEO/CollectionPageSchema.tsx`
-  - `frontend/src/components/SEO/BreadcrumbSchema.tsx`
+  - `apps/frontend/src/components/SEO/ProductSchema.tsx`
+  - `apps/frontend/src/components/SEO/OrganizationSchema.tsx`
+  - `apps/frontend/src/components/SEO/HowToSchema.tsx`
+  - `apps/frontend/src/components/SEO/CollectionPageSchema.tsx`
+  - `apps/frontend/src/components/SEO/BreadcrumbSchema.tsx`
 - Page files:
-  - `frontend/src/app/sitemap.ts`
-  - `frontend/src/app/robots.ts`
-  - `frontend/src/app/(product)/plp/page.tsx`
-  - `frontend/src/app/(product)/pdp/[slug]/page.tsx`
-  - `frontend/src/app/(product)/page.tsx`
-- `frontend/src/components/RichTextEditor/ProductShortcodeModal.tsx` - Updated placeholder
-- `frontend/src/utils/blogShortcodes.ts` - Updated comment
+  - `apps/frontend/src/app/sitemap.ts`
+  - `apps/frontend/src/app/robots.ts`
+  - `apps/frontend/src/app/(product)/plp/page.tsx`
+  - `apps/frontend/src/app/(product)/pdp/[slug]/page.tsx`
+  - `apps/frontend/src/app/(product)/page.tsx`
+- `apps/frontend/src/components/RichTextEditor/ProductShortcodeModal.tsx` - Updated placeholder
+- `apps/frontend/src/utils/blogShortcodes.ts` - Updated comment
 
 ---
 
@@ -217,11 +217,11 @@ NEXT_PUBLIC_IMAGE_BASE_URL=https://api.infinitycolor.co/
 
 The backend CORS should already allow the new domain through environment variables, but verify:
 
-Check `backend/config/middlewares.ts` - it should use `process.env.FRONTEND_URL`, which you'll set to `https://infinitycolor.co`.
+Check `apps/backend/config/middlewares.ts` - it should use `process.env.FRONTEND_URL`, which you'll set to `https://infinitycolor.co`.
 
 If you have hardcoded CORS origins, update them:
 ```typescript
-// In backend/config/middlewares.ts or similar
+// In apps/backend/config/middlewares.ts or similar
 origin: [
   'https://infinitycolor.co',
   'https://staging.infinitycolor.org',  // Keep if still needed

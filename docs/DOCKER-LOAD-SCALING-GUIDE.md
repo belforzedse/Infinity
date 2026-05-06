@@ -10,14 +10,14 @@ This guide explains how to run **multiple frontend (Next.js) and backend (Strapi
 
 1. **Backend** (from repo root or server backend dir):
    ```bash
-   cd backend
+   cd apps/backend
    docker compose -f docker-compose.yml -f docker-compose.scale.yml up -d
    ```
    Starts 1 Postgres, 1 Redis, and 4 Strapi containers (ports 1337, 1338, 1339, 1340).
 
 2. **Frontend** (from repo root or server frontend dir):
    ```bash
-   cd frontend
+   cd apps/frontend
    docker compose -f docker-compose.yml -f docker-compose.scale.yml up -d
    ```
    Starts 5 Next.js containers (ports 3000–3004).
@@ -58,10 +58,10 @@ You keep one Postgres and one Redis; you only add another Strapi service that us
 
 ### 1.1 Create a scale override file
 
-Create **`backend/docker-compose.scale.yml`** (or add the following to your existing override):
+Create **`apps/backend/docker-compose.scale.yml`** (or add the following to your existing override):
 
 ```yaml
-# backend/docker-compose.scale.yml
+# apps/backend/docker-compose.scale.yml
 # Use with: docker compose -f docker-compose.yml -f docker-compose.scale.yml up -d
 
 services:
@@ -135,7 +135,7 @@ services:
 From the **backend** directory:
 
 ```bash
-cd backend
+cd apps/backend
 docker compose -f docker-compose.yml -f docker-compose.scale.yml up -d
 ```
 
@@ -155,10 +155,10 @@ Same idea: same image, same env, different host port so Nginx can load-balance.
 
 ### 2.1 Create a scale override file
 
-Create **`frontend/docker-compose.scale.yml`**:
+Create **`apps/frontend/docker-compose.scale.yml`**:
 
 ```yaml
-# frontend/docker-compose.scale.yml
+# apps/frontend/docker-compose.scale.yml
 # Use with: docker compose -f docker-compose.yml -f docker-compose.scale.yml up -d
 
 services:
@@ -200,14 +200,14 @@ services:
 ```
 
 - Each container listens on **port 3000 inside** the container (Next.js standalone default). Host ports 3000–3004 map to each container’s 3000.
-- The repo’s `frontend/docker-compose.scale.yml` defines 5 Next instances by default; remove services or Nginx upstream lines to run fewer.
+- The repo’s `apps/frontend/docker-compose.scale.yml` defines 5 Next instances by default; remove services or Nginx upstream lines to run fewer.
 
 ### 2.2 Start the frontend with extra replicas
 
 From the **frontend** directory:
 
 ```bash
-cd frontend
+cd apps/frontend
 docker compose -f docker-compose.yml -f docker-compose.scale.yml up -d
 ```
 
@@ -343,7 +343,7 @@ If you see errors, fix the config (e.g. duplicate `Connection` header). When usi
 
 - **Backend:** Stop the extra Strapi and revert Nginx to a single backend:
   ```bash
-  cd backend
+  cd apps/backend
   docker compose -f docker-compose.yml -f docker-compose.scale.yml down strapi-2
   ```
   Then in Nginx change `proxy_pass http://strapi_upstream` back to `proxy_pass http://127.0.0.1:1337` and remove the `strapi_upstream` block (or leave it with one server). Reload Nginx.
@@ -391,12 +391,12 @@ healthcheck:
 | Why ip_hash for Strapi? | So the same browser (admin) always hits the same Strapi and in-memory admin sessions work. |
 | Do I need two databases? | No. One Postgres and one Redis for all Strapi containers. |
 | Do I need two upload volumes? | No. All Strapis mount the same `backend_uploads-data` volume. |
-| How many frontend/Strapi replicas? | Default scale is 5 Next (3000–3004) and 4 Strapi (1337–1340). Adjust by adding/removing services in the scale compose and Nginx upstream. |
+| How many apps/frontend/Strapi replicas? | Default scale is 5 Next (3000–3004) and 4 Strapi (1337–1340). Adjust by adding/removing services in the scale compose and Nginx upstream. |
 
 Files to add or edit:
 
-- **backend/docker-compose.scale.yml** – second Strapi service.
-- **frontend/docker-compose.scale.yml** – second (and optional third) frontend service.
+- **apps/backend/docker-compose.scale.yml** – second Strapi service.
+- **apps/frontend/docker-compose.scale.yml** – second (and optional third) frontend service.
 - **Nginx site config** – upstream blocks and `proxy_pass` to `next_upstream` and `strapi_upstream`.
 
 After that, start the stack with the scale overrides and reload Nginx. No application code or database migration is required.

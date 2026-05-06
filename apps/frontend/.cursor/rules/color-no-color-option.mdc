@@ -14,7 +14,7 @@ Added an option in the color creation modals to select "No Color" which defaults
 ### Files Modified
 
 #### 1. Main Color Management Page
-**File**: `frontend/src/app/(super-admin)/super-admin/products/colors/page.tsx`
+**File**: `apps/frontend/src/app/(super-admin)/super-admin/products/colors/page.tsx`
 
 **Changes**:
 - Added `noColor: boolean` field to `ModalState` type
@@ -26,7 +26,7 @@ Added an option in the color creation modals to select "No Color" which defaults
 - Updated preview to show "سفید خالص (بدون رنگ)" when no color is selected
 
 #### 2. Product Features Table Color Modal
-**File**: `frontend/src/components/Product/add/Details/Features/Table.tsx`
+**File**: `apps/frontend/src/components/Product/add/Details/Features/Table.tsx`
 
 **Changes**:
 - Added `noColor: false` to `colorModal` state

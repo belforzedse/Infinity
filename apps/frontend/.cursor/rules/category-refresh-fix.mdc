@@ -27,7 +27,7 @@ Fixed the issue where newly created product categories didn't appear in the cate
 
 ## Files Modified
 
-### 1. `frontend/src/services/super-admin/product/category/getAll.ts` (CRITICAL)
+### 1. `apps/frontend/src/services/super-admin/product/category/getAll.ts` (CRITICAL)
 
 **Fixed Pagination Limit**:
 - Changed from `"pagination[pageSize]": 1000` to `"pagination[limit]": -1`
@@ -50,7 +50,7 @@ params: {
 }
 ```
 
-### 2. `frontend/src/hooks/product/useCategory.ts`
+### 2. `apps/frontend/src/hooks/product/useCategory.ts`
 
 **Added Imports**:
 ```typescript
@@ -73,7 +73,7 @@ import { extractErrorMessage, translateErrorMessage } from "@/lib/errorTranslati
 
 **Exported new function** in return statement.
 
-### 3. `frontend/src/components/Product/add/SetCategory/Import.tsx`
+### 3. `apps/frontend/src/components/Product/add/SetCategory/Import.tsx`
 
 **Updated Imports**:
 - Added `toast from "react-hot-toast"`

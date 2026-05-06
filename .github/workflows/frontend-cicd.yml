@@ -7,14 +7,24 @@ on:
       - dev
       - experimental
     paths:
-      - 'frontend/**'
+      - 'apps/frontend/**'
+      - 'packages/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'turbo.json'
       - '.github/workflows/frontend-cicd.yml'
-      - 'frontend/docker-compose.scale.yml'
+      - 'apps/frontend/docker-compose.scale.yml'
   pull_request:
     paths:
-      - 'frontend/**'
+      - 'apps/frontend/**'
+      - 'packages/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'turbo.json'
       - '.github/workflows/frontend-cicd.yml'
-      - 'frontend/docker-compose.scale.yml'
+      - 'apps/frontend/docker-compose.scale.yml'
   workflow_dispatch:
 
 env:
@@ -52,12 +62,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
-        working-directory: frontend
-        run: npm ci --legacy-peer-deps
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile
 
       - name: Select Dockerfile and image tag
         id: meta
@@ -65,15 +76,15 @@ jobs:
           set -euo pipefail
           case "${GITHUB_REF_NAME}" in
             dev)
-              DOCKERFILE="frontend/dev.Dockerfile"
+              DOCKERFILE="apps/frontend/dev.Dockerfile"
               RUNTIME_TAG="dev"
               ;;
             experimental)
-              DOCKERFILE="frontend/main.Dockerfile"
+              DOCKERFILE="apps/frontend/main.Dockerfile"
               RUNTIME_TAG="experimental"
               ;;
             *)
-              DOCKERFILE="frontend/main.Dockerfile"
+              DOCKERFILE="apps/frontend/main.Dockerfile"
               RUNTIME_TAG="main"
               ;;
           esac
@@ -94,7 +105,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
-          context: frontend
+          context: .
           file: ${{ steps.meta.outputs.dockerfile }}
           push: true
           tags: |
@@ -121,9 +132,9 @@ jobs:
           username: ${{ secrets.FRONTEND_USER }}
           key: ${{ secrets.FRONTEND_SSH_KEY }}
           port: ${{ secrets.FRONTEND_PORT || '22' }}
-          source: "frontend/docker-compose.yml,frontend/docker-compose.scale.yml"
+          source: "apps/frontend/docker-compose.yml,apps/frontend/docker-compose.scale.yml"
           target: /opt/infinity/frontend/
-          strip_components: 1
+          strip_components: 2
 
       - name: Deploy to production
         if: github.ref == 'refs/heads/main'
@@ -174,9 +185,9 @@ jobs:
           username: ${{ secrets.FRONTEND_USER }}
           key: ${{ secrets.FRONTEND_SSH_KEY }}
           port: ${{ secrets.FRONTEND_PORT || '22' }}
-          source: "frontend/docker-compose.yml,frontend/docker-compose.scale.yml"
+          source: "apps/frontend/docker-compose.yml,apps/frontend/docker-compose.scale.yml"
           target: /opt/infinity/frontend/
-          strip_components: 1
+          strip_components: 2
 
       - name: Deploy to staging
         if: github.ref == 'refs/heads/dev'
@@ -227,9 +238,9 @@ jobs:
           username: ${{ secrets.FRONTEND_USER }}
           key: ${{ secrets.FRONTEND_SSH_KEY }}
           port: ${{ secrets.FRONTEND_PORT || '22' }}
-          source: "frontend/docker-compose.yml,frontend/docker-compose.scale.yml"
+          source: "apps/frontend/docker-compose.yml,apps/frontend/docker-compose.scale.yml"
           target: /opt/infinity/frontend/
-          strip_components: 1
+          strip_components: 2
 
       - name: Deploy to experimental
         if: github.ref == 'refs/heads/experimental'

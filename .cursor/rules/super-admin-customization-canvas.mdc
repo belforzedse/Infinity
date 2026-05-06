@@ -1,6 +1,6 @@
 ---
 description: Canvas-style preview used in super-admin customization pages. Use when adding or changing customization previews so they match the hero-slider look.
-globs: frontend/src/app/(super-admin)/super-admin/settings/customization/**/*.tsx, frontend/src/components/SuperAdmin/CustomizationPreviewSection.tsx, frontend/src/components/SuperAdmin/Navigation/NavigationPreview.tsx
+globs: apps/frontend/src/app/(super-admin)/super-admin/settings/customization/**/*.tsx, apps/frontend/src/components/SuperAdmin/CustomizationPreviewSection.tsx, apps/frontend/src/components/SuperAdmin/Navigation/NavigationPreview.tsx
 alwaysApply: false
 ---
 # Super Admin Customization Canvas Style
@@ -9,7 +9,7 @@ This rule documents the shared canvas-style preview used across super-admin cust
 
 ## Reference: Hero Slider
 
-The hero-slider page ([frontend/src/app/(super-admin)/super-admin/settings/customization/hero-slider/page.tsx](frontend/src/app/(super-admin)/super-admin/settings/customization/hero-slider/page.tsx)) uses [TemplatePreview](frontend/src/components/SuperAdmin/HeroSliderEditor/TemplatePreview.tsx), which defines the canvas pattern:
+The hero-slider page ([apps/apps/frontend/src/app/(super-admin)/super-admin/settings/customization/hero-slider/page.tsx](apps/apps/frontend/src/app/(super-admin)/super-admin/settings/customization/hero-slider/page.tsx)) uses [TemplatePreview](apps/apps/frontend/src/components/SuperAdmin/HeroSliderEditor/TemplatePreview.tsx), which defines the canvas pattern:
 
 - **Outer section**: `rounded-2xl border border-slate-200 bg-white p-4`
 - **Header**: Title "پیش‌نمایش قالب" + optional device toggles / badge
@@ -19,7 +19,7 @@ The hero-slider page ([frontend/src/app/(super-admin)/super-admin/settings/custo
 
 ## Shared Component: CustomizationPreviewSection
 
-All non–hero-slider customization previews use [CustomizationPreviewSection](frontend/src/components/SuperAdmin/CustomizationPreviewSection.tsx):
+All non–hero-slider customization previews use [CustomizationPreviewSection](apps/apps/frontend/src/components/SuperAdmin/CustomizationPreviewSection.tsx):
 
 - **Props**: `title` (default "پیش‌نمایش قالب"), optional `badge`, optional `empty` (`EmptyStateConfig`: icon, title, description), `browserFrame` (default true), `children`
 - **Exports**: `BrowserChrome` (reusable fake browser bar + content wrapper), `EmptyStateConfig` type
@@ -44,24 +44,24 @@ All non–hero-slider customization previews use [CustomizationPreviewSection](f
 
 To keep previews as accurate as the hero slider, customization previews reuse the same components or markup as the live site:
 
-- **Home banners**: [HomePromoBanners](frontend/src/components/Home/PromoBanners.tsx) — same component used on the home page.
-- **Featured category**: [FeaturedCategorySection](frontend/src/components/Home/FeaturedCategorySection.tsx) with placeholder products so layout and styling match; banner and slug come from form data.
-- **Navbar**: [NavigationPreview](frontend/src/components/SuperAdmin/Navigation/NavigationPreview.tsx) uses the same structure and classes as [PLPHeaderDesktopNav](frontend/src/components/PLP/Header/DesktopNav.tsx) (bg-stone-50, px-10 py-3, gap-6, same link styles).
+- **Home banners**: [HomePromoBanners](apps/apps/frontend/src/components/Home/PromoBanners.tsx) — same component used on the home page.
+- **Featured category**: [FeaturedCategorySection](apps/apps/frontend/src/components/Home/FeaturedCategorySection.tsx) with placeholder products so layout and styling match; banner and slug come from form data.
+- **Navbar**: [NavigationPreview](apps/apps/frontend/src/components/SuperAdmin/Navigation/NavigationPreview.tsx) uses the same structure and classes as [PLPHeaderDesktopNav](apps/apps/frontend/src/components/PLP/Header/DesktopNav.tsx) (bg-stone-50, px-10 py-3, gap-6, same link styles).
 
 ## Panel editor style (hero-style collapsible panel)
 
 The hero slider uses a collapsible side panel (320px, spring animation, rounded-xl border) for the slot editor. The same style is available on other customization pages:
 
-- **CustomizationEditorPanel** ([frontend/src/components/SuperAdmin/CustomizationEditorPanel.tsx](frontend/src/components/SuperAdmin/CustomizationEditorPanel.tsx)) — Reusable collapsible panel: same width, motion, and chrome as the hero’s side panel.
+- **CustomizationEditorPanel** ([apps/apps/frontend/src/components/SuperAdmin/CustomizationEditorPanel.tsx](apps/apps/frontend/src/components/SuperAdmin/CustomizationEditorPanel.tsx)) — Reusable collapsible panel: same width, motion, and chrome as the hero’s side panel.
 - **CustomizationPreviewSection** — Optional `editorPanel` prop: when set, the section renders preview (left) + CustomizationEditorPanel (right) with a header toggle (PanelLeftClose / PanelRight).
 - **UpsertPageContentWrapper** — Optional `usePanelLayout`: when `true` and `footer` is set, layout is preview (left) + form in CustomizationEditorPanel (right), with a bar that has the panel collapse toggle. Used by featured-category, home-banners, and navbar so the form lives in the hero-style panel.
 
 ## Key Files
 
-- [frontend/src/components/SuperAdmin/CustomizationPreviewSection.tsx](frontend/src/components/SuperAdmin/CustomizationPreviewSection.tsx) — Section + viewport + optional browser frame + optional editor panel
-- [frontend/src/components/SuperAdmin/CustomizationEditorPanel.tsx](frontend/src/components/SuperAdmin/CustomizationEditorPanel.tsx) — Hero-style collapsible side panel
-- [frontend/src/components/SuperAdmin/Navigation/NavigationPreview.tsx](frontend/src/components/SuperAdmin/Navigation/NavigationPreview.tsx) — Navbar preview (same structure as PLPHeaderDesktopNav)
-- [frontend/src/components/SuperAdmin/HeroSliderEditor/TemplatePreview.tsx](frontend/src/components/SuperAdmin/HeroSliderEditor/TemplatePreview.tsx) — Hero reference implementation
+- [apps/apps/frontend/src/components/SuperAdmin/CustomizationPreviewSection.tsx](apps/apps/frontend/src/components/SuperAdmin/CustomizationPreviewSection.tsx) — Section + viewport + optional browser frame + optional editor panel
+- [apps/apps/frontend/src/components/SuperAdmin/CustomizationEditorPanel.tsx](apps/apps/frontend/src/components/SuperAdmin/CustomizationEditorPanel.tsx) — Hero-style collapsible side panel
+- [apps/apps/frontend/src/components/SuperAdmin/Navigation/NavigationPreview.tsx](apps/apps/frontend/src/components/SuperAdmin/Navigation/NavigationPreview.tsx) — Navbar preview (same structure as PLPHeaderDesktopNav)
+- [apps/apps/frontend/src/components/SuperAdmin/HeroSliderEditor/TemplatePreview.tsx](apps/apps/frontend/src/components/SuperAdmin/HeroSliderEditor/TemplatePreview.tsx) — Hero reference implementation
 
 ## Note on "N Issue(s)" in the status bar
 

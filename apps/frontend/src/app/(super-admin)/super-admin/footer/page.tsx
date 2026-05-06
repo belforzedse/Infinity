@@ -2,7 +2,7 @@
  * Footer Management Page - DISABLED
  *
  * The footer is now managed as a frontend component with hardcoded data.
- * Footer data is located in: frontend/src/constants/footer.ts
+ * Footer data is located in: apps/frontend/src/constants/footer.ts
  */
 
 export default function FooterPage() {
@@ -17,7 +17,10 @@ export default function FooterPage() {
           <p className="mb-2 text-sm font-semibold text-gray-700">To update the footer:</p>
           <p className="text-sm text-gray-600">
             Edit the <code className="rounded bg-gray-200 px-1 py-0.5">FOOTER_DATA</code> constant
-            in <code className="rounded bg-gray-200 px-1 py-0.5">frontend/src/constants/footer.ts</code>
+            in{" "}
+            <code className="rounded bg-gray-200 px-1 py-0.5">
+              apps/frontend/src/constants/footer.ts
+            </code>
           </p>
         </div>
         <p className="mt-4 text-sm text-gray-500">

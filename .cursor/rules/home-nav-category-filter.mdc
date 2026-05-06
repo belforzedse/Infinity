@@ -1,6 +1,6 @@
 ---
 description: Featured categories and name filter for carousel and bottom nav; header shows all main.
-globs: frontend/src/constants/categories.ts, frontend/src/services/product/categories.ts, backend/src/api/product-category/content-types/product-category/schema.json
+globs: apps/frontend/src/constants/categories.ts, apps/frontend/src/services/product/categories.ts, apps/backend/src/api/product-category/content-types/product-category/schema.json
 alwaysApply: false
 ---
 # Home and Nav Category Display
@@ -18,4 +18,4 @@ Use **Featured** first, then fall back to **name filter**:
 
 ## Name filter constant
 
-- [frontend/src/constants/categories.ts](mdc:frontend/src/constants/categories.ts) exports `ALLOWED_HOME_NAV_CATEGORY_NAME_SUBSTRINGS` (includes مانتو, پلیور, دامن, کت, …). Used only as fallback when no categories are marked featured.
+- [apps/apps/frontend/src/constants/categories.ts](mdc:apps/frontend/src/constants/categories.ts) exports `ALLOWED_HOME_NAV_CATEGORY_NAME_SUBSTRINGS` (includes مانتو, پلیور, دامن, کت, …). Used only as fallback when no categories are marked featured.

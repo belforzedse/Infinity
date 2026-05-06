@@ -19,7 +19,7 @@ alwaysApply: false
 
 ## Manual Activity Logging (frontend)
 
-- After a super-admin creates a manual order, the UI posts to `/admin-activities` with a summary payload so the action appears immediately in the report. (See `frontend/src/app/(super-admin)/super-admin/orders/add/page.tsx`.)
+- After a super-admin creates a manual order, the UI posts to `/admin-activities` with a summary payload so the action appears immediately in the report. (See `apps/frontend/src/app/(super-admin)/super-admin/orders/add/page.tsx`.)
 
 ## Validation Checklist
 

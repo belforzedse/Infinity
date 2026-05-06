@@ -5,8 +5,8 @@ services:
   strapi:
     container_name: infinity-strapi-local
     build:
-      context: .
-      dockerfile: local.Dockerfile
+      context: ../..
+      dockerfile: apps/backend/local.Dockerfile
     env_file:
       - ${ENV_FILE:-.env}
     environment:
@@ -21,7 +21,7 @@ services:
       REDIS_PASSWORD: 2768fwZiUEEfAJXfeo0lM5do2Ly3BPQccK36PfMQf5w=
       CHOKIDAR_USEPOLLING: "true"
       CHOKIDAR_INTERVAL: "300"
-    command: npm run develop
+    command: pnpm run develop
     depends_on:
       infinity-postgres:
         condition: service_healthy
@@ -31,9 +31,9 @@ services:
       - "127.0.0.1:${STRAPI_PORT:-1337}:1337"
     restart: unless-stopped
     volumes:
-      - .:/app
-      - strapi-node-modules:/app/node_modules
-      - uploads-data:/app/public/uploads
+      - .:/repo/apps/backend
+      - strapi-node-modules:/repo/apps/backend/node_modules
+      - uploads-data:/repo/apps/backend/public/uploads
     networks:
       - infinity-network
 
