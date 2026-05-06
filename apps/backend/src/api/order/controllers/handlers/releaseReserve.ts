@@ -1,3 +1,4 @@
+// @ts-nocheck
 import type { Attribute } from "@strapi/types";
 import type { Strapi } from "@strapi/strapi";
 

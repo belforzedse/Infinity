@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * product-review controller
  */

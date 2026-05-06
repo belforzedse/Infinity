@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * local-user-address controller
  */

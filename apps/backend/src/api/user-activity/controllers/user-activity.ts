@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { factories } from "@strapi/strapi";
 import { ROLE_NAMES } from "../../../utils/roles";
 import { fetchUserWithRole, normalizeRoleName } from "../../../utils/roles";

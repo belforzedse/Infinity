@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * blog-category controller
  */

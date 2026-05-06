@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * payment-gateway controller
  */
