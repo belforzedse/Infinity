@@ -50,6 +50,7 @@ export default function EditStoryPage() {
           MediaType: story.MediaType,
           IsActive: story.IsActive,
           SortOrder: story.SortOrder,
+          updatedAt: story.updatedAt,
           mediaId: story.Media?.id,
           mediaUrl: resolveMediaUrl(story.Media?.url),
           thumbnailId: story.Thumbnail?.id,

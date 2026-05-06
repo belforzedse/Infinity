@@ -93,6 +93,8 @@ export function StoriesAvatarList({
                   <img
                     src={avatarUrl}
                     alt={story.Title}
+                    loading="lazy"
+                    decoding="async"
                     className="h-full w-full rounded-full object-cover"
                   />
                 ) : (

@@ -125,7 +125,7 @@ export async function listStories(params: StoryListParams = {}): Promise<StrapiL
   if (params.search) query.set("filters[Title][$containsi]", params.search);
 
   const endpoint = `${ENDPOINTS.STORIES.LIST}?${query.toString()}`;
-  const res = await apiClient.get<unknown[]>(endpoint);
+  const res = await apiClient.get<unknown[]>(endpoint, { cache: "no-store" });
   return {
     data: (res.data ?? []).map(normalizeStory),
     meta: res.meta,
@@ -133,7 +133,7 @@ export async function listStories(params: StoryListParams = {}): Promise<StrapiL
 }
 
 export async function getStory(id: number): Promise<Story> {
-  const res = await apiClient.get<unknown>(ENDPOINTS.STORIES.DETAIL(id));
+  const res = await apiClient.get<unknown>(ENDPOINTS.STORIES.DETAIL(id), { cache: "no-store" });
   const raw = res.data;
   if (raw === undefined) throw new Error("Invalid story response");
   return normalizeStory(raw);

@@ -12,6 +12,7 @@ export interface StoryFormValues {
   IsActive: boolean;
   SortOrder: number;
   MediaType: StoryMediaType;
+  updatedAt?: string;
   mediaId?: number;
   mediaUrl?: string;
   thumbnailId?: number;
@@ -89,13 +90,18 @@ export default function StoryForm({ initialValues, onSubmit, isLoading, submitLa
     });
   };
 
-  function fullUrl(url?: string) {
+  function fullUrl(url?: string, version?: string) {
     if (!url) return undefined;
-    if (url.startsWith("http")) return url;
+    const appendVersion = (value: string) => {
+      if (!version) return value;
+      const separator = value.includes("?") ? "&" : "?";
+      return `${value}${separator}v=${encodeURIComponent(version)}`;
+    };
+    if (url.startsWith("http")) return appendVersion(url);
     const base = (IMAGE_BASE_URL || "").replace(/\/+$/, "");
     const path = url.replace(/^\/+/, "");
-    if (!base) return `/${path}`;
-    return `${base}/${path}`;
+    if (!base) return appendVersion(`/${path}`);
+    return appendVersion(`${base}/${path}`);
   }
 
   return (
@@ -128,9 +134,17 @@ export default function StoryForm({ initialValues, onSubmit, isLoading, submitLa
           {mediaUrl ? (
             <div className="relative inline-block">
               {mediaType === "video" ? (
-                <video src={fullUrl(mediaUrl)} className="h-48 w-auto rounded-xl" controls />
+                <video
+                  src={fullUrl(mediaUrl, initialValues?.updatedAt)}
+                  className="h-48 w-auto rounded-xl"
+                  controls
+                />
               ) : (
-                <img src={fullUrl(mediaUrl)} alt="media" className="h-48 w-auto rounded-xl object-cover" />
+                <img
+                  src={fullUrl(mediaUrl, initialValues?.updatedAt)}
+                  alt="media"
+                  className="h-48 w-auto rounded-xl object-cover"
+                />
               )}
               <button
                 type="button"
@@ -171,7 +185,7 @@ export default function StoryForm({ initialValues, onSubmit, isLoading, submitLa
           {thumbnailUrl ? (
             <div className="relative inline-block">
               <img
-                src={fullUrl(thumbnailUrl)}
+                src={fullUrl(thumbnailUrl, initialValues?.updatedAt)}
                 alt="cover"
                 className="h-32 w-32 rounded-xl object-cover"
               />
