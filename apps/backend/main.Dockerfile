@@ -52,7 +52,12 @@ ENV NODE_ENV=production \
 # Alpine default CDN (dl-cdn.alpinelinux.org) is often unreachable from same networks as Docker Hub; use Arvan APK mirror
 RUN sed -i 's|https://dl-cdn.alpinelinux.org/alpine|https://mirror.arvancloud.ir/alpine|g' /etc/apk/repositories \
     && apk add --no-cache su-exec vips
-RUN corepack enable
+# Reuse Corepack cache from builder so pnpm@10.28.2 activates without another registry fetch (CI mirrors / flaky networks).
+COPY --from=builder /root/.cache/node/corepack /root/.cache/node/corepack
+RUN mkdir -p /home/node/.cache/node \
+    && cp -a /root/.cache/node/corepack /home/node/.cache/node/ \
+    && chown -R node:node /home/node/.cache
+RUN corepack enable && corepack prepare pnpm@10.28.2 --activate
 
 WORKDIR /app
 
