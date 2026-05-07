@@ -1,0 +1,18 @@
+# pnpm + Corepack in monorepo Docker images
+
+## Why this exists
+
+Root [package.json](package.json) declares `"packageManager": "pnpm@10.28.2"`, but `pnpm deploy --prod` copies only the **filtered** app package into `/app`. If [apps/backend/package.json](apps/backend/package.json) (or [apps/frontend/package.json](apps/frontend/package.json)) has **no** `packageManager` field, the production image’s `/app/package.json` does not pin pnpm.
+
+With `corepack enable` only, Corepack may resolve the **latest** pnpm (e.g. 11.x), which requires a newer Node than Strapi’s Node 20 Alpine image. That produces:
+
+- `ERR_UNKNOWN_BUILTIN_MODULE: node:sqlite` (pnpm 11 on Node 20)
+
+## Rule
+
+- Keep `"packageManager": "pnpm@10.28.2"` (same as root) in **every** workspace package that is deployed standalone (`apps/backend`, `apps/frontend`).
+- Backend production runner: after `COPY` from builder, ensure pnpm 10 is available (see [apps/backend/main.Dockerfile](apps/backend/main.Dockerfile): copy Corepack cache from builder + `corepack prepare pnpm@10.28.2 --activate`) so activation does not depend on a second registry fetch when possible.
+
+## Do not
+
+- Do not rely on root `packageManager` alone for `/app` produced by `pnpm deploy` — it is not copied into that artifact.
