@@ -45,7 +45,10 @@ export interface ApiClientConfig {
     error: ApiError,
     context: { status: number; options?: ApiRequestOptions },
   ) => void;
-  /** Optional GET dedupe / SWR cache (typically browser-only). */
+  /**
+   * Optional browser cache: SWR + ETag for eligible GETs, and in-flight deduplication
+   * for GET only. POST/PUT/PATCH/DELETE always run independently (never share pending).
+   */
   apiCache?: ApiCache;
 }
 
@@ -207,11 +210,13 @@ export class ApiClient {
 
     const urlString = url.toString();
     const retries = options?.retries ?? this.retryConfig.maxRetries;
+    const isGet = method.toUpperCase() === "GET";
 
     const cache = this.apiCache;
     const cacheKey = cache ? cache.generateKey(method, urlString, data) : "";
 
-    if (cache) {
+    // In-flight dedupe only for GET: mutating requests must not share one promise by URL/body.
+    if (cache && isGet) {
       const pendingRequest = cache.getPending<{ data: ApiResponse<T>; headers: Headers }>(cacheKey);
       if (pendingRequest) {
         return pendingRequest.then((response) => response.data);
@@ -226,7 +231,7 @@ export class ApiClient {
 
     const cacheConfig = enableCache && cache ? cache.getCacheConfig(urlString) : null;
 
-    if (enableCache && cache && cacheConfig && method.toUpperCase() === "GET") {
+    if (enableCache && cache && cacheConfig && isGet) {
       const cached = cache.get<ApiResponse<T>>(cacheKey);
 
       if (cached) {
@@ -262,14 +267,14 @@ export class ApiClient {
       retries,
     );
 
-    if (cache) {
+    if (cache && isGet) {
       cache.setPending(cacheKey, requestPromise);
     }
 
     try {
       const response = await requestPromise;
 
-      if (enableCache && cache && cacheConfig && method.toUpperCase() === "GET" && response) {
+      if (enableCache && cache && cacheConfig && isGet && response) {
         const etag = this.extractETag(response.headers);
         cache.set(cacheKey, response.data, etag, cacheConfig);
       }
