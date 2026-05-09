@@ -69,6 +69,7 @@
     "strapi-plugin-redis": "1.1.0",
     "strapi-plugin-rest-cache": "4.2.9",
     "strapi-provider-rest-cache-redis": "4.2.9",
+    "sharp": "0.32.6",
     "styled-components": "5.3.3",
     "@strapi/typescript-utils": "4.25.21",
     "typescript": "5.2.2"
