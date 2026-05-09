@@ -2,6 +2,15 @@
   "name": "infinitycolor-monorepo",
   "private": true,
   "packageManager": "pnpm@10.28.2",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@strapi/strapi",
+      "@swc/core",
+      "core-js-pure",
+      "esbuild",
+      "sharp"
+    ]
+  },
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
