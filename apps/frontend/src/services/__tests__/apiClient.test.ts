@@ -1,5 +1,10 @@
-import ApiClient, { apiClient } from "../index";
-import { API_BASE_URL, ERROR_MESSAGES, HTTP_STATUS } from "@/constants/api";
+import { ApiClient } from "@repo/api/client";
+import { apiClient } from "@/lib/api-client";
+import { API_BASE_URL, ERROR_MESSAGES } from "@/constants/api";
+
+jest.mock("../../lib/api-cache", () => ({
+  apiCache: undefined,
+}));
 
 // Mock fetch globally
 const mockFetch = jest.fn();
@@ -153,7 +158,7 @@ describe("ApiClient", () => {
     it("handles network errors", async () => {
       mockFetch.mockRejectedValueOnce(new Error("Network Error"));
 
-      await expect(apiClient.get("/test")).rejects.toEqual(
+      await expect(apiClient.get("/test", { retries: 0 })).rejects.toEqual(
         expect.objectContaining({
           status: 500,
           message: ERROR_MESSAGES.DEFAULT,
@@ -170,7 +175,7 @@ describe("ApiClient", () => {
         });
       });
 
-      const requestPromise = apiClient.get("/slow", { timeout: 1000 });
+      const requestPromise = apiClient.get("/slow", { timeout: 1000, retries: 0 });
 
       // Fast-forward time to trigger timeout
       jest.advanceTimersByTime(1000);
@@ -187,7 +192,7 @@ describe("ApiClient", () => {
     });
 
     it("throws error when API_BASE_URL is not configured", async () => {
-      const client = new ApiClient("undefined");
+      const client = new ApiClient({ baseUrl: "undefined" });
 
       await expect(client.get("/test")).rejects.toEqual(
         expect.objectContaining({

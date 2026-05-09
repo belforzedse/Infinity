@@ -1,0 +1,69 @@
+# Strapi Sharp linuxmusl Recovery (GitLab Deploy)
+
+## When to use
+
+Use this runbook when backend startup fails with:
+
+- `Something went wrong installing the "sharp" module`
+- `Cannot find module '../build/Release/sharp-linuxmusl-x64.node'`
+
+This indicates a missing/incompatible Sharp native binary for Alpine (`musl`) runtime.
+If the binary exists but startup fails with `Error loading shared library libvips-cpp.so.42`, the runner image is missing required libvips runtime libraries.
+
+## Deployment context in this repo
+
+- Build job: `backend:build` in `.gitlab-ci.yml`
+- Deploy job: `backend:deploy` in `.gitlab-ci.yml`
+- Runtime image: `${CI_REGISTRY_IMAGE}/infinity-backend:${IMAGE_TAG}`
+- Runtime compose files:
+  - `apps/backend/docker-compose.yml`
+  - `apps/backend/docker-compose.ci.yml`
+  - `apps/backend/docker-compose.scale.yml`
+  - `apps/backend/docker-compose.scale.ci.yml`
+
+## Required build behavior
+
+In backend Dockerfiles, Sharp must be rebuilt for Alpine musl in `/app`:
+
+```sh
+npm_config_platform=linux npm_config_arch=x64 npm_config_libc=musl pnpm rebuild sharp --unsafe-perm
+```
+
+Then verify during image build:
+
+```sh
+node -e "const sharp=require('sharp'); console.log('sharp-ok', process.platform, process.arch, sharp.versions);"
+```
+
+## Required deploy behavior
+
+Before compose `up`, verify pulled image can load Sharp:
+
+```sh
+docker run --rm --entrypoint node "$CI_REGISTRY_IMAGE/infinity-backend:$IMAGE_TAG" \
+  -e "const sharp=require('sharp'); console.log('sharp-runtime-ok', process.platform, process.arch, sharp.versions);"
+```
+
+If this command fails, stop deployment and rebuild image.
+
+## Server-side emergency recovery (temporary)
+
+Use only for immediate incident mitigation. Permanent fix must be in Dockerfile/CI.
+
+1. Enter backend container.
+2. Reinstall/rebuild Sharp for musl:
+
+```sh
+npm_config_platform=linux npm_config_arch=x64 npm_config_libc=musl pnpm rebuild sharp --unsafe-perm
+node -e "require('sharp'); console.log('sharp-manual-fix-ok')"
+```
+
+3. Restart container.
+
+## Post-fix validation checklist
+
+- `docker run ... --entrypoint node ... require('sharp')` passes for deployed tag.
+- `pnpm run start:prod` starts without upload plugin Sharp error.
+- Backend health endpoint responds successfully: `/api/_health`.
+- Upload plugin can process at least one image.
+- No runtime error for `libvips-cpp.so.42` when requiring `sharp`.

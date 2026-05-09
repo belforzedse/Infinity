@@ -1,6 +1,11 @@
-import ApiClient, { apiClient } from "./index";
+import { ApiClient } from "@repo/api/client";
+import { apiClient } from "@/lib/api-client";
 import { ERROR_MESSAGES, HTTP_STATUS } from "@/constants/api";
 import { handleAuthErrors } from "@/utils/auth";
+
+jest.mock("../lib/api-cache", () => ({
+  apiCache: undefined,
+}));
 
 jest.mock("@/utils/auth", () => ({
   handleAuthErrors: jest.fn(),
@@ -51,7 +56,7 @@ describe("ApiClient error handling", () => {
   });
 
   it("throws when baseUrl is missing", async () => {
-    const client = new ApiClient("undefined");
+    const client = new ApiClient({ baseUrl: "undefined" });
 
     await expect(client.get("/test")).rejects.toEqual({
       message: "API base URL is not configured",

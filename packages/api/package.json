@@ -1,0 +1,24 @@
+{
+  "name": "@repo/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./types": "./src/types/api.ts",
+    "./client": "./src/client/api-client.ts",
+    "./config": "./src/config/public.ts",
+    "./cache": "./src/cache/api-cache.ts",
+    "./token": "./src/token/access-token.ts",
+    "./utils": "./src/utils/index.ts",
+    "./fetch": "./src/fetch-with-timeout.ts"
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit",
+    "lint": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "20.17.30",
+    "typescript": "5.8.3"
+  }
+}

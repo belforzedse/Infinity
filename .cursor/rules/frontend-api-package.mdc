@@ -1,0 +1,29 @@
+---
+description: Shared frontend HTTP client and API primitives in `@repo/api` monorepo package
+globs: packages/api/**/*.ts,apps/frontend/src/lib/api-client.ts,apps/frontend/src/lib/api-cache.ts
+alwaysApply: false
+---
+
+# `@repo/api` (shared frontend ↔ Strapi HTTP layer)
+
+## What lives in the package
+
+- **Config / env:** [`packages/api/src/config/public.ts`](packages/api/src/config/public.ts) — `API_BASE_URL`, `getStrapiServerUrl`, `REQUEST_TIMEOUT`, `RETRY_CONFIG`, `HTTP_STATUS`, `ERROR_MESSAGES`, image URL helpers.
+- **Types:** [`packages/api/src/types/api.ts`](packages/api/src/types/api.ts) — `ApiResponse`, `ApiError`, `ApiRequestOptions`, pagination helpers.
+- **Client:** [`packages/api/src/client/api-client.ts`](packages/api/src/client/api-client.ts) — `ApiClient` (fetch, retries, optional browser cache, injectable `onHttpError` / `getAuthToken`).
+- **Cache engine:** [`packages/api/src/cache/api-cache.ts`](packages/api/src/cache/api-cache.ts) — `ApiCache` + `startApiCacheCleanup`; **path allow/deny rules are per-app**.
+- **Token helpers (client-only):** [`packages/api/src/token/access-token.ts`](packages/api/src/token/access-token.ts) — import as `@repo/api/token` (not from the root `@repo/api` barrel, to avoid pulling `"use client"` into server code).
+- **Utils:** [`packages/api/src/utils`](packages/api/src/utils) — `formatQueryParams`, `handleApiError` (pass message map), JWT helpers.
+- **Fetch:** [`packages/api/src/fetch-with-timeout.ts`](packages/api/src/fetch-with-timeout.ts) — `@repo/api/fetch`.
+
+## Storefront wiring
+
+- **Singleton:** [`apps/frontend/src/lib/api-client.ts`](apps/frontend/src/lib/api-client.ts) composes `ApiClient` with `handleAuthErrors`, super-admin 403 behavior, and `apiCache`.
+- **Cache rules:** [`apps/frontend/src/lib/api-cache.ts`](apps/frontend/src/lib/api-cache.ts) — ecommerce/blog/product-oriented regex lists stay here.
+- **Re-exports:** [`apps/frontend/src/constants/api.ts`](apps/frontend/src/constants/api.ts) re-exports shared config from `@repo/api/config` and keeps `ENDPOINTS`, checkout timeouts, overlay constants.
+
+## Conventions
+
+- **Do not** move cart/checkout/product domain services or `ENDPOINTS` into `@repo/api`.
+- **Do not** put Jotai/UI notification logic in `@repo/api`; inject via `onHttpError` or app wrappers.
+- New apps (e.g. social frontend): add `"@repo/api": "workspace:*"`, `transpilePackages: ["@repo/api"]` in Next config, then compose their own `ApiClient` instance and cache rules.

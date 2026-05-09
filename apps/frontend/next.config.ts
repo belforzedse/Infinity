@@ -29,6 +29,7 @@ process.env.NEXT_PUBLIC_BUILD_VERSION = BUILD_VERSION;
 const nextConfig = {
   output: "standalone",
   outputFileTracingRoot: path.join(__dirname, "../.."),
+  transpilePackages: ["@repo/api"],
   reactStrictMode: true,
   // Allow sitemap and other static generation to run longer during build (default 60s)
   staticPageGenerationTimeout: 180,
