@@ -52,7 +52,7 @@ ENV NODE_ENV=production \
 # su-exec so entrypoint can create uploads dir then run as node
 # Alpine default CDN (dl-cdn.alpinelinux.org) is often unreachable from same networks as Docker Hub; use Arvan APK mirror
 RUN sed -i 's|https://dl-cdn.alpinelinux.org/alpine|https://mirror.arvancloud.ir/alpine|g' /etc/apk/repositories \
-    && apk add --no-cache su-exec vips
+    && apk add --no-cache su-exec vips vips-dev
 # Reuse Corepack cache from builder so pnpm@10.28.2 activates without another registry fetch (CI mirrors / flaky networks).
 COPY --from=builder /root/.cache/node/corepack /root/.cache/node/corepack
 RUN mkdir -p /home/node/.cache/node \

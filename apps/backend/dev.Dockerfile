@@ -43,7 +43,7 @@ ENV NODE_ENV=production \
     NODE_OPTIONS=${NODE_OPTIONS}
 
 RUN sed -i 's|https://dl-cdn.alpinelinux.org/alpine|https://mirror.arvancloud.ir/alpine|g' /etc/apk/repositories \
-    && apk add --no-cache vips
+    && apk add --no-cache vips vips-dev
 RUN corepack enable
 
 WORKDIR /app
