@@ -36,7 +36,8 @@ RUN pnpm --filter @repo/backend deploy --legacy --prod /app \
     && cp -a /repo/apps/backend/dist/. /app/dist/ \
     && if [ -d /repo/apps/backend/build ]; then cp -a /repo/apps/backend/build/. /app/build/; fi \
     && cd /app \
-    && pnpm rebuild sharp --unsafe-perm
+    && npm_config_platform=linux npm_config_arch=x64 npm_config_libc=musl pnpm rebuild sharp --unsafe-perm \
+    && node -e "const sharp=require('sharp'); console.log('sharp-ok', process.platform, process.arch, sharp.versions);"
 
 FROM docker.arvancloud.ir/node:20-alpine AS runner
 

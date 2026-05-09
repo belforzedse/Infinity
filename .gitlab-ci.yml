@@ -193,6 +193,8 @@ backend:deploy:
       	pull_with_retry "postgres:16-alpine"
       	pull_with_retry "redis:7-alpine"
       	pull_with_retry "$CI_REGISTRY_IMAGE/infinity-backend:$IMAGE_TAG"
+      	docker run --rm --entrypoint node "$CI_REGISTRY_IMAGE/infinity-backend:$IMAGE_TAG" \
+      	  -e "const sharp=require('sharp'); console.log('sharp-runtime-ok', process.platform, process.arch, sharp.versions);"
 
       	docker compose -f docker-compose.yml -f docker-compose.ci.yml -f docker-compose.scale.yml -f docker-compose.scale.ci.yml --env-file "\$ENV_FILE" down --remove-orphans || true
       	for c in infinity-strapi infinity-strapi-2 infinity-strapi-3 infinity-strapi-4 infinity-strapi-5 infinity-strapi-6; do docker rm -f "\$c" 2>/dev/null || true; done
