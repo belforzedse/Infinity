@@ -59,8 +59,8 @@ Files: [apps/apps/frontend/public/images/placeholders/](apps/apps/frontend/publi
 
 To add new fonts for the hero font selector:
 
-1. Add font files to `apps/frontend/public/fonts/`
-2. Register in `apps/frontend/src/styles/fonts.ts` (e.g. `@font-face` and export)
+1. Add font files under `packages/fonts/assets/` (keep woff2 paths consistent).
+2. Register with `next/font/local` in [`packages/fonts/src/index.ts`](packages/fonts/src/index.ts) and export the loader; consume from `@repo/fonts` in `apps/frontend/src/app/layout.tsx` (html `variable` classes).
 3. Add the font to Tailwind in `apps/frontend/tailwind.config.ts` under `fontFamily`
 4. Add the option to `HERO_FONT_FAMILY_OPTIONS` in [apps/apps/frontend/src/types/super-admin/heroSlider.ts](apps/apps/frontend/src/types/super-admin/heroSlider.ts)
 

@@ -1,0 +1,30 @@
+---
+description: Shared Infinity brand logos (`@repo/brand`) for Next.js apps
+globs: packages/brand/**/*.tsx,apps/frontend/src/**/*.tsx,apps/social/src/**/*.tsx
+alwaysApply: false
+---
+
+# `@repo/brand`
+
+Monorepo package for storefront and super-admin **logo** components (Next.js `Image` + `Link`).
+
+## Source
+
+- [`packages/brand/src/StorefrontLogo.tsx`](packages/brand/src/StorefrontLogo.tsx) — **`StorefrontLogo`**, image `/images/full-logo.png`.
+- [`packages/brand/src/SuperAdminLogo.tsx`](packages/brand/src/SuperAdminLogo.tsx) — **`SuperAdminLogo`**, image `/Logo.png`, optional `compact` for collapsed sidebar.
+
+Component modules use **PascalCase** filenames matching the primary export (e.g. `SuperAdminLogo.tsx`).
+
+## App setup
+
+1. Add `"@repo/brand": "workspace:*"` to the app `package.json`.
+2. Set `transpilePackages: [..., "@repo/brand"]` in `next.config.ts`.
+3. Ensure the same files exist under that app’s **`public/`** (`images/full-logo.png`, `Logo.png`) if you use the components.
+
+## API
+
+- Optional **`href`** (default `"/"`) on both components when the logo should navigate somewhere other than store root.
+
+## Conventions
+
+- Do not reintroduce duplicate logo components under `apps/frontend/src/components/Kits/`; import from `@repo/brand` instead.

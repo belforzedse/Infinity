@@ -25,7 +25,8 @@ alwaysApply: false
 ## Social app (`@repo/social`)
 
 - **Client:** [`apps/social/src/lib/api-client.ts`](apps/social/src/lib/api-client.ts) — minimal `ApiClient` (no storefront cache/auth); extend when needed.
-- **Next.js:** [`apps/social/next.config.ts`](apps/social/next.config.ts) — `transpilePackages: ["@repo/api"]`, `outputFileTracingRoot` for monorepo tracing.
+- **Next.js:** [`apps/social/next.config.ts`](apps/social/next.config.ts) — `transpilePackages: ["@repo/api", "@repo/brand", "@repo/fonts"]`, `outputFileTracingRoot` for monorepo tracing.
+- **Brand:** [`StorefrontLogo`](packages/brand/src/StorefrontLogo.tsx) in header; `public/images/full-logo.png` must exist in the social app.
 
 ## Conventions
 

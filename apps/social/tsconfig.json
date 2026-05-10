@@ -19,7 +19,9 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@repo/fonts": ["../../packages/fonts/src/index.ts"],
+      "@repo/brand": ["../../packages/brand/src/index.ts"]
     }
   },
   "include": [

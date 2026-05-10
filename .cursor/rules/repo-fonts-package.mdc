@@ -1,0 +1,30 @@
+---
+description: Shared Infinity typography (`@repo/fonts`) — Peyda, Rokh, Kaghaz via next/font/local
+globs: packages/fonts/**/*.ts,apps/frontend/src/app/layout.tsx,apps/social/src/app/layout.tsx
+alwaysApply: false
+---
+
+# `@repo/fonts`
+
+Centralizes the same **local font files** and **`next/font/local`** loaders used by the storefront so other Next apps (e.g. `@repo/social`) stay typographically aligned.
+
+## Layout
+
+- **Font binaries:** [`packages/fonts/assets/`](packages/fonts/assets/) (woff2 Peyda, Peyda Fanum, Rokh, Kaghaz — copied from the former `apps/frontend/public/fonts` tree).
+- **Loaders:** [`packages/fonts/src/index.ts`](packages/fonts/src/index.ts) exports `peyda`, `peydaFanum`, `rokh`, `kaghaz` (same CSS variables: `--font-peyda`, `--font-peyda-fanum`, `--font-rokh`, `--font-kaghaz`).
+
+## App setup
+
+1. `"@repo/fonts": "workspace:*"` in the app `package.json`.
+2. `transpilePackages: [..., "@repo/fonts"]` in `next.config.ts`.
+3. **Root layout:** put `${…variable}` classes on `<html>` and apply `${peydaFanum.className}` on `<body>` when the default UI text should match the storefront (Persian numerals).
+
+Do not serve duplicate copies from `public/fonts`; `next/font` emits assets under `/_next/static/media/`.
+
+## Tailwind (v4)
+
+Map tokens in `@theme inline`, e.g. `--font-sans: var(--font-peyda-fanum), …` and optional `--font-peyda`, `--font-rokh`, `--font-kaghaz` for `font-peyda` / `font-rokh` / `font-kaghaz` utilities.
+
+## Storefront (v3 Tailwind)
+
+[`apps/frontend/tailwind.config.ts`](apps/frontend/tailwind.config.ts) already references `var(--font-peyda-fanum)` etc.; keep that in sync with the variable names exported by `@repo/fonts`.

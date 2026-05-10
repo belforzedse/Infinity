@@ -14,6 +14,22 @@ alwaysApply: false
 
 Apply the same horizontal padding to the sticky header inner row so header and body align.
 
+## Background
+
+- Site canvas: **`#F9FAFF`** — set as `--background` in `apps/social/src/app/globals.css` and exposed to Tailwind as `bg-background` (see `@theme inline` there). Use `bg-background` / `bg-background/90` for body and sticky header so the tone stays consistent.
+
+## Top header
+
+- [`apps/social/src/components/Header.tsx`](apps/social/src/components/Header.tsx) — same canvas as the app (`bg-background/90`, light border); centered **`StorefrontLogo`** from `@repo/brand` (same as storefront), search pill, bookmarks / notifications / profile. Bar uses `dir="ltr"` (search screen-left); Persian controls use local `dir="rtl"`. Keep [`apps/social/public/images/full-logo.png`](apps/social/public/images/full-logo.png) in sync with the storefront asset.
+
+## Typography
+
+- Persian UI uses shared **`@repo/fonts`** (Peyda Fanum on `<body>`, variables on `<html>`). See [repo-fonts-package.mdc](repo-fonts-package.mdc).
+
+### Resolving `@repo/fonts`
+
+- Run **`pnpm install`** from the monorepo root so `apps/social/node_modules/@repo/fonts` exists. If the IDE or an old dev server still errors, restart dev. [`apps/social/tsconfig.json`](apps/social/tsconfig.json) also maps `@repo/fonts` → `../../packages/fonts/src/index.ts` as a fallback.
+
 ## Direction and language
 
 - Root layout uses `lang="fa"` and `dir="rtl"` for Persian UI copy.

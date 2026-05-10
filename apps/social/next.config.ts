@@ -3,7 +3,7 @@ import path from "path";
 
 const nextConfig: NextConfig = {
   outputFileTracingRoot: path.join(__dirname, "../.."),
-  transpilePackages: ["@repo/api"],
+  transpilePackages: ["@repo/api", "@repo/brand", "@repo/fonts"],
 };
 
 export default nextConfig;

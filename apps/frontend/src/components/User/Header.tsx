@@ -4,7 +4,7 @@ import React from "react";
 import MobileHamburgerMenu from "./MobileHamburgerMenu";
 import ShoppingCartCounter from "../ShoppingCart/Counter";
 import BackButtonToStore from "../BackButtonToStore";
-import Logo from "../Kits/Logo";
+import { StorefrontLogo } from "@repo/brand";
 
 const UserHeader: React.FC = () => {
   const [isStandalone, setIsStandalone] = React.useState(false);
@@ -57,8 +57,7 @@ const UserHeader: React.FC = () => {
 
       {/* Center: Logo */}
       <div className="relative -translate-y-4 h-10 w-28 flex-shrink-0 md:h-12 md:w-36">
-        <Logo />
-
+        <StorefrontLogo />
       </div>
       <div className="lg:hidden">
         <BackButtonToStore />

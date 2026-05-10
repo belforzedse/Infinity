@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Logo from "@/components/Kits/SuperAdminLogo";
+import { SuperAdminLogo } from "@repo/brand";
 import MenuIcon from "@/components/PLP/Icons/MenuIcon";
 import { useMe } from "@/hooks/api/useMe";
 import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
@@ -27,7 +27,7 @@ export default function SuperAdminLayoutHeader({ onMenuClick }: SuperAdminLayout
       </button>
 
       <div className="md:hidden">
-        <Logo />
+        <SuperAdminLogo />
       </div>
 
       {/* Search Section */}

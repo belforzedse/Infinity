@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "@repo/api": "workspace:*",
+    "@repo/brand": "workspace:*",
+    "@repo/fonts": "workspace:*",
     "next": "16.2.6",
     "react": "19.2.4",
     "react-dom": "19.2.4"

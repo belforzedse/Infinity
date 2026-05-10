@@ -1,27 +1,23 @@
 @import "tailwindcss";
 
+/* Light brand canvas only: do not tie to prefers-color-scheme (OS dark mode would override #F9FAFF). */
 :root {
-  --background: #fafafa;
+  color-scheme: light;
+  --background: #f9faff;
   --foreground: #18181b;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: var(--font-peyda-fanum), ui-sans-serif, system-ui, sans-serif;
+  --font-peyda: var(--font-peyda);
+  --font-peyda-fanum: var(--font-peyda-fanum);
+  --font-rokh: var(--font-rokh);
+  --font-kaghaz: var(--font-kaghaz);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",
-    Arial, sans-serif;
 }

@@ -1,92 +1,4 @@
-import Link from "next/link";
-
-type NavItem = {
-  label: string;
-  href: string;
-  active?: boolean;
-};
-
-const navItems: NavItem[] = [
-  { label: "خانه", href: "/", active: true },
-  { label: "کاوش", href: "#explore" },
-  { label: "پیام‌ها", href: "#messages" },
-  { label: "اعلان‌ها", href: "#notifications" },
-];
-
-function navItemClassName(active?: boolean): string {
-  return active
-    ? "rounded-full bg-zinc-900 px-4 py-2 text-sm font-medium text-white"
-    : "rounded-full px-4 py-2 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900";
-}
-
-function AppHeader() {
-  return (
-    <header className="sticky top-0 z-10 border-b border-zinc-200/80 bg-zinc-50/90 backdrop-blur-md">
-      <div className="mx-auto flex h-14 max-w-[1280px] items-center justify-between gap-4 px-4 sm:px-6 lg:px-[60px]">
-        <Link
-          href="/"
-          className="text-lg font-semibold tracking-tight text-zinc-900"
-        >
-          اینفینیتی‌گرام
-        </Link>
-        <nav className="hidden items-center gap-1 md:flex" aria-label="ناوبری اصلی">
-          {navItems.map((item) =>
-            item.href.startsWith("/") ? (
-              <Link
-                key={item.label}
-                href={item.href}
-                className={navItemClassName(item.active)}
-              >
-                {item.label}
-              </Link>
-            ) : (
-              <a
-                key={item.label}
-                href={item.href}
-                className={navItemClassName(item.active)}
-              >
-                {item.label}
-              </a>
-            ),
-          )}
-        </nav>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            className="hidden h-9 max-w-[200px] flex-1 items-center rounded-full border border-zinc-200 bg-white px-4 text-right text-sm text-zinc-500 shadow-sm sm:flex md:max-w-[240px]"
-            aria-label="جستجو"
-          >
-            جستجو…
-          </button>
-          <button
-            type="button"
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-700 shadow-sm transition-colors hover:bg-zinc-50 md:hidden"
-            aria-label="منو"
-          >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              aria-hidden
-            >
-              <path d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-          <button
-            type="button"
-            className="hidden h-9 items-center justify-center rounded-full bg-violet-600 px-4 text-sm font-medium text-white shadow-sm transition-colors hover:bg-violet-700 md:inline-flex"
-          >
-            پست جدید
-          </button>
-        </div>
-      </div>
-    </header>
-  );
-}
+import { Header } from "@/components/Header";
 
 function FeedPlaceholder() {
   return (
@@ -147,7 +59,7 @@ function SideRail() {
 export default function HomePage() {
   return (
     <div className="flex min-h-dvh flex-col">
-      <AppHeader />
+      <Header />
       <div className="mx-auto w-full max-w-[1280px] flex-1 px-4 pb-12 pt-6 sm:px-6 lg:px-[60px]">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-10">
           <div className="space-y-6">

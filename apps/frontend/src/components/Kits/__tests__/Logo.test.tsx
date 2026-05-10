@@ -1,14 +1,15 @@
 import { render, screen } from "@testing-library/react";
-import Logo from "../Logo";
+import { StorefrontLogo } from "@repo/brand";
 
 jest.mock("next/image", () => ({
   __esModule: true,
-  default: ({ fill, priority, ...props }: any) => {
+  default: ({ fill, priority, src, ...props }: Record<string, unknown>) => {
     // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text
     return (
       <img
         data-fill={fill ? "true" : undefined}
         data-priority={priority ? "true" : undefined}
+        src={typeof src === "string" ? src : ""}
         {...props}
       />
     );
@@ -17,66 +18,72 @@ jest.mock("next/image", () => ({
 
 jest.mock("next/link", () => ({
   __esModule: true,
-  default: ({ children, href }: any) => <a href={href}>{children}</a>,
+  default: ({
+    children,
+    href,
+  }: {
+    children: React.ReactNode;
+    href: string;
+  }) => <a href={href}>{children}</a>,
 }));
 
-describe("Logo", () => {
+describe("StorefrontLogo", () => {
   it("should render logo image", () => {
-    render(<Logo />);
+    render(<StorefrontLogo />);
 
     const img = screen.getByAltText("Logo");
     expect(img).toBeInTheDocument();
   });
 
   it("should render as a link to home page", () => {
-    render(<Logo />);
+    render(<StorefrontLogo />);
 
     const link = screen.getByRole("link");
     expect(link).toHaveAttribute("href", "/");
   });
 
   it("should use correct image source", () => {
-    render(<Logo />);
+    render(<StorefrontLogo />);
 
     const img = screen.getByAltText("Logo");
-    expect(img).toHaveAttribute("src", "/images/cropped-021.webp");
+    expect(img).toHaveAttribute("src", "/images/full-logo.png");
   });
 
   it("should have priority loading", () => {
-    render(<Logo />);
+    render(<StorefrontLogo />);
 
     const img = screen.getByAltText("Logo");
     expect(img).toHaveAttribute("data-priority", "true");
   });
 
   it("should have responsive sizes", () => {
-    render(<Logo />);
+    render(<StorefrontLogo />);
 
     const img = screen.getByAltText("Logo");
-    expect(img).toHaveAttribute("sizes", "(max-width: 768px) 90px, 110px");
+    expect(img).toHaveAttribute("sizes", "(max-width: 768px) 150px, 210px");
   });
 
   it("should have fill layout", () => {
-    render(<Logo />);
+    render(<StorefrontLogo />);
 
     const img = screen.getByAltText("Logo");
     expect(img).toHaveAttribute("data-fill", "true");
   });
 
   it("should have object-contain class", () => {
-    render(<Logo />);
+    render(<StorefrontLogo />);
 
     const img = screen.getByAltText("Logo");
     expect(img).toHaveClass("object-contain");
   });
 
   it("should have responsive dimensions container", () => {
-    const { container } = render(<Logo />);
+    const { container } = render(<StorefrontLogo />);
 
     const imageContainer = container.querySelector(".relative");
-    expect(imageContainer).toHaveClass("h-[56px]");
-    expect(imageContainer).toHaveClass("w-[90px]");
-    expect(imageContainer).toHaveClass("md:h-[95px]");
-    expect(imageContainer).toHaveClass("md:w-[152px]");
+    expect(imageContainer).toHaveClass("h-[52px]");
+    expect(imageContainer).toHaveClass("w-[150px]");
+    expect(imageContainer).toHaveClass("md:h-[72px]");
+    expect(imageContainer).toHaveClass("md:w-[210px]");
   });
 });

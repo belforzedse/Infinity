@@ -7,7 +7,7 @@ import OrderTrackingIcon from "../../Icons/OrderTrackingIcon";
 import SearchIcon from "../../Icons/SearchIcon";
 import CartIcon from "../../Icons/CartIcon";
 import MenuIcon from "../../Icons/MenuIcon";
-import Logo from "@/components/Kits/Logo";
+import { StorefrontLogo } from "@repo/brand";
 import { useCart } from "@/contexts/CartContext";
 
 type Props = object;
@@ -75,7 +75,7 @@ export default function PLPMobileHeader({}: Props) {
           <OrderTrackingIcon className="text-neutral-800" />
         </button>
 
-        <Logo />
+        <StorefrontLogo />
 
         {/* Left Section */}
         <div className="flex items-center gap-2">

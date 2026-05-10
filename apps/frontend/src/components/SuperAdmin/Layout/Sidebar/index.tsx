@@ -1,5 +1,5 @@
 "use client";
-import Logo from "@/components/Kits/SuperAdminLogo";
+import { SuperAdminLogo } from "@repo/brand";
 import superAdminSidebar, { getSidebarItemsForRole } from "@/constants/superAdminSidebar";
 import Link from "next/link";
 import ChevronDownIcon from "../Icons/ChevronDownIcon";
@@ -139,14 +139,14 @@ export default function SuperAdminLayoutSidebar({ isOpen, onClose, isCollapsed =
         {/* Logo section - full when expanded */}
         {!isCollapsed && (
           <div className="flex items-center justify-center p-3 pb-4 flex-shrink-0">
-            <Logo />
+            <SuperAdminLogo />
           </div>
         )}
 
         {/* Compact logo when collapsed - first icon */}
         {isCollapsed && (
           <div className="flex flex-shrink-0 items-center justify-center border-b border-neutral-100 px-2 py-4 md:py-3">
-            <Logo compact />
+            <SuperAdminLogo compact />
           </div>
         )}
 

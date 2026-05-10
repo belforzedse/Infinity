@@ -6,7 +6,7 @@ import "./globals.css";
 import { NuqsAdapter } from "nuqs/adapters/next";
 import { CartProvider } from "@/contexts/CartContext";
 import Providers from "./Providers";
-import { peyda, peydaFanum, rokh, kaghaz } from "@/styles/fonts";
+import { peyda, peydaFanum, rokh, kaghaz } from "@repo/fonts";
 import { DebugPanel } from "@/components/Debug";
 import { OrganizationSchema } from "@/components/SEO/OrganizationSchema";
 import { IMAGE_BASE_URL } from "@/constants/api";
@@ -107,21 +107,7 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="icon" href="/favicon-96x96.png" type="image/png" sizes="96x96" />
 
-        {/* Preload critical fonts - prioritize above-the-fold content */}
-        <link
-          rel="preload"
-          href="/fonts/peyda-regular-fanum.woff2"
-          as="font"
-          type="font/woff2"
-          crossOrigin="anonymous"
-        />
-        <link
-          rel="preload"
-          href="/fonts/peyda-bold-fanum.woff2"
-          as="font"
-          type="font/woff2"
-          crossOrigin="anonymous"
-        />
+        {/* Critical Peyda Fanum preloads are emitted by next/font (`peydaFanum` in @repo/fonts). */}
 
         {/* DNS prefetch for external domains - API first for critical requests */}
         <link rel="dns-prefetch" href={API_BASE_DOMAIN} />

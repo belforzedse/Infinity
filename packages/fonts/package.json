@@ -1,0 +1,19 @@
+{
+  "name": "@repo/fonts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "next": ">=15"
+  },
+  "devDependencies": {
+    "next": "16.2.4",
+    "typescript": "5.8.3"
+  }
+}

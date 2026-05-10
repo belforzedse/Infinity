@@ -2,15 +2,21 @@ import type { ReactElement } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-interface SuperAdminLogoProps {
+export type SuperAdminLogoProps = {
   /** When true, renders a small icon-sized logo for collapsed sidebar */
   compact?: boolean;
-}
+  /** Defaults to `/`. */
+  href?: string;
+};
 
-export default function SuperAdminLogo({ compact = false }: SuperAdminLogoProps): ReactElement {
+/** Super-admin sidebar/header logo (`/Logo.png`). */
+export function SuperAdminLogo({
+  compact = false,
+  href = "/",
+}: SuperAdminLogoProps): ReactElement {
   if (compact) {
     return (
-      <Link href="/" className="flex items-center justify-center" aria-label="Logo">
+      <Link href={href} className="flex items-center justify-center" aria-label="Logo">
         <div className="relative h-9 w-9 shrink-0 md:h-10 md:w-10">
           <Image
             src="/Logo.png"
@@ -26,7 +32,7 @@ export default function SuperAdminLogo({ compact = false }: SuperAdminLogoProps)
   }
 
   return (
-    <Link href="/">
+    <Link href={href}>
       <div className="relative h-[52px] w-[150px] md:h-[72px] md:w-[210px]">
         <Image
           src="/Logo.png"
@@ -40,4 +46,3 @@ export default function SuperAdminLogo({ compact = false }: SuperAdminLogoProps)
     </Link>
   );
 }
-
