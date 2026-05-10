@@ -1,6 +1,6 @@
 ---
 description: Shared frontend HTTP client and API primitives in `@repo/api` monorepo package
-globs: packages/api/**/*.ts,apps/frontend/src/lib/api-client.ts,apps/frontend/src/lib/api-cache.ts
+globs: packages/api/**/*.ts,apps/frontend/src/lib/api-client.ts,apps/frontend/src/lib/api-cache.ts,apps/social/src/lib/api-client.ts
 alwaysApply: false
 ---
 
@@ -21,6 +21,11 @@ alwaysApply: false
 - **Singleton:** [`apps/frontend/src/lib/api-client.ts`](apps/frontend/src/lib/api-client.ts) composes `ApiClient` with `handleAuthErrors`, super-admin 403 behavior, and `apiCache`.
 - **Cache rules:** [`apps/frontend/src/lib/api-cache.ts`](apps/frontend/src/lib/api-cache.ts) — ecommerce/blog/product-oriented regex lists stay here.
 - **Re-exports:** [`apps/frontend/src/constants/api.ts`](apps/frontend/src/constants/api.ts) re-exports shared config from `@repo/api/config` and keeps `ENDPOINTS`, checkout timeouts, overlay constants.
+
+## Social app (`@repo/social`)
+
+- **Client:** [`apps/social/src/lib/api-client.ts`](apps/social/src/lib/api-client.ts) — minimal `ApiClient` (no storefront cache/auth); extend when needed.
+- **Next.js:** [`apps/social/next.config.ts`](apps/social/next.config.ts) — `transpilePackages: ["@repo/api"]`, `outputFileTracingRoot` for monorepo tracing.
 
 ## Conventions
 

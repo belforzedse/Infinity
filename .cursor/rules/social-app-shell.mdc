@@ -1,0 +1,24 @@
+---
+description: Social app (@repo/social) homepage shell — max width, padding, RTL
+globs: apps/social/**/*.tsx,apps/social/**/*.ts
+alwaysApply: false
+---
+
+# Social app layout shell
+
+## Page width and spacing (desktop)
+
+- **Max width:** `max-w-[1280px]` on the main content column and header inner row (`mx-auto w-full`).
+- **Top padding (below header):** `pt-6` (24px) on the primary scrollable/main wrapper.
+- **Horizontal padding:** `lg:px-[60px]` on desktop; use `px-4 sm:px-6` on smaller breakpoints so content stays usable.
+
+Apply the same horizontal padding to the sticky header inner row so header and body align.
+
+## Direction and language
+
+- Root layout uses `lang="fa"` and `dir="rtl"` for Persian UI copy.
+
+## Conventions
+
+- Prefer **Next.js `Link`** for internal routes (`href` starting with `/`); use `<a>` for hash/placeholder anchors until routes exist.
+- New routes should keep content inside the same `max-w-[1280px]` + horizontal padding pattern for visual consistency.
