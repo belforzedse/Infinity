@@ -3,13 +3,20 @@ import { StorefrontLogo } from "@repo/brand";
 
 jest.mock("next/image", () => ({
   __esModule: true,
-  default: ({ fill, priority, src, ...props }: Record<string, unknown>) => {
+  default: ({
+    priority,
+    src,
+    width,
+    height,
+    ...props
+  }: Record<string, unknown>) => {
     // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text
     return (
       <img
-        data-fill={fill ? "true" : undefined}
         data-priority={priority ? "true" : undefined}
         src={typeof src === "string" ? src : ""}
+        width={width as number | undefined}
+        height={height as number | undefined}
         {...props}
       />
     );
@@ -63,27 +70,27 @@ describe("StorefrontLogo", () => {
     expect(img).toHaveAttribute("sizes", "(max-width: 768px) 150px, 210px");
   });
 
-  it("should have fill layout", () => {
+  it("should pass intrinsic dimensions for layout", () => {
     render(<StorefrontLogo />);
 
     const img = screen.getByAltText("Logo");
-    expect(img).toHaveAttribute("data-fill", "true");
+    expect(img).toHaveAttribute("width", "210");
+    expect(img).toHaveAttribute("height", "72");
   });
 
-  it("should have object-contain class", () => {
+  it("should use object-fit contain in style", () => {
     render(<StorefrontLogo />);
 
     const img = screen.getByAltText("Logo");
-    expect(img).toHaveClass("object-contain");
+    expect(img).toHaveStyle({ objectFit: "contain" });
   });
 
-  it("should have responsive dimensions container", () => {
-    const { container } = render(<StorefrontLogo />);
+  it("should honor fixed width and height when provided", () => {
+    render(<StorefrontLogo width={92} height={58} />);
 
-    const imageContainer = container.querySelector(".relative");
-    expect(imageContainer).toHaveClass("h-[52px]");
-    expect(imageContainer).toHaveClass("w-[150px]");
-    expect(imageContainer).toHaveClass("md:h-[72px]");
-    expect(imageContainer).toHaveClass("md:w-[210px]");
+    const img = screen.getByAltText("Logo");
+    expect(img).toHaveAttribute("width", "92");
+    expect(img).toHaveAttribute("height", "58");
+    expect(img).toHaveStyle({ width: "92px", height: "58px", objectFit: "contain" });
   });
 });

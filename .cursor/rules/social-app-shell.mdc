@@ -10,17 +10,25 @@ alwaysApply: false
 
 - **Max width:** `max-w-[1280px]` on the main content column and header inner row (`mx-auto w-full`).
 - **Top padding (below header):** `pt-6` (24px) on the primary scrollable/main wrapper.
-- **Horizontal padding:** `lg:px-[60px]` on desktop; use `px-4 sm:px-6` on smaller breakpoints so content stays usable.
+- **Horizontal padding:** `lg:px-[60px]` on desktop; below `sm`, use **`px-5`** (20px) with **`sm:px-6`** so mobile matches the 20px side inset.
 
 Apply the same horizontal padding to the sticky header inner row so header and body align.
+
+## Brand color (Infinity-Primary)
+
+- **`#3D4C6E`** — defined in [`apps/social/src/app/globals.css`](apps/social/src/app/globals.css) as `--infinity-primary` (comment: Infinity-Primary) and mapped in `@theme inline` as **`--color-infinity-primary`**. Tailwind utilities: `bg-infinity-primary`, `text-infinity-primary`, etc.
 
 ## Background
 
 - Site canvas: **`#F9FAFF`** — set as `--background` in `apps/social/src/app/globals.css` and exposed to Tailwind as `bg-background` (see `@theme inline` there). Use `bg-background` / `bg-background/90` for body and sticky header so the tone stays consistent.
 
+## Mobile bottom navigation
+
+- [`apps/social/src/components/MobileBottomNav.tsx`](apps/social/src/components/MobileBottomNav.tsx) — rendered from [`apps/social/src/app/layout.tsx`](apps/social/src/app/layout.tsx); **`lg:hidden`**. **20px** horizontal inset from the screen (`mx-5` on the inner wrapper). Bar: **`rounded-[20px]`**, white, `shadow-[0_4px_19px_rgba(57,57,57,0.05)]`, padding **`pt-[10px] px-[30px] pb-[5px]`**, inner row **`h-16`**, **`justify-between`**, **`gap-[33px]`**, **`dir="ltr"`** (Bookmark → Profile → center → Search → Home). Side tabs are **`Link`**s to **`/bookmarks`**, **`/profile`**, **`/search`**, **`/`** (home); **`usePathname()`** (normalized) drives **active** icon + indicator (**`text-infinity-primary`** / **`bg-infinity-primary`**) for the current route. Tab slots: **`h-8 w-6`**, **`gap-2`**, Lucide icons **24×24**, **`strokeWidth={1.5}`**; inactive strokes **`#A3A3A3`** / profile **`#A49BA0`**; indicator **`h-[3px] w-[17px]`**, inactive **`bg-black/[0.08]`**. Center: **`size-16`** circle **`bg-infinity-primary`**, mark from **[`/Infinity.svg`](apps/social/public/Infinity.svg)** (~**49×49**), also links **`/`** (no tab indicator; home tab shows active on `/`). **`pb-[env(safe-area-inset-bottom)]`** on the fixed wrapper; **`body`** uses **`pb-28 lg:pb-0`** so content clears the bar. Placeholder shells: [`bookmarks/page.tsx`](apps/social/src/app/bookmarks/page.tsx), [`profile/page.tsx`](apps/social/src/app/profile/page.tsx), [`search/page.tsx`](apps/social/src/app/search/page.tsx).
+
 ## Top header
 
-- [`apps/social/src/components/Header.tsx`](apps/social/src/components/Header.tsx) — same canvas as the app (`bg-background/90`, light border); centered **`StorefrontLogo`** from `@repo/brand` (same as storefront), search pill, bookmarks / notifications / profile. Bar uses `dir="ltr"` (search screen-left); Persian controls use local `dir="rtl"`. Keep [`apps/social/public/images/full-logo.png`](apps/social/public/images/full-logo.png) in sync with the storefront asset.
+- [`apps/social/src/components/Header.tsx`](apps/social/src/components/Header.tsx) — **`lg` and up:** same canvas as the app (`bg-background/90`, backdrop blur); LTR grid — [`SearchBar`](apps/social/src/components/SearchBar.tsx) (Figma `Frame 92960`), centered **`StorefrontLogo`** **`92×58`**, bookmarks / notifications / profile. **`lg:hidden` mobile:** background **`#F8F9FB`**; same **`StorefrontLogo`** asset **smaller** (**`72×45`**); notifications only in **`rounded-2xl bg-white shadow-sm`** bell control; logo uses **`absolute` centering** + **`pointer-events`** so the bell stays clickable. Keep [`apps/social/public/images/full-logo.png`](apps/social/public/images/full-logo.png) in sync with the storefront asset.
 
 ## Typography
 
@@ -33,6 +41,20 @@ Apply the same horizontal padding to the sticky header inner row so header and b
 ## Direction and language
 
 - Root layout uses `lang="fa"` and `dir="rtl"` for Persian UI copy.
+
+## Icons
+
+- Same packages as storefront: **`lucide-react@0.542.0`** (primary) and **`react-icons@5.5.0`** (Feather / MD / etc. when needed). Declare them in [`apps/social/package.json`](apps/social/package.json) at those versions to stay aligned with `@repo/frontend`.
+
+## Stories rail
+
+- **Layout (Figma Frame 92985 / 92964):** [`stories-rail.tsx`](apps/social/src/components/stories-rail.tsx) — column `items-end`, **gap 20px** (`gap-5`), **padding 0**. Heading **داستان ها**: **24px / 700 / line-height 21px**, `#424242`, `font-peyda`. Row **h-20**, **gap 16px** (`gap-4`). Avatars **80×80** outer, **74×74** image: unseen **3px** gradient ring `to-b #3C4D6E → #98BDFF`; seen **`border-2` `#C3C3C3`**. No per-story captions in rail (spec); `aria-label` on each control.
+- **Parity vs storefront:** Same **npm** viewer **`react-instagram-stories@1.1.1`** (declared in [`apps/social/package.json`](apps/social/package.json)), same **API** (`getActiveStories`, seen endpoints, `@repo/api` URLs). The viewer **must** load the library stylesheet: `@import "react-instagram-stories/styles.css"` in [`apps/social/src/app/globals.css`](apps/social/src/app/globals.css) (resolved from `node_modules`, never copy `node_modules` into the repo). **Not** shared React components with storefront — only the same package + import pattern. If behavior diverges, check env (`NEXT_PUBLIC_API_BASE_URL`, tokens), auth, and network.
+- Supporting: [`stories-avatar-list.tsx`](apps/social/src/components/stories/stories-avatar-list.tsx), [`story.service.ts`](apps/social/src/services/story.service.ts), [`stories-viewer-modal.tsx`](apps/social/src/components/stories/stories-viewer-modal.tsx).
+
+## UI primitives
+
+- **Button:** [`apps/social/src/components/ui/Button.tsx`](apps/social/src/components/ui/Button.tsx) — default variant matches the glass gradient profile pill (Figma `Frame 92963`); pass glyphs via the optional `icon` prop (`ReactNode`).
 
 ## Conventions
 

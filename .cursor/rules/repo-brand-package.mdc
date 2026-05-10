@@ -28,3 +28,4 @@ Component modules use **PascalCase** filenames matching the primary export (e.g.
 ## Conventions
 
 - Do not reintroduce duplicate logo components under `apps/frontend/src/components/Kits/`; import from `@repo/brand` instead.
+- **`StorefrontLogo`** sizes the image with **intrinsic `width` / `height` and inline `style`** so it renders in apps whose Tailwind content paths do not scan `packages/brand`. Pass **`width` + `height`** (px) for fixed sizes (e.g. social header **92×58**). Next.js apps using Tailwind v4 may add `@source` to their CSS pointing at `packages/brand/src` (see `apps/social/src/app/globals.css`).

@@ -414,7 +414,7 @@ importers:
         version: 9.24.0(jiti@2.7.0)
       eslint-config-next:
         specifier: 16.2.4
-        version: 16.2.4(eslint@9.24.0(jiti@2.7.0))(typescript@5.8.3)
+        version: 16.2.4(@typescript-eslint/parser@8.59.2(eslint@9.24.0(jiti@2.7.0))(typescript@5.8.3))(eslint@9.24.0(jiti@2.7.0))(typescript@5.8.3)
       eslint-config-prettier:
         specifier: 9.1.2
         version: 9.1.2(eslint@9.24.0(jiti@2.7.0))
@@ -466,6 +466,15 @@ importers:
       '@repo/fonts':
         specifier: workspace:*
         version: link:../../packages/fonts
+      clsx:
+        specifier: 2.1.1
+        version: 2.1.1
+      jotai:
+        specifier: 2.12.2
+        version: 2.12.2(@types/react@19.2.14)(react@19.2.4)
+      lucide-react:
+        specifier: 0.542.0
+        version: 0.542.0(react@19.2.4)
       next:
         specifier: 16.2.6
         version: 16.2.6(@opentelemetry/api@1.9.1)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -475,6 +484,15 @@ importers:
       react-dom:
         specifier: 19.2.4
         version: 19.2.4(react@19.2.4)
+      react-hot-toast:
+        specifier: 2.5.2
+        version: 2.5.2(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      react-icons:
+        specifier: 5.5.0
+        version: 5.5.0(react@19.2.4)
+      react-instagram-stories:
+        specifier: 1.1.1
+        version: 1.1.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4
@@ -493,7 +511,7 @@ importers:
         version: 9.24.0(jiti@2.7.0)
       eslint-config-next:
         specifier: 16.2.6
-        version: 16.2.6(@typescript-eslint/parser@8.59.2(eslint@9.24.0(jiti@2.7.0))(typescript@5.8.3))(eslint@9.24.0(jiti@2.7.0))(typescript@5.8.3)
+        version: 16.2.6(eslint@9.24.0(jiti@2.7.0))(typescript@5.8.3)
       tailwindcss:
         specifier: ^4
         version: 4.3.0
@@ -19757,13 +19775,13 @@ snapshots:
 
   escape-string-regexp@4.0.0: {}
 
-  eslint-config-next@16.2.4(eslint@9.24.0(jiti@2.7.0))(typescript@5.8.3):
+  eslint-config-next@16.2.4(@typescript-eslint/parser@8.59.2(eslint@9.24.0(jiti@2.7.0))(typescript@5.8.3))(eslint@9.24.0(jiti@2.7.0))(typescript@5.8.3):
     dependencies:
       '@next/eslint-plugin-next': 16.2.4
       eslint: 9.24.0(jiti@2.7.0)
       eslint-import-resolver-node: 0.3.10
-      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(eslint@9.24.0(jiti@2.7.0)))(eslint@9.24.0(jiti@2.7.0))
-      eslint-plugin-import: 2.32.0(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(eslint@9.24.0(jiti@2.7.0)))(eslint@9.24.0(jiti@2.7.0)))(eslint@9.24.0(jiti@2.7.0))
+      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0)(eslint@9.24.0(jiti@2.7.0))
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.59.2(eslint@9.24.0(jiti@2.7.0))(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.24.0(jiti@2.7.0))
       eslint-plugin-jsx-a11y: 6.10.2(eslint@9.24.0(jiti@2.7.0))
       eslint-plugin-react: 7.37.5(eslint@9.24.0(jiti@2.7.0))
       eslint-plugin-react-hooks: 7.0.1(eslint@9.24.0(jiti@2.7.0))
@@ -19777,13 +19795,13 @@ snapshots:
       - eslint-plugin-import-x
       - supports-color
 
-  eslint-config-next@16.2.6(@typescript-eslint/parser@8.59.2(eslint@9.24.0(jiti@2.7.0))(typescript@5.8.3))(eslint@9.24.0(jiti@2.7.0))(typescript@5.8.3):
+  eslint-config-next@16.2.6(eslint@9.24.0(jiti@2.7.0))(typescript@5.8.3):
     dependencies:
       '@next/eslint-plugin-next': 16.2.6
       eslint: 9.24.0(jiti@2.7.0)
       eslint-import-resolver-node: 0.3.10
-      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0)(eslint@9.24.0(jiti@2.7.0))
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.59.2(eslint@9.24.0(jiti@2.7.0))(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.24.0(jiti@2.7.0))
+      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(eslint@9.24.0(jiti@2.7.0)))(eslint@9.24.0(jiti@2.7.0))
+      eslint-plugin-import: 2.32.0(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(eslint@9.24.0(jiti@2.7.0)))(eslint@9.24.0(jiti@2.7.0)))(eslint@9.24.0(jiti@2.7.0))
       eslint-plugin-jsx-a11y: 6.10.2(eslint@9.24.0(jiti@2.7.0))
       eslint-plugin-react: 7.37.5(eslint@9.24.0(jiti@2.7.0))
       eslint-plugin-react-hooks: 7.0.1(eslint@9.24.0(jiti@2.7.0))
@@ -22397,6 +22415,11 @@ snapshots:
 
   jose@6.2.3: {}
 
+  jotai@2.12.2(@types/react@19.2.14)(react@19.2.4):
+    optionalDependencies:
+      '@types/react': 19.2.14
+      react: 19.2.4
+
   jotai@2.12.2(@types/react@19.2.14)(react@19.2.5):
     optionalDependencies:
       '@types/react': 19.2.14
@@ -22988,6 +23011,10 @@ snapshots:
       lru-cache: 6.0.0
 
   lru_map@0.3.3: {}
+
+  lucide-react@0.542.0(react@19.2.4):
+    dependencies:
+      react: 19.2.4
 
   lucide-react@0.542.0(react@19.2.5):
     dependencies:
@@ -24395,6 +24422,13 @@ snapshots:
     dependencies:
       react: 19.2.5
 
+  react-hot-toast@2.5.2(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
+    dependencies:
+      csstype: 3.2.3
+      goober: 2.1.18(csstype@3.2.3)
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
+
   react-hot-toast@2.5.2(react-dom@19.2.5(react@19.2.5))(react@19.2.5):
     dependencies:
       csstype: 3.2.3
@@ -24402,9 +24436,18 @@ snapshots:
       react: 19.2.5
       react-dom: 19.2.5(react@19.2.5)
 
+  react-icons@5.5.0(react@19.2.4):
+    dependencies:
+      react: 19.2.4
+
   react-icons@5.5.0(react@19.2.5):
     dependencies:
       react: 19.2.5
+
+  react-instagram-stories@1.1.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
+    dependencies:
+      react: 19.2.4
+      react-dom: 19.2.4(react@19.2.4)
 
   react-instagram-stories@1.1.1(react-dom@19.2.5(react@19.2.5))(react@19.2.5):
     dependencies:

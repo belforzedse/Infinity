@@ -1,15 +1,28 @@
+/* Fullscreen viewer layout — from the installed `react-instagram-stories` package (same as storefront). */
+@import "react-instagram-stories/styles.css";
+
 @import "tailwindcss";
+
+/* Ensure Tailwind sees shared UI in workspace packages (v4 content detection may not follow pnpm links). */
+@source "../../../../packages/brand/src/**/*.tsx";
 
 /* Light brand canvas only: do not tie to prefers-color-scheme (OS dark mode would override #F9FAFF). */
 :root {
   color-scheme: light;
   --background: #f9faff;
   --foreground: #18181b;
+  /* Infinity-Primary */
+  --infinity-primary: #3d4c6e;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-infinity-primary: var(--infinity-primary);
+  /* Auth / form (ported from storefront tokens, aligned with social text) */
+  --color-foreground-primary: var(--foreground);
+  --color-foreground-muted: #71717a;
+  --color-background-form: #ffffff;
   --font-sans: var(--font-peyda-fanum), ui-sans-serif, system-ui, sans-serif;
   --font-peyda: var(--font-peyda);
   --font-peyda-fanum: var(--font-peyda-fanum);
@@ -20,4 +33,46 @@
 body {
   background: var(--background);
   color: var(--foreground);
+}
+
+@layer components {
+  .card {
+    @apply rounded-2xl border border-slate-100 bg-white shadow-sm transition-all duration-300 hover:border-slate-200 hover:shadow-md;
+  }
+
+  .btn {
+    @apply text-sm inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary focus-visible:ring-offset-2 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .btn-primary {
+    @apply bg-infinity-primary text-white hover:opacity-95 hover:shadow-md;
+  }
+
+  .btn-outline {
+    @apply border border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50;
+  }
+}
+
+@keyframes auth-loader-slide {
+  0% {
+    transform: translateX(-300%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}
+
+@layer utilities {
+  .animate-auth-loader-slide {
+    animation: auth-loader-slide 1.2s ease-in-out infinite;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }

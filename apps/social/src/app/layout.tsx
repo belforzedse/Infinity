@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { peyda, peydaFanum, rokh, kaghaz } from "@repo/fonts";
+import { Providers } from "@/app/providers";
+import { AppChrome } from "@/components/AppChrome";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -18,10 +20,10 @@ export default function RootLayout({
       dir="rtl"
       className={`${peyda.variable} ${peydaFanum.variable} ${rokh.variable} ${kaghaz.variable} antialiased`}
     >
-      <body
-        className={`min-h-dvh flex flex-col bg-background text-zinc-900 ${peydaFanum.className}`}
-      >
-        {children}
+      <body className={`min-h-dvh flex flex-col bg-background text-zinc-900 ${peydaFanum.className}`}>
+        <Providers>
+          <AppChrome>{children}</AppChrome>
+        </Providers>
       </body>
     </html>
   );

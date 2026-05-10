@@ -1,0 +1,62 @@
+---
+description: Social app (`@repo/social`) auth routes, API, tokens, redirects, and on-brand UI (no storefront pink).
+---
+
+# Social app authentication
+
+## Routes (mirror storefront public `/auth`, not account/super-admin)
+
+| Path | Role |
+|------|------|
+| `/auth` | Phone check → `/auth/login` or `/auth/register` |
+| `/auth/login` | Password login |
+| `/auth/login/otp` | OTP login |
+| `/auth/register` | OTP for new users |
+| `/auth/register/info` | Profile + password completion |
+| `/auth/forgot-password` | Request reset OTP |
+| `/auth/forgot-password/verify` | OTP + new password |
+
+Canonical entry: **`/auth`**.
+
+## Environment
+
+- **`NEXT_PUBLIC_API_BASE_URL`** — same Strapi API as storefront; must match backend deployment ([`packages/api` config](packages/api/src/config/public.ts)).
+- Optional: `NEXT_PUBLIC_STRAPI_TOKEN` for public reads (stories, etc.).
+
+## Tokens
+
+- **Access token:** `localStorage` key from `@repo/api/token` (default `accessToken`). Set via `setAccessToken()` after login/register/OTP.
+- **OTP flow:** `sessionStorage` `otpToken` (set by `AuthService.sendOTP`).
+- **`ApiClient`** in [`apps/social/src/lib/api-client.ts`](apps/social/src/lib/api-client.ts) attaches Bearer from storage on requests when not skipped.
+
+## Redirect query
+
+- **`?redirect=/some-path`** — preserved across auth steps where applicable; after successful session, navigate to that path if it is a same-origin path (starts with `/`). Social does **not** send users to storefront `/account` or `/super-admin`; default post-login is **`/`**.
+
+## State
+
+- **Jotai** shared store: [`apps/social/src/lib/jotaiStore.ts`](apps/social/src/lib/jotaiStore.ts), wrapped by `Provider` in [`apps/social/src/app/providers.tsx`](apps/social/src/app/providers.tsx).
+- Atoms: [`apps/social/src/lib/atoms/auth.ts`](apps/social/src/lib/atoms/auth.ts) (`currentUserAtom`, `userLoadingAtom`, `userErrorAtom`, `redirectUrlAtom`).
+- Phone gate: `phoneNumberAtom` in [`useCheckPhoneNumber`](apps/social/src/hooks/useCheckPhoneNumber.ts).
+
+## API surface
+
+- Endpoints: [`apps/social/src/lib/api-endpoints.ts`](apps/social/src/lib/api-endpoints.ts) — `AUTH.*`, `USER.ME`, `STORIES.*`.
+- Services: [`AuthService`](apps/social/src/services/auth/index.ts), [`UserService.me`](apps/social/src/services/user/me.ts).
+
+## UI / theming (social, not storefront pink)
+
+- Canvas: **`bg-background`** (`#F9FAFF`). Brand actions/focus: **`infinity-primary`** (`#3D4C6E`) — utilities `bg-infinity-primary`, `text-infinity-primary`, `ring-infinity-primary`, etc.
+- Do **not** reintroduce storefront **`pink-*`** / **`rose-*`** for auth chrome; shared patterns live in [`globals.css`](apps/social/src/app/globals.css) (`.card`, `.btn`, `.btn-primary`).
+- Auth layout: [`apps/social/src/app/auth/layout.tsx`](apps/social/src/app/auth/layout.tsx). Mobile bottom nav is hidden on `/auth/**` via [`AppChrome`](apps/social/src/components/AppChrome.tsx).
+
+## Differences vs storefront
+
+- No **cart** migration after login.
+- No redirects to **`/account`** or **`/super-admin`**.
+- Errors: **Persian** user messages via [`getUserFacingErrorMessage`](apps/social/src/utils/userErrorMessage.ts) / [`errorTranslations`](apps/social/src/lib/errorTranslations.ts).
+
+## Related
+
+- Shell spacing/header: [social-app-shell.mdc](social-app-shell.mdc)
+- Storefront auth reference: `apps/frontend/src/app/(public)/auth/`
