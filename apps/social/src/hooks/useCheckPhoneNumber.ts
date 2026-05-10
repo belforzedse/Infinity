@@ -3,7 +3,19 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { atom, useAtom } from "jotai";
+import type { ApiError } from "@repo/api";
 import { AuthService } from "@/services";
+
+function isApiError(err: unknown): err is ApiError {
+  return (
+    typeof err === "object" &&
+    err !== null &&
+    "message" in err &&
+    typeof (err as ApiError).message === "string" &&
+    "status" in err &&
+    typeof (err as ApiError).status === "number"
+  );
+}
 
 interface UseCheckPhoneNumberReturn {
   isLoading: boolean;
@@ -46,8 +58,14 @@ export function useCheckPhoneNumber(): UseCheckPhoneNumberReturn {
         router.push(`/auth/register${redirectQuery}`);
       }
     } catch (err) {
-      setError("خطا در بررسی شماره تلفن");
-      console.error(err);
+      setError(isApiError(err) ? err.message : "خطا در بررسی شماره تلفن");
+      if (isApiError(err)) {
+        console.error("checkPhoneNumber failed", { status: err.status, message: err.message });
+      } else if (err instanceof Error) {
+        console.error("checkPhoneNumber failed", err.message, err.stack);
+      } else {
+        console.error("checkPhoneNumber failed", err);
+      }
     } finally {
       setIsLoading(false);
     }

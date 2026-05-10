@@ -23,6 +23,10 @@ Canonical entry: **`/auth`**.
 - **`NEXT_PUBLIC_API_BASE_URL`** — same Strapi API as storefront; must match backend deployment ([`packages/api` config](packages/api/src/config/public.ts)).
 - Optional: `NEXT_PUBLIC_STRAPI_TOKEN` for public reads (stories, etc.).
 
+## CORS (local social on port 2890)
+
+Strapi [`config/middlewares.ts`](apps/backend/config/middlewares.ts) whitelists browser `Origin` values. The social app uses **`http://localhost:2890`** (and `127.0.0.1:2890`). If that origin is missing, preflight **OPTIONS** may return 200 while the **POST** is still blocked by the browser — auth appears stuck and `@repo/api` surfaces a generic error. After adding a new frontend dev port, extend `corsOrigins` the same way as storefront `2888`.
+
 ## Tokens
 
 - **Access token:** `localStorage` key from `@repo/api/token` (default `accessToken`). Set via `setAccessToken()` after login/register/OTP.

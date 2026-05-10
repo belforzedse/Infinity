@@ -1,6 +1,6 @@
 import { connection } from "next/server";
 import { Header } from "@/components/Header";
-import { StoriesRail } from "@/components/stories-rail";
+import { StoriesRail } from "@/components/StoriesRail";
 import { getActiveStories } from "@/services/story.service";
 
 export const revalidate = 60;

@@ -1,3 +1,10 @@
+/** Partial body for `PUT /auth/self` from the profile account form. */
+export type UpdateMePayload = {
+  FirstName?: string;
+  LastName?: string;
+  Phone?: string;
+};
+
 /** Current user from `GET /auth/self` (same shape as storefront `MeResponse`). */
 export interface MeResponse {
   Bio: string | null;

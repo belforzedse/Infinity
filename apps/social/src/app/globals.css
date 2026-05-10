@@ -5,6 +5,7 @@
 
 /* Ensure Tailwind sees shared UI in workspace packages (v4 content detection may not follow pnpm links). */
 @source "../../../../packages/brand/src/**/*.tsx";
+@source "../**/*.tsx";
 
 /* Light brand canvas only: do not tie to prefers-color-scheme (OS dark mode would override #F9FAFF). */
 :root {
@@ -35,13 +36,20 @@ body {
   color: var(--foreground);
 }
 
+@layer base {
+  /* Native buttons default to `cursor: default` in some resets; match clickable affordance app-wide. */
+  button:enabled {
+    cursor: pointer;
+  }
+}
+
 @layer components {
   .card {
     @apply rounded-2xl border border-slate-100 bg-white shadow-sm transition-all duration-300 hover:border-slate-200 hover:shadow-md;
   }
 
   .btn {
-    @apply text-sm inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary focus-visible:ring-offset-2 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60;
+    @apply cursor-pointer text-sm inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary focus-visible:ring-offset-2 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60;
   }
 
   .btn-primary {
@@ -59,6 +67,60 @@ body {
   }
   100% {
     transform: translateX(400%);
+  }
+}
+
+/* Kits/Modal — matches `tailwindcss-animate` enter/exit (see storefront Modal: `animate-in fade-in` + `zoom-in-95`, `duration-200`). */
+@keyframes infinity-modal-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes infinity-modal-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes infinity-modal-dialog-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) scale3d(0.95, 0.95, 1);
+  }
+}
+
+@keyframes infinity-modal-dialog-out {
+  to {
+    opacity: 0;
+    transform: translate3d(0, 0, 0) scale3d(0.95, 0.95, 1);
+  }
+}
+
+@layer components {
+  .infinity-modal-backdrop-enter {
+    animation: infinity-modal-fade-in 200ms ease both;
+  }
+
+  .infinity-modal-backdrop-exit {
+    animation: infinity-modal-fade-out 200ms ease both;
+  }
+
+  .infinity-modal-dialog-enter {
+    animation: infinity-modal-dialog-in 200ms ease both;
+  }
+
+  .infinity-modal-dialog-exit {
+    animation: infinity-modal-dialog-out 200ms ease both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .infinity-modal-backdrop-enter,
+    .infinity-modal-backdrop-exit,
+    .infinity-modal-dialog-enter,
+    .infinity-modal-dialog-exit {
+      animation: none;
+    }
   }
 }
 

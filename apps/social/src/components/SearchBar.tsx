@@ -38,7 +38,7 @@ export function SearchBar({
     >
       <span className="flex h-6 w-full flex-row items-center justify-end gap-1">
         <Search
-          className="shrink-0 text-[#A3A3A3]"
+          className="shrink-0 text-[#94A3B8]"
           size={24}
           strokeWidth={1.2}
           aria-hidden

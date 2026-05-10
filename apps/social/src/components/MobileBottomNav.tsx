@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
 import { Bookmark, Home, Search, User } from "lucide-react";
+import { useCurrentUser } from "@/hooks/use-current-user";
 
 const INFINITY_MARK_SRC = "/Infinity.svg";
 
@@ -76,9 +77,11 @@ function normalizePath(pathname: string | null): string {
 export function MobileBottomNav() {
   const pathname = usePathname();
   const path = normalizePath(pathname);
+  const { isAuthenticated } = useCurrentUser();
 
-  const isBookmarksActive = path === "/bookmarks";
-  const isProfileActive = path === "/profile";
+  const isBookmarksActive = path === "/profile/bookmarks" || path.startsWith("/profile/bookmarks/");
+  const profileHref = isAuthenticated ? "/profile" : "/auth";
+  const isProfileActive = isAuthenticated ? path === "/profile" : path.startsWith("/auth");
   const isSearchActive = path === "/search";
   const isHomeActive = path === "/";
 
@@ -92,14 +95,14 @@ export function MobileBottomNav() {
         >
           <div className="flex h-16 w-full flex-row items-center justify-between gap-[33px]">
             <NavTabLink
-              href="/bookmarks"
+              href="/profile/bookmarks"
               icon={Bookmark}
               active={isBookmarksActive}
               inactiveIconClassName="text-[#A3A3A3]"
               ariaLabel="نشان‌ها"
             />
             <NavTabLink
-              href="/profile"
+              href={profileHref}
               icon={User}
               active={isProfileActive}
               inactiveIconClassName="text-[#A49BA0]"

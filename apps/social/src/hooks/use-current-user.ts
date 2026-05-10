@@ -3,12 +3,14 @@
 import { useEffect, useState } from "react";
 import { apiClient } from "@/lib/api-client";
 import { ENDPOINTS } from "@/lib/api-endpoints";
+import { normalizeMeResponse } from "@/services/user/me";
 
 /**
- * Minimal session probe for story “seen” sync — same token + `/auth/self` pattern as storefront.
+ * Session probe + first name for UI (same token + `/auth/self` as storefront).
  */
 export function useCurrentUser() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [firstName, setFirstName] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -18,13 +20,21 @@ export function useCurrentUser() {
       const token = localStorage.getItem("accessToken");
       if (!token) {
         setIsAuthenticated(false);
+        setFirstName(null);
         return;
       }
       try {
-        await apiClient.get(ENDPOINTS.USER.ME, { cache: "no-store" });
-        if (!cancelled) setIsAuthenticated(true);
+        const response = await apiClient.get(ENDPOINTS.USER.ME, { cache: "no-store" });
+        const user = normalizeMeResponse(response);
+        if (!cancelled) {
+          setIsAuthenticated(true);
+          setFirstName(typeof user.FirstName === "string" ? user.FirstName : "");
+        }
       } catch {
-        if (!cancelled) setIsAuthenticated(false);
+        if (!cancelled) {
+          setIsAuthenticated(false);
+          setFirstName(null);
+        }
       }
     })();
 
@@ -33,5 +43,5 @@ export function useCurrentUser() {
     };
   }, []);
 
-  return { isAuthenticated };
+  return { isAuthenticated, firstName };
 }

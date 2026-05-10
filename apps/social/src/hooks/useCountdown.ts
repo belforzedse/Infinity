@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 
 interface UseCountdownReturn {
   timeLeft: string;
+  /** True while countdown is running (seconds &gt; 0). */
   isActive: boolean;
   startTimer: () => void;
   resetTimer: () => void;
@@ -11,35 +12,24 @@ interface UseCountdownReturn {
 
 export function useCountdown(initialSeconds: number = 120): UseCountdownReturn {
   const [seconds, setSeconds] = useState(initialSeconds);
-  const [isActive, setIsActive] = useState(true);
 
   const startTimer = useCallback(() => {
-    setIsActive(true);
     setSeconds(initialSeconds);
   }, [initialSeconds]);
 
   const resetTimer = useCallback(() => {
-    setIsActive(false);
     setSeconds(initialSeconds);
   }, [initialSeconds]);
 
+  const hasTimeLeft = seconds > 0;
+
   useEffect(() => {
-    let interval: ReturnType<typeof setInterval>;
-
-    if (isActive && seconds > 0) {
-      interval = setInterval(() => {
-        setSeconds((prev) => prev - 1);
-      }, 1000);
-    } else if (seconds === 0) {
-      setIsActive(false);
-    }
-
-    return () => {
-      if (interval) {
-        clearInterval(interval);
-      }
-    };
-  }, [isActive, seconds]);
+    if (!hasTimeLeft) return undefined;
+    const id = window.setInterval(() => {
+      setSeconds((prev) => (prev <= 1 ? 0 : prev - 1));
+    }, 1000);
+    return () => window.clearInterval(id);
+  }, [hasTimeLeft]);
 
   const timeLeft = `${Math.floor(seconds / 60)
     .toString()
@@ -50,7 +40,7 @@ export function useCountdown(initialSeconds: number = 120): UseCountdownReturn {
 
   return {
     timeLeft,
-    isActive,
+    isActive: hasTimeLeft,
     startTimer,
     resetTimer,
   };

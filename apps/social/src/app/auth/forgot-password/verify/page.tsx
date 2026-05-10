@@ -16,7 +16,10 @@ function VerifyContent() {
   const phoneNumber = queryParams.get("phoneNumber");
 
   const router = useRouter();
-  const [pendingPassword, setPendingPassword] = useState<string | null>(null);
+  const [pendingPassword] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return sessionStorage.getItem("pendingNewPassword");
+  });
 
   useEffect(() => {
     if (!phoneNumber) {
@@ -34,14 +37,6 @@ function VerifyContent() {
 
     void sendInitialOTP();
   }, [phoneNumber, router]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const stored = sessionStorage.getItem("pendingNewPassword");
-    if (stored) {
-      setPendingPassword(stored);
-    }
-  }, []);
 
   return (
     <div className="mx-auto w-full">

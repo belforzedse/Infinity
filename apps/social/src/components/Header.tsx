@@ -1,7 +1,14 @@
+"use client";
+
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import { StorefrontLogo } from "@repo/brand";
-import { Bell, Bookmark, User } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { Bell, Bookmark } from "lucide-react";
 import { SearchBar } from "@/components/SearchBar";
+import { HeaderProfileNav } from "@/components/HeaderProfileNav";
+
+const LG_BREAKPOINT_PX = 1024;
+const NEAR_TOP_SCROLL_Y = 80;
 
 function Divider() {
   return <span className="h-6 w-px shrink-0 bg-zinc-200" aria-hidden />;
@@ -9,14 +16,41 @@ function Divider() {
 
 /**
  * App shell header. Desktop: LTR grid search | logo | actions.
- * Mobile (&lt; lg): light canvas, same `StorefrontLogo` as desktop (smaller), centered; notifications only.
+ * Mobile (&lt; lg): frosted bar, same `StorefrontLogo` as desktop (smaller), centered; notifications only.
+ * Mobile: hides on scroll-down, shows on scroll-up or near top (aligned with storefront product layout).
  *
  * Icons: `lucide-react` (same stack as `@repo/frontend`).
  */
 export function Header() {
+  const [showHeader, setShowHeader] = useState(true);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentY = window.scrollY;
+
+      if (window.innerWidth >= LG_BREAKPOINT_PX) {
+        lastScrollY.current = currentY;
+        setShowHeader(true);
+        return;
+      }
+
+      const isScrollingUp = currentY <= lastScrollY.current;
+      const nearTop = currentY < NEAR_TOP_SCROLL_Y;
+      setShowHeader(isScrollingUp || nearTop);
+      lastScrollY.current = Math.max(0, currentY);
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
     <header
-      className="sticky top-0 z-20 bg-[#F8F9FB] text-zinc-700 lg:bg-background/90 lg:backdrop-blur-md"
+      className={`sticky top-0 z-50 transform bg-background/35 text-zinc-700 backdrop-blur-md transition-all duration-200 ${
+        showHeader ? "translate-y-0" : "-translate-y-full"
+      }`}
       dir="ltr"
     >
       {/* Mobile */}
@@ -29,7 +63,7 @@ export function Header() {
         <div className="relative z-10 ml-auto">
           <button
             type="button"
-            className="rounded-2xl bg-white p-2.5 text-infinity-primary shadow-sm transition-opacity hover:opacity-90"
+            className="rounded-2xl bg-white p-2.5 text-[#94A3B8] shadow-sm transition-colors hover:text-zinc-700"
             aria-label="اعلان‌ها"
           >
             <Bell size={20} strokeWidth={1.5} aria-hidden />
@@ -48,36 +82,23 @@ export function Header() {
         </div>
 
         <div className="flex min-w-0 items-center justify-end justify-self-end gap-3 sm:gap-4">
-          <button
-            type="button"
-            className="rounded-lg p-1.5 text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
+          <Link
+            href="/profile/bookmarks"
+            className="rounded-lg p-1.5 text-[#94A3B8] transition-colors hover:bg-zinc-100 hover:text-zinc-800"
             aria-label="نشان‌ها"
           >
             <Bookmark size={20} strokeWidth={1.5} aria-hidden />
-          </button>
+          </Link>
           <Divider />
           <button
             type="button"
-            className="rounded-lg p-1.5 text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
+            className="rounded-lg p-1.5 text-[#94A3B8] transition-colors hover:bg-zinc-100 hover:text-zinc-800"
             aria-label="اعلان‌ها"
           >
             <Bell size={20} strokeWidth={1.5} aria-hidden />
           </button>
           <Divider />
-          <Button
-            dir="rtl"
-            aria-label="پروفایل کاربر"
-            icon={
-              <User
-                size={20}
-                strokeWidth={1.2}
-                className="text-[#A49BA0]"
-                aria-hidden
-              />
-            }
-          >
-            <span className="max-w-[53px] truncate">کیمیای عزیز</span>
-          </Button>
+          <HeaderProfileNav />
         </div>
       </div>
     </header>

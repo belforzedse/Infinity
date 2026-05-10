@@ -5,6 +5,9 @@ const corsOrigins = [
   "https://infinitycolor.co",
   "http://localhost:2888",
   "http://127.0.0.1:2888",
+  // @repo/social (`next dev -p 2890`)
+  "http://localhost:2890",
+  "http://127.0.0.1:2890",
 ].filter((origin, i, arr) => arr.indexOf(origin) === i); // dedupe
 
 const allowedOriginsSet = new Set(corsOrigins);
