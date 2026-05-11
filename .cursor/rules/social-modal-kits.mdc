@@ -1,0 +1,24 @@
+---
+description: Social app modal primitives ported from storefront — portal dialog, confirm step, and Tailwind v4 content.
+---
+
+# Social `Kits` modal (`@repo/social`)
+
+## Files
+
+| File | Role |
+|------|------|
+| [`apps/social/src/components/Kits/Modal.tsx`](apps/social/src/components/Kits/Modal.tsx) | Portal + backdrop, Escape, focus trap, scroll lock. Motion aligns with storefront **`tailwindcss-animate`** (same enter shape: `translate3d` + `scale3d(0.95)`, `fade-in` + `zoom-in-95`, **200ms** + CSS default **`ease`**). **Phases:** `hidden` → one `rAF` → `entering` → `animationend` → `shown`; close → `exiting` → `animationend` → unmount. Keyframes live in [`globals.css`](apps/social/src/app/globals.css) (`.infinity-modal-*`). Reduced motion: skip enter/exit in JS; CSS also sets `animation: none` on those classes. |
+| [`apps/social/src/components/Kits/ConfirmDialog.tsx`](apps/social/src/components/Kits/ConfirmDialog.tsx) | Wraps `Modal`; RTL body; primary confirm uses `bg-infinity-primary`; action row uses `justify-start` so in page `dir="rtl"` the primary button sits on the **inline start** (right), matching storefront. |
+
+## Tailwind v4
+
+[`apps/social/src/app/globals.css`](apps/social/src/app/globals.css) includes `@source "../**/*.tsx"` so classes used only under `src/components/Kits` are scanned.
+
+## Usage
+
+- **Logout:** [`ProfileSidebar`](apps/social/src/components/profile/ProfileSidebar.tsx) opens `ConfirmDialog` then [`performLogout`](apps/social/src/utils/logout.ts) on confirm (storefront-aligned copy and behavior).
+
+## Related
+
+- Storefront reference: [`apps/frontend/src/components/Kits/Modal.tsx`](apps/frontend/src/components/Kits/Modal.tsx), [`ConfirmDialog`](apps/frontend/src/components/Kits/ConfirmDialog.tsx)

@@ -1,0 +1,40 @@
+---
+description: Social app `/profile` account layout, sidebar, form fields, and `GET/PUT /auth/self` mapping.
+---
+
+# Social profile account (`@repo/social`)
+
+## Routes
+
+| Path | Purpose |
+|------|---------|
+| `/profile` | Account form: نام، نام خانوادگی، شماره همراه |
+| `/profile/posts` | Placeholder «پست‌های من» (sidebar link target) |
+| `/profile/bookmarks` | «ذخیره‌شده‌ها» (bookmarks under profile layout) |
+| `/bookmarks` | Permanent redirect to `/profile/bookmarks` (legacy URL) |
+
+## Layout
+
+- [`apps/social/src/app/profile/layout.tsx`](apps/social/src/app/profile/layout.tsx) — `Header` + `max-w-[1280px]` shell ([`social-app-shell.mdc`](social-app-shell.mdc)). Desktop: `flex-row` with **[`ProfileSidebar`](apps/social/src/components/profile/ProfileSidebar.tsx) first in the DOM** so under `dir="rtl"` the sidebar sits on the **physical right**. Sidebar **`nav`** uses `dir="rtl"` + `justify-start` so rows anchor to the **inline start (right)**; each row is **icon → label** so the icon sits on the **right** of the text.
+- Child pages must not duplicate `Header`.
+
+## Sidebar
+
+- **Desktop (`lg`+):** Figma-sized card (`~281px` wide, `24px` radius, `0 0 14.7px` shadow). Nav links share **`py-[10px] px-[10px]`** so **active** (glass) and **inactive** rows stay aligned; **active** adds `glassDefaultCrossfadeSurface` with **`19px`** radius only. Items: اطلاعات کاربری (`/profile`, **exact**), پست‌های من (`/profile/posts`, prefix; **Infinity mark** in navy circle like home tab), ذخیره‌شده‌ها (`/profile/bookmarks`, prefix), خروج.
+- **Mobile (`<lg`):** The card sidebar is **hidden** (`hidden lg:block` on the desktop `<aside>`). A full-width **pill** [`Menu`](https://headlessui.com/react/menu) from **`@headlessui/react`** shows the **active** section (icon + label + chevron, `dir="rtl"`); **`MenuItems`** lists the same routes (with `router.push`) plus a separator and **خروج**. Shared routes and `isActive` logic: [`profile-nav-config.ts`](apps/social/src/components/profile/profile-nav-config.ts) (`PROFILE_NAV_ITEMS`, `isProfileNavActive`, `getActiveProfileNavItem`).
+- **Logout (both):** opens [`ConfirmDialog`](apps/social/src/components/Kits/ConfirmDialog.tsx) (storefront-aligned copy); confirm runs [`performLogout`](apps/social/src/utils/logout.ts) (clear auth atoms, OTP storage, token, hard-navigate to `/auth`).
+
+## Account form
+
+- [`apps/social/src/components/profile/ProfileAccountForm.tsx`](apps/social/src/components/profile/ProfileAccountForm.tsx) — client-only. Loads [`UserService.me()`](apps/social/src/services/user/me.ts); unauthenticated → `router.replace("/auth?redirect=/profile")`.
+- **Fields:** `FirstName`, `LastName`, `Phone` only (no email, no username on this screen). Inputs use [`SocialTextField`](apps/social/src/components/ui/SocialTextField.tsx) (48px height, 24px radius, shadow at rest, `#94A3B8` border on hover/focus, Peyda 14/24, placeholder `#A3A3A3`; width via `className`, e.g. `w-full`). **Phone** is `readOnly` (display-only; still sent on `PUT` from loaded state).
+- **Submit:** [`UserService.updateMe`](apps/social/src/services/user/me.ts) → `PUT /auth/self` with [`UpdateMePayload`](apps/social/src/types/user-me.ts). Phone normalized with [`normalizePhoneNumber`](apps/social/src/utils/auth.ts). Empty `Phone` string is sent when cleared; backend skips plugin phone update when normalized length is 0.
+- Success: toast + refresh [`currentUserAtom`](apps/social/src/lib/atoms/auth.ts) with the normalized `me` response.
+
+## API
+
+- Endpoint: [`ENDPOINTS.USER.ME`](apps/social/src/lib/api-endpoints.ts) — `GET` and `PUT` `/auth/self`. Response normalized with [`normalizeMeResponse`](apps/social/src/services/user/me.ts) (flat or `{ data }`).
+
+## Related
+
+- Auth tokens and redirects: [`social-auth-flow.mdc`](social-auth-flow.mdc)
