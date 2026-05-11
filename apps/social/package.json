@@ -11,10 +11,17 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
+    "@dnd-kit/core": "6.3.1",
+    "@dnd-kit/sortable": "10.0.0",
+    "@dnd-kit/utilities": "3.2.2",
     "@headlessui/react": "2.2.1",
     "@repo/api": "workspace:*",
     "@repo/brand": "workspace:*",
     "@repo/fonts": "workspace:*",
+    "@tiptap/extension-placeholder": "3.11.0",
+    "@tiptap/react": "3.11.0",
+    "@tiptap/starter-kit": "3.11.0",
+    "browser-image-compression": "2.0.2",
     "clsx": "2.1.1",
     "jotai": "2.12.2",
     "lucide-react": "0.542.0",

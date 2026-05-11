@@ -96,14 +96,14 @@ export function ProfileAccountForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="flex items-center gap-3">
-        <Button
+        <button
           type="button"
           onClick={() => router.back()}
-          className="lg:inline-flex size-9 shrink-0 items-center justify-center rounded-sm hidden "
+          className="hidden size-9 shrink-0 items-center justify-center rounded-sm bg-white text-zinc-700 shadow-[0_0_14.7px_rgba(0,0,0,0.04)] transition-colors hover:bg-zinc-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400/70 lg:inline-flex"
           aria-label="بازگشت"
         >
           <ChevronRight className="size-5 stroke-[1.5]" aria-hidden />
-        </Button>
+        </button>
         <h1 className="font-peyda text-lg font-semibold text-zinc-800">
           اطلاعات حساب کاربری
         </h1>

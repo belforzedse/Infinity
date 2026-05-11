@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
-import { Bookmark, Home, Search, User } from "lucide-react";
+import { Bookmark, Home, Plus, Search, User } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
 
 const INFINITY_MARK_SRC = "/Infinity.svg";
@@ -77,7 +77,7 @@ function normalizePath(pathname: string | null): string {
 export function MobileBottomNav() {
   const pathname = usePathname();
   const path = normalizePath(pathname);
-  const { isAuthenticated } = useCurrentUser();
+  const { isAuthenticated, canCreatePost } = useCurrentUser();
 
   const isBookmarksActive = path === "/profile/bookmarks" || path.startsWith("/profile/bookmarks/");
   const profileHref = isAuthenticated ? "/profile" : "/auth";
@@ -108,19 +108,29 @@ export function MobileBottomNav() {
               inactiveIconClassName="text-[#A49BA0]"
               ariaLabel="پروفایل"
             />
-            <Link
-              href="/"
-              className="flex size-16 shrink-0 items-center justify-center rounded-full bg-infinity-primary shadow-[0_0_5.8px_rgba(0,0,0,0.09)]"
-              aria-label="خانه اینفینیتی"
-            >
-              <img
-                src={INFINITY_MARK_SRC}
-                alt=""
-                width={49}
-                height={49}
-                className="size-[49px] object-contain"
-              />
-            </Link>
+            {canCreatePost ? (
+              <Link
+                href="/profile/posts/add"
+                className="flex size-16 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(180deg,#566D97_0%,#98BDFF_100%)] shadow-[0_0_5.8px_rgba(0,0,0,0.09)]"
+                aria-label="ایجاد پست جدید"
+              >
+                <Plus size={28} strokeWidth={1.5} className="text-white" aria-hidden />
+              </Link>
+            ) : (
+              <Link
+                href="/"
+                className="flex size-16 shrink-0 items-center justify-center rounded-full bg-infinity-primary shadow-[0_0_5.8px_rgba(0,0,0,0.09)]"
+                aria-label="خانه اینفینیتی"
+              >
+                <img
+                  src={INFINITY_MARK_SRC}
+                  alt=""
+                  width={49}
+                  height={49}
+                  className="size-[49px] object-contain"
+                />
+              </Link>
+            )}
             <NavTabLink
               href="/search"
               icon={Search}

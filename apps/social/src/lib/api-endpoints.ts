@@ -20,4 +20,12 @@ export const ENDPOINTS = {
     SEEN_MARK: "/story-seens/mark",
     SEEN_MINE: "/story-seens/mine",
   },
+  FILE: {
+    UPLOAD: "/upload",
+    DOWNLOAD: "/upload/files",
+  },
+  POSTS: {
+    LIST: "/posts",
+    CREATE: "/posts",
+  },
 } as const;

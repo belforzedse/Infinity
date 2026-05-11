@@ -57,6 +57,10 @@ export function ProfileSidebar() {
   const openLogoutConfirm = () => setShowLogoutConfirm(true);
   const closeLogoutConfirm = () => setShowLogoutConfirm(false);
 
+  if (pathname?.startsWith("/profile/posts/add")) {
+    return null;
+  }
+
   const activeItem = getActiveProfileNavItem(pathname);
 
   return (
