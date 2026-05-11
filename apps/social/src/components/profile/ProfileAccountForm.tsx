@@ -96,15 +96,17 @@ export function ProfileAccountForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="flex items-center gap-3">
-        <h1 className="font-peyda text-lg font-semibold text-zinc-800">اطلاعات حساب کاربری</h1>
-        <button
+        <Button
           type="button"
           onClick={() => router.back()}
-          className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#E8EEF9] to-[#D4E4FF] text-infinity-primary transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400/70"
+          className="lg:inline-flex size-9 shrink-0 items-center justify-center rounded-sm hidden "
           aria-label="بازگشت"
         >
           <ChevronRight className="size-5 stroke-[1.5]" aria-hidden />
-        </button>
+        </Button>
+        <h1 className="font-peyda text-lg font-semibold text-zinc-800">
+          اطلاعات حساب کاربری
+        </h1>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">

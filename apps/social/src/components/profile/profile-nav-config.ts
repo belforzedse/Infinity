@@ -11,7 +11,7 @@ export type ProfileNavItem = {
 
 export const PROFILE_NAV_ITEMS: readonly ProfileNavItem[] = [
   { href: "/profile", label: "اطلاعات کاربری", icon: "user", match: "exact" },
-  { href: "/profile/posts", label: "پست‌های من", icon: "infinity", match: "prefix" },
+  { href: "/profile/posts", label: "پست‌های اینفینیتی", icon: "infinity", match: "prefix" },
   {
     href: "/profile/bookmarks",
     label: "ذخیره‌شده‌ها",
