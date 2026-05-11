@@ -1,0 +1,26 @@
+---
+description: Strapi backend Sharp native module and Node version (pnpm override, typegen)
+globs: apps/backend/**/*
+alwaysApply: false
+---
+
+# Backend Sharp and Node
+
+## Problem
+
+`@strapi/plugin-upload` depends on **Sharp** for image processing. Older **Sharp 0.32.x** expects a legacy native layout (`build/Release/sharp-win32-x64.node`) and does not reliably install for **Node 22+**, which breaks `pnpm type:generate`, `strapi develop`, and any command that loads plugins.
+
+## Fix in this repo
+
+- Root [`package.json`](package.json) sets **`pnpm.overrides.sharp`** to **`0.34.5`** so every consumer (including Strapi) resolves the same Sharp. Sharp 0.34.x supports `^18.17.0 || ^20.3.0 || >=21.0.0` and uses **`@img/sharp-win32-x64`** (and siblings) for prebuilt binaries.
+- [`apps/backend/package.json`](apps/backend/package.json) declares **`sharp`** explicitly at **`0.34.5`** (aligned with the override).
+
+`pnpm` also lists **`sharp`** under **`onlyBuiltDependencies`** so install scripts run and native binaries are fetched.
+
+## Strapi engine warning
+
+Strapi 4.x still declares **`engines.node: <=20.x.x`**. You may see a pnpm **Unsupported engine** warning on Node 22; types and Sharp can work, but **Node 20 LTS** remains the safest choice for production and CI until Strapi officially supports newer Node.
+
+## After changing Sharp or Node
+
+From the monorepo root: `pnpm install`, then `pnpm --filter @repo/backend type:generate` (or `cd apps/backend && pnpm type:generate`).

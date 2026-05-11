@@ -1743,6 +1743,169 @@ export interface ApiPaymentGatewayPaymentGateway extends Schema.CollectionType {
   };
 }
 
+export interface ApiPostCommentLikePostCommentLike extends Schema.CollectionType {
+  collectionName: "post_comment_likes";
+  info: {
+    displayName: "PostCommentLike";
+    pluralName: "post-comment-likes";
+    singularName: "post-comment-like";
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<
+      "api::post-comment-like.post-comment-like",
+      "oneToOne",
+      "admin::user"
+    > &
+      Attribute.Private;
+    post_comment: Attribute.Relation<
+      "api::post-comment-like.post-comment-like",
+      "manyToOne",
+      "api::post-comment.post-comment"
+    >;
+    updatedAt: Attribute.DateTime;
+    updatedBy: Attribute.Relation<
+      "api::post-comment-like.post-comment-like",
+      "oneToOne",
+      "admin::user"
+    > &
+      Attribute.Private;
+    user: Attribute.Relation<
+      "api::post-comment-like.post-comment-like",
+      "manyToOne",
+      "plugin::users-permissions.user"
+    >;
+  };
+}
+
+export interface ApiPostCommentPostComment extends Schema.CollectionType {
+  collectionName: "post_comments";
+  info: {
+    description: "Threaded comments on posts with moderation support";
+    displayName: "Post Comment";
+    pluralName: "post-comments";
+    singularName: "post-comment";
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    Content: Attribute.Text &
+      Attribute.Required &
+      Attribute.SetMinMaxLength<{
+        maxLength: 2000;
+      }>;
+    createdAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<"api::post-comment.post-comment", "oneToOne", "admin::user"> &
+      Attribute.Private;
+    Date: Attribute.DateTime & Attribute.Required;
+    Name: Attribute.String &
+      Attribute.SetMinMaxLength<{
+        maxLength: 150;
+      }>;
+    parent_comment: Attribute.Relation<
+      "api::post-comment.post-comment",
+      "manyToOne",
+      "api::post-comment.post-comment"
+    >;
+    post: Attribute.Relation<"api::post-comment.post-comment", "manyToOne", "api::post.post">;
+    post_comment_likes: Attribute.Relation<
+      "api::post-comment.post-comment",
+      "oneToMany",
+      "api::post-comment-like.post-comment-like"
+    >;
+    replies: Attribute.Relation<
+      "api::post-comment.post-comment",
+      "oneToMany",
+      "api::post-comment.post-comment"
+    >;
+    Status: Attribute.Enumeration<["Pending", "Approved", "Rejected"]> &
+      Attribute.Required &
+      Attribute.DefaultTo<"Pending">;
+    updatedAt: Attribute.DateTime;
+    updatedBy: Attribute.Relation<"api::post-comment.post-comment", "oneToOne", "admin::user"> &
+      Attribute.Private;
+    user: Attribute.Relation<
+      "api::post-comment.post-comment",
+      "manyToOne",
+      "plugin::users-permissions.user"
+    >;
+  };
+}
+
+export interface ApiPostLikePostLike extends Schema.CollectionType {
+  collectionName: "post_likes";
+  info: {
+    displayName: "PostLike";
+    pluralName: "post-likes";
+    singularName: "post-like";
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<"api::post-like.post-like", "oneToOne", "admin::user"> &
+      Attribute.Private;
+    post: Attribute.Relation<"api::post-like.post-like", "manyToOne", "api::post.post">;
+    updatedAt: Attribute.DateTime;
+    updatedBy: Attribute.Relation<"api::post-like.post-like", "oneToOne", "admin::user"> &
+      Attribute.Private;
+    user: Attribute.Relation<
+      "api::post-like.post-like",
+      "manyToOne",
+      "plugin::users-permissions.user"
+    >;
+  };
+}
+
+export interface ApiPostPost extends Schema.CollectionType {
+  collectionName: "posts";
+  info: {
+    description: "Media posts with optional product links";
+    displayName: "Posts";
+    pluralName: "posts";
+    singularName: "post";
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    CoverImage: Attribute.Media<"images"> & Attribute.Required;
+    createdAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<"api::post.post", "oneToOne", "admin::user"> & Attribute.Private;
+    Description: Attribute.RichText & Attribute.Required;
+    Media: Attribute.Media<"images" | "videos", true> & Attribute.Required;
+    post_comments: Attribute.Relation<
+      "api::post.post",
+      "oneToMany",
+      "api::post-comment.post-comment"
+    >;
+    post_likes: Attribute.Relation<"api::post.post", "oneToMany", "api::post-like.post-like">;
+    ProductLink: Attribute.String &
+      Attribute.SetMinMaxLength<{
+        maxLength: 500;
+      }>;
+    Size: Attribute.Enumeration<["Small", "Medium", "Large", "X Large"]> & Attribute.Required;
+    Slug: Attribute.String &
+      Attribute.Required &
+      Attribute.Unique &
+      Attribute.SetMinMaxLength<{
+        maxLength: 150;
+      }>;
+    Title: Attribute.String &
+      Attribute.Required &
+      Attribute.SetMinMaxLength<{
+        maxLength: 255;
+      }>;
+    updatedAt: Attribute.DateTime;
+    updatedBy: Attribute.Relation<"api::post.post", "oneToOne", "admin::user"> & Attribute.Private;
+  };
+}
+
 export interface ApiProductCategoryContentProductCategoryContent extends Schema.CollectionType {
   collectionName: "product_category_contents";
   info: {
@@ -3310,6 +3473,10 @@ declare module "@strapi/types" {
       "api::order-log.order-log": ApiOrderLogOrderLog;
       "api::order.order": ApiOrderOrder;
       "api::payment-gateway.payment-gateway": ApiPaymentGatewayPaymentGateway;
+      "api::post-comment-like.post-comment-like": ApiPostCommentLikePostCommentLike;
+      "api::post-comment.post-comment": ApiPostCommentPostComment;
+      "api::post-like.post-like": ApiPostLikePostLike;
+      "api::post.post": ApiPostPost;
       "api::product-category-content.product-category-content": ApiProductCategoryContentProductCategoryContent;
       "api::product-category.product-category": ApiProductCategoryProductCategory;
       "api::product-faq.product-faq": ApiProductFaqProductFaq;

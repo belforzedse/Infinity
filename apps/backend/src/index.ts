@@ -119,6 +119,12 @@ const ROLE_PERMISSION_SPECS: Record<string, RolePermissionSpec> = {
       "api::blog-comment": {
         "blog-comment": READ_ACTIONS,
       },
+      "api::post": {
+        post: READ_ACTIONS,
+      },
+      "api::post-comment": {
+        "post-comment": READ_ACTIONS,
+      },
       "api::faq-category": {
         "faq-category": READ_ACTIONS,
       },
@@ -150,6 +156,15 @@ const ROLE_PERMISSION_SPECS: Record<string, RolePermissionSpec> = {
       },
       "api::product-like": {
         "product-like": ["toggleFavorite", "getUserLikes"],
+      },
+      "api::post-like": {
+        "post-like": ["toggle", "getUserLikes"],
+      },
+      "api::post-comment": {
+        "post-comment": ["create", "update", "delete"],
+      },
+      "api::post-comment-like": {
+        "post-comment-like": ["toggle"],
       },
       "api::product-stock": {
         "product-stock": READ_ACTIONS,
@@ -245,6 +260,13 @@ const STORE_MANAGER_RESTRICTED_CONTROLLERS: RestrictedController[] = [
   { typeKey: "api::blog-comment", controller: "blog-comment", allowActions: READ_ACTIONS },
   // Allow store managers to update site settings used by the super-admin customization pages.
   { typeKey: "api::settings", controller: "settings", allowActions: ["find", "update"] },
+];
+
+const EDITOR_RESTRICTED_CONTROLLERS: RestrictedController[] = [
+  { typeKey: "api::post", controller: "post", allowActions: READ_ACTIONS },
+  { typeKey: "api::post-comment", controller: "post-comment", allowActions: READ_ACTIONS },
+  { typeKey: "api::post-like", controller: "post-like", allowActions: [] },
+  { typeKey: "api::post-comment-like", controller: "post-comment-like", allowActions: [] },
 ];
 
 /**
@@ -360,6 +382,7 @@ function getDefaultPermissions(strapi: Strapi, roleType: string): Record<string,
           restriction.typeKey !== "api::settings"
       );
       applyRestrictedControllers(tree, editorRestrictions, strapi);
+      applyRestrictedControllers(tree, EDITOR_RESTRICTED_CONTROLLERS, strapi);
     }
     return tree;
   }
