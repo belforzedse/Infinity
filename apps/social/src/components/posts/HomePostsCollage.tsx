@@ -5,10 +5,7 @@ import { useCallback, useMemo, useState } from "react";
 import { Layers2, Video } from "lucide-react";
 import { InfinityMarkCircle } from "@/components/InfinityMarkCircle";
 import { PostCard, toMobilePostCardVariant } from "@/components/posts/PostCard";
-import {
-  HOME_COLLAGE_SUBLG_MOBILE_LG_MAX_PX,
-  type DesktopPostCardVariant,
-} from "@/components/posts/post-card-variants";
+import type { DesktopPostCardVariant } from "@/components/posts/post-card-variants";
 import type { HomeFeedCardOverlay, HomeFeedPost } from "@/services/feed-post.service";
 import { useIsLgUp } from "@/components/posts/use-is-lg-up";
 
@@ -57,8 +54,8 @@ export type HomePostsCollageProps = {
 };
 
 /**
- * Homepage «پست ها»: **`lg`+** — 6-column dense grid. Below **`lg`**: **`grid-cols-2 md:grid-cols-3`** so tablets
- * fit **three** small tiles per row; **`mobile-lg`** spans **`col-span-2 md:col-span-3`** with a modest max width cap.
+ * Homepage «پست ها»: **`lg`+** — 6-column dense grid. Below **`lg`**: dense tablet tracks
+ * let later small cards backfill around large cards instead of leaving open rows.
  */
 export function HomePostsCollage({ posts }: HomePostsCollageProps) {
   const isLgUp = useIsLgUp();
@@ -155,14 +152,11 @@ export function HomePostsCollage({ posts }: HomePostsCollageProps) {
           </div>
         </div>
       ) : (
-        <div className="grid w-full min-w-0 grid-cols-2 gap-x-2 gap-y-2 auto-rows-auto md:grid-cols-3 md:gap-x-2 md:gap-y-2">
+        <div className="grid w-full min-w-0 grid-flow-dense grid-cols-2 gap-x-2 gap-y-2 auto-rows-auto sm:grid-cols-3 md:grid-cols-4 md:gap-x-2 md:gap-y-2 min-[900px]:grid-cols-5">
           {mobileCards.map((post) =>
             post.variant === "mobile-lg" ? (
-              <div key={post.id} className="col-span-2 flex min-w-0 justify-center md:col-span-3">
-                <div
-                  className="w-full min-w-0"
-                  style={{ maxWidth: HOME_COLLAGE_SUBLG_MOBILE_LG_MAX_PX }}
-                >
+              <div key={post.id} className="col-span-2 flex min-w-0 justify-center sm:row-span-2">
+                <div className="w-full min-w-0">
                   <PostCard
                     variant={post.variant}
                     widthMode="fluid"

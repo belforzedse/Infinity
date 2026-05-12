@@ -8,7 +8,6 @@ import { POST_CARD_LAYOUTS, fluidMaxWidthCapPx, type PostCardVariant } from "@/c
 
 export type { PostCardVariant, DesktopPostCardVariant } from "@/components/posts/post-card-variants";
 export {
-  HOME_COLLAGE_SUBLG_MOBILE_LG_MAX_PX,
   POST_CARD_LAYOUTS,
   POST_CARD_FLUID_MAX_EXTRA_PX,
   fluidMaxWidthCapPx,

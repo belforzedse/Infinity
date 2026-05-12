@@ -1,6 +1,5 @@
 import {
   fluidMaxWidthCapPx,
-  HOME_COLLAGE_SUBLG_MOBILE_LG_MAX_PX,
   POST_CARD_LAYOUTS,
 } from "@/components/posts/post-card-variants";
 
@@ -58,22 +57,22 @@ export function HomePostsCollageSkeleton() {
         پست ها
       </h2>
 
-      {/* Tablet / mobile: 2 cols phone, 3 cols md–lg; capped large row */}
+      {/* Tablet / mobile: dense sub-lg tracks let small cards fill around larger cards. */}
       <div
-        className="grid w-full min-w-0 grid-cols-2 gap-x-2 gap-y-2 md:grid-cols-3 md:gap-x-2 md:gap-y-2 lg:hidden"
+        className="grid w-full min-w-0 grid-flow-dense grid-cols-2 gap-x-2 gap-y-2 sm:grid-cols-3 md:grid-cols-4 md:gap-x-2 md:gap-y-2 min-[900px]:grid-cols-5 lg:hidden"
         dir="ltr"
       >
-        {Array.from({ length: 3 }, (_, i) => (
+        {Array.from({ length: 4 }, (_, i) => (
           <div key={`sk-sm-a-${i}`} className="min-w-0 w-full">
             <CardPulseShell aspectW={SM.widthPx} aspectH={SM.imageHeightPx} />
           </div>
         ))}
-        <div className="col-span-2 flex min-w-0 justify-center md:col-span-3">
-          <div className="w-full min-w-0" style={{ maxWidth: HOME_COLLAGE_SUBLG_MOBILE_LG_MAX_PX }}>
+        <div className="col-span-2 flex min-w-0 justify-center sm:row-span-2">
+          <div className="w-full min-w-0">
             <CardPulseShell aspectW={LG.widthPx} aspectH={LG.imageHeightPx} />
           </div>
         </div>
-        {Array.from({ length: 3 }, (_, i) => (
+        {Array.from({ length: 5 }, (_, i) => (
           <div key={`sk-sm-b-${i}`} className="min-w-0 w-full">
             <CardPulseShell aspectW={SM.widthPx} aspectH={SM.imageHeightPx} />
           </div>

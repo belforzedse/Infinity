@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { StorefrontLogo } from "@repo/brand";
-import { Bell, Bookmark } from "lucide-react";
+import { Bell, Bookmark, User } from "lucide-react";
 import { SearchBar } from "@/components/SearchBar";
 import { HeaderProfileNav } from "@/components/HeaderProfileNav";
+import { useCurrentUser } from "@/hooks/use-current-user";
 
 const LG_BREAKPOINT_PX = 1024;
 const NEAR_TOP_SCROLL_Y = 80;
@@ -24,6 +25,20 @@ function Divider() {
 export function Header() {
   const [showHeader, setShowHeader] = useState(true);
   const lastScrollY = useRef(0);
+  const { canCreatePost } = useCurrentUser();
+
+  const leadingAction = canCreatePost
+    ? {
+        href: "/profile",
+        label: "پروفایل",
+        icon: User,
+      }
+    : {
+        href: "/profile/bookmarks",
+        label: "نشان‌ها",
+        icon: Bookmark,
+      };
+  const LeadingActionIcon = leadingAction.icon;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -83,11 +98,11 @@ export function Header() {
 
         <div className="flex min-w-0 items-center justify-end justify-self-end gap-3 sm:gap-4">
           <Link
-            href="/profile/bookmarks"
+            href={leadingAction.href}
             className="rounded-lg p-1.5 text-[#94A3B8] transition-colors hover:bg-zinc-100 hover:text-zinc-800"
-            aria-label="نشان‌ها"
+            aria-label={leadingAction.label}
           >
-            <Bookmark size={20} strokeWidth={1.5} aria-hidden />
+            <LeadingActionIcon size={20} strokeWidth={1.5} aria-hidden />
           </Link>
           <Divider />
           <button

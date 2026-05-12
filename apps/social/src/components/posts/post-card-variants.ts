@@ -36,12 +36,6 @@ export function fluidMaxWidthCapPx(variant: PostCardVariant): number {
 }
 
 /**
- * Below Tailwind **`lg`**, home collage **`mobile-lg`** row: max width for the tile (centered).
- * Kept modest so large posts do not dominate tablet height; small posts use **`md:grid-cols-3`** for density.
- */
-export const HOME_COLLAGE_SUBLG_MOBILE_LG_MAX_PX = 420;
-
-/**
  * Maps a desktop post size to the mobile `PostCard` variant:
  * - `xl` → `mobile-lg`
  * - `sm` → `mobile-sm`
