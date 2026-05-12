@@ -57,7 +57,7 @@ export function ProfileSidebar() {
   const openLogoutConfirm = () => setShowLogoutConfirm(true);
   const closeLogoutConfirm = () => setShowLogoutConfirm(false);
 
-  if (pathname?.startsWith("/profile/posts/add")) {
+  if (pathname?.startsWith("/profile/posts/add") || pathname?.startsWith("/profile/posts/edit")) {
     return null;
   }
 

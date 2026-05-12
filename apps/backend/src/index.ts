@@ -220,6 +220,13 @@ if (CONTENT_API_ALLOW_ALL) {
   });
 }
 
+function shouldStartBackgroundJobs() {
+  const argv = process.argv.join(" ");
+  const disabled = String(process.env.DISABLE_BACKGROUND_JOBS || "false").toLowerCase() === "true";
+  const isBuildCommand = /\b(build|ts:generate-types|generate-types)\b/.test(argv);
+  return !disabled && !isBuildCommand;
+}
+
 type RestrictedController = {
   typeKey: string;
   controller: string;
@@ -542,20 +549,24 @@ export default {
     ensureIranLocations(strapi).catch((err) => {
       strapi.log.error("Failed to ensure province/city seed", err);
     });
-    try {
-      startExpireStockReservationsJob(strapi);
-    } catch (error) {
-      strapi.log.error("Failed to start expire stock reservations job", error);
-    }
-    try {
-      startExpireReserveOrdersJob(strapi);
-    } catch (error) {
-      strapi.log.error("Failed to start expire reserve orders job", error);
-    }
-    try {
-      startFlushViewCountersJob(strapi);
-    } catch (error) {
-      strapi.log.error("Failed to start flush view counters job", error);
+    if (shouldStartBackgroundJobs()) {
+      try {
+        startExpireStockReservationsJob(strapi);
+      } catch (error) {
+        strapi.log.error("Failed to start expire stock reservations job", error);
+      }
+      try {
+        startExpireReserveOrdersJob(strapi);
+      } catch (error) {
+        strapi.log.error("Failed to start expire reserve orders job", error);
+      }
+      try {
+        startFlushViewCountersJob(strapi);
+      } catch (error) {
+        strapi.log.error("Failed to start flush view counters job", error);
+      }
+    } else {
+      strapi.log.info("Background jobs skipped for build/type-generation command");
     }
     // Migrate any existing local-users to plugin users by creating a bridge (idempotent)
     (async function migrateLocalUsers() {

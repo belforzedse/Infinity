@@ -18,12 +18,17 @@ import {
   Link as LinkIcon,
   List,
   ListOrdered,
+  Palette,
   Quote,
   Underline as UnderlineIcon,
   Unlink,
+  X,
 } from "lucide-react";
+import { useEffect, useReducer, type ReactNode } from "react";
 import { EditorContent, useEditor, type Editor } from "@tiptap/react";
+import Color from "@tiptap/extension-color";
 import StarterKit from "@tiptap/starter-kit";
+import { TextStyle } from "@tiptap/extension-text-style";
 import Placeholder from "@tiptap/extension-placeholder";
 
 function cx(...parts: (string | false | undefined)[]): string {
@@ -71,6 +76,8 @@ export function CaptionEditor({ value, onChange, placeholder, disabled }: Captio
         placeholder: placeholder ?? DEFAULT_PLACEHOLDER,
         emptyEditorClass: "is-editor-empty",
       }),
+      TextStyle,
+      Color,
     ],
     content: value,
     editable: !disabled,
@@ -118,9 +125,59 @@ const buttonBaseClass = cx(
   "disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent",
 );
 
-const buttonActiveClass = "bg-[rgba(140,174,236,0.18)] text-[#3D4C6E] hover:bg-[rgba(140,174,236,0.28)]";
+const buttonActiveClass = "text-[#3D4C6E]";
+
+const activeButtonStyle = {
+  backgroundColor: "rgba(140, 174, 236, 0.26)",
+  boxShadow: "inset 0 0 0 1px rgba(61, 76, 110, 0.18)",
+};
+
+const captionTextColors = [
+  "#18181b",
+  "#3d4c6e",
+  "#dc2626",
+  "#ea580c",
+  "#16a34a",
+  "#2563eb",
+  "#7e22ce",
+  "#0891b2",
+];
+
+const isHexColor = (value: string): boolean => /^#[0-9a-f]{6}$/i.test(value);
 
 function CaptionToolbar({ editor, disabled }: CaptionToolbarProps) {
+  const [, forceUpdate] = useReducer((value) => value + 1, 0);
+
+  useEffect(() => {
+    let frameId: number | null = null;
+
+    const refreshToolbarState = () => {
+      if (frameId !== null) {
+        return;
+      }
+
+      frameId = requestAnimationFrame(() => {
+        frameId = null;
+        forceUpdate();
+      });
+    };
+
+    editor.on("selectionUpdate", refreshToolbarState);
+    editor.on("transaction", refreshToolbarState);
+
+    return () => {
+      editor.off("selectionUpdate", refreshToolbarState);
+      editor.off("transaction", refreshToolbarState);
+
+      if (frameId !== null) {
+        cancelAnimationFrame(frameId);
+      }
+    };
+  }, [editor]);
+
+  const currentTextColor = (editor.getAttributes("textStyle").color as string | undefined) ?? "";
+  const colorInputValue = isHexColor(currentTextColor) ? currentTextColor : "#3d4c6e";
+
   const setLink = () => {
     const previous = editor.getAttributes("link").href as string | undefined;
     const next = typeof window === "undefined" ? null : window.prompt("آدرس لینک:", previous ?? "");
@@ -209,6 +266,62 @@ function CaptionToolbar({ editor, disabled }: CaptionToolbarProps) {
       >
         <Unlink className="size-4 stroke-[1.8]" aria-hidden />
       </ToolbarButton>
+
+      <span className="mx-1 h-5 w-px bg-zinc-200" aria-hidden />
+
+      <div className="flex flex-row items-center gap-1">
+        <label
+          className={cx(
+            buttonBaseClass,
+            "relative overflow-hidden",
+            disabled && "pointer-events-none opacity-40",
+          )}
+          title="انتخاب رنگ متن"
+          aria-label="انتخاب رنگ متن"
+        >
+          <Palette className="size-4 stroke-[1.8]" aria-hidden />
+          <input
+            type="color"
+            value={colorInputValue}
+            disabled={disabled}
+            onInput={(event) =>
+              editor.chain().focus().setColor((event.target as HTMLInputElement).value).run()
+            }
+            className="absolute inset-0 cursor-pointer opacity-0 disabled:cursor-not-allowed"
+          />
+        </label>
+
+        <div className="flex flex-row items-center gap-1 rounded-lg bg-zinc-50 px-1 py-1">
+          {captionTextColors.map((color) => {
+            const selected = currentTextColor.toLowerCase() === color;
+
+            return (
+              <button
+                key={color}
+                type="button"
+                disabled={disabled}
+                onClick={() => editor.chain().focus().setColor(color).run()}
+                className="h-6 w-6 rounded-full border border-white shadow-sm transition-transform hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400/70 disabled:cursor-not-allowed disabled:opacity-40"
+                style={{
+                  backgroundColor: color,
+                  boxShadow: selected
+                    ? "0 0 0 2px #ffffff, 0 0 0 4px rgba(61, 76, 110, 0.55)"
+                    : undefined,
+                }}
+                aria-label={`انتخاب رنگ متن ${color}`}
+                aria-pressed={selected}
+              />
+            );
+          })}
+          <ToolbarButton
+            disabled={disabled || !currentTextColor}
+            aria-label="حذف رنگ متن"
+            onClick={() => editor.chain().focus().unsetColor().run()}
+          >
+            <X className="size-3.5 stroke-[1.9]" aria-hidden />
+          </ToolbarButton>
+        </div>
+      </div>
     </div>
   );
 }
@@ -218,7 +331,7 @@ type ToolbarButtonProps = {
   disabled?: boolean;
   onClick: () => void;
   "aria-label": string;
-  children: React.ReactNode;
+  children: ReactNode;
 };
 
 function ToolbarButton({ active, disabled, onClick, children, ...rest }: ToolbarButtonProps) {
@@ -228,6 +341,8 @@ function ToolbarButton({ active, disabled, onClick, children, ...rest }: Toolbar
       disabled={disabled}
       onClick={onClick}
       className={cx(buttonBaseClass, active && buttonActiveClass)}
+      style={active ? activeButtonStyle : undefined}
+      data-active={active ? "true" : undefined}
       aria-pressed={active}
       {...rest}
     >

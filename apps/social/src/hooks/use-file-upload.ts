@@ -31,15 +31,22 @@ export type CoverUploadController = {
   isUploading: boolean;
   hasMedia: boolean;
   setFile: (file: File) => void;
+  setExisting: (media: ExistingUploadedMedia | null) => void;
   clear: () => void;
   /** Resolves with the uploaded media id (uploading if not already done). */
   upload: () => Promise<number>;
 };
 
-export function useCoverUpload(): CoverUploadController {
+export type ExistingUploadedMedia = {
+  id: number;
+  preview: string;
+  isVideo?: boolean;
+};
+
+export function useCoverUpload(initialMedia?: ExistingUploadedMedia | null): CoverUploadController {
   const [file, setFileState] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
-  const [uploadedId, setUploadedId] = useState<number | null>(null);
+  const [preview, setPreview] = useState<string | null>(initialMedia?.preview ?? null);
+  const [uploadedId, setUploadedId] = useState<number | null>(initialMedia?.id ?? null);
   const [isUploading, setIsUploading] = useState(false);
 
   useEffect(
@@ -56,6 +63,15 @@ export function useCoverUpload(): CoverUploadController {
     });
     setFileState(next);
     setUploadedId(null);
+  }, []);
+
+  const setExisting = useCallback((media: ExistingUploadedMedia | null) => {
+    setPreview((prev) => {
+      revokeIfBlob(prev);
+      return media?.preview ?? null;
+    });
+    setFileState(null);
+    setUploadedId(media?.id ?? null);
   }, []);
 
   const clear = useCallback(() => {
@@ -87,8 +103,9 @@ export function useCoverUpload(): CoverUploadController {
     preview,
     uploadedId,
     isUploading,
-    hasMedia: file != null,
+    hasMedia: file != null || uploadedId != null,
     setFile,
+    setExisting,
     clear,
     upload,
   };
@@ -97,7 +114,7 @@ export function useCoverUpload(): CoverUploadController {
 export type GalleryItem = {
   /** Stable id for `@dnd-kit/sortable` `SortableContext`. */
   id: string;
-  file: File;
+  file: File | null;
   preview: string;
   uploadedId: number | null;
   /**
@@ -112,6 +129,7 @@ export type GalleryUploadController = {
   isUploading: boolean;
   hasMedia: boolean;
   add: (files: readonly File[]) => void;
+  setExisting: (media: readonly ExistingUploadedMedia[]) => void;
   remove: (id: string) => void;
   reorder: (fromIndex: number, toIndex: number) => void;
   /** Resolves with all media ids in current display order. */
@@ -124,8 +142,18 @@ function nextGalleryItemId(): string {
   return `g${Date.now().toString(36)}-${galleryItemSeq}`;
 }
 
-export function useGalleryUpload(): GalleryUploadController {
-  const [items, setItems] = useState<GalleryItem[]>([]);
+function existingGalleryItem(media: ExistingUploadedMedia): GalleryItem {
+  return {
+    id: `existing-${media.id}`,
+    file: null,
+    preview: media.preview,
+    uploadedId: media.id,
+    isVideo: media.isVideo === true,
+  };
+}
+
+export function useGalleryUpload(initialMedia: readonly ExistingUploadedMedia[] = []): GalleryUploadController {
+  const [items, setItems] = useState<GalleryItem[]>(() => initialMedia.map(existingGalleryItem));
   const [isUploading, setIsUploading] = useState(false);
   const itemsRef = useRef<GalleryItem[]>(items);
   itemsRef.current = items;
@@ -151,6 +179,15 @@ export function useGalleryUpload(): GalleryUploadController {
     setItems((prev) => [...prev, ...next]);
   }, []);
 
+  const setExisting = useCallback((media: readonly ExistingUploadedMedia[]) => {
+    setItems((prev) => {
+      for (const it of prev) {
+        revokeIfBlob(it.preview);
+      }
+      return media.map(existingGalleryItem);
+    });
+  }, []);
+
   const remove = useCallback((id: string) => {
     setItems((prev) => {
       const target = prev.find((it) => it.id === id);
@@ -172,6 +209,7 @@ export function useGalleryUpload(): GalleryUploadController {
       const ids = await Promise.all(
         snapshot.map(async (item) => {
           if (item.uploadedId != null) return item.uploadedId;
+          if (!item.file) throw new Error("یکی از فایل های گالری آماده آپلود نیست.");
           const records = await UploadService.uploadFile(item.file);
           const first = records[0];
           if (!first) throw new Error("یکی از تصاویر گالری آپلود نشد.");
@@ -195,6 +233,7 @@ export function useGalleryUpload(): GalleryUploadController {
       isUploading,
       hasMedia: items.length > 0,
       add,
+      setExisting,
       remove,
       reorder,
       uploadAll,

@@ -26,7 +26,55 @@ function isExplicitlyEmptyRelation(value: any): boolean {
   return false;
 }
 
-export default factories.createCoreController("api::post.post", () => ({
+function toArray(value: any): any[] {
+  if (!value) return [];
+  if (Array.isArray(value)) return value;
+  if (Array.isArray(value.data)) return value.data;
+  return [value.data || value];
+}
+
+function relationId(value: any): number | null {
+  if (!value) return null;
+  const raw = typeof value === "object" ? value.id : value;
+  const id = Number(raw);
+  return Number.isFinite(id) ? id : null;
+}
+
+function collectPostMediaIds(post: any): number[] {
+  const ids = new Set<number>();
+  const coverId = relationId(post?.CoverImage);
+  if (coverId != null) ids.add(coverId);
+
+  toArray(post?.Media).forEach((media) => {
+    const id = relationId(media);
+    if (id != null) ids.add(id);
+  });
+
+  return [...ids];
+}
+
+async function deleteByIds(strapi: any, uid: string, ids: number[]) {
+  if (ids.length === 0) return;
+  await strapi.db.query(uid).deleteMany({ where: { id: { $in: ids } } });
+}
+
+async function deleteUploadFiles(strapi: any, mediaIds: number[]) {
+  if (mediaIds.length === 0) return;
+  const uploadService = strapi.plugin("upload").service("upload");
+
+  for (const mediaId of mediaIds) {
+    try {
+      const file = await strapi.entityService.findOne("plugin::upload.file", mediaId);
+      if (file) {
+        await uploadService.remove(file);
+      }
+    } catch (error) {
+      strapi.log.error("Failed to delete post upload file", { mediaId, error });
+    }
+  }
+}
+
+export default factories.createCoreController("api::post.post", ({ strapi }) => ({
   async create(ctx: any) {
     const data = ctx.request.body?.data || {};
 
@@ -72,5 +120,62 @@ export default factories.createCoreController("api::post.post", () => ({
     }
 
     return await super.update(ctx);
+  },
+
+  async delete(ctx: any) {
+    const id = Number(ctx.params?.id);
+    if (!Number.isFinite(id)) {
+      return ctx.badRequest("Post ID is invalid");
+    }
+
+    const post = await strapi.entityService.findOne("api::post.post", id, {
+      populate: ["CoverImage", "Media"],
+    });
+
+    if (!post) {
+      return ctx.notFound("Post not found");
+    }
+
+    const mediaIds = collectPostMediaIds(post);
+
+    const comments = await strapi.entityService.findMany("api::post-comment.post-comment", {
+      filters: { post: { id } },
+      fields: ["id"],
+      pagination: { page: 1, pageSize: 10000 },
+    });
+    const commentIds = comments.map((comment: any) => comment.id).filter(Boolean);
+
+    if (commentIds.length > 0) {
+      const commentLikes = await strapi.entityService.findMany(
+        "api::post-comment-like.post-comment-like",
+        {
+          filters: { post_comment: { id: { $in: commentIds } } },
+          fields: ["id"],
+          pagination: { page: 1, pageSize: 10000 },
+        },
+      );
+      await deleteByIds(
+        strapi,
+        "api::post-comment-like.post-comment-like",
+        commentLikes.map((like: any) => like.id).filter(Boolean),
+      );
+      await deleteByIds(strapi, "api::post-comment.post-comment", commentIds);
+    }
+
+    const postLikes = await strapi.entityService.findMany("api::post-like.post-like", {
+      filters: { post: { id } },
+      fields: ["id"],
+      pagination: { page: 1, pageSize: 10000 },
+    });
+    await deleteByIds(
+      strapi,
+      "api::post-like.post-like",
+      postLikes.map((like: any) => like.id).filter(Boolean),
+    );
+
+    const deletedPost = await strapi.entityService.delete("api::post.post", id);
+    await deleteUploadFiles(strapi, mediaIds);
+
+    return { data: deletedPost };
   },
 }));
