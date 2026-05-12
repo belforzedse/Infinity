@@ -3,38 +3,38 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ArrowRight } from "lucide-react";
+import {
+  COVER_ASPECT_BY_CODE,
+  SIZE_PICKER_MOBILE_PREVIEW,
+  type PostCreateSizeCode,
+} from "@/components/posts/post-size-config";
 import { Button } from "@/components/ui/Button";
 
-type SizeValue = "xl" | "l" | "m" | "s";
-
-type Dimensions = { w: number; h: number };
-
 type SizeOption = {
-  value: SizeValue;
+  value: PostCreateSizeCode;
   label: string;
-  desktop: Dimensions;
-  /**
-   * Mobile dimensions. `null` means the option is hidden on mobile (only XL
-   * and S are surfaced on mobile per product spec, so users get a fast pick
-   * between "fullscreen" and "thumbnail" without scrolling through every
-   * intermediate ratio).
-   */
-  mobile: Dimensions | null;
+  /** Desktop picker box (matches `POST_CARD_LAYOUTS` image area). */
+  desktop: { w: number; h: number };
+  /** Mobile picker box (`xl` uses `mobile-lg` width scale). */
+  mobile: { w: number; h: number };
 };
 
 /**
- * Card metadata, ordered largest → smallest. In an RTL container the first
- * item lands on the right, so XL renders rightmost on desktop (matches mock).
- * Mobile shows only XL + S stacked top-to-bottom; mobile XL is scaled to
- * **360 wide** (preserving aspect ratio → 360×508) so it fits a 360px viewport.
- * S keeps its desktop pixels on mobile (180×260) so the relative-size
- * hierarchy still reads at a glance.
+ * XL (right in RTL flex) then SM. Pixels from `post-size-config.ts` (`COVER_ASPECT_BY_CODE`).
  */
 const SIZE_OPTIONS: readonly SizeOption[] = [
-  { value: "xl", label: "ایکس لارج", desktop: { w: 380, h: 536 }, mobile: { w: 360, h: 508 } },
-  { value: "l", label: "لارج", desktop: { w: 280, h: 464 }, mobile: null },
-  { value: "m", label: "مدیوم", desktop: { w: 280, h: 260 }, mobile: null },
-  { value: "s", label: "اسمال", desktop: { w: 180, h: 260 }, mobile: { w: 180, h: 260 } },
+  {
+    value: "xl",
+    label: "ایکس لارج",
+    desktop: COVER_ASPECT_BY_CODE.xl,
+    mobile: SIZE_PICKER_MOBILE_PREVIEW.xl,
+  },
+  {
+    value: "sm",
+    label: "اسمال",
+    desktop: COVER_ASPECT_BY_CODE.sm,
+    mobile: SIZE_PICKER_MOBILE_PREVIEW.sm,
+  },
 ] as const;
 
 const PARENT_HREF = "/profile/posts/add";
@@ -55,12 +55,6 @@ const cardUnselectedClass =
 const cardSelectedClass =
   "bg-[rgba(140,174,236,0.28)] text-[#3D4C6E] ring-2 ring-[#566D97]";
 
-/**
- * Tracks the `lg` breakpoint (≥1024px) on the client so we can swap each
- * card between its desktop and mobile pixel dimensions. SSR/initial render
- * defaults to desktop to keep the layout stable above the breakpoint; the
- * post-mount effect corrects mobile viewports on first paint.
- */
 function useIsLgUp(): boolean {
   const [isLgUp, setIsLgUp] = useState<boolean>(true);
 
@@ -80,31 +74,17 @@ function useIsLgUp(): boolean {
 }
 
 /**
- * Step 2 of the create-content flow: choose an image size for the new post.
- * Reached from `/profile/posts/add` after picking "افزودن پست" + Next.
- * Sidebar is hidden on this route by `ProfileSidebar` (early-return on path),
- * so this page renders full-width inside `ProfileLayout`.
+ * Step 2 of the create-content flow: choose **xl** or **sm** for the new post.
  */
 export default function AddPostSizePage() {
   const router = useRouter();
   const isLgUp = useIsLgUp();
-  const [selected, setSelected] = useState<SizeValue | null>(null);
+  const [selected, setSelected] = useState<PostCreateSizeCode | null>(null);
 
-  const visibleOptions = isLgUp
-    ? SIZE_OPTIONS
-    : SIZE_OPTIONS.filter((opt) => opt.mobile != null);
+  const visibleOptions = SIZE_OPTIONS;
 
-  /**
-   * Derived effective selection: if the raw `selected` value isn't in the
-   * currently visible set (e.g. user picked L/M on desktop then resized to
-   * mobile where those cards are hidden), treat the radio group as visually
-   * unselected without mutating state. The raw pick is preserved, so resizing
-   * back to desktop restores the original selection automatically.
-   */
-  const effectiveSelected: SizeValue | null =
-    selected != null && visibleOptions.some((opt) => opt.value === selected)
-      ? selected
-      : null;
+  const effectiveSelected: PostCreateSizeCode | null =
+    selected != null && visibleOptions.some((opt) => opt.value === selected) ? selected : null;
 
   const handleBack = () => {
     router.push(PARENT_HREF);
@@ -143,7 +123,6 @@ export default function AddPostSizePage() {
         {visibleOptions.map(({ value, label, desktop, mobile }) => {
           const isSelected = effectiveSelected === value;
           const dim = isLgUp ? desktop : mobile;
-          if (dim == null) return null;
           return (
             <button
               key={value}

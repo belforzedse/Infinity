@@ -61,6 +61,12 @@ Apply the same horizontal padding to the sticky header inner row so header and b
 - **Parity vs storefront:** Same **npm** viewer **`react-instagram-stories@1.1.1`** (declared in [`apps/social/package.json`](apps/social/package.json)), same **API** (`getActiveStories`, seen endpoints, `@repo/api` URLs). The viewer **must** load the library stylesheet: `@import "react-instagram-stories/styles.css"` in [`apps/social/src/app/globals.css`](apps/social/src/app/globals.css) (resolved from `node_modules`, never copy `node_modules` into the repo). **Not** shared React components with storefront — only the same package + import pattern. If behavior diverges, check env (`NEXT_PUBLIC_API_BASE_URL`, tokens), auth, and network.
 - Supporting: [`StoriesAvatarList.tsx`](apps/social/src/components/stories/StoriesAvatarList.tsx), [`story.service.ts`](apps/social/src/services/story.service.ts), [`StoriesViewerModal.tsx`](apps/social/src/components/stories/StoriesViewerModal.tsx).
 
+## Homepage posts («پست ها»)
+
+- [`apps/social/src/app/page.tsx`](apps/social/src/app/page.tsx) stacks **`StoriesRail`** (when stories exist) and **`HomePostsCollage`** with **`gap-10`** on `<main>`.
+- [`HomePostsCollage`](apps/social/src/components/posts/HomePostsCollage.tsx) — section title **پست ها** + **CSS Grid** collage; feed from **`HomePostsFeedSection`** + **`Suspense`** / skeleton (see [social-post-card.mdc](social-post-card.mdc)). Below **`lg`**, **`mobile-lg`** sits in **`col-span-2`** but the card is **capped** at Figma width **+10px** (not full track width on tablet).
+- Card sizing / mobile mapping: [social-post-card.mdc](social-post-card.mdc).
+
 ## Add post selector (`/profile/posts/add`)
 
 - **Sidebar hide:** [`ProfileSidebar`](apps/social/src/components/profile/ProfileSidebar.tsx) early-returns `null` when `usePathname()?.startsWith("/profile/posts/add")`, so the existing [`profile/layout.tsx`](apps/social/src/app/profile/layout.tsx) wrapper renders the page full-width without restructuring routes. The mobile section dropdown (top of `ProfileSidebar`) disappears with it. Surgical alternative to splitting `/profile` into route groups.
@@ -75,27 +81,16 @@ Apply the same horizontal padding to the sticky header inner row so header and b
 - **Page:** [`apps/social/src/app/profile/posts/add/post/page.tsx`](apps/social/src/app/profile/posts/add/post/page.tsx) — `"use client"`. Same `flex flex-col gap-8 lg:gap-10` shell as the parent so the visual rhythm carries through the flow:
   1. **Title row** — heading **«انتخاب سایز»** (same `font-peyda text-lg font-semibold text-zinc-800 lg:text-xl` as the parent) and a desktop-only `ArrowRight` button (`h-9 w-9 rounded-xl bg-white text-zinc-700 shadow-[0_0_14.7px_rgba(0,0,0,0.04)]`) that calls `router.push("/profile/posts/add")`. Arrow is **`hidden lg:inline-flex`** — mobile shows title only.
   2. **Size cards** — `role="radiogroup"` (aria-label `«انتخاب سایز پست»`) on a `flex w-full flex-col items-end gap-4 lg:flex-row lg:justify-center lg:gap-6` container. A single **`items-end`** carries both breakpoints because `align-items` lives on the cross axis: in mobile `flex-col` + RTL, cross-axis end is **LEFT** (cards stack on the left edge of the content area, per the screenshot), and in desktop `flex-row`, cross-axis end is **BOTTOM** (cards bottom-align so the silhouette matches the mock — largest extends up, smallest sits near the baseline). Direction (`rtl`) only affects the main axis in flex-row, so the desktop bottom-alignment is unaffected. No horizontal scroll, no snap behavior. Each option is a `<button type="button" role="radio" aria-checked aria-label>` with the base `flex shrink-0 cursor-pointer items-center justify-center rounded-3xl border-0 text-center font-peyda text-base transition-colors` plus the same selected/unselected palette as the parent (**unselected** `bg-[rgba(140,174,236,0.14)] text-[#94A3B8] hover:bg-[rgba(140,174,236,0.2)]`, **selected** `bg-[rgba(140,174,236,0.28)] text-[#3D4C6E] ring-2 ring-[#566D97]`). **Sizes are set via inline `style={{ width: `${w}px`, height: `${h}px` }}`** (not Tailwind arbitrary classes) so the px values are exact and easy to read.
-  3. **Actions row** — identical responsive shell to the parent (`grid grid-cols-2 gap-3 [&>button]:w-full lg:flex lg:flex-row lg:justify-end lg:[&>button]:w-auto`), with the same DOM order (blue **«مرحله ی بعد»** first, default **«انصراف»** second) and the same Cancel target (`/profile`). **«مرحله ی بعد»** is disabled until a size is selected. **Next wiring:** pushes **`/profile/posts/add/post/content?size=${effectiveSelected}`** — the chosen size code rides along as a query param so the content step can both render the cover preview in the correct aspect ratio and post the matching `Size` enum value to the backend.
-- **Card metadata** (DOM order largest → smallest; RTL puts XL on the right on desktop, top of the column on mobile):
+  3. **Actions row** — identical responsive shell to the parent (`grid grid-cols-2 gap-3 [&>button]:w-full lg:flex lg:flex-row lg:justify-end lg:[&>button]:w-auto`), with the same DOM order (blue **«مرحله ی بعد»** first, default **«انصراف»** second) and the same Cancel target (`/profile`). **«مرحله ی بعد»** is disabled until a size is selected. **Next wiring:** pushes **`/profile/posts/add/post/content?size=${effectiveSelected}`** (`xl` or `sm`) so the content step can render the cover preview and map to Strapi `Size` via [`post-size-config`](apps/social/src/components/posts/post-size-config.ts) / [`post.service`](apps/social/src/services/post.service.ts).
+- **Card metadata** (DOM order XL then SM in markup; RTL puts XL on the right on desktop). Pixel boxes come from **`COVER_ASPECT_BY_CODE`** and **`SIZE_PICKER_MOBILE_PREVIEW`** in [`post-size-config.ts`](apps/social/src/components/posts/post-size-config.ts) (aligned with **`POST_CARD_LAYOUTS`**):
 
   | Value | Label | Desktop (lg+) | Mobile (<lg) |
   |---|---|---|---|
-  | `xl` | **ایکس لارج** | **380 × 536** | 360 × 508 |
-  | `l`  | **لارج**       | **280 × 464** | _hidden_ |
-  | `m`  | **مدیوم**      | **280 × 260** | _hidden_ |
-  | `s`  | **اسمال**      | **180 × 260** | 180 × 260 |
+  | `xl` | **ایکس لارج** | **383 × 536** | scaled to **`mobile-lg`** width (362px), height from aspect ratio |
+  | `sm` | **اسمال** | **184 × 229** | same as desktop |
 
-  **Mobile shows only XL + S** (per product spec — fast pick between "fullscreen" and "thumbnail" without scrolling through every intermediate ratio). The schema models this as `SizeOption.mobile: Dimensions | null`, and the render path filters with `SIZE_OPTIONS.filter(o => o.mobile != null)` below `lg`. Mobile XL is scaled to **360 wide** (preserving aspect ratio → **360 × 508**) so it fits a 360px viewport; mobile S keeps its desktop pixels (**180 × 260**) so the relative-size hierarchy still reads at a glance when stacked above one another.
-- **Breakpoint detection:** `useIsLgUp()` (a local hook inside the page module) wraps `window.matchMedia("(min-width: 1024px)")`. SSR/initial render returns **`true`** (desktop) to keep the layout stable above the breakpoint; the post-mount effect corrects mobile viewports on first paint, then subscribes to `change` for live resizes. Picking `desktop` vs `mobile` dimensions (and the visible set) derives from this single boolean.
-- **Resize selection handling:** Don't mutate `selected` from an effect (avoids the React "setState in effect" warning and cascading renders). Instead **derive** `effectiveSelected = selected != null && visibleOptions.some(o => o.value === selected) ? selected : null`, and use `effectiveSelected` for `aria-checked`, the selected styling, the Next button's `disabled`, and `handleNext`'s guard. This auto-clears the visible selection when shrinking below `lg` with L/M picked, and **restores** the original pick if the user resizes back to desktop (raw `selected` is preserved).
-- **Mobile vs desktop card example:**
-
-```tsx
-const visibleOptions = isLgUp ? SIZE_OPTIONS : SIZE_OPTIONS.filter(o => o.mobile != null);
-const dim = isLgUp ? desktop : mobile;
-if (dim == null) return null; // narrows TS, guards stale `mobile: null` entries
-// <button … style={{ width: `${dim.w}px`, height: `${dim.h}px` }} />
-```
+- **Breakpoint detection:** `useIsLgUp()` wraps `window.matchMedia("(min-width: 1024px)")`. SSR/initial render defaults **`true`** (desktop); the post-mount effect corrects mobile viewports, then subscribes to `change`.
+- **Selection:** `effectiveSelected` guards disabled Next; both sizes are always visible on mobile and desktop (two options only).
 
 ## Add post content (`/profile/posts/add/post/content?size=...`)
 
@@ -107,14 +102,14 @@ The third and final step of the create-post flow. Reached from the size selector
   - **Fields row** — [`PostFieldsRow`](apps/social/src/components/posts/PostFieldsRow.tsx).
   - **Caption** — labelled [`CaptionEditor`](apps/social/src/components/posts/CaptionEditor.tsx) (lean TipTap).
   - **Actions row** — same responsive shell as steps 1–2 (`grid grid-cols-2 lg:flex lg:justify-end`). **Blue «انتشار»** (disabled until validation passes; shows «در حال انتشار...» while submitting) + **default «انصراف»** (→ `/profile`).
-- **Size param parsing:** `parseSizeParam` (in the page module) lower-cases the raw query value and rejects anything not in `{xl, l, m, s}`. Missing / invalid → `router.replace("/profile/posts/add/post")` from a `useEffect`, with a short Persian "redirecting" message during the navigation tick. The cover card's `aspectRatio` prop is fed `SIZE_DIMENSIONS[size]`, where `SIZE_DIMENSIONS` mirrors the (desktop) px sizes the size-selector exposes (`xl: 380×536`, `l: 280×464`, `m: 280×260`, `s: 180×260`).
-- **Size → backend enum mapping:** Lives in [`apps/social/src/services/post.service.ts`](apps/social/src/services/post.service.ts) as `POST_SIZE_TO_ENUM`:
+- **Size param parsing:** `parsePostCreateSizeParam` from [`post-size-config.ts`](apps/social/src/components/posts/post-size-config.ts) accepts **`xl` | `sm`** only. Missing / invalid → `router.replace("/profile/posts/add/post")` from a `useEffect`, with a short Persian "redirecting" message during the navigation tick. The cover card's `aspectRatio` prop is **`COVER_ASPECT_BY_CODE[size]`** (same pixels as [`POST_CARD_LAYOUTS`](apps/social/src/components/posts/post-card-variants.ts)).
+- **Size → backend enum mapping:** [`post-size-config.ts`](apps/social/src/components/posts/post-size-config.ts) **`POST_SIZE_TO_STRAPI`**, re-exported from [`post.service`](apps/social/src/services/post.service.ts) as `POST_SIZE_TO_ENUM`:
 
   ```ts
-  { s: "Small", m: "Medium", l: "Large", xl: "X Large" }
+  { sm: "Small", xl: "X Large" }
   ```
 
-  Note the **space** in `"X Large"` — match the backend `api::post.post.Size` enum exactly or Strapi rejects the create.
+  Note the **space** in `"X Large"` — match the backend `api::post.post.Size` enum exactly or Strapi rejects the create. Legacy posts may still have **Medium** / **Large** in the database; new creates only send **Small** or **X Large**.
 - **State (all raw `useState`** to match [`ProfileAccountForm`](apps/social/src/components/profile/ProfileAccountForm.tsx)**):** `title`, `slug`, `slugDirty`, `productLink`, `captionHtml`, `isPublishing`, plus `cover = useCoverUpload()` and `gallery = useGalleryUpload()` from [`use-file-upload.ts`](apps/social/src/hooks/use-file-upload.ts). Slug auto-derives from title via `slugifyBody` until the user edits the slug, at which point `slugDirty` locks the derivation. Publish-time slug always passes through `withUniqueSuffix` (adds `-<Date.now().toString(36)>`) so the backend's `Slug` uniqueness constraint can't fail on a same-titled second post.
 - **`canPublish` gate:** non-empty trimmed `title`, `cover.hasMedia` truthy, `gallery.items.length >= 1`, `stripHtml(captionHtml).length > 0`, `size != null`, and `!isPublishing`. Matches the backend `post.ts` controller's required-field set (`Title`, `Slug`, `Description`, `CoverImage`, `Media`, `Size`).
 - **Publish flow:** parallel `cover.upload()` + `gallery.uploadAll()` → `PostService.create(...)` → `toast.success("پست منتشر شد.")` → `router.push("/profile/posts")`. Errors funnel through `getUserFacingErrorMessage(error, "انتشار پست ناموفق بود. دوباره تلاش کنید")` so server / network errors surface in Persian without leaking raw exception text. `isPublishing` flips back in a `finally` so a server rejection lets the user retry without a page reload.

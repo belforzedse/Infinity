@@ -1,5 +1,6 @@
 /**
  * Client for the social `api::post.post` collection — wraps `POST /posts`.
+ * Public listing for the home feed lives in [`feed-post.service`](./feed-post.service.ts) (`getHomeFeedPosts`).
  *
  * The backend's create controller (`apps/backend/src/api/post/controllers/post.ts`)
  * requires `Title`, `Slug`, `Description`, `CoverImage`, `Media`, and `Size`. We map
@@ -8,6 +9,10 @@
  */
 
 import type { ApiError } from "@repo/api/types";
+import {
+  POST_SIZE_TO_STRAPI,
+  type PostCreateSizeCode,
+} from "@/components/posts/post-size-config";
 import { apiClient } from "@/lib/api-client";
 import { ENDPOINTS } from "@/lib/api-endpoints";
 import { handleAuthErrors } from "@/utils/auth";
@@ -15,14 +20,12 @@ import { handleAuthErrors } from "@/utils/auth";
 /** Wire-level enum on `api::post.post.Size`. Note the space in `"X Large"`. */
 export type PostSize = "Small" | "Medium" | "Large" | "X Large";
 
-/** Compact UI size code used across the multi-step create-post flow. */
-export type PostSizeCode = "s" | "m" | "l" | "xl";
+/** Compact UI size code in create-post URLs and forms (`?size=xl|sm`). */
+export type PostSizeCode = PostCreateSizeCode;
 
 export const POST_SIZE_TO_ENUM: Readonly<Record<PostSizeCode, PostSize>> = {
-  s: "Small",
-  m: "Medium",
-  l: "Large",
-  xl: "X Large",
+  xl: POST_SIZE_TO_STRAPI.xl,
+  sm: POST_SIZE_TO_STRAPI.sm,
 };
 
 export type CreatePostInput = {

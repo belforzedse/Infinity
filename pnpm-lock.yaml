@@ -417,7 +417,7 @@ importers:
         version: 9.24.0(jiti@2.7.0)
       eslint-config-next:
         specifier: 16.2.4
-        version: 16.2.4(eslint@9.24.0(jiti@2.7.0))(typescript@5.8.3)
+        version: 16.2.4(@typescript-eslint/parser@8.59.2(eslint@9.24.0(jiti@2.7.0))(typescript@5.8.3))(eslint@9.24.0(jiti@2.7.0))(typescript@5.8.3)
       eslint-config-prettier:
         specifier: 9.1.2
         version: 9.1.2(eslint@9.24.0(jiti@2.7.0))
@@ -538,7 +538,7 @@ importers:
         version: 9.24.0(jiti@2.7.0)
       eslint-config-next:
         specifier: 16.2.6
-        version: 16.2.6(@typescript-eslint/parser@8.59.2(eslint@9.24.0(jiti@2.7.0))(typescript@5.8.3))(eslint@9.24.0(jiti@2.7.0))(typescript@5.8.3)
+        version: 16.2.6(eslint@9.24.0(jiti@2.7.0))(typescript@5.8.3)
       tailwindcss:
         specifier: ^4
         version: 4.3.0
@@ -19723,13 +19723,13 @@ snapshots:
 
   escape-string-regexp@4.0.0: {}
 
-  eslint-config-next@16.2.4(eslint@9.24.0(jiti@2.7.0))(typescript@5.8.3):
+  eslint-config-next@16.2.4(@typescript-eslint/parser@8.59.2(eslint@9.24.0(jiti@2.7.0))(typescript@5.8.3))(eslint@9.24.0(jiti@2.7.0))(typescript@5.8.3):
     dependencies:
       '@next/eslint-plugin-next': 16.2.4
       eslint: 9.24.0(jiti@2.7.0)
       eslint-import-resolver-node: 0.3.10
-      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(eslint@9.24.0(jiti@2.7.0)))(eslint@9.24.0(jiti@2.7.0))
-      eslint-plugin-import: 2.32.0(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(eslint@9.24.0(jiti@2.7.0)))(eslint@9.24.0(jiti@2.7.0)))(eslint@9.24.0(jiti@2.7.0))
+      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0)(eslint@9.24.0(jiti@2.7.0))
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.59.2(eslint@9.24.0(jiti@2.7.0))(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.24.0(jiti@2.7.0))
       eslint-plugin-jsx-a11y: 6.10.2(eslint@9.24.0(jiti@2.7.0))
       eslint-plugin-react: 7.37.5(eslint@9.24.0(jiti@2.7.0))
       eslint-plugin-react-hooks: 7.0.1(eslint@9.24.0(jiti@2.7.0))
@@ -19743,13 +19743,13 @@ snapshots:
       - eslint-plugin-import-x
       - supports-color
 
-  eslint-config-next@16.2.6(@typescript-eslint/parser@8.59.2(eslint@9.24.0(jiti@2.7.0))(typescript@5.8.3))(eslint@9.24.0(jiti@2.7.0))(typescript@5.8.3):
+  eslint-config-next@16.2.6(eslint@9.24.0(jiti@2.7.0))(typescript@5.8.3):
     dependencies:
       '@next/eslint-plugin-next': 16.2.6
       eslint: 9.24.0(jiti@2.7.0)
       eslint-import-resolver-node: 0.3.10
-      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0)(eslint@9.24.0(jiti@2.7.0))
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.59.2(eslint@9.24.0(jiti@2.7.0))(typescript@5.8.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.24.0(jiti@2.7.0))
+      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(eslint@9.24.0(jiti@2.7.0)))(eslint@9.24.0(jiti@2.7.0))
+      eslint-plugin-import: 2.32.0(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(eslint@9.24.0(jiti@2.7.0)))(eslint@9.24.0(jiti@2.7.0)))(eslint@9.24.0(jiti@2.7.0))
       eslint-plugin-jsx-a11y: 6.10.2(eslint@9.24.0(jiti@2.7.0))
       eslint-plugin-react: 7.37.5(eslint@9.24.0(jiti@2.7.0))
       eslint-plugin-react-hooks: 7.0.1(eslint@9.24.0(jiti@2.7.0))

@@ -3,7 +3,7 @@
 /**
  * Step 3 of the create-post flow.
  *
- * Reads the chosen post size from `?size=xl|l|m|s` and stitches together the
+ * Reads the chosen post size from `?size=xl|sm` and stitches together the
  * cover uploader, gallery uploader, fields row, and lean caption editor. On
  * publish, it uploads all media in parallel, then sends `POST /posts` with the
  * Strapi-shaped payload and routes the user to `/profile/posts` on success.
@@ -13,7 +13,7 @@
  * full-width inside `ProfileLayout`.
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import toast from "react-hot-toast";
@@ -23,49 +23,26 @@ import { CoverImageCard } from "@/components/posts/CoverImageCard";
 import { PostFieldsRow } from "@/components/posts/PostFieldsRow";
 import { PostGalleryCard } from "@/components/posts/PostGalleryCard";
 import Text from "@/components/Kits/Text";
+import { COVER_ASPECT_BY_CODE, parsePostCreateSizeParam } from "@/components/posts/post-size-config";
 import { useCoverUpload, useGalleryUpload } from "@/hooks/use-file-upload";
-import {
-  POST_SIZE_TO_ENUM,
-  PostService,
-  type PostSizeCode,
-} from "@/services/post.service";
+import { POST_SIZE_TO_ENUM, PostService } from "@/services/post.service";
 import { autoSlug, slugifyBody, withUniqueSuffix } from "@/utils/post-slug";
 import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
+import SuspenseLoader from "@/components/ui/SuspenseLoader";
 
 const PARENT_HREF = "/profile/posts/add/post";
 const CANCEL_HREF = "/profile";
 const POSTS_HREF = "/profile/posts";
-
-/**
- * Pixel dimensions for each size code, kept in sync with the size-selector
- * step (`apps/social/src/app/profile/posts/add/post/page.tsx`). The post page
- * uses these as an aspect-ratio source for the cover preview so the card
- * literally shows the silhouette of the chosen post size.
- */
-const SIZE_DIMENSIONS: Readonly<Record<PostSizeCode, { w: number; h: number }>> = {
-  xl: { w: 380, h: 536 },
-  l: { w: 280, h: 464 },
-  m: { w: 280, h: 260 },
-  s: { w: 180, h: 260 },
-};
-
-const SIZE_CODES = new Set<PostSizeCode>(["xl", "l", "m", "s"]);
-
-function parseSizeParam(raw: string | null): PostSizeCode | null {
-  if (!raw) return null;
-  const normalized = raw.toLowerCase();
-  return SIZE_CODES.has(normalized as PostSizeCode) ? (normalized as PostSizeCode) : null;
-}
 
 function stripHtml(html: string): string {
   if (!html) return "";
   return html.replace(/<[^>]*>/g, "").trim();
 }
 
-export default function AddPostContentPage() {
+function AddPostContentPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const size = useMemo(() => parseSizeParam(searchParams.get("size")), [searchParams]);
+  const size = useMemo(() => parsePostCreateSizeParam(searchParams.get("size")), [searchParams]);
 
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
@@ -177,7 +154,7 @@ export default function AddPostContentPage() {
 
       <div className="grid w-full grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-6">
         <div className="order-1 lg:order-2 lg:col-span-1">
-          <CoverImageCard controller={cover} aspectRatio={SIZE_DIMENSIONS[size]} />
+          <CoverImageCard controller={cover} aspectRatio={COVER_ASPECT_BY_CODE[size]} />
         </div>
         <div className="order-2 lg:order-1 lg:col-span-2">
           <PostGalleryCard controller={gallery} />
@@ -228,5 +205,13 @@ export default function AddPostContentPage() {
         </Button>
       </div>
     </div>
+  );
+}
+
+export default function AddPostContentPage() {
+  return (
+    <Suspense fallback={<SuspenseLoader />}>
+      <AddPostContentPageInner />
+    </Suspense>
   );
 }

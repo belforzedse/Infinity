@@ -1,0 +1,48 @@
+---
+description: Social PostCard variants (desktop xl/sm + mobile), homepage «پست ها» grid, create-post size config
+globs: apps/social/src/components/posts/**/*.tsx,apps/social/src/app/page.tsx,apps/social/src/app/profile/posts/**/*.tsx
+alwaysApply: false
+---
+
+# Post card + homepage «پست ها»
+
+## Components
+
+- [`PostCard`](apps/social/src/components/posts/PostCard.tsx) — reusable feed card: default **`widthMode="fixed"`** uses design pixel width/height per variant; **`widthMode="fluid"`** uses `width: 100%` with optional **`fluidMaxWidth`**. Default cap = **`fluidMaxWidthCapPx(variant)`** (Figma **`widthPx` + 10px** via **`POST_CARD_FLUID_MAX_EXTRA_PX`** — stops oversized **`mobile-lg`** on tablet). **`"none"`** = uncapped (rare). `rounded-[20px]`, `next/image` + `object-cover`, bottom action row (`dir="ltr"`: bookmark visual left, metrics visual right on RTL pages).
+- [`post-card-variants.ts`](apps/social/src/components/posts/post-card-variants.ts) — `POST_CARD_LAYOUTS`, `DesktopPostCardVariant` (**`xl` | `sm`** only), `toMobilePostCardVariant`.
+- [`post-size-config.ts`](apps/social/src/components/posts/post-size-config.ts) — create-post URL `?size=xl|sm`, cover aspect **`COVER_ASPECT_BY_CODE`**, Strapi mapping **`POST_SIZE_TO_STRAPI`** (`xl` → `X Large`, `sm` → `Small`). Used by add-post size step, content step, and [`post.service`](apps/social/src/services/post.service.ts).
+- **Demo toggle:** set **`NEXT_PUBLIC_SOCIAL_HOME_POSTS_DEMO=true`** (or **`1`** / **`yes`**) so home uses Picsum placeholders from [`home-posts-demo.ts`](apps/social/src/components/posts/home-posts-demo.ts) instead of the API. Restart dev server after changing `.env.local`.
+- [`feed-post.service.ts`](apps/social/src/services/feed-post.service.ts) — server **`getHomeFeedPosts()`**: `GET /posts` with **`populate`** (cover, media mime/urls, optional relation **counts** for likes/comments), **`sort=createdAt:desc`**, **`pagination[pageSize]=48`**. Maps Strapi **`Size`** → desktop **`xl` | `sm`**. Builds absolute cover URLs with **`IMAGE_BASE_URL`**. Rendered from async **`HomePostsFeedSection`** when demo is off (see below).
+- [`HomePostsFeedSection.tsx`](apps/social/src/components/posts/HomePostsFeedSection.tsx) — async server component: **`await getHomeFeedPosts()`** then **`<HomePostsCollage posts={…} />`**. Home [`page.tsx`](apps/social/src/app/page.tsx) wraps it in **`<Suspense fallback={<HomePostsCollageSkeleton />}>`** (same **`revalidate: 60`** as the page).
+- [`HomePostsCollageSkeleton.tsx`](apps/social/src/components/posts/HomePostsCollageSkeleton.tsx) — pulse placeholders mirroring **`<lg`** two-column + **`col-span-2`** large row and **`lg+`** 6-col dense band; heading **پست ها** stays visible (storefront-style loading).
+- [`HomePostsCollage`](apps/social/src/components/posts/HomePostsCollage.tsx) — **`posts` prop** from **`HomePostsFeedSection`**. Section **`items-stretch`**. From **`lg`**: **6-column** **`grid-auto-flow: dense`**; **`PostCard`** **`widthMode="fluid"`** (default **+10px** cap). Below **`lg`**: **`grid-cols-2 md:grid-cols-3`** + tight **`gap-2`** — **three** **`mobile-sm`** tiles per row from **`md`** up (denser tablet); **`mobile-lg`** **`col-span-2 md:col-span-3`** with inner **`max-width: HOME_COLLAGE_SUBLG_MOBILE_LG_MAX_PX`** (420) + **`fluidMaxWidth="none"`**. **`mobile-sm`** still **`fluidMaxWidth="none"`** + **`w-full`**. Empty copy: **«هنوز پستی ثبت نشده است.»** **No** `column-count`, **no** `@egjs` for this layout.
+
+## Variant pixels (Figma)
+
+| `variant` | Image `width × height` | Column gap (image → row) |
+|-----------|------------------------|----------------------------|
+| `xl` | 383 × 536 | 10px |
+| `sm` | 184 × 229 | 10px |
+| `mobile-lg` | 362 × 484 | 10px |
+| `mobile-sm` | Same as `sm` | Same as `sm` |
+
+## Mobile mapping
+
+Below Tailwind **`lg`** (`min-width: 1024px`), map **desktop** post sizes to **mobile** card variants:
+
+- `xl` → `mobile-lg`
+- `sm` → `mobile-sm`
+
+Use `toMobilePostCardVariant()` from [`post-card-variants.ts`](apps/social/src/components/posts/post-card-variants.ts).
+
+## Tokens / interaction
+
+- Action counts: `font-peyda text-[10px] font-medium leading-[21px] text-[#424242]`.
+- Secondary icon stroke: `#94A3B8`.
+- Liked heart: fill `#D52953`, stroke `#BA1B42`.
+- Hover / `focus-within` on the card: image darkens via `bg-black/20` overlay (opacity transition only — no layout shift).
+- Optional `overlay` slot: top-left inside the image wrapper only (absolute).
+
+## Images
+
+- [`apps/social/next.config.ts`](apps/social/next.config.ts) allows `picsum.photos` and `fastly.picsum.photos` for `next/image` when demos or CMS use them.
