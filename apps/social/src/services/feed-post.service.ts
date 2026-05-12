@@ -10,9 +10,17 @@ export type HomeFeedCardOverlay = "infinity" | "video" | "gallery" | null;
 
 export type HomeFeedPost = {
   id: string;
+  slug: string;
+  title: string;
   desktopVariant: DesktopPostCardVariant;
   imageSrc: string;
   imageAlt: string;
+  media: readonly {
+    id: string;
+    url: string;
+    alternativeText?: string;
+    mime?: string;
+  }[];
   likesCount: number;
   commentsCount: number;
   overlay: HomeFeedCardOverlay;
@@ -104,6 +112,7 @@ function normalizeStrapiPostEntry(entry: unknown): HomeFeedPost | null {
   if (!imageSrc) return null;
 
   const title = typeof attrs.Title === "string" ? attrs.Title.trim() : "";
+  const slug = typeof attrs.Slug === "string" ? attrs.Slug.trim() : "";
   const imageAlt = (coverAttrs.alternativeText?.trim() || title || "پست").slice(0, 500);
 
   const mediaList = normalizeMediaList(attrs.Media);
@@ -113,13 +122,27 @@ function normalizeStrapiPostEntry(entry: unknown): HomeFeedPost | null {
   const commentsCount = relationTotal(attrs.post_comments);
 
   const postId = typeof id === "number" ? String(id) : "";
-  if (!postId) return null;
+  if (!postId || !slug) return null;
 
   return {
     id: postId,
+    slug,
+    title,
     desktopVariant: mapSizeToDesktopVariant(attrs.Size),
     imageSrc,
     imageAlt,
+    media: mediaList
+      .map((media, index) => {
+        const url = strapiMediaUrl(media.url);
+        if (!url) return null;
+        return {
+          id: `${postId}-${index}`,
+          url,
+          alternativeText: media.alternativeText,
+          mime: media.mime,
+        };
+      })
+      .filter((media): media is NonNullable<typeof media> => media != null),
     likesCount,
     commentsCount,
     overlay: inferOverlay(mediaList, productLink),
@@ -128,6 +151,9 @@ function normalizeStrapiPostEntry(entry: unknown): HomeFeedPost | null {
 
 function buildListQuery(includeRelationCounts: boolean): string {
   const p = new URLSearchParams();
+  p.set("fields[0]", "Title");
+  p.set("fields[1]", "Slug");
+  p.set("fields[2]", "Size");
   p.set("populate[CoverImage][fields][0]", "url");
   p.set("populate[CoverImage][fields][1]", "alternativeText");
   p.set("populate[Media][fields][0]", "url");

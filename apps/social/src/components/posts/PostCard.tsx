@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Bookmark, Heart, MessageCircle } from "lucide-react";
 import clsx from "clsx";
 import { POST_CARD_LAYOUTS, fluidMaxWidthCapPx, type PostCardVariant } from "@/components/posts/post-card-variants";
@@ -27,6 +28,7 @@ export type PostCardProps = {
   onLike?: () => void;
   onComment?: () => void;
   onSave?: () => void;
+  href?: string;
   /** Top-left badge inside the image (video / gallery / brand mark). */
   overlay?: ReactNode;
   className?: string;
@@ -69,6 +71,7 @@ export function PostCard({
   onLike,
   onComment,
   onSave,
+  href,
   overlay,
   className,
   widthMode = "fixed",
@@ -119,10 +122,14 @@ export function PostCard({
       style={articleStyle}
       data-variant={variant}
     >
-      <div
-        className="relative isolate overflow-hidden rounded-[20px] bg-zinc-100"
-        style={mediaStyle}
-      >
+      <div className="relative isolate overflow-hidden rounded-[20px] bg-zinc-100" style={mediaStyle}>
+        {href ? (
+          <Link
+            href={href}
+            className="absolute inset-0 z-[1] rounded-[20px] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400/70"
+            aria-label={imageAlt ? `مشاهده پست ${imageAlt}` : "مشاهده پست"}
+          />
+        ) : null}
         <Image
           src={imageSrc}
           alt={imageAlt}

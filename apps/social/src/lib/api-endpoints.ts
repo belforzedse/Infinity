@@ -29,4 +29,8 @@ export const ENDPOINTS = {
     CREATE: "/posts",
     DETAIL: (id: number | string) => `/posts/${id}`,
   },
+  POST_COMMENTS: {
+    LIST_FOR_POST: (postId: number | string) => `/post-comments/post/${postId}`,
+    CREATE: "/post-comments",
+  },
 } as const;

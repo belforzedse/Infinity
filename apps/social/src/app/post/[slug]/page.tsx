@@ -1,0 +1,77 @@
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { Header } from "@/components/Header";
+import { HomePostsCollage } from "@/components/posts/HomePostsCollage";
+import { PostDetailView } from "@/components/posts/PostDetailView";
+import { getHomeDemoPosts, isSocialHomePostsDemoEnabled } from "@/components/posts/home-posts-demo";
+import { getHomeFeedPosts } from "@/services/feed-post.service";
+import { getPostDetailBySlug } from "@/services/post-detail.service";
+
+export const revalidate = 30;
+
+type PostPageProps = {
+  params: Promise<{
+    slug: string;
+  }>;
+};
+
+function safeDecode(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
+async function getGridPosts() {
+  try {
+    return isSocialHomePostsDemoEnabled() ? getHomeDemoPosts() : await getHomeFeedPosts();
+  } catch (error) {
+    console.error("Post detail grid fetch failed:", error);
+    return [];
+  }
+}
+
+export async function generateMetadata({ params }: PostPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const post = await getPostDetailBySlug(safeDecode(slug));
+
+  if (!post) {
+    return {
+      title: "پست یافت نشد | اینفینیتی‌گرام",
+    };
+  }
+
+  return {
+    title: `${post.title} | اینفینیتی‌گرام`,
+    description: post.caption,
+  };
+}
+
+export default async function PostDetailPage({ params }: PostPageProps) {
+  const { slug } = await params;
+  const [post, gridPosts] = await Promise.all([
+    getPostDetailBySlug(safeDecode(slug)),
+    getGridPosts(),
+  ]);
+
+  if (!post) notFound();
+
+  return (
+    <div className="flex min-h-dvh flex-col">
+      <Header />
+      <main
+        className="mx-auto flex w-full max-w-[1280px] flex-1 flex-col gap-6 px-4 pb-8 pt-3 sm:px-6 lg:flex-row lg:items-start lg:gap-6 lg:px-[60px] lg:pb-12 lg:pt-6"
+        dir="rtl"
+      >
+        <aside className="w-full min-w-0 lg:sticky lg:top-24 lg:w-[560px] lg:shrink-0">
+          <PostDetailView post={post} />
+        </aside>
+
+        <section className="hidden min-w-0 flex-1 lg:block" aria-label="پست‌های دیگر">
+          <HomePostsCollage posts={gridPosts.filter((item) => item.slug !== post.slug)} />
+        </section>
+      </main>
+    </div>
+  );
+}

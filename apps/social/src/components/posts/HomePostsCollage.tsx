@@ -2,6 +2,7 @@
 
 import type { CSSProperties } from "react";
 import { useCallback, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Layers2, Video } from "lucide-react";
 import { InfinityMarkCircle } from "@/components/InfinityMarkCircle";
 import { PostCard, toMobilePostCardVariant } from "@/components/posts/PostCard";
@@ -59,12 +60,11 @@ export type HomePostsCollageProps = {
  */
 export function HomePostsCollage({ posts }: HomePostsCollageProps) {
   const isLgUp = useIsLgUp();
+  const router = useRouter();
   const [liked, setLiked] = useState<Readonly<Record<string, boolean>>>({});
   const [saved, setSaved] = useState<Readonly<Record<string, boolean>>>({});
 
-  const handleDemoComment = useCallback(() => {
-    void 0;
-  }, []);
+  const openPost = useCallback((slug: string) => router.push(`/post/${encodeURIComponent(slug)}`), [router]);
 
   const toggleLiked = useCallback((id: string) => {
     setLiked((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -143,8 +143,9 @@ export function HomePostsCollage({ posts }: HomePostsCollageProps) {
                   isLiked={Boolean(liked[post.id])}
                   isSaved={Boolean(saved[post.id])}
                   onLike={() => toggleLiked(post.id)}
-                  onComment={handleDemoComment}
+                  onComment={() => openPost(post.slug)}
                   onSave={() => toggleSaved(post.id)}
+                  href={`/post/${encodeURIComponent(post.slug)}`}
                   overlay={post.overlay != null ? <OverlayBadge type={post.overlay} /> : undefined}
                 />
               </div>
@@ -169,8 +170,9 @@ export function HomePostsCollage({ posts }: HomePostsCollageProps) {
                     isLiked={Boolean(liked[post.id])}
                     isSaved={Boolean(saved[post.id])}
                     onLike={() => toggleLiked(post.id)}
-                    onComment={handleDemoComment}
+                    onComment={() => openPost(post.slug)}
                     onSave={() => toggleSaved(post.id)}
+                    href={`/post/${encodeURIComponent(post.slug)}`}
                     overlay={post.overlay != null ? <OverlayBadge type={post.overlay} /> : undefined}
                   />
                 </div>
@@ -189,8 +191,9 @@ export function HomePostsCollage({ posts }: HomePostsCollageProps) {
                   isLiked={Boolean(liked[post.id])}
                   isSaved={Boolean(saved[post.id])}
                   onLike={() => toggleLiked(post.id)}
-                  onComment={handleDemoComment}
+                  onComment={() => openPost(post.slug)}
                   onSave={() => toggleSaved(post.id)}
+                  href={`/post/${encodeURIComponent(post.slug)}`}
                   overlay={post.overlay != null ? <OverlayBadge type={post.overlay} /> : undefined}
                 />
               </div>

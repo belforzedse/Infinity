@@ -55,9 +55,31 @@ function buildDemoPosts(): HomeFeedPost[] {
       const { widthPx, imageHeightPx } = POST_CARD_LAYOUTS[variant];
       out.push({
         id: `demo-${c}-r${slot.rowStart}-c${slot.colStart}-${ix}`,
+        slug: `demo-post-${ix}`,
+        title: variant === "xl" ? "اصالت در عین سادگی" : "استایل روزمره اینفینیتی",
         desktopVariant: variant,
         imageSrc: buildPicsumSrc(seed, widthPx, imageHeightPx),
         imageAlt: `${alt} (${ix})`,
+        media: [
+          {
+            id: `demo-${ix}-1`,
+            url: buildPicsumSrc(`${seed}-slide-1`, widthPx, imageHeightPx),
+            alternativeText: `${alt} (${ix})`,
+            mime: "image/jpeg",
+          },
+          {
+            id: `demo-${ix}-2`,
+            url: buildPicsumSrc(`${seed}-slide-2`, widthPx, imageHeightPx),
+            alternativeText: `${alt} (${ix})`,
+            mime: "image/jpeg",
+          },
+          {
+            id: `demo-${ix}-3`,
+            url: buildPicsumSrc(`${seed}-slide-3`, widthPx, imageHeightPx),
+            alternativeText: `${alt} (${ix})`,
+            mime: "image/jpeg",
+          },
+        ],
         likesCount: ix % 3 === 0 ? 1200 : 40 + ix,
         commentsCount: (ix * 3) % 200,
         overlay,
