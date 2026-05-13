@@ -1,22 +1,20 @@
 "use client";
 
-import type { CSSProperties, RefObject } from "react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import type { CSSProperties } from "react";
+import { useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Layers2, Video } from "lucide-react";
-import toast from "react-hot-toast";
 import { InfinityMarkCircle } from "@/components/InfinityMarkCircle";
 import { PostCard, toMobilePostCardVariant } from "@/components/posts/PostCard";
 import type { DesktopPostCardVariant } from "@/components/posts/post-card-variants";
 import type { HomeFeedCardOverlay, HomeFeedPost } from "@/services/feed-post.service";
 import { useIsLgUp } from "@/components/posts/use-is-lg-up";
-import { getLikedPostIds, hasAccessToken, togglePostLike } from "@/services/post-like.service";
-import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
+import { useCollageInteractions } from "@/components/posts/use-collage-interactions";
 
 /** Tight horizontal gap; cards use `widthMode="fluid"` so tracks shrink without horizontal scroll. */
 const GRID_GAP_X_PX = 6;
 
-function OverlayBadge({ type }: { type: Exclude<HomeFeedCardOverlay, null> }) {
+export function OverlayBadge({ type }: { type: Exclude<HomeFeedCardOverlay, null> }) {
   const shell =
     "inline-flex items-center justify-center rounded-lg bg-black/[0.14] p-0.5 shadow-sm backdrop-blur-[7px]";
 
@@ -47,7 +45,7 @@ function OverlayBadge({ type }: { type: Exclude<HomeFeedCardOverlay, null> }) {
   );
 }
 
-function gridSpanStyle(variant: DesktopPostCardVariant): CSSProperties {
+export function gridSpanStyle(variant: DesktopPostCardVariant): CSSProperties {
   return variant === "xl"
     ? { gridColumn: "span 2", gridRow: "span 2" }
     : { gridColumn: "span 1", gridRow: "span 1" };
@@ -55,10 +53,8 @@ function gridSpanStyle(variant: DesktopPostCardVariant): CSSProperties {
 
 export type HomePostsCollageProps = {
   posts: readonly HomeFeedPost[];
-  desktopLayout?: "fluid" | "compact";
   likeMode?: "local" | "api";
   showHeading?: boolean;
-  compactProbeRef?: RefObject<HTMLDivElement | null>;
 };
 
 /**
@@ -67,107 +63,22 @@ export type HomePostsCollageProps = {
  */
 export function HomePostsCollage({
   posts,
-  desktopLayout = "fluid",
   likeMode = "local",
   showHeading = true,
-  compactProbeRef,
 }: HomePostsCollageProps) {
   const isLgUp = useIsLgUp();
   const router = useRouter();
-  const [liked, setLiked] = useState<Readonly<Record<string, boolean>>>({});
-  const [saved, setSaved] = useState<Readonly<Record<string, boolean>>>({});
-  const [likeCounts, setLikeCounts] = useState<Readonly<Record<string, number>>>({});
-  const [pendingLikes, setPendingLikes] = useState<Readonly<Record<string, boolean>>>({});
-
+  const { liked, saved, likeCounts, toggleLiked, toggleSaved } = useCollageInteractions(posts, likeMode);
   const openPost = useCallback((slug: string) => router.push(`/post/${encodeURIComponent(slug)}`), [router]);
-
-  useEffect(() => {
-    if (likeMode !== "api" || !hasAccessToken()) return;
-
-    let cancelled = false;
-    getLikedPostIds()
-      .then((ids) => {
-        if (cancelled) return;
-        const next: Record<string, boolean> = {};
-        posts.forEach((post) => {
-          if (ids.has(post.id)) next[post.id] = true;
-        });
-        setLiked(next);
-      })
-      .catch(() => {
-        if (!cancelled) setLiked({});
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [likeMode, posts]);
-
-  const toggleLiked = useCallback(
-    async (id: string) => {
-      if (likeMode === "local") {
-        setLiked((prev) => ({ ...prev, [id]: !prev[id] }));
-        return;
-      }
-
-      if (!hasAccessToken()) {
-        toast.error("برای پسندیدن پست ابتدا وارد حساب کاربری شوید.");
-        return;
-      }
-
-      if (pendingLikes[id]) return;
-
-      const wasLiked = Boolean(liked[id]);
-      const nextLiked = !wasLiked;
-      setPendingLikes((prev) => ({ ...prev, [id]: true }));
-      setLiked((prev) => ({ ...prev, [id]: nextLiked }));
-      setLikeCounts((prev) => ({
-        ...prev,
-        [id]: (prev[id] ?? posts.find((post) => post.id === id)?.likesCount ?? 0) + (nextLiked ? 1 : -1),
-      }));
-
-      try {
-        const result = await togglePostLike(id);
-        setLiked((prev) => ({ ...prev, [id]: result.isLiked }));
-        if (result.isLiked !== nextLiked) {
-          setLikeCounts((prev) => ({
-            ...prev,
-            [id]: Math.max(
-              0,
-              (prev[id] ?? posts.find((post) => post.id === id)?.likesCount ?? 0) +
-                (result.isLiked ? 1 : -1),
-            ),
-          }));
-        }
-      } catch (error: unknown) {
-        setLiked((prev) => ({ ...prev, [id]: wasLiked }));
-        setLikeCounts((prev) => ({
-          ...prev,
-          [id]: posts.find((post) => post.id === id)?.likesCount ?? prev[id] ?? 0,
-        }));
-        toast.error(getUserFacingErrorMessage(error, "پسندیدن پست ناموفق بود."));
-      } finally {
-        setPendingLikes((prev) => ({ ...prev, [id]: false }));
-      }
-    },
-    [likeMode, liked, pendingLikes, posts],
-  );
-
-  const toggleSaved = useCallback((id: string) => {
-    setSaved((prev) => ({ ...prev, [id]: !prev[id] }));
-  }, []);
 
   const desktopItems = useMemo(
     () =>
-      posts.map((post) => {
-        const variant = desktopLayout === "compact" ? "sm" : post.desktopVariant;
-        return {
-          post,
-          variant,
-          cellStyle: gridSpanStyle(variant),
-        };
-      }),
-    [desktopLayout, posts],
+      posts.map((post) => ({
+        post,
+        variant: post.desktopVariant,
+        cellStyle: gridSpanStyle(post.desktopVariant),
+      })),
+    [posts],
   );
 
   const mobileCards = useMemo(
@@ -210,36 +121,6 @@ export function HomePostsCollage({
         <p className="w-full text-right font-peyda text-sm text-zinc-500" role="status">
           هنوز پستی ثبت نشده است.
         </p>
-      ) : isLgUp && desktopLayout === "compact" ? (
-        <div className="w-full min-w-0" dir="ltr">
-          <div className="grid w-full grid-flow-dense grid-cols-[repeat(auto-fill,minmax(168px,1fr))] gap-x-2 gap-y-2">
-            {desktopItems.map(({ post, variant }, index) => (
-              <div
-                key={post.id}
-                ref={index === 0 ? compactProbeRef : undefined}
-                className="flex w-full min-w-0"
-              >
-                <PostCard
-                  variant={variant}
-                  widthMode="fluid"
-                  fluidMaxWidth="none"
-                  className="w-full"
-                  imageSrc={post.imageSrc}
-                  imageAlt={post.imageAlt}
-                  likesCount={likeCounts[post.id] ?? post.likesCount}
-                  commentsCount={post.commentsCount}
-                  isLiked={Boolean(liked[post.id])}
-                  isSaved={Boolean(saved[post.id])}
-                  onLike={() => void toggleLiked(post.id)}
-                  onComment={() => openPost(post.slug)}
-                  onSave={() => toggleSaved(post.id)}
-                  href={`/post/${encodeURIComponent(post.slug)}`}
-                  overlay={post.overlay != null ? <OverlayBadge type={post.overlay} /> : undefined}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
       ) : isLgUp ? (
         <div className="w-full min-w-0" dir="ltr">
           <div
