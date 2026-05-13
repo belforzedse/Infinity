@@ -1,6 +1,6 @@
 "use client";
 
-import type { CSSProperties } from "react";
+import type { CSSProperties, RefObject } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Layers2, Video } from "lucide-react";
@@ -58,6 +58,7 @@ export type HomePostsCollageProps = {
   desktopLayout?: "fluid" | "compact";
   likeMode?: "local" | "api";
   showHeading?: boolean;
+  compactProbeRef?: RefObject<HTMLDivElement | null>;
 };
 
 /**
@@ -69,6 +70,7 @@ export function HomePostsCollage({
   desktopLayout = "fluid",
   likeMode = "local",
   showHeading = true,
+  compactProbeRef,
 }: HomePostsCollageProps) {
   const isLgUp = useIsLgUp();
   const router = useRouter();
@@ -210,16 +212,17 @@ export function HomePostsCollage({
         </p>
       ) : isLgUp && desktopLayout === "compact" ? (
         <div className="w-full min-w-0" dir="ltr">
-          <div className="grid w-full grid-flow-dense grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-x-2 gap-y-2">
-            {desktopItems.map(({ post, variant }) => (
+          <div className="grid w-full grid-flow-dense grid-cols-[repeat(auto-fit,minmax(168px,210px))] justify-end gap-x-2 gap-y-2">
+            {desktopItems.map(({ post, variant }, index) => (
               <div
                 key={post.id}
+                ref={index === 0 ? compactProbeRef : undefined}
                 className="flex min-w-0 justify-center"
               >
                 <PostCard
                   variant={variant}
                   widthMode="fluid"
-                  fluidMaxWidth="none"
+                  fluidMaxWidth={210}
                   className="w-full"
                   imageSrc={post.imageSrc}
                   imageAlt={post.imageAlt}

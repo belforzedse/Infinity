@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Header } from "@/components/Header";
 import { StoriesRail } from "@/components/StoriesRail";
-import { HomePostsCollage } from "@/components/posts/HomePostsCollage";
-import { PostDetailView } from "@/components/posts/PostDetailView";
+import { PostDetailRelatedLayout } from "@/components/posts/PostDetailRelatedLayout";
 import { getHomeDemoPosts, isSocialHomePostsDemoEnabled } from "@/components/posts/home-posts-demo";
 import { getHomeFeedPosts } from "@/services/feed-post.service";
 import { getPostDetailBySlug } from "@/services/post-detail.service";
@@ -70,8 +69,6 @@ export default async function PostDetailPage({ params }: PostPageProps) {
   if (!post) notFound();
 
   const relatedPosts = gridPosts.filter((item) => item.slug !== post.slug);
-  const sidePosts = relatedPosts.slice(0, 6);
-  const lowerPosts = relatedPosts.slice(6);
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -86,28 +83,7 @@ export default async function PostDetailPage({ params }: PostPageProps) {
           </section>
         ) : null}
 
-        <div className="flex w-full min-w-0 flex-col gap-6 lg:flex-row lg:items-start">
-          <aside className="w-full min-w-0 lg:w-[560px] lg:shrink-0">
-            <PostDetailView post={post} />
-          </aside>
-
-          <section
-            className="hidden min-w-0 flex-1 lg:block"
-            aria-label="پست‌های دیگر"
-          >
-            <HomePostsCollage
-              posts={sidePosts}
-              desktopLayout="compact"
-              likeMode="api"
-            />
-          </section>
-        </div>
-
-        {lowerPosts.length > 0 ? (
-          <section aria-label="پست‌های بیشتر">
-            <HomePostsCollage posts={lowerPosts} likeMode="api" showHeading={false} />
-          </section>
-        ) : null}
+        <PostDetailRelatedLayout post={post} relatedPosts={relatedPosts} />
       </main>
     </div>
   );
