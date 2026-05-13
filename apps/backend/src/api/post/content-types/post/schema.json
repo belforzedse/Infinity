@@ -64,6 +64,12 @@
       "target": "api::post-like.post-like",
       "mappedBy": "post"
     },
+    "post_bookmarks": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::post-bookmark.post-bookmark",
+      "mappedBy": "post"
+    },
     "post_comments": {
       "type": "relation",
       "relation": "oneToMany",

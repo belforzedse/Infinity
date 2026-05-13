@@ -173,6 +173,17 @@ export default factories.createCoreController("api::post.post", ({ strapi }) => 
       postLikes.map((like: any) => like.id).filter(Boolean),
     );
 
+    const postBookmarks = await strapi.entityService.findMany("api::post-bookmark.post-bookmark", {
+      filters: { post: { id } },
+      fields: ["id"],
+      pagination: { page: 1, pageSize: 10000 },
+    });
+    await deleteByIds(
+      strapi,
+      "api::post-bookmark.post-bookmark",
+      postBookmarks.map((bookmark: any) => bookmark.id).filter(Boolean),
+    );
+
     const deletedPost = await strapi.entityService.delete("api::post.post", id);
     await deleteUploadFiles(strapi, mediaIds);
 

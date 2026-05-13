@@ -32,9 +32,16 @@ export const ENDPOINTS = {
   POST_COMMENTS: {
     LIST_FOR_POST: (postId: number | string) => `/post-comments/post/${postId}`,
     CREATE: "/post-comments",
+    LIST: "/post-comments",
+    APPROVE: (id: number | string) => `/post-comments/${id}/approve`,
+    REJECT: (id: number | string) => `/post-comments/${id}/reject`,
   },
   POST_LIKES: {
     TOGGLE: "/post-likes/toggle",
     USER_LIKES: "/post-likes/user/me",
+  },
+  POST_BOOKMARKS: {
+    TOGGLE: "/post-bookmarks/toggle",
+    USER_BOOKMARKS: "/post-bookmarks/user/me",
   },
 } as const;

@@ -160,6 +160,9 @@ const ROLE_PERMISSION_SPECS: Record<string, RolePermissionSpec> = {
       "api::post-like": {
         "post-like": ["toggle", "getUserLikes"],
       },
+      "api::post-bookmark": {
+        "post-bookmark": ["toggle", "getUserBookmarks"],
+      },
       "api::post-comment": {
         "post-comment": ["create", "update", "delete"],
       },
@@ -273,6 +276,7 @@ const EDITOR_RESTRICTED_CONTROLLERS: RestrictedController[] = [
   { typeKey: "api::post", controller: "post", allowActions: READ_ACTIONS },
   { typeKey: "api::post-comment", controller: "post-comment", allowActions: READ_ACTIONS },
   { typeKey: "api::post-like", controller: "post-like", allowActions: [] },
+  { typeKey: "api::post-bookmark", controller: "post-bookmark", allowActions: [] },
   { typeKey: "api::post-comment-like", controller: "post-comment-like", allowActions: [] },
 ];
 

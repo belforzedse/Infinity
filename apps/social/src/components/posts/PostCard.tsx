@@ -251,12 +251,12 @@ export function PostCard({
             disabled={!onLike}
           >
             {likesLabel != null ? (
-              <span key={likesLabel} className={clsx(ACTION_TEXT_CLASS, "order-1 animate-fade-up")}>
+              <span key={`likes-${likesLabel}`} className={clsx(ACTION_TEXT_CLASS, "order-1 animate-fade-up")}>
                 {likesLabel}
               </span>
             ) : null}
             <span
-              key={heartBurstKey}
+              key={`heart-${heartBurstKey}`}
               className={clsx(
                 "heart-burst-target order-2 inline-flex shrink-0",
                 heartBurstKey > 0 && "animate-heart-burst",

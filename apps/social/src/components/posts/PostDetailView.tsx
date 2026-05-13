@@ -10,14 +10,13 @@ import {
   MessageSquareText,
   SendHorizonal,
 } from "lucide-react";
-import { useAtom } from "jotai";
 import toast from "react-hot-toast";
 import type { PostDetail, PostDetailComment, PostDetailMedia } from "@/services/post-detail.service";
 import { createPostComment } from "@/services/post-comment.service";
 import { getLikedPostIds, hasAccessToken, togglePostLike } from "@/services/post-like.service";
+import { getBookmarkedPostIds, togglePostBookmark } from "@/services/post-bookmark.service";
 import { BlurImage } from "@/components/ui/BlurImage";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { savedPostIdsAtom } from "@/lib/saved-posts-atom";
 import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
 
 function cx(...parts: (string | false | undefined)[]): string {
@@ -296,8 +295,8 @@ export function PostDetailView({ post, className }: { post: PostDetail; classNam
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(post.likesCount);
   const [isLikePending, setIsLikePending] = useState(false);
-  const [savedPostIds, setSavedPostIds] = useAtom(savedPostIdsAtom);
-  const isSaved = savedPostIds.includes(post.id);
+  const [isSaved, setIsSaved] = useState(false);
+  const [isSavePending, setIsSavePending] = useState(false);
   const [heartBurstKey, setHeartBurstKey] = useState(0);
   const [saveAnimKey, setSaveAnimKey] = useState(0);
   const [comment, setComment] = useState("");
@@ -346,6 +345,26 @@ export function PostDetailView({ post, className }: { post: PostDetail; classNam
     };
   }, [post.id]);
 
+  useEffect(() => {
+    if (!hasAccessToken()) {
+      setIsSaved(false);
+      return;
+    }
+
+    let cancelled = false;
+    getBookmarkedPostIds()
+      .then((ids) => {
+        if (!cancelled) setIsSaved(ids.has(post.id));
+      })
+      .catch(() => {
+        if (!cancelled) setIsSaved(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [post.id]);
+
   async function toggleLike() {
     if (isLikePending) return;
 
@@ -382,11 +401,28 @@ export function PostDetailView({ post, className }: { post: PostDetail; classNam
     }
   }
 
-  function toggleSaved() {
-    setSavedPostIds((prev) => {
-      if (prev.includes(post.id)) return prev.filter((id) => id !== post.id);
-      return [post.id, ...prev];
-    });
+  async function toggleSaved() {
+    if (isSavePending) return;
+
+    if (!hasAccessToken()) {
+      toast.error("برای ذخیره پست ابتدا وارد حساب کاربری شوید.");
+      return;
+    }
+
+    const wasSaved = isSaved;
+    const nextSaved = !wasSaved;
+    setIsSavePending(true);
+    setIsSaved(nextSaved);
+
+    try {
+      const result = await togglePostBookmark(post.id);
+      setIsSaved(result.isBookmarked);
+    } catch (error: unknown) {
+      setIsSaved(wasSaved);
+      toast.error(getUserFacingErrorMessage(error, "ذخیره پست ناموفق بود."));
+    } finally {
+      setIsSavePending(false);
+    }
   }
 
   async function submitComment() {
@@ -416,7 +452,7 @@ export function PostDetailView({ post, className }: { post: PostDetail; classNam
   return (
     <article
       className={cx(
-        "w-full min-w-0 rounded-[32px] bg-white px-4 pb-8 pt-4 shadow-[0_18px_45px_rgba(61,76,110,0.06)] sm:px-5 lg:px-6",
+        "w-full min-w-0 rounded-[32px] bg-white px-3 pb-2 pt-2 shadow-[0_18px_45px_rgba(61,76,110,0.06)] sm:px-5 lg:px-2",
         className,
       )}
       dir="rtl"
@@ -426,8 +462,9 @@ export function PostDetailView({ post, className }: { post: PostDetail; classNam
       <div dir="ltr" className="mt-3 flex items-center justify-between px-1">
         <button
           type="button"
-          onClick={toggleSaved}
-          className="pressable inline-flex size-10 items-center justify-center rounded-xl text-[#94A3B8] transition-colors hover:text-zinc-700"
+          onClick={() => void toggleSaved()}
+          disabled={isSavePending}
+          className="pressable inline-flex size-10 items-center justify-center rounded-xl text-[#94A3B8] transition-colors hover:text-zinc-700 disabled:pointer-events-none disabled:opacity-60"
           aria-label={isSaved ? "حذف از ذخیره‌ها" : "ذخیره پست"}
           aria-pressed={isSaved}
         >
@@ -450,11 +487,11 @@ export function PostDetailView({ post, className }: { post: PostDetail; classNam
             aria-label={isLiked ? "لغو پسند" : "پسندیدن"}
             aria-pressed={isLiked}
           >
-            <span key={likeCount} className="animate-fade-up tabular-nums">
+            <span key={`likes-${likeCount}`} className="animate-fade-up tabular-nums">
               {formatCount(likeCount)}
             </span>
             <span
-              key={heartBurstKey}
+              key={`heart-${heartBurstKey}`}
               className={cx("heart-burst-target inline-flex", heartBurstKey > 0 && "animate-heart-burst")}
             >
               <Heart

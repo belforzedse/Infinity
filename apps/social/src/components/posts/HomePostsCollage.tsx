@@ -60,6 +60,7 @@ export type HomePostsCollageProps = {
   posts: readonly HomeFeedPost[];
   likeMode?: "local" | "api";
   showHeading?: boolean;
+  onSavedChange?: (postId: string, isSaved: boolean) => void;
 };
 
 /**
@@ -70,10 +71,15 @@ export function HomePostsCollage({
   posts,
   likeMode = "local",
   showHeading = true,
+  onSavedChange,
 }: HomePostsCollageProps) {
   const isLgUp = useIsLgUp();
   const router = useRouter();
-  const { liked, saved, likeCounts, toggleLiked, toggleSaved, shakeIds } = useCollageInteractions(posts, likeMode);
+  const { liked, saved, likeCounts, toggleLiked, toggleSaved, shakeIds } = useCollageInteractions(
+    posts,
+    likeMode,
+    onSavedChange,
+  );
   const openPost = useCallback((slug: string) => router.push(`/post/${encodeURIComponent(slug)}`), [router]);
 
   const desktopItems = useMemo(
@@ -152,7 +158,7 @@ export function HomePostsCollage({
                   isSaved={Boolean(saved[post.id])}
                   onLike={() => void toggleLiked(post.id)}
                   onComment={() => openPost(post.slug)}
-                  onSave={() => toggleSaved(post.id)}
+                  onSave={() => void toggleSaved(post.id)}
                   href={`/post/${encodeURIComponent(post.slug)}`}
                   overlay={post.overlay != null ? <OverlayBadge type={post.overlay} /> : undefined}
                   shakeKey={shakeIds[post.id]}
@@ -184,7 +190,7 @@ export function HomePostsCollage({
                     isSaved={Boolean(saved[post.id])}
                     onLike={() => void toggleLiked(post.id)}
                     onComment={() => openPost(post.slug)}
-                    onSave={() => toggleSaved(post.id)}
+                    onSave={() => void toggleSaved(post.id)}
                     href={`/post/${encodeURIComponent(post.slug)}`}
                     overlay={post.overlay != null ? <OverlayBadge type={post.overlay} /> : undefined}
                     shakeKey={shakeIds[post.id]}
@@ -210,7 +216,7 @@ export function HomePostsCollage({
                   isSaved={Boolean(saved[post.id])}
                   onLike={() => void toggleLiked(post.id)}
                   onComment={() => openPost(post.slug)}
-                  onSave={() => toggleSaved(post.id)}
+                  onSave={() => void toggleSaved(post.id)}
                   href={`/post/${encodeURIComponent(post.slug)}`}
                   overlay={post.overlay != null ? <OverlayBadge type={post.overlay} /> : undefined}
                   shakeKey={shakeIds[post.id]}

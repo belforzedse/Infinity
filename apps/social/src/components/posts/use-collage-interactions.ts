@@ -1,18 +1,22 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useAtom } from "jotai";
 import toast from "react-hot-toast";
-import { savedPostIdsAtom } from "@/lib/saved-posts-atom";
 import type { HomeFeedPost } from "@/services/feed-post.service";
 import { getLikedPostIds, hasAccessToken, togglePostLike } from "@/services/post-like.service";
+import { getBookmarkedPostIds, togglePostBookmark } from "@/services/post-bookmark.service";
 import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
 
-export function useCollageInteractions(posts: readonly HomeFeedPost[], likeMode: "local" | "api") {
+export function useCollageInteractions(
+  posts: readonly HomeFeedPost[],
+  likeMode: "local" | "api",
+  onSavedChange?: (postId: string, isSaved: boolean) => void,
+) {
   const [liked, setLiked] = useState<Readonly<Record<string, boolean>>>({});
-  const [savedPostIds, setSavedPostIds] = useAtom(savedPostIdsAtom);
+  const [savedPostIds, setSavedPostIds] = useState<readonly string[]>([]);
   const [likeCounts, setLikeCounts] = useState<Readonly<Record<string, number>>>({});
   const [pendingLikes, setPendingLikes] = useState<Readonly<Record<string, boolean>>>({});
+  const [pendingSaves, setPendingSaves] = useState<Readonly<Record<string, boolean>>>({});
   const [shakeIds, setShakeIds] = useState<Readonly<Record<string, number>>>({});
 
   const savedIdSet = useMemo(() => new Set(savedPostIds), [savedPostIds]);
@@ -45,6 +49,26 @@ export function useCollageInteractions(posts: readonly HomeFeedPost[], likeMode:
       cancelled = true;
     };
   }, [likeMode, posts]);
+
+  useEffect(() => {
+    if (!hasAccessToken()) {
+      setSavedPostIds([]);
+      return;
+    }
+
+    let cancelled = false;
+    getBookmarkedPostIds()
+      .then((ids) => {
+        if (!cancelled) setSavedPostIds([...ids]);
+      })
+      .catch(() => {
+        if (!cancelled) setSavedPostIds([]);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [posts]);
 
   const toggleLiked = useCallback(
     async (id: string) => {
@@ -97,12 +121,43 @@ export function useCollageInteractions(posts: readonly HomeFeedPost[], likeMode:
     [likeMode, liked, pendingLikes, posts],
   );
 
-  const toggleSaved = useCallback((id: string) => {
-    setSavedPostIds((prev) => {
-      if (prev.includes(id)) return prev.filter((postId) => postId !== id);
-      return [id, ...prev];
-    });
-  }, [setSavedPostIds]);
+  const toggleSaved = useCallback(
+    async (id: string) => {
+      if (!hasAccessToken()) {
+        toast.error("برای ذخیره پست ابتدا وارد حساب کاربری شوید.");
+        return;
+      }
+
+      if (pendingSaves[id]) return;
+
+      const wasSaved = savedPostIds.includes(id);
+      const nextSaved = !wasSaved;
+      setPendingSaves((prev) => ({ ...prev, [id]: true }));
+      setSavedPostIds((prev) => {
+        if (nextSaved) return prev.includes(id) ? prev : [id, ...prev];
+        return prev.filter((postId) => postId !== id);
+      });
+
+      try {
+        const result = await togglePostBookmark(id);
+        setSavedPostIds((prev) => {
+          if (result.isBookmarked) return prev.includes(id) ? prev : [id, ...prev];
+          return prev.filter((postId) => postId !== id);
+        });
+        onSavedChange?.(id, result.isBookmarked);
+      } catch (error: unknown) {
+        setSavedPostIds((prev) => {
+          if (wasSaved) return prev.includes(id) ? prev : [id, ...prev];
+          return prev.filter((postId) => postId !== id);
+        });
+        setShakeIds((prev) => ({ ...prev, [id]: (prev[id] ?? 0) + 1 }));
+        toast.error(getUserFacingErrorMessage(error, "ذخیره پست ناموفق بود."));
+      } finally {
+        setPendingSaves((prev) => ({ ...prev, [id]: false }));
+      }
+    },
+    [onSavedChange, pendingSaves, savedPostIds],
+  );
 
   return { liked, saved, likeCounts, pendingLikes, shakeIds, toggleLiked, toggleSaved };
 }

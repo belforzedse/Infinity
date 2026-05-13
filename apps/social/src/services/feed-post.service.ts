@@ -60,6 +60,7 @@ function normalizeMediaEntry(entry: unknown): StrapiMediaAttrs {
 
 function normalizeMediaList(raw: unknown): readonly StrapiMediaAttrs[] {
   if (!raw || typeof raw !== "object") return [];
+  if (Array.isArray(raw)) return raw.map(normalizeMediaEntry);
   const r = raw as Record<string, unknown>;
   const data = r.data;
   if (Array.isArray(data)) return data.map(normalizeMediaEntry);
@@ -96,7 +97,7 @@ function inferOverlay(
   return null;
 }
 
-function normalizeStrapiPostEntry(entry: unknown): HomeFeedPost | null {
+export function normalizeStrapiPostEntry(entry: unknown): HomeFeedPost | null {
   if (!entry || typeof entry !== "object") return null;
   const root = entry as Record<string, unknown>;
   const id = root.id;
@@ -105,7 +106,7 @@ function normalizeStrapiPostEntry(entry: unknown): HomeFeedPost | null {
   const coverRaw = attrs.CoverImage;
   const coverData =
     coverRaw && typeof coverRaw === "object"
-      ? (coverRaw as Record<string, unknown>).data
+      ? ((coverRaw as Record<string, unknown>).data ?? coverRaw)
       : undefined;
   const coverAttrs = normalizeMediaEntry(coverData);
   const imageSrc = strapiMediaUrl(coverAttrs.url);

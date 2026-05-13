@@ -1743,6 +1743,32 @@ export interface ApiPaymentGatewayPaymentGateway extends Schema.CollectionType {
   };
 }
 
+export interface ApiPostBookmarkPostBookmark extends Schema.CollectionType {
+  collectionName: "post_bookmarks";
+  info: {
+    displayName: "PostBookmark";
+    pluralName: "post-bookmarks";
+    singularName: "post-bookmark";
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    createdAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<"api::post-bookmark.post-bookmark", "oneToOne", "admin::user"> &
+      Attribute.Private;
+    post: Attribute.Relation<"api::post-bookmark.post-bookmark", "manyToOne", "api::post.post">;
+    updatedAt: Attribute.DateTime;
+    updatedBy: Attribute.Relation<"api::post-bookmark.post-bookmark", "oneToOne", "admin::user"> &
+      Attribute.Private;
+    user: Attribute.Relation<
+      "api::post-bookmark.post-bookmark",
+      "manyToOne",
+      "plugin::users-permissions.user"
+    >;
+  };
+}
+
 export interface ApiPostCommentLikePostCommentLike extends Schema.CollectionType {
   collectionName: "post_comment_likes";
   info: {
@@ -1879,6 +1905,11 @@ export interface ApiPostPost extends Schema.CollectionType {
     createdBy: Attribute.Relation<"api::post.post", "oneToOne", "admin::user"> & Attribute.Private;
     Description: Attribute.RichText & Attribute.Required;
     Media: Attribute.Media<"images" | "videos", true> & Attribute.Required;
+    post_bookmarks: Attribute.Relation<
+      "api::post.post",
+      "oneToMany",
+      "api::post-bookmark.post-bookmark"
+    >;
     post_comments: Attribute.Relation<
       "api::post.post",
       "oneToMany",
@@ -3473,6 +3504,7 @@ declare module "@strapi/types" {
       "api::order-log.order-log": ApiOrderLogOrderLog;
       "api::order.order": ApiOrderOrder;
       "api::payment-gateway.payment-gateway": ApiPaymentGatewayPaymentGateway;
+      "api::post-bookmark.post-bookmark": ApiPostBookmarkPostBookmark;
       "api::post-comment-like.post-comment-like": ApiPostCommentLikePostCommentLike;
       "api::post-comment.post-comment": ApiPostCommentPostComment;
       "api::post-like.post-like": ApiPostLikePostLike;

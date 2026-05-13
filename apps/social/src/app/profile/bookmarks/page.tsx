@@ -1,19 +1,17 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Bookmark } from "lucide-react";
-import { useAtomValue } from "jotai";
 import toast from "react-hot-toast";
 import { HomePostsCollage } from "@/components/posts/HomePostsCollage";
 import { HomePostsCollageSkeleton } from "@/components/posts/HomePostsCollageSkeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useSmoothLoading } from "@/hooks/useSmoothLoading";
-import { savedPostIdsAtom } from "@/lib/saved-posts-atom";
-import { getHomeFeedPosts, type HomeFeedPost } from "@/services/feed-post.service";
+import type { HomeFeedPost } from "@/services/feed-post.service";
+import { getUserBookmarkedPosts } from "@/services/post-bookmark.service";
 import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
 
 export default function ProfileBookmarksPage() {
-  const savedPostIds = useAtomValue(savedPostIdsAtom);
   const [posts, setPosts] = useState<readonly HomeFeedPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const showLoading = useSmoothLoading(isLoading, { showDelayMs: 80, minVisibleMs: 240 });
@@ -21,9 +19,9 @@ export default function ProfileBookmarksPage() {
   useEffect(() => {
     let cancelled = false;
 
-    getHomeFeedPosts()
-      .then((rows) => {
-        if (!cancelled) setPosts(rows);
+    getUserBookmarkedPosts(1, 100)
+      .then((response) => {
+        if (!cancelled) setPosts(response.data);
       })
       .catch((error: unknown) => {
         if (!cancelled) toast.error(getUserFacingErrorMessage(error, "دریافت نشان‌ها ناموفق بود."));
@@ -37,11 +35,10 @@ export default function ProfileBookmarksPage() {
     };
   }, []);
 
-  const savedSet = useMemo(() => new Set(savedPostIds), [savedPostIds]);
-  const bookmarkedPosts = useMemo(
-    () => posts.filter((post) => savedSet.has(post.id)),
-    [posts, savedSet],
-  );
+  const handleSavedChange = useCallback((postId: string, isSaved: boolean) => {
+    if (isSaved) return;
+    setPosts((prev) => prev.filter((post) => post.id !== postId));
+  }, []);
 
   return (
     <div className="flex w-full flex-col gap-6" dir="rtl">
@@ -51,7 +48,7 @@ export default function ProfileBookmarksPage() {
 
       {isLoading ? (
         showLoading ? <HomePostsCollageSkeleton /> : null
-      ) : bookmarkedPosts.length === 0 ? (
+      ) : posts.length === 0 ? (
         <EmptyState
           icon={Bookmark}
           title="هنوز پستی ذخیره نکرده‌اید"
@@ -59,7 +56,12 @@ export default function ProfileBookmarksPage() {
           cta={{ label: "کاوش پست‌ها", href: "/" }}
         />
       ) : (
-        <HomePostsCollage posts={bookmarkedPosts} likeMode="api" showHeading={false} />
+        <HomePostsCollage
+          posts={posts}
+          likeMode="api"
+          showHeading={false}
+          onSavedChange={handleSavedChange}
+        />
       )}
     </div>
   );

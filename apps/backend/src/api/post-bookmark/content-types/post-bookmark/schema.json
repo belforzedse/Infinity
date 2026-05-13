@@ -1,0 +1,26 @@
+{
+  "kind": "collectionType",
+  "collectionName": "post_bookmarks",
+  "info": {
+    "singularName": "post-bookmark",
+    "pluralName": "post-bookmarks",
+    "displayName": "PostBookmark"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "user": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "post": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::post.post",
+      "inversedBy": "post_bookmarks"
+    }
+  }
+}
