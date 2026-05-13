@@ -13,6 +13,7 @@ import {
 import toast from "react-hot-toast";
 import type { PostDetail, PostDetailComment, PostDetailMedia } from "@/services/post-detail.service";
 import { createPostComment } from "@/services/post-comment.service";
+import { getLikedPostCommentIds, togglePostCommentLike } from "@/services/post-comment-like.service";
 import { getLikedPostIds, hasAccessToken, togglePostLike } from "@/services/post-like.service";
 import { getBookmarkedPostIds, togglePostBookmark } from "@/services/post-bookmark.service";
 import { BlurImage } from "@/components/ui/BlurImage";
@@ -74,9 +75,40 @@ function Avatar({ comment }: { comment: PostDetailComment }) {
   );
 }
 
-function CommentItem({ comment, isReply = false }: { comment: PostDetailComment; isReply?: boolean }) {
+function updateCommentById(
+  rows: PostDetailComment[],
+  id: string,
+  updater: (comment: PostDetailComment) => PostDetailComment,
+): PostDetailComment[] {
+  return rows.map((comment) => {
+    if (comment.id === id) return updater(comment);
+    if (comment.replies.length === 0) return comment;
+    return {
+      ...comment,
+      replies: updateCommentById(comment.replies, id, updater),
+    };
+  });
+}
+
+function CommentItem({
+  comment,
+  isReply = false,
+  likedCommentIds,
+  pendingCommentLikes,
+  onReply,
+  onToggleLike,
+}: {
+  comment: PostDetailComment;
+  isReply?: boolean;
+  likedCommentIds: Readonly<Record<string, boolean>>;
+  pendingCommentLikes: Readonly<Record<string, boolean>>;
+  onReply: (comment: PostDetailComment) => void;
+  onToggleLike: (comment: PostDetailComment) => void;
+}) {
   const [showReplies, setShowReplies] = useState(false);
   const hasReplies = comment.replies.length > 0;
+  const liked = Boolean(likedCommentIds[comment.id]);
+  const pending = Boolean(pendingCommentLikes[comment.id]);
 
   return (
     <div className={cx("w-full", isReply && "pr-8")}>
@@ -95,13 +127,28 @@ function CommentItem({ comment, isReply = false }: { comment: PostDetailComment;
             {comment.text}
           </p>
           <div className="mt-1 flex flex-row items-center gap-5 font-peyda text-[12px] font-semibold text-[#3D4C6E]">
-            <button type="button" className="transition-colors hover:text-zinc-700">
+            <button
+              type="button"
+              onClick={() => onReply(comment)}
+              className="transition-colors hover:text-zinc-700"
+            >
               پاسخ
             </button>
-            <span className="inline-flex flex-row items-center gap-1">
+            <button
+              type="button"
+              onClick={() => onToggleLike(comment)}
+              disabled={pending}
+              className="inline-flex flex-row items-center gap-1 transition-colors hover:text-zinc-700 disabled:pointer-events-none disabled:opacity-50"
+              aria-label={liked ? "لغو پسند دیدگاه" : "پسندیدن دیدگاه"}
+              aria-pressed={liked}
+            >
               {formatCount(comment.likesCount)}
-              <Heart className="size-4" strokeWidth={1.6} aria-hidden />
-            </span>
+              <Heart
+                className={cx("size-4", liked && "fill-current")}
+                strokeWidth={1.6}
+                aria-hidden
+              />
+            </button>
           </div>
         </div>
       </div>
@@ -119,7 +166,15 @@ function CommentItem({ comment, isReply = false }: { comment: PostDetailComment;
           {showReplies ? (
             <div className="mt-4 flex flex-col gap-5">
               {comment.replies.map((reply) => (
-                <CommentItem key={reply.id} comment={reply} isReply />
+                <CommentItem
+                  key={reply.id}
+                  comment={reply}
+                  isReply
+                  likedCommentIds={likedCommentIds}
+                  pendingCommentLikes={pendingCommentLikes}
+                  onReply={onReply}
+                  onToggleLike={onToggleLike}
+                />
               ))}
             </div>
           ) : null}
@@ -294,21 +349,33 @@ function PostMediaCarousel({ media }: { media: PostDetailMedia[] }) {
 export function PostDetailView({ post, className }: { post: PostDetail; className?: string }) {
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(post.likesCount);
+  const [comments, setComments] = useState<PostDetailComment[]>(post.comments);
   const [isLikePending, setIsLikePending] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [isSavePending, setIsSavePending] = useState(false);
+  const [likedCommentIds, setLikedCommentIds] = useState<Readonly<Record<string, boolean>>>({});
+  const [pendingCommentLikes, setPendingCommentLikes] = useState<Readonly<Record<string, boolean>>>({});
   const [heartBurstKey, setHeartBurstKey] = useState(0);
   const [saveAnimKey, setSaveAnimKey] = useState(0);
   const [comment, setComment] = useState("");
+  const [replyTarget, setReplyTarget] = useState<PostDetailComment | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitHint, setSubmitHint] = useState<string | null>(null);
   const likeButtonRef = useRef<HTMLButtonElement | null>(null);
+  const commentInputRef = useRef<HTMLInputElement | null>(null);
   const previousIsLiked = useRef(isLiked);
   const previousIsSaved = useRef(isSaved);
 
   useEffect(() => {
     setLikeCount(post.likesCount);
   }, [post.id, post.likesCount]);
+
+  useEffect(() => {
+    setComments(post.comments);
+    setLikedCommentIds({});
+    setPendingCommentLikes({});
+    setReplyTarget(null);
+  }, [post.id, post.comments]);
 
   useEffect(() => {
     if (isLiked && !previousIsLiked.current) {
@@ -358,6 +425,31 @@ export function PostDetailView({ post, className }: { post: PostDetail; classNam
       })
       .catch(() => {
         if (!cancelled) setIsSaved(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [post.id]);
+
+  useEffect(() => {
+    if (!hasAccessToken()) {
+      setLikedCommentIds({});
+      return;
+    }
+
+    let cancelled = false;
+    getLikedPostCommentIds()
+      .then((ids) => {
+        if (cancelled) return;
+        const next: Record<string, boolean> = {};
+        ids.forEach((id) => {
+          next[id] = true;
+        });
+        setLikedCommentIds(next);
+      })
+      .catch(() => {
+        if (!cancelled) setLikedCommentIds({});
       });
 
     return () => {
@@ -425,6 +517,56 @@ export function PostDetailView({ post, className }: { post: PostDetail; classNam
     }
   }
 
+  async function toggleCommentLike(target: PostDetailComment) {
+    if (pendingCommentLikes[target.id]) return;
+
+    if (!hasAccessToken()) {
+      toast.error("برای پسندیدن دیدگاه ابتدا وارد حساب کاربری شوید.");
+      return;
+    }
+
+    const wasLiked = Boolean(likedCommentIds[target.id]);
+    const nextLiked = !wasLiked;
+    setPendingCommentLikes((prev) => ({ ...prev, [target.id]: true }));
+    setLikedCommentIds((prev) => ({ ...prev, [target.id]: nextLiked }));
+    setComments((prev) =>
+      updateCommentById(prev, target.id, (item) => ({
+        ...item,
+        likesCount: Math.max(0, item.likesCount + (nextLiked ? 1 : -1)),
+      })),
+    );
+
+    try {
+      const result = await togglePostCommentLike(target.id);
+      setLikedCommentIds((prev) => ({ ...prev, [target.id]: result.isLiked }));
+      if (result.isLiked !== nextLiked) {
+        setComments((prev) =>
+          updateCommentById(prev, target.id, (item) => ({
+            ...item,
+            likesCount: Math.max(0, item.likesCount + (result.isLiked ? 1 : -1)),
+          })),
+        );
+      }
+    } catch (error: unknown) {
+      setLikedCommentIds((prev) => ({ ...prev, [target.id]: wasLiked }));
+      setComments((prev) =>
+        updateCommentById(prev, target.id, (item) => ({
+          ...item,
+          likesCount: Math.max(0, item.likesCount + (nextLiked ? -1 : 1)),
+        })),
+      );
+      toast.error(getUserFacingErrorMessage(error, "پسندیدن دیدگاه ناموفق بود."));
+    } finally {
+      setPendingCommentLikes((prev) => ({ ...prev, [target.id]: false }));
+    }
+  }
+
+  function startReply(target: PostDetailComment) {
+    setReplyTarget(target);
+    setSubmitHint(null);
+    window.setTimeout(() => commentInputRef.current?.focus(), 0);
+  }
+
   async function submitComment() {
     const value = comment.trim();
     if (!value || isSubmitting) return;
@@ -436,10 +578,15 @@ export function PostDetailView({ post, className }: { post: PostDetail; classNam
     setIsSubmitting(true);
     setSubmitHint(null);
     try {
-      await createPostComment({ postId: post.id, content: value });
+      await createPostComment({
+        postId: post.id,
+        content: value,
+        parentCommentId: replyTarget?.id,
+      });
       setComment("");
+      setReplyTarget(null);
       setSubmitHint("دیدگاه شما بعد از تایید نمایش داده می‌شود.");
-      toast.success("دیدگاه ثبت شد و در انتظار تایید است.");
+      toast.success(replyTarget ? "پاسخ ثبت شد و در انتظار تایید است." : "دیدگاه ثبت شد و در انتظار تایید است.");
     } catch (error: unknown) {
       const message = getUserFacingErrorMessage(error, "ثبت دیدگاه ناموفق بود.");
       setSubmitHint(message);
@@ -534,7 +681,7 @@ export function PostDetailView({ post, className }: { post: PostDetail; classNam
       </div>
 
       <div className="mt-6 border-t border-[#E5EAF2] pt-6">
-        {post.comments.length === 0 ? (
+        {comments.length === 0 ? (
           <EmptyState
             icon={MessageSquareText}
             title="هنوز دیدگاهی ثبت نشده است"
@@ -543,14 +690,33 @@ export function PostDetailView({ post, className }: { post: PostDetail; classNam
           />
         ) : (
           <div className="flex flex-col gap-6">
-            {post.comments.map((item) => (
-              <CommentItem key={item.id} comment={item} />
+            {comments.map((item) => (
+              <CommentItem
+                key={item.id}
+                comment={item}
+                likedCommentIds={likedCommentIds}
+                pendingCommentLikes={pendingCommentLikes}
+                onReply={startReply}
+                onToggleLike={(target) => void toggleCommentLike(target)}
+              />
             ))}
           </div>
         )}
       </div>
 
       <div className="sticky bottom-3 mt-7 rounded-full bg-white/85 p-1 shadow-[0_10px_30px_rgba(61,76,110,0.08)] backdrop-blur-md">
+        {replyTarget ? (
+          <div className="mb-2 flex items-center justify-between rounded-2xl bg-[#F7F8FF] px-4 py-2 font-peyda text-xs text-[#3D4C6E]">
+            <button
+              type="button"
+              onClick={() => setReplyTarget(null)}
+              className="font-semibold text-[#7B8498] transition-colors hover:text-zinc-700"
+            >
+              لغو
+            </button>
+            <span className="min-w-0 truncate">پاسخ به {replyTarget.authorName}</span>
+          </div>
+        ) : null}
         <div className="flex h-12 flex-row items-center gap-2 rounded-full bg-[#F9FAFF] px-2">
           <button
             type="button"
@@ -562,6 +728,7 @@ export function PostDetailView({ post, className }: { post: PostDetail; classNam
             <SendHorizonal className="size-5" strokeWidth={1.6} aria-hidden />
           </button>
           <input
+            ref={commentInputRef}
             value={comment}
             onChange={(event) => setComment(event.target.value)}
             onKeyDown={(event) => {
@@ -570,7 +737,7 @@ export function PostDetailView({ post, className }: { post: PostDetail; classNam
                 void submitComment();
               }
             }}
-            placeholder="نظر شما"
+            placeholder={replyTarget ? "پاسخ شما" : "نظر شما"}
             className="h-full min-w-0 flex-1 bg-transparent px-2 text-right font-peyda text-sm font-medium text-[#424242] placeholder:text-[#A3AFC2] focus:outline-none"
             maxLength={2000}
           />

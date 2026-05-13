@@ -145,9 +145,20 @@ function relationTotal(raw: unknown): number {
   const r = raw as Record<string, unknown>;
   if (typeof r.count === "number") return r.count;
   const meta = r.meta as Record<string, unknown> | undefined;
+  if (typeof meta?.count === "number") return meta.count;
   const pagination = meta?.pagination as Record<string, unknown> | undefined;
   if (typeof pagination?.total === "number") return pagination.total;
+  if (typeof pagination?.count === "number") return pagination.count;
   const data = r.data;
+  if (data && typeof data === "object" && !Array.isArray(data)) {
+    const dataAttrs = (data as Record<string, unknown>).attributes as
+      | Record<string, unknown>
+      | undefined;
+    if (typeof dataAttrs?.count === "number") return dataAttrs.count;
+    if (typeof (data as Record<string, unknown>).count === "number") {
+      return (data as Record<string, number>).count;
+    }
+  }
   if (Array.isArray(data)) return data.length;
   return 0;
 }

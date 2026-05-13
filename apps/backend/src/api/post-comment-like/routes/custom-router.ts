@@ -8,5 +8,13 @@ export default {
         auth: { scope: [] },
       },
     },
+    {
+      method: "GET",
+      path: "/post-comment-likes/user/me",
+      handler: "post-comment-like.getUserLikes",
+      config: {
+        auth: { scope: [] },
+      },
+    },
   ],
 };

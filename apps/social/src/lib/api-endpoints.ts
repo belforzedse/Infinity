@@ -40,6 +40,10 @@ export const ENDPOINTS = {
     TOGGLE: "/post-likes/toggle",
     USER_LIKES: "/post-likes/user/me",
   },
+  POST_COMMENT_LIKES: {
+    TOGGLE: "/post-comment-likes/toggle",
+    USER_LIKES: "/post-comment-likes/user/me",
+  },
   POST_BOOKMARKS: {
     TOGGLE: "/post-bookmarks/toggle",
     USER_BOOKMARKS: "/post-bookmarks/user/me",

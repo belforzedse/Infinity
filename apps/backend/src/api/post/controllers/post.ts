@@ -74,7 +74,74 @@ async function deleteUploadFiles(strapi: any, mediaIds: number[]) {
   }
 }
 
+function relationCountPayload(count: number) {
+  return {
+    data: {
+      attributes: {
+        count,
+      },
+    },
+  };
+}
+
+function responseRows(response: any): any[] {
+  const data = response?.data;
+  if (Array.isArray(data)) return data;
+  return data ? [data] : [];
+}
+
+async function attachPostEngagementCounts(strapi: any, response: any) {
+  const rows = responseRows(response);
+  const ids = rows
+    .map((row) => Number(row?.id))
+    .filter((id) => Number.isFinite(id));
+
+  if (ids.length === 0) return response;
+
+  const counts = await Promise.all(
+    ids.map(async (id) => {
+      const [likes, comments] = await Promise.all([
+        strapi.db.query("api::post-like.post-like").count({
+          where: { post: { id } },
+        }),
+        strapi.db.query("api::post-comment.post-comment").count({
+          where: { post: { id }, Status: "Approved" },
+        }),
+      ]);
+
+      return [id, { likes, comments }] as const;
+    }),
+  );
+  const countByPostId = new Map(counts);
+
+  rows.forEach((row) => {
+    const id = Number(row?.id);
+    const countsForPost = countByPostId.get(id);
+    if (!countsForPost) return;
+
+    const target =
+      row.attributes && typeof row.attributes === "object"
+        ? row.attributes
+        : row;
+
+    target.post_likes = relationCountPayload(countsForPost.likes);
+    target.post_comments = relationCountPayload(countsForPost.comments);
+  });
+
+  return response;
+}
+
 export default factories.createCoreController("api::post.post", ({ strapi }) => ({
+  async find(ctx: any) {
+    const response = await super.find(ctx);
+    return attachPostEngagementCounts(strapi, response);
+  },
+
+  async findOne(ctx: any) {
+    const response = await super.findOne(ctx);
+    return attachPostEngagementCounts(strapi, response);
+  },
+
   async create(ctx: any) {
     const data = ctx.request.body?.data || {};
 

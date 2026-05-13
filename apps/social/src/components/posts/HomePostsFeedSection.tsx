@@ -8,5 +8,5 @@ import { getHomeFeedPosts } from "@/services/feed-post.service";
  */
 export async function HomePostsFeedSection() {
   const posts = isSocialHomePostsDemoEnabled() ? getHomeDemoPosts() : await getHomeFeedPosts();
-  return <HomePostsCollage posts={posts} />;
+  return <HomePostsCollage posts={posts} likeMode="api" />;
 }

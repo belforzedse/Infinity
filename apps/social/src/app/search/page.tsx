@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Search } from "lucide-react";
 import toast from "react-hot-toast";
 import { Header } from "@/components/Header";
@@ -33,12 +34,24 @@ function writeRecents(queries: readonly string[]) {
 }
 
 export default function SearchPage() {
-  const [query, setQuery] = useState("");
-  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const searchParams = useSearchParams();
+  const initialQuery = searchParams.get("q") ?? "";
+  const [query, setQuery] = useState(initialQuery);
+  const [debouncedQuery, setDebouncedQuery] = useState(initialQuery);
   const [recentQueries, setRecentQueries] = useState<string[]>(readRecents);
   const [results, setResults] = useState<readonly HomeFeedPost[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const showLoading = useSmoothLoading(isLoading, { showDelayMs: 80, minVisibleMs: 240 });
+
+  useEffect(() => {
+    const q = searchParams.get("q") ?? "";
+    setQuery(q);
+    setDebouncedQuery(q);
+    if (!q.trim()) {
+      setResults([]);
+      setIsLoading(false);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const q = debouncedQuery.trim();

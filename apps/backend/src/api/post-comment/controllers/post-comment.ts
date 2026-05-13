@@ -253,7 +253,14 @@ export default factories.createCoreController("api::post-comment.post-comment", 
     const comments = await strapi.entityService.findMany("api::post-comment.post-comment", {
       filters,
       sort: { createdAt: "desc" },
-      populate: ["user", "post", "parent_comment"],
+      populate: {
+        user: true,
+        post: true,
+        parent_comment: true,
+        post_comment_likes: {
+          count: true,
+        },
+      },
     });
 
     return { data: comments };

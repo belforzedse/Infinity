@@ -1,22 +1,41 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Eye, Images, Pencil, Trash2 } from "lucide-react";
+import { ArrowRight, Check, Eye, Images, MessageSquareText, Pencil, Trash2, X } from "lucide-react";
 import toast from "react-hot-toast";
 import ConfirmDialog from "@/components/Kits/ConfirmDialog";
 import { PostCard, toMobilePostCardVariant } from "@/components/posts/PostCard";
 import { useIsLgUp } from "@/components/posts/use-is-lg-up";
 import SuspenseLoader from "@/components/ui/SuspenseLoader";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { BlurImage } from "@/components/ui/BlurImage";
 import { useSmoothLoading } from "@/hooks/useSmoothLoading";
+import {
+  approvePostComment,
+  listPendingPostComments,
+  rejectPostComment,
+  type PendingPostComment,
+} from "@/services/post-comment.service";
 import { PostService, type ProfilePost } from "@/services/post.service";
 import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
 
 const PROFILE_HREF = "/profile";
+type ProfilePostsTab = "posts" | "comments";
+type CommentAction = "approve" | "reject";
 
 function cx(...parts: (string | false | undefined)[]): string {
   return parts.filter(Boolean).join(" ");
+}
+
+function formatCommentDate(value: string): string {
+  if (!value) return "بدون تاریخ";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "بدون تاریخ";
+  return new Intl.DateTimeFormat("fa-IR", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(date);
 }
 
 function ProfilePostActions({
@@ -76,14 +95,164 @@ function ProfilePostActions({
   );
 }
 
+function ProfilePostsTabs({
+  activeTab,
+  onChange,
+  pendingCount,
+}: {
+  activeTab: ProfilePostsTab;
+  onChange: (tab: ProfilePostsTab) => void;
+  pendingCount: number;
+}) {
+  const tabs: readonly { id: ProfilePostsTab; label: string; count?: number }[] = [
+    { id: "posts", label: "پست‌ها" },
+    { id: "comments", label: "دیدگاه‌ها", count: pendingCount },
+  ];
+
+  return (
+    <div className="inline-flex w-full rounded-2xl bg-white p-1 shadow-[0_0_14.7px_rgba(0,0,0,0.04)] sm:w-auto">
+      {tabs.map((tab) => {
+        const active = activeTab === tab.id;
+        return (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => onChange(tab.id)}
+            className={cx(
+              "inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-xl px-4 font-peyda text-sm font-semibold transition-colors sm:flex-none",
+              active
+                ? "bg-[#3D4C6E] text-white shadow-sm"
+                : "text-[#7B8498] hover:bg-slate-50 hover:text-[#3D4C6E]",
+            )}
+            aria-pressed={active}
+          >
+            {tab.label}
+            {tab.count != null && tab.count > 0 ? (
+              <span
+                className={cx(
+                  "inline-flex min-w-5 items-center justify-center rounded-full px-1.5 text-xs leading-5",
+                  active ? "bg-white/20 text-white" : "bg-[#EEF2FF] text-[#3D4C6E]",
+                )}
+              >
+                {new Intl.NumberFormat("fa-IR").format(tab.count)}
+              </span>
+            ) : null}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function PendingCommentsTable({
+  comments,
+  actionCommentId,
+  onAction,
+}: {
+  comments: readonly PendingPostComment[];
+  actionCommentId: number | null;
+  onAction: (comment: PendingPostComment, action: CommentAction) => void;
+}) {
+  return (
+    <div className="overflow-hidden rounded-2xl bg-white shadow-[0_0_14.7px_rgba(0,0,0,0.04)]">
+      <div className="overflow-x-auto">
+        <table className="min-w-[720px] w-full border-collapse text-right font-peyda">
+          <thead className="bg-[#F8FAFC] text-xs font-semibold text-[#7B8498]">
+            <tr>
+              <th className="px-4 py-3">پست</th>
+              <th className="px-4 py-3">دیدگاه</th>
+              <th className="px-4 py-3">نویسنده</th>
+              <th className="px-4 py-3">تاریخ</th>
+              <th className="px-4 py-3 text-center">عملیات</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 text-sm text-[#424242]">
+            {comments.map((comment) => {
+              const busy = actionCommentId === comment.id;
+              return (
+                <tr key={comment.id} className="align-middle">
+                  <td className="w-[230px] px-4 py-3">
+                    <div className="flex min-w-0 flex-row items-center gap-3">
+                      <div className="relative size-14 shrink-0 overflow-hidden rounded-xl bg-slate-100">
+                        {comment.post?.coverUrl ? (
+                          <BlurImage
+                            src={comment.post.coverUrl}
+                            alt={comment.post.title}
+                            fill
+                            sizes="56px"
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-[#94A3B8]">
+                            <Images className="size-5" strokeWidth={1.6} aria-hidden />
+                          </div>
+                        )}
+                      </div>
+                      <span className="line-clamp-2 min-w-0 text-xs font-semibold leading-5 text-[#3D4C6E]">
+                        {comment.post?.title ?? "پست حذف‌شده"}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="max-w-[320px] px-4 py-3">
+                    <p className="line-clamp-3 leading-6 text-[#424242]">{comment.content}</p>
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3 text-[#64748B]">{comment.name}</td>
+                  <td className="whitespace-nowrap px-4 py-3 text-xs text-[#7B8498]">
+                    {formatCommentDate(comment.date)}
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex flex-row items-center justify-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => onAction(comment, "approve")}
+                        disabled={busy}
+                        className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-emerald-50 px-3 text-xs font-semibold text-emerald-700 transition-colors hover:bg-emerald-100 disabled:pointer-events-none disabled:opacity-50"
+                      >
+                        <Check className="size-4" strokeWidth={1.8} aria-hidden />
+                        تایید
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => onAction(comment, "reject")}
+                        disabled={busy}
+                        className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-rose-50 px-3 text-xs font-semibold text-rose-700 transition-colors hover:bg-rose-100 disabled:pointer-events-none disabled:opacity-50"
+                      >
+                        <X className="size-4" strokeWidth={1.8} aria-hidden />
+                        رد
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 export default function ProfilePostsPage() {
   const router = useRouter();
   const isLgUp = useIsLgUp();
+  const [activeTab, setActiveTab] = useState<ProfilePostsTab>("posts");
   const [posts, setPosts] = useState<ProfilePost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const showLoading = useSmoothLoading(isLoading, { showDelayMs: 80, minVisibleMs: 240 });
   const [deleteTarget, setDeleteTarget] = useState<ProfilePost | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [pendingComments, setPendingComments] = useState<PendingPostComment[]>([]);
+  const [commentsLoaded, setCommentsLoaded] = useState(false);
+  const [isCommentsLoading, setIsCommentsLoading] = useState(false);
+  const [commentActionId, setCommentActionId] = useState<number | null>(null);
+  const commentsRequestId = useRef(0);
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -105,6 +274,32 @@ export default function ProfilePostsPage() {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (activeTab !== "comments" || commentsLoaded || isCommentsLoading) return;
+
+    const requestId = commentsRequestId.current + 1;
+    commentsRequestId.current = requestId;
+    setIsCommentsLoading(true);
+
+    listPendingPostComments()
+      .then((rows) => {
+        if (isMountedRef.current && commentsRequestId.current === requestId) {
+          setPendingComments(rows);
+          setCommentsLoaded(true);
+        }
+      })
+      .catch((error: unknown) => {
+        if (isMountedRef.current && commentsRequestId.current === requestId) {
+          toast.error(getUserFacingErrorMessage(error, "دریافت دیدگاه‌ها ناموفق بود."));
+        }
+      })
+      .finally(() => {
+        if (isMountedRef.current && commentsRequestId.current === requestId) {
+          setIsCommentsLoading(false);
+        }
+      });
+  }, [activeTab, commentsLoaded, isCommentsLoading]);
 
   const gridItems = useMemo(
     () =>
@@ -138,11 +333,37 @@ export default function ProfilePostsPage() {
     }
   }, [deleteTarget, deletingId]);
 
+  const handleCommentAction = useCallback(async (comment: PendingPostComment, action: CommentAction) => {
+    if (commentActionId != null) return;
+
+    setCommentActionId(comment.id);
+    try {
+      if (action === "approve") {
+        await approvePostComment(comment.id);
+        toast.success("دیدگاه تایید شد.");
+      } else {
+        await rejectPostComment(comment.id);
+        toast.success("دیدگاه رد شد.");
+      }
+      setPendingComments((prev) => prev.filter((item) => item.id !== comment.id));
+    } catch (error: unknown) {
+      toast.error(
+        getUserFacingErrorMessage(
+          error,
+          action === "approve" ? "تایید دیدگاه ناموفق بود." : "رد دیدگاه ناموفق بود.",
+        ),
+      );
+    } finally {
+      setCommentActionId(null);
+    }
+  }, [commentActionId]);
+
   return (
     <div className="flex w-full flex-col gap-6" dir="rtl">
-      <div className="flex w-full flex-row items-center gap-3">
+      <div className="flex w-full flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-row items-center gap-3">
         <h1 className="font-peyda text-lg font-semibold text-zinc-800 lg:text-xl">
-          پست‌های منتشر شده
+          پست‌های اینفینیتی
         </h1>
         <button
           type="button"
@@ -152,9 +373,15 @@ export default function ProfilePostsPage() {
         >
           <ArrowRight size={18} strokeWidth={1.8} aria-hidden />
         </button>
+        </div>
+        <ProfilePostsTabs
+          activeTab={activeTab}
+          onChange={setActiveTab}
+          pendingCount={pendingComments.length}
+        />
       </div>
 
-      {isLoading ? (
+      {activeTab === "posts" && (isLoading ? (
         showLoading ? <SuspenseLoader /> : null
       ) : posts.length === 0 ? (
         <EmptyState
@@ -189,7 +416,23 @@ export default function ProfilePostsPage() {
             </div>
           ))}
         </div>
-      )}
+      ))}
+
+      {activeTab === "comments" && (isCommentsLoading ? (
+        <SuspenseLoader />
+      ) : pendingComments.length === 0 ? (
+        <EmptyState
+          icon={MessageSquareText}
+          title="دیدگاه در انتظار تایید ندارید"
+          description="دیدگاه‌های جدیدی که نیاز به بررسی داشته باشند اینجا نمایش داده می‌شوند."
+        />
+      ) : (
+        <PendingCommentsTable
+          comments={pendingComments}
+          actionCommentId={commentActionId}
+          onAction={handleCommentAction}
+        />
+      ))}
 
       <ConfirmDialog
         isOpen={deleteTarget != null}
