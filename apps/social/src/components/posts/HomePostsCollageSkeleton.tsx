@@ -39,7 +39,7 @@ function CardPulseShell({
 /**
  * Homepage «پست ها» loading shell — mirrors collage breakpoints (storefront-style pulse blocks).
  */
-export function HomePostsCollageSkeleton() {
+export function HomePostsCollageSkeleton({ showHeading = true }: { showHeading?: boolean } = {}) {
   const xlCap = fluidMaxWidthCapPx("xl");
   const desktopSmCap = fluidMaxWidthCapPx("sm");
 
@@ -50,12 +50,14 @@ export function HomePostsCollageSkeleton() {
       aria-busy="true"
       aria-labelledby="home-posts-heading-skel"
     >
-      <h2
-        id="home-posts-heading-skel"
-        className="self-stretch text-right font-peyda text-2xl font-bold leading-[21px] text-[#424242]"
-      >
-        پست ها
-      </h2>
+      {showHeading ? (
+        <h2
+          id="home-posts-heading-skel"
+          className="self-stretch text-right font-peyda text-2xl font-bold leading-[21px] text-[#424242]"
+        >
+          پست ها
+        </h2>
+      ) : null}
 
       {/* Tablet / mobile: dense sub-lg tracks let small cards fill around larger cards. */}
       <div

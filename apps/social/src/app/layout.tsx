@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { peyda, peydaFanum, rokh, kaghaz } from "@repo/fonts";
 import { Providers } from "@/app/providers";
 import { AppChrome } from "@/components/AppChrome";
+import { NavigationProgress } from "@/components/ui/NavigationProgress";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -22,6 +23,7 @@ export default function RootLayout({
     >
       <body className={`min-h-dvh flex flex-col bg-background text-zinc-900 ${peydaFanum.className}`}>
         <Providers>
+          <NavigationProgress />
           <AppChrome>{children}</AppChrome>
         </Providers>
       </body>

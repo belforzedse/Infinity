@@ -21,7 +21,10 @@
       "Bash(rm:*)",
       "Bash(test:*)",
       "WebSearch",
-      "Bash(npx next lint:*)"
+      "Bash(npx next lint:*)",
+      "Bash(pnpm --filter social lint)",
+      "Bash(pnpm --filter social check-types)",
+      "Bash(pnpm check-types *)"
     ],
     "deny": [],
     "ask": []

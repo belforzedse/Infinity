@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import ConfirmDialog from "@/components/Kits/ConfirmDialog";
 import { PostCard, toMobilePostCardVariant } from "@/components/posts/PostCard";
 import { useIsLgUp } from "@/components/posts/use-is-lg-up";
+import { ProfilePostsGridSkeleton } from "@/components/ui/skeletons/ProfilePostsGridSkeleton";
 import SuspenseLoader from "@/components/ui/SuspenseLoader";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { BlurImage } from "@/components/ui/BlurImage";
@@ -382,8 +383,8 @@ export default function ProfilePostsPage() {
       </div>
 
       {activeTab === "posts" && (isLoading ? (
-        showLoading ? <SuspenseLoader /> : null
-      ) : posts.length === 0 ? (
+        showLoading ? <ProfilePostsGridSkeleton /> : null
+      ) :posts.length === 0 ? (
         <EmptyState
           icon={Images}
           title="هنوز پستی ثبت نشده است"
