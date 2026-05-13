@@ -33,4 +33,8 @@ export const ENDPOINTS = {
     LIST_FOR_POST: (postId: number | string) => `/post-comments/post/${postId}`,
     CREATE: "/post-comments",
   },
+  POST_LIKES: {
+    TOGGLE: "/post-likes/toggle",
+    USER_LIKES: "/post-likes/user/me",
+  },
 } as const;

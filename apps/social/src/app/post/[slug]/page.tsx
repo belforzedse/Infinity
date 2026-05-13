@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Header } from "@/components/Header";
+import { StoriesRail } from "@/components/StoriesRail";
 import { HomePostsCollage } from "@/components/posts/HomePostsCollage";
 import { PostDetailView } from "@/components/posts/PostDetailView";
 import { getHomeDemoPosts, isSocialHomePostsDemoEnabled } from "@/components/posts/home-posts-demo";
 import { getHomeFeedPosts } from "@/services/feed-post.service";
 import { getPostDetailBySlug } from "@/services/post-detail.service";
+import { getActiveStories } from "@/services/story.service";
 
 export const revalidate = 30;
 
@@ -32,6 +34,15 @@ async function getGridPosts() {
   }
 }
 
+async function getStoriesForPost() {
+  try {
+    return await getActiveStories();
+  } catch (error) {
+    console.error("Post detail stories fetch failed:", error);
+    return [];
+  }
+}
+
 export async function generateMetadata({ params }: PostPageProps): Promise<Metadata> {
   const { slug } = await params;
   const post = await getPostDetailBySlug(safeDecode(slug));
@@ -50,27 +61,53 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
 
 export default async function PostDetailPage({ params }: PostPageProps) {
   const { slug } = await params;
-  const [post, gridPosts] = await Promise.all([
+  const [post, gridPosts, activeStories] = await Promise.all([
     getPostDetailBySlug(safeDecode(slug)),
     getGridPosts(),
+    getStoriesForPost(),
   ]);
 
   if (!post) notFound();
+
+  const relatedPosts = gridPosts.filter((item) => item.slug !== post.slug);
+  const sidePosts = relatedPosts.slice(0, 6);
+  const lowerPosts = relatedPosts.slice(6);
 
   return (
     <div className="flex min-h-dvh flex-col">
       <Header />
       <main
-        className="mx-auto flex w-full max-w-[1280px] flex-1 flex-col gap-6 px-4 pb-8 pt-3 sm:px-6 lg:flex-row lg:items-start lg:gap-6 lg:px-[60px] lg:pb-12 lg:pt-6"
+        className="mx-auto flex w-full max-w-[1280px] flex-1 flex-col gap-6 px-4 pb-8 pt-3 sm:px-6 lg:px-[60px] lg:pb-12 lg:pt-6"
         dir="rtl"
       >
-        <aside className="w-full min-w-0 lg:sticky lg:top-24 lg:w-[560px] lg:shrink-0">
-          <PostDetailView post={post} />
-        </aside>
+        {activeStories.length > 0 ? (
+          <section>
+            <StoriesRail stories={activeStories} />
+          </section>
+        ) : null}
 
-        <section className="hidden min-w-0 flex-1 lg:block" aria-label="پست‌های دیگر">
-          <HomePostsCollage posts={gridPosts.filter((item) => item.slug !== post.slug)} />
-        </section>
+        <div className="flex w-full min-w-0 flex-col gap-6 lg:flex-row lg:items-start">
+          <aside className="w-full min-w-0 lg:w-[560px] lg:shrink-0">
+            <PostDetailView post={post} />
+          </aside>
+
+          <section
+            className="hidden min-w-0 flex-1 lg:block"
+            aria-label="پست‌های دیگر"
+          >
+            <HomePostsCollage
+              posts={sidePosts}
+              desktopLayout="compact"
+              likeMode="api"
+            />
+          </section>
+        </div>
+
+        {lowerPosts.length > 0 ? (
+          <section aria-label="پست‌های بیشتر">
+            <HomePostsCollage posts={lowerPosts} likeMode="api" showHeading={false} />
+          </section>
+        ) : null}
       </main>
     </div>
   );

@@ -1,11 +1,19 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState } from "react";
-import { Bookmark, Heart, MessageCircle, SendHorizonal } from "lucide-react";
+import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import {
+  Bookmark,
+  ChevronLeft,
+  ChevronRight,
+  Heart,
+  MessageCircle,
+  SendHorizonal,
+} from "lucide-react";
 import toast from "react-hot-toast";
 import type { PostDetail, PostDetailComment, PostDetailMedia } from "@/services/post-detail.service";
 import { createPostComment } from "@/services/post-comment.service";
+import { getLikedPostIds, hasAccessToken, togglePostLike } from "@/services/post-like.service";
 import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
 
 function cx(...parts: (string | false | undefined)[]): string {
@@ -124,8 +132,8 @@ function MediaSlide({ media, active }: { media: PostDetailMedia; active: boolean
   return (
     <div
       className={cx(
-        "absolute inset-0 transition-opacity duration-200",
-        active ? "opacity-100" : "pointer-events-none opacity-0",
+        "relative h-full w-full shrink-0",
+        !active && "pointer-events-none",
       )}
       aria-hidden={!active}
     >
@@ -154,7 +162,62 @@ function MediaSlide({ media, active }: { media: PostDetailMedia; active: boolean
 
 function PostMediaCarousel({ media }: { media: PostDetailMedia[] }) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [dragOffset, setDragOffset] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const viewportRef = useRef<HTMLDivElement | null>(null);
+  const dragStartX = useRef(0);
+  const pointerId = useRef<number | null>(null);
   const activeMedia = media[Math.min(activeIndex, media.length - 1)];
+  const hasMultiple = media.length > 1;
+
+  const goTo = useCallback(
+    (index: number) => {
+      if (!hasMultiple) return;
+      setActiveIndex((index + media.length) % media.length);
+      setDragOffset(0);
+    },
+    [hasMultiple, media.length],
+  );
+
+  const goPrevious = useCallback(() => goTo(activeIndex - 1), [activeIndex, goTo]);
+  const goNext = useCallback(() => goTo(activeIndex + 1), [activeIndex, goTo]);
+
+  function startDrag(event: ReactPointerEvent<HTMLDivElement>) {
+    if (!hasMultiple || (event.pointerType === "mouse" && event.button !== 0)) return;
+    pointerId.current = event.pointerId;
+    dragStartX.current = event.clientX;
+    setIsDragging(true);
+    setDragOffset(0);
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }
+
+  function moveDrag(event: ReactPointerEvent<HTMLDivElement>) {
+    if (!isDragging || pointerId.current !== event.pointerId) return;
+    setDragOffset(event.clientX - dragStartX.current);
+  }
+
+  function endDrag(event: ReactPointerEvent<HTMLDivElement>) {
+    if (!isDragging || pointerId.current !== event.pointerId) return;
+
+    const width = viewportRef.current?.clientWidth ?? 0;
+    const threshold = Math.min(90, Math.max(48, width * 0.18));
+    const offset = event.clientX - dragStartX.current;
+
+    if (Math.abs(offset) >= threshold) {
+      if (offset < 0) {
+        goPrevious();
+      } else {
+        goNext();
+      }
+    }
+
+    pointerId.current = null;
+    setIsDragging(false);
+    setDragOffset(0);
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+  }
 
   if (!activeMedia) {
     return (
@@ -166,26 +229,60 @@ function PostMediaCarousel({ media }: { media: PostDetailMedia[] }) {
 
   return (
     <div className="relative w-full overflow-hidden rounded-[28px] bg-zinc-100 shadow-[0_12px_34px_rgba(61,76,110,0.08)]">
-      <div className="relative aspect-[4/5] w-full">
-        {media.map((item, index) => (
-          <MediaSlide key={item.id} media={item} active={index === activeIndex} />
-        ))}
-      </div>
-      {media.length > 1 ? (
-        <div className="absolute bottom-5 left-0 right-0 z-10 flex flex-row items-center justify-center gap-1.5">
+      <div
+        ref={viewportRef}
+        dir="ltr"
+        className={cx(
+          "relative aspect-[4/5] w-full touch-pan-y select-none overflow-hidden",
+          hasMultiple && (isDragging ? "cursor-grabbing" : "cursor-grab"),
+        )}
+        onPointerDown={startDrag}
+        onPointerMove={moveDrag}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+      >
+        <div
+          className={cx("flex h-full w-full", !isDragging && "transition-transform duration-200 ease-out")}
+          style={{ transform: `translateX(calc(${-activeIndex * 100}% + ${dragOffset}px))` }}
+        >
           {media.map((item, index) => (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => setActiveIndex(index)}
-              className={cx(
-                "size-2.5 rounded-full border border-white/80 shadow-sm transition-colors",
-                index === activeIndex ? "bg-[#3D4C6E]" : "bg-white",
-              )}
-              aria-label={`اسلاید ${numberFormat.format(index + 1)}`}
-            />
+            <MediaSlide key={item.id} media={item} active={index === activeIndex} />
           ))}
         </div>
+      </div>
+      {hasMultiple ? (
+        <>
+          <button
+            type="button"
+            onClick={goPrevious}
+            className="absolute left-4 top-1/2 z-10 inline-flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-[#3D4C6E] shadow-[0_8px_24px_rgba(61,76,110,0.14)] backdrop-blur-md transition-colors hover:bg-white"
+            aria-label="اسلاید قبلی"
+          >
+            <ChevronLeft className="size-5" strokeWidth={1.8} aria-hidden />
+          </button>
+          <button
+            type="button"
+            onClick={goNext}
+            className="absolute right-4 top-1/2 z-10 inline-flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-[#3D4C6E] shadow-[0_8px_24px_rgba(61,76,110,0.14)] backdrop-blur-md transition-colors hover:bg-white"
+            aria-label="اسلاید بعدی"
+          >
+            <ChevronRight className="size-5" strokeWidth={1.8} aria-hidden />
+          </button>
+          <div className="absolute bottom-5 left-0 right-0 z-10 flex flex-row items-center justify-center gap-1.5">
+            {media.map((item, index) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => goTo(index)}
+                className={cx(
+                  "size-2.5 rounded-full border border-white/80 shadow-sm transition-colors",
+                  index === activeIndex ? "bg-[#3D4C6E]" : "bg-white",
+                )}
+                aria-label={`اسلاید ${numberFormat.format(index + 1)}`}
+              />
+            ))}
+          </div>
+        </>
       ) : null}
     </div>
   );
@@ -193,12 +290,62 @@ function PostMediaCarousel({ media }: { media: PostDetailMedia[] }) {
 
 export function PostDetailView({ post, className }: { post: PostDetail; className?: string }) {
   const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(post.likesCount);
+  const [isLikePending, setIsLikePending] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitHint, setSubmitHint] = useState<string | null>(null);
 
-  const likeCount = useMemo(() => post.likesCount + (isLiked ? 1 : 0), [isLiked, post.likesCount]);
+  useEffect(() => {
+    setLikeCount(post.likesCount);
+  }, [post.id, post.likesCount]);
+
+  useEffect(() => {
+    if (!hasAccessToken()) return;
+
+    let cancelled = false;
+    getLikedPostIds()
+      .then((ids) => {
+        if (!cancelled) setIsLiked(ids.has(post.id));
+      })
+      .catch(() => {
+        if (!cancelled) setIsLiked(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [post.id]);
+
+  async function toggleLike() {
+    if (isLikePending) return;
+
+    if (!hasAccessToken()) {
+      toast.error("برای پسندیدن پست ابتدا وارد حساب کاربری شوید.");
+      return;
+    }
+
+    const wasLiked = isLiked;
+    const nextLiked = !wasLiked;
+    setIsLikePending(true);
+    setIsLiked(nextLiked);
+    setLikeCount((prev) => Math.max(0, prev + (nextLiked ? 1 : -1)));
+
+    try {
+      const result = await togglePostLike(post.id);
+      setIsLiked(result.isLiked);
+      if (result.isLiked !== nextLiked) {
+        setLikeCount((prev) => Math.max(0, prev + (result.isLiked ? 1 : -1)));
+      }
+    } catch (error: unknown) {
+      setIsLiked(wasLiked);
+      setLikeCount((prev) => Math.max(0, prev + (nextLiked ? -1 : 1)));
+      toast.error(getUserFacingErrorMessage(error, "پسندیدن پست ناموفق بود."));
+    } finally {
+      setIsLikePending(false);
+    }
+  }
 
   async function submitComment() {
     const value = comment.trim();
@@ -252,7 +399,8 @@ export function PostDetailView({ post, className }: { post: PostDetail; classNam
           </span>
           <button
             type="button"
-            onClick={() => setIsLiked((prev) => !prev)}
+            onClick={() => void toggleLike()}
+            disabled={isLikePending}
             className="inline-flex flex-row items-center gap-1.5 rounded-xl transition-colors hover:text-zinc-700"
             aria-label={isLiked ? "لغو پسند" : "پسندیدن"}
             aria-pressed={isLiked}
@@ -261,8 +409,8 @@ export function PostDetailView({ post, className }: { post: PostDetail; classNam
             <Heart
               className="size-7"
               strokeWidth={1.5}
-              fill={isLiked ? "#D52953" : "#D52953"}
-              stroke={isLiked ? "#BA1B42" : "#D52953"}
+              fill={isLiked ? "#D52953" : "none"}
+              stroke={isLiked ? "#BA1B42" : "#94A3B8"}
               aria-hidden
             />
           </button>
