@@ -3,13 +3,14 @@
 import type { CSSProperties } from "react";
 import { useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Layers2, Video } from "lucide-react";
+import { Images, Layers2, Video } from "lucide-react";
 import { InfinityMarkCircle } from "@/components/InfinityMarkCircle";
 import { PostCard, toMobilePostCardVariant } from "@/components/posts/PostCard";
 import type { DesktopPostCardVariant } from "@/components/posts/post-card-variants";
 import type { HomeFeedCardOverlay, HomeFeedPost } from "@/services/feed-post.service";
 import { useIsLgUp } from "@/components/posts/use-is-lg-up";
 import { useCollageInteractions } from "@/components/posts/use-collage-interactions";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 /** Tight horizontal gap; cards use `widthMode="fluid"` so tracks shrink without horizontal scroll. */
 const GRID_GAP_X_PX = 6;
@@ -51,6 +52,10 @@ export function gridSpanStyle(variant: DesktopPostCardVariant): CSSProperties {
     : { gridColumn: "span 1", gridRow: "span 1" };
 }
 
+function staggerStyle(index: number): CSSProperties {
+  return { "--i": Math.min(index, 12) } as CSSProperties;
+}
+
 export type HomePostsCollageProps = {
   posts: readonly HomeFeedPost[];
   likeMode?: "local" | "api";
@@ -68,7 +73,7 @@ export function HomePostsCollage({
 }: HomePostsCollageProps) {
   const isLgUp = useIsLgUp();
   const router = useRouter();
-  const { liked, saved, likeCounts, toggleLiked, toggleSaved } = useCollageInteractions(posts, likeMode);
+  const { liked, saved, likeCounts, toggleLiked, toggleSaved, shakeIds } = useCollageInteractions(posts, likeMode);
   const openPost = useCallback((slug: string) => router.push(`/post/${encodeURIComponent(slug)}`), [router]);
 
   const desktopItems = useMemo(
@@ -118,17 +123,24 @@ export function HomePostsCollage({
       ) : null}
 
       {!hasPosts ? (
-        <p className="w-full text-right font-peyda text-sm text-zinc-500" role="status">
-          هنوز پستی ثبت نشده است.
-        </p>
+        <EmptyState
+          icon={Images}
+          title="هنوز پستی ثبت نشده است"
+          description="وقتی پستی منتشر شود، اینجا نمایش داده می‌شود."
+          className="w-full"
+        />
       ) : isLgUp ? (
         <div className="w-full min-w-0" dir="ltr">
           <div
             className="mx-auto grid w-full max-w-full justify-items-stretch px-0 [&>div]:min-w-0"
             style={gridStyle}
           >
-            {desktopItems.map(({ post, variant, cellStyle }) => (
-              <div key={post.id} style={cellStyle} className="flex min-w-0 justify-center">
+            {desktopItems.map(({ post, variant, cellStyle }, index) => (
+              <div
+                key={post.id}
+                style={{ ...cellStyle, ...staggerStyle(index) }}
+                className="animate-stagger-fade-up flex min-w-0 justify-center"
+              >
                 <PostCard
                   variant={variant}
                   widthMode="fluid"
@@ -143,6 +155,7 @@ export function HomePostsCollage({
                   onSave={() => toggleSaved(post.id)}
                   href={`/post/${encodeURIComponent(post.slug)}`}
                   overlay={post.overlay != null ? <OverlayBadge type={post.overlay} /> : undefined}
+                  shakeKey={shakeIds[post.id]}
                 />
               </div>
             ))}
@@ -150,9 +163,13 @@ export function HomePostsCollage({
         </div>
       ) : (
         <div className="grid w-full min-w-0 grid-flow-dense grid-cols-2 gap-x-2 gap-y-2 auto-rows-auto sm:grid-cols-3 md:grid-cols-4 md:gap-x-2 md:gap-y-2 min-[900px]:grid-cols-5">
-          {mobileCards.map((post) =>
+          {mobileCards.map((post, index) =>
             post.variant === "mobile-lg" ? (
-              <div key={post.id} className="col-span-2 flex min-w-0 justify-center sm:row-span-2">
+              <div
+                key={post.id}
+                style={staggerStyle(index)}
+                className="animate-stagger-fade-up col-span-2 flex min-w-0 justify-center sm:row-span-2"
+              >
                 <div className="w-full min-w-0">
                   <PostCard
                     variant={post.variant}
@@ -170,11 +187,16 @@ export function HomePostsCollage({
                     onSave={() => toggleSaved(post.id)}
                     href={`/post/${encodeURIComponent(post.slug)}`}
                     overlay={post.overlay != null ? <OverlayBadge type={post.overlay} /> : undefined}
+                    shakeKey={shakeIds[post.id]}
                   />
                 </div>
               </div>
             ) : (
-              <div key={post.id} className="min-w-0 w-full">
+              <div
+                key={post.id}
+                style={staggerStyle(index)}
+                className="animate-stagger-fade-up min-w-0 w-full"
+              >
                 <PostCard
                   variant={post.variant}
                   widthMode="fluid"
@@ -191,6 +213,7 @@ export function HomePostsCollage({
                   onSave={() => toggleSaved(post.id)}
                   href={`/post/${encodeURIComponent(post.slug)}`}
                   overlay={post.overlay != null ? <OverlayBadge type={post.overlay} /> : undefined}
+                  shakeKey={shakeIds[post.id]}
                 />
               </div>
             ),

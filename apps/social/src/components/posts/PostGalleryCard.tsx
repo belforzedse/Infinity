@@ -207,15 +207,25 @@ type SortableTileProps = {
 function SortableTile({ item, index, onRemove }: SortableTileProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: item.id });
+  const sortableTransform = CSS.Transform.toString(transform);
 
   const style: React.CSSProperties = {
-    transform: CSS.Transform.toString(transform),
-    transition,
+    transform: [sortableTransform, isDragging ? "scale(1.04) rotate(1deg)" : undefined]
+      .filter(Boolean)
+      .join(" "),
+    transition: isDragging ? "transform 160ms var(--ease-velvet)" : transition,
     zIndex: isDragging ? 10 : undefined,
   };
 
   return (
-    <div ref={setNodeRef} style={style} className="group relative">
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cx(
+        "group relative transition-shadow duration-150 ease-[var(--ease-velvet)]",
+        isDragging && "z-10 shadow-xl",
+      )}
+    >
       <button
         type="button"
         aria-label={`جابجایی تصویر ${index + 1}`}

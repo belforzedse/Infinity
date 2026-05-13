@@ -1,11 +1,11 @@
 "use client";
 
-import type { ReactNode } from "react";
-import Image from "next/image";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Bookmark, Heart, MessageCircle } from "lucide-react";
 import clsx from "clsx";
 import { POST_CARD_LAYOUTS, fluidMaxWidthCapPx, type PostCardVariant } from "@/components/posts/post-card-variants";
+import { BlurImage } from "@/components/ui/BlurImage";
 
 export type { PostCardVariant, DesktopPostCardVariant } from "@/components/posts/post-card-variants";
 export {
@@ -42,6 +42,8 @@ export type PostCardProps = {
    * Use `"none"` only for rare full-bleed layouts (uncapped width).
    */
   fluidMaxWidth?: number | "none";
+  /** Incrementing key from interaction hook; each bump shakes the like button (error rollback feedback). */
+  shakeKey?: number;
 };
 
 const ACTION_TEXT_CLASS =
@@ -76,6 +78,7 @@ export function PostCard({
   className,
   widthMode = "fixed",
   fluidMaxWidth,
+  shakeKey,
 }: PostCardProps) {
   const layout = POST_CARD_LAYOUTS[variant];
   const { widthPx, imageHeightPx, columnGapPx } = layout;
@@ -90,6 +93,42 @@ export function PostCard({
 
   const likesLabel = formatCountLabel(likesCount);
   const commentsLabel = formatCountLabel(commentsCount);
+
+  const [heartBurstKey, setHeartBurstKey] = useState(0);
+  const prevIsLiked = useRef(isLiked);
+  useEffect(() => {
+    if (isLiked && !prevIsLiked.current) {
+      const id = window.setTimeout(() => setHeartBurstKey((key) => key + 1), 0);
+      prevIsLiked.current = isLiked;
+      return () => window.clearTimeout(id);
+    }
+    prevIsLiked.current = isLiked;
+  }, [isLiked]);
+
+  const [saveAnimKey, setSaveAnimKey] = useState(0);
+  const prevIsSaved = useRef(isSaved);
+  useEffect(() => {
+    if (isSaved !== prevIsSaved.current) {
+      const id = window.setTimeout(() => setSaveAnimKey((key) => key + 1), 0);
+      prevIsSaved.current = isSaved;
+      return () => window.clearTimeout(id);
+    }
+    prevIsSaved.current = isSaved;
+  }, [isSaved]);
+
+  const likeButtonRef = useRef<HTMLButtonElement>(null);
+  const prevShakeKey = useRef(shakeKey ?? 0);
+  useEffect(() => {
+    if ((shakeKey ?? 0) === 0 || shakeKey === prevShakeKey.current) return;
+    prevShakeKey.current = shakeKey ?? 0;
+    const el = likeButtonRef.current;
+    if (!el) return;
+    el.classList.remove("animate-shake");
+    void el.offsetHeight; // force reflow to restart animation
+    el.classList.add("animate-shake");
+    const id = window.setTimeout(() => el.classList.remove("animate-shake"), 400);
+    return () => window.clearTimeout(id);
+  }, [shakeKey]);
 
   const articleStyle = isFluid
     ? ({
@@ -130,7 +169,7 @@ export function PostCard({
             aria-label={imageAlt ? `مشاهده پست ${imageAlt}` : "مشاهده پست"}
           />
         ) : null}
-        <Image
+        <BlurImage
           src={imageSrc}
           alt={imageAlt}
           fill
@@ -158,7 +197,7 @@ export function PostCard({
           type="button"
           onClick={onSave}
           className={clsx(
-            "inline-flex size-9 shrink-0 items-center justify-center rounded-lg text-[#94A3B8] outline-none transition-colors",
+            "pressable inline-flex size-9 shrink-0 items-center justify-center rounded-lg text-[#94A3B8] outline-none transition-colors",
             "hover:text-zinc-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400/70",
             "disabled:pointer-events-none disabled:opacity-40",
           )}
@@ -166,12 +205,17 @@ export function PostCard({
           aria-pressed={isSaved}
           disabled={!onSave}
         >
-          <Bookmark
-            size={20}
-            strokeWidth={1.5}
-            className={clsx(isSaved && "fill-current")}
-            aria-hidden
-          />
+          <span
+            key={saveAnimKey}
+            className={clsx("inline-flex shrink-0", saveAnimKey > 0 && "animate-pop")}
+          >
+            <Bookmark
+              size={20}
+              strokeWidth={1.5}
+              className={clsx(isSaved && "fill-current")}
+              aria-hidden
+            />
+          </span>
         </button>
 
         <div className="flex flex-row items-center gap-[11px]">
@@ -179,7 +223,7 @@ export function PostCard({
             type="button"
             onClick={onComment}
             className={clsx(
-              "inline-flex h-9 shrink-0 flex-row items-center gap-1 rounded-lg px-1 text-[#94A3B8] outline-none transition-colors",
+              "pressable inline-flex h-9 shrink-0 flex-row items-center gap-1 rounded-lg px-1 text-[#94A3B8] outline-none transition-colors",
               "hover:text-zinc-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400/70",
               "disabled:pointer-events-none disabled:opacity-40",
             )}
@@ -193,33 +237,40 @@ export function PostCard({
           </button>
 
           <button
+            ref={likeButtonRef}
             type="button"
             onClick={onLike}
             className={clsx(
-              "inline-flex h-9 shrink-0 flex-row items-center gap-1 rounded-lg px-1 outline-none transition-colors",
+              "pressable inline-flex h-9 shrink-0 flex-row items-center gap-1 rounded-lg px-1 outline-none transition-colors",
               "hover:text-zinc-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400/70",
               "disabled:pointer-events-none disabled:opacity-40",
             )}
-            style={
-              isLiked
-                ? { color: HEART_FILL }
-                : { color: ICON_SECONDARY }
-            }
+            style={isLiked ? { color: HEART_FILL } : { color: ICON_SECONDARY }}
             aria-label={isLiked ? "لغو پسند" : "پسندیدن"}
             aria-pressed={isLiked}
             disabled={!onLike}
           >
             {likesLabel != null ? (
-              <span className={clsx(ACTION_TEXT_CLASS, "order-1")}>{likesLabel}</span>
+              <span key={likesLabel} className={clsx(ACTION_TEXT_CLASS, "order-1 animate-fade-up")}>
+                {likesLabel}
+              </span>
             ) : null}
-            <Heart
-              size={20}
-              strokeWidth={1.5}
-              className="order-2 shrink-0"
-              fill={isLiked ? HEART_FILL : "none"}
-              stroke={isLiked ? HEART_STROKE : ICON_SECONDARY}
-              aria-hidden
-            />
+            <span
+              key={heartBurstKey}
+              className={clsx(
+                "heart-burst-target order-2 inline-flex shrink-0",
+                heartBurstKey > 0 && "animate-heart-burst",
+              )}
+            >
+              <Heart
+                size={20}
+                strokeWidth={1.5}
+                className={clsx(heartBurstKey > 0 && "animate-pop")}
+                fill={isLiked ? HEART_FILL : "none"}
+                stroke={isLiked ? HEART_STROKE : ICON_SECONDARY}
+                aria-hidden
+              />
+            </span>
           </button>
         </div>
       </div>

@@ -2,12 +2,14 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Eye, Pencil, Trash2 } from "lucide-react";
+import { ArrowRight, Eye, Images, Pencil, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 import ConfirmDialog from "@/components/Kits/ConfirmDialog";
 import { PostCard, toMobilePostCardVariant } from "@/components/posts/PostCard";
 import { useIsLgUp } from "@/components/posts/use-is-lg-up";
 import SuspenseLoader from "@/components/ui/SuspenseLoader";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { useSmoothLoading } from "@/hooks/useSmoothLoading";
 import { PostService, type ProfilePost } from "@/services/post.service";
 import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
 
@@ -79,6 +81,7 @@ export default function ProfilePostsPage() {
   const isLgUp = useIsLgUp();
   const [posts, setPosts] = useState<ProfilePost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const showLoading = useSmoothLoading(isLoading, { showDelayMs: 80, minVisibleMs: 240 });
   const [deleteTarget, setDeleteTarget] = useState<ProfilePost | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
@@ -152,11 +155,13 @@ export default function ProfilePostsPage() {
       </div>
 
       {isLoading ? (
-        <SuspenseLoader />
+        showLoading ? <SuspenseLoader /> : null
       ) : posts.length === 0 ? (
-        <p className="font-peyda text-sm text-zinc-500" role="status">
-          هنوز پستی ثبت نشده است.
-        </p>
+        <EmptyState
+          icon={Images}
+          title="هنوز پستی ثبت نشده است"
+          description="پست‌های منتشرشده شما اینجا نمایش داده می‌شوند."
+        />
       ) : (
         <div className="grid w-full grid-flow-dense grid-cols-2 gap-x-2 gap-y-4 sm:grid-cols-3 lg:grid-cols-4">
           {gridItems.map(({ post, variant }) => (

@@ -21,15 +21,15 @@ function CardPulseShell({
   return (
     <div className="w-full min-w-0" style={maxWidthPx != null ? { maxWidth: maxWidthPx } : undefined}>
       <div
-        className="w-full animate-pulse rounded-[20px] bg-zinc-200/90"
+        className="w-full skeleton-shimmer rounded-[20px]"
         style={{ aspectRatio: `${aspectW} / ${aspectH}` }}
         aria-hidden
       />
       <div className="mt-2.5 flex h-9 w-full flex-row items-center justify-between px-1">
-        <div className="size-9 shrink-0 animate-pulse rounded-lg bg-zinc-100" aria-hidden />
+        <div className="size-9 shrink-0 skeleton-shimmer-light rounded-lg" aria-hidden />
         <div className="flex gap-2">
-          <div className="h-9 w-14 animate-pulse rounded-lg bg-zinc-100" aria-hidden />
-          <div className="h-9 w-14 animate-pulse rounded-lg bg-zinc-100" aria-hidden />
+          <div className="h-9 w-14 skeleton-shimmer-light rounded-lg" aria-hidden />
+          <div className="h-9 w-14 skeleton-shimmer-light rounded-lg" aria-hidden />
         </div>
       </div>
     </div>

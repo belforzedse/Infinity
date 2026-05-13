@@ -33,7 +33,7 @@ export default function ConfirmDialog({
           <button
             type="button"
             onClick={onConfirm}
-            className="cursor-pointer font-peyda rounded-2xl bg-infinity-primary px-5 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400/70"
+            className="pressable cursor-pointer rounded-2xl bg-infinity-primary px-5 py-2.5 font-peyda text-sm font-medium text-white transition-colors hover:opacity-95 active:bg-[#2f3b56] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400/70"
           >
             {confirmText}
           </button>
@@ -41,7 +41,7 @@ export default function ConfirmDialog({
             <button
               type="button"
               onClick={onCancel}
-              className="cursor-pointer font-peyda rounded-2xl border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400/70"
+              className="pressable cursor-pointer rounded-2xl border border-zinc-200 bg-white px-5 py-2.5 font-peyda text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400/70"
             >
               {cancelText}
             </button>

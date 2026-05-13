@@ -50,7 +50,7 @@ function StoryAvatarRing({
   if (isSeen) {
     return (
       <span
-        className="box-border flex shrink-0 items-center justify-center rounded-full border-2 border-[#C3C3C3] bg-white"
+        className="box-border flex shrink-0 items-center justify-center rounded-full border-2 border-[#C3C3C3] bg-white transition-transform duration-150 ease-[var(--ease-velvet)] group-active:scale-[0.96]"
         style={{ width: OUTER_SIZE_PX, height: OUTER_SIZE_PX }}
       >
         {innerWrap}
@@ -60,7 +60,7 @@ function StoryAvatarRing({
 
   return (
     <span
-      className="inline-flex shrink-0 items-center justify-center rounded-full bg-gradient-to-b from-[#3C4D6E] to-[#98BDFF] p-[3px]"
+      className="inline-flex shrink-0 items-center justify-center rounded-full bg-gradient-to-b from-[#3C4D6E] to-[#98BDFF] p-[3px] transition-transform duration-150 ease-[var(--ease-velvet)] group-active:scale-[0.96]"
       style={{ width: OUTER_SIZE_PX, height: OUTER_SIZE_PX }}
     >
       {innerWrap}
@@ -133,7 +133,7 @@ export function StoriesAvatarList({
             key={story.id}
             type="button"
             onClick={() => onAvatarClick(index)}
-            className="flex shrink-0 items-center justify-center p-0 lg:size-20"
+            className="group pressable flex shrink-0 items-center justify-center rounded-[10px] p-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary focus-visible:ring-offset-2 lg:size-20 lg:rounded-full"
             aria-label={`نمایش استوری ${story.Title}`}
           >
             <span

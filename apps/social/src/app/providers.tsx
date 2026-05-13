@@ -12,6 +12,7 @@ export function Providers({ children }: { children: ReactNode }) {
       <Toaster
         position="top-center"
         toastOptions={{
+          className: "infinity-toast",
           style: { direction: "rtl" },
           duration: 4000,
           success: {

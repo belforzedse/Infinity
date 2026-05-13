@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { HomePostsCollage, gridSpanStyle, OverlayBadge } from "@/components/posts/HomePostsCollage";
 import { PostCard } from "@/components/posts/PostCard";
+import { POST_CARD_LAYOUTS } from "@/components/posts/post-card-variants";
 import { PostDetailView } from "@/components/posts/PostDetailView";
 import { useCollageInteractions } from "@/components/posts/use-collage-interactions";
 import type { HomeFeedPost } from "@/services/feed-post.service";
@@ -17,6 +18,14 @@ type PostDetailRelatedLayoutProps = {
 const GRID_COL_GAP = 6;
 const GRID_ROW_GAP = 8;
 
+function relatedCardInitialStyle(variant: HomeFeedPost["desktopVariant"]) {
+  const layout = POST_CARD_LAYOUTS[variant];
+  return {
+    ...gridSpanStyle(variant),
+    aspectRatio: `${layout.widthPx} / ${layout.imageHeightPx + layout.columnGapPx + 36}`,
+  };
+}
+
 export function PostDetailRelatedLayout({ post, relatedPosts }: PostDetailRelatedLayoutProps) {
   const postRef = useRef<HTMLDivElement | null>(null);
   const probeRef = useRef<HTMLDivElement | null>(null);
@@ -28,7 +37,7 @@ export function PostDetailRelatedLayout({ post, relatedPosts }: PostDetailRelate
     (slug: string) => router.push(`/post/${encodeURIComponent(slug)}`),
     [router],
   );
-  const { liked, saved, likeCounts, toggleLiked, toggleSaved } = useCollageInteractions(
+  const { liked, saved, likeCounts, toggleLiked, toggleSaved, shakeIds } = useCollageInteractions(
     relatedPosts,
     "api",
   );
@@ -111,7 +120,7 @@ export function PostDetailRelatedLayout({ post, relatedPosts }: PostDetailRelate
             <div
               key={relatedPost.id}
               ref={index === 0 ? probeRef : undefined}
-              style={gridSpanStyle(relatedPost.desktopVariant)}
+              style={relatedCardInitialStyle(relatedPost.desktopVariant)}
               className="flex min-w-0 justify-center"
             >
               <PostCard
@@ -127,6 +136,7 @@ export function PostDetailRelatedLayout({ post, relatedPosts }: PostDetailRelate
                 onComment={() => openPost(relatedPost.slug)}
                 onSave={() => toggleSaved(relatedPost.id)}
                 href={`/post/${encodeURIComponent(relatedPost.slug)}`}
+                shakeKey={shakeIds[relatedPost.id]}
                 overlay={
                   relatedPost.overlay != null ? (
                     <OverlayBadge type={relatedPost.overlay} />

@@ -1,16 +1,28 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useAtom } from "jotai";
 import toast from "react-hot-toast";
+import { savedPostIdsAtom } from "@/lib/saved-posts-atom";
 import type { HomeFeedPost } from "@/services/feed-post.service";
 import { getLikedPostIds, hasAccessToken, togglePostLike } from "@/services/post-like.service";
 import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
 
 export function useCollageInteractions(posts: readonly HomeFeedPost[], likeMode: "local" | "api") {
   const [liked, setLiked] = useState<Readonly<Record<string, boolean>>>({});
-  const [saved, setSaved] = useState<Readonly<Record<string, boolean>>>({});
+  const [savedPostIds, setSavedPostIds] = useAtom(savedPostIdsAtom);
   const [likeCounts, setLikeCounts] = useState<Readonly<Record<string, number>>>({});
   const [pendingLikes, setPendingLikes] = useState<Readonly<Record<string, boolean>>>({});
+  const [shakeIds, setShakeIds] = useState<Readonly<Record<string, number>>>({});
+
+  const savedIdSet = useMemo(() => new Set(savedPostIds), [savedPostIds]);
+  const saved = useMemo<Readonly<Record<string, boolean>>>(() => {
+    const next: Record<string, boolean> = {};
+    posts.forEach((post) => {
+      if (savedIdSet.has(post.id)) next[post.id] = true;
+    });
+    return next;
+  }, [posts, savedIdSet]);
 
   useEffect(() => {
     if (likeMode !== "api" || !hasAccessToken()) return;
@@ -76,6 +88,7 @@ export function useCollageInteractions(posts: readonly HomeFeedPost[], likeMode:
           ...prev,
           [id]: posts.find((post) => post.id === id)?.likesCount ?? prev[id] ?? 0,
         }));
+        setShakeIds((prev) => ({ ...prev, [id]: (prev[id] ?? 0) + 1 }));
         toast.error(getUserFacingErrorMessage(error, "پسندیدن پست ناموفق بود."));
       } finally {
         setPendingLikes((prev) => ({ ...prev, [id]: false }));
@@ -85,8 +98,11 @@ export function useCollageInteractions(posts: readonly HomeFeedPost[], likeMode:
   );
 
   const toggleSaved = useCallback((id: string) => {
-    setSaved((prev) => ({ ...prev, [id]: !prev[id] }));
-  }, []);
+    setSavedPostIds((prev) => {
+      if (prev.includes(id)) return prev.filter((postId) => postId !== id);
+      return [id, ...prev];
+    });
+  }, [setSavedPostIds]);
 
-  return { liked, saved, likeCounts, toggleLiked, toggleSaved };
+  return { liked, saved, likeCounts, pendingLikes, shakeIds, toggleLiked, toggleSaved };
 }
