@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Social app
 
-## Getting Started
+`@repo/social` is the public Social experience for Infinity Color. Local development runs on port `2890`.
 
-First, run the development server:
+## Local development
+
+From the repository root:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm --filter @repo/social dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:2890`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The app reads the shared public API defaults from `@repo/api`:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- API: `https://api.infinitycolor.co/api` in production
+- images: `https://api.infinitycolor.co` in production
 
-## Learn More
+`NEXT_PUBLIC_SOCIAL_HOME_POSTS_DEMO=true` is only for local/demo work. Do not enable it for the public deployment.
 
-To learn more about Next.js, take a look at the following resources:
+## Production deployment
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Production is deployed only from the `main` branch through `.gitlab-ci.yml`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- image: `infinity-social`
+- host directory: `/opt/infinity/social`
+- containers: `infinity-social`, `infinity-social-2`, `infinity-social-3`, `infinity-social-4`
+- host ports: `2890-2893`
+- public site URL: `https://infinitygram.co`
 
-## Deploy on Vercel
+The production image bakes these public values into the build:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `NEXT_PUBLIC_API_BASE_URL=https://api.infinitycolor.co/api`
+- `NEXT_PUBLIC_IMAGE_BASE_URL=https://api.infinitycolor.co`
+- `NEXT_PUBLIC_SITE_URL=https://infinitygram.co`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+There is intentionally no Social runtime env file yet. The Social containers call Strapi through the public API URLs; do not add `STRAPI_INTERNAL_URL` or `STRAPI_BUILD_TIME_URL` for this app.
+
+## Nginx
+
+Use the `social_upstream` block from `docs/nginx-upstream-snippet.conf` in the `infinitygram.co` server config and proxy the site to that upstream:
+
+```nginx
+location / {
+    proxy_pass http://social_upstream;
+}
+```
+
+Keep Social proxying separate from storefront traffic. Only the Social Next.js containers belong in `social_upstream`.
+
+## Verification
+
+After deploy:
+
+```bash
+cd /opt/infinity/social
+docker compose -f docker-compose.yml -f docker-compose.ci.yml -f docker-compose.scale.yml -f docker-compose.scale.ci.yml ps
+```
+
+Confirm all four Social containers are healthy, then smoke test:
+
+- `/`
+- `/auth`
+- `/search`
+- a public `/post/<slug>`
+- `/robots.txt`
+- `/sitemap.xml`

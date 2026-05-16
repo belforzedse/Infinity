@@ -19,6 +19,7 @@ const CARD_OPTIONS: readonly CardOption[] = [
 
 const CANCEL_HREF = "/profile";
 const POST_SIZE_HREF = "/profile/posts/add/post";
+const STORY_HREF = "/profile/posts/add/story";
 
 function cx(...parts: (string | false | undefined)[]): string {
   return parts.filter(Boolean).join(" ");
@@ -52,7 +53,7 @@ export default function AddPostPage() {
       router.push(POST_SIZE_HREF);
       return;
     }
-    // TODO: wire story branch once /profile/posts/add/story exists.
+    router.push(STORY_HREF);
   };
 
   return (

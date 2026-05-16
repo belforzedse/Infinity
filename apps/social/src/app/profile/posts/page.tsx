@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-import { ArrowRight, Check, Eye, Images, MessageSquareText, Pencil, Trash2, X } from "lucide-react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ArrowRight, Check, Eye, EyeOff, Image as ImageIcon, Images, MessageSquareText, Pencil, Plus, Trash2, Video, X } from "lucide-react";
 import toast from "react-hot-toast";
+import { IMAGE_BASE_URL } from "@repo/api";
 import ConfirmDialog from "@/components/Kits/ConfirmDialog";
 import { PostCard, toMobilePostCardVariant } from "@/components/posts/PostCard";
 import { useIsLgUp } from "@/components/posts/use-is-lg-up";
@@ -20,9 +21,11 @@ import {
 } from "@/services/post-comment.service";
 import { PostService, type ProfilePost } from "@/services/post.service";
 import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
+import { deleteStory, listStories, updateStory } from "@/services/story.service";
+import type { Story } from "@/types/story";
 
 const PROFILE_HREF = "/profile";
-type ProfilePostsTab = "posts" | "comments";
+type ProfilePostsTab = "posts" | "stories" | "comments";
 type CommentAction = "approve" | "reject";
 
 function cx(...parts: (string | false | undefined)[]): string {
@@ -37,6 +40,20 @@ function formatCommentDate(value: string): string {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(date);
+}
+
+function resolveStoryMediaUrl(url?: string): string | undefined {
+  if (!url) return undefined;
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  const base = IMAGE_BASE_URL.replace(/\/+$/, "");
+  return `${base}/${url.replace(/^\/+/, "")}`;
+}
+
+function formatStoryDate(value?: string): string {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+  return new Intl.DateTimeFormat("fa-IR", { dateStyle: "medium" }).format(date);
 }
 
 function ProfilePostActions({
@@ -107,6 +124,7 @@ function ProfilePostsTabs({
 }) {
   const tabs: readonly { id: ProfilePostsTab; label: string; count?: number }[] = [
     { id: "posts", label: "پست‌ها" },
+    { id: "stories", label: "استوری‌ها" },
     { id: "comments", label: "دیدگاه‌ها", count: pendingCount },
   ];
 
@@ -141,6 +159,106 @@ function ProfilePostsTabs({
           </button>
         );
       })}
+    </div>
+  );
+}
+
+function StoriesTable({
+  stories,
+  togglingId,
+  deletingId,
+  onToggle,
+  onEdit,
+  onDelete,
+}: {
+  stories: readonly Story[];
+  togglingId: number | null;
+  deletingId: number | null;
+  onToggle: (story: Story) => void;
+  onEdit: (story: Story) => void;
+  onDelete: (story: Story) => void;
+}) {
+  return (
+    <div className="overflow-hidden rounded-2xl bg-white shadow-[0_0_14.7px_rgba(0,0,0,0.04)]">
+      <div className="overflow-x-auto">
+        <table className="min-w-[760px] w-full border-collapse text-right font-peyda">
+          <thead className="bg-[#F8FAFC] text-xs font-semibold text-[#7B8498]">
+            <tr>
+              <th className="px-4 py-3">عنوان</th>
+              <th className="px-4 py-3">نوع</th>
+              <th className="px-4 py-3 text-center">ترتیب</th>
+              <th className="px-4 py-3">شروع</th>
+              <th className="px-4 py-3">پایان</th>
+              <th className="px-4 py-3 text-center">وضعیت</th>
+              <th className="px-4 py-3 text-center">عملیات</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 text-sm text-[#424242]">
+            {stories.map((story) => {
+              const thumbnail = resolveStoryMediaUrl(story.Thumbnail?.url ?? story.Media?.url);
+              return (
+                <tr key={story.id}>
+                  <td className="px-4 py-3">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-100">
+                        {thumbnail ? (
+                          <img src={thumbnail} alt="" className="h-full w-full object-cover" />
+                        ) : story.MediaType === "video" ? (
+                          <Video className="size-5 text-slate-400" aria-hidden />
+                        ) : (
+                          <ImageIcon className="size-5 text-slate-400" aria-hidden />
+                        )}
+                      </div>
+                      <span className="min-w-0 font-semibold text-[#3D4C6E]">{story.Title}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-[#64748B]">{story.MediaType === "video" ? "ویدیو" : "تصویر"}</td>
+                  <td className="px-4 py-3 text-center text-[#64748B]">{story.SortOrder}</td>
+                  <td className="px-4 py-3 text-[#64748B]">{formatStoryDate(story.StartAt)}</td>
+                  <td className="px-4 py-3 text-[#64748B]">{formatStoryDate(story.EndAt)}</td>
+                  <td className="px-4 py-3 text-center">
+                    <button
+                      type="button"
+                      disabled={togglingId === story.id}
+                      onClick={() => onToggle(story)}
+                      className={cx(
+                        "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold transition-colors disabled:opacity-50",
+                        story.IsActive
+                          ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                          : "bg-slate-100 text-slate-500 hover:bg-slate-200",
+                      )}
+                    >
+                      {story.IsActive ? <Eye className="size-3" aria-hidden /> : <EyeOff className="size-3" aria-hidden />}
+                      {story.IsActive ? "فعال" : "غیرفعال"}
+                    </button>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center justify-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => onEdit(story)}
+                        className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700"
+                        aria-label="ویرایش استوری"
+                      >
+                        <Pencil className="size-4" aria-hidden />
+                      </button>
+                      <button
+                        type="button"
+                        disabled={deletingId === story.id}
+                        onClick={() => onDelete(story)}
+                        className="rounded-lg p-2 text-slate-500 hover:bg-rose-50 hover:text-rose-600 disabled:opacity-50"
+                        aria-label="حذف استوری"
+                      >
+                        <Trash2 className="size-4" aria-hidden />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
@@ -233,10 +351,14 @@ function PendingCommentsTable({
   );
 }
 
-export default function ProfilePostsPage() {
+function ProfilePostsPageInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const isLgUp = useIsLgUp();
-  const [activeTab, setActiveTab] = useState<ProfilePostsTab>("posts");
+  const requestedTab = searchParams.get("tab");
+  const initialTab: ProfilePostsTab =
+    requestedTab === "stories" || requestedTab === "comments" ? requestedTab : "posts";
+  const [activeTab, setActiveTab] = useState<ProfilePostsTab>(initialTab);
   const [posts, setPosts] = useState<ProfilePost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const showLoading = useSmoothLoading(isLoading, { showDelayMs: 80, minVisibleMs: 240 });
@@ -246,8 +368,42 @@ export default function ProfilePostsPage() {
   const [commentsLoaded, setCommentsLoaded] = useState(false);
   const [isCommentsLoading, setIsCommentsLoading] = useState(false);
   const [commentActionId, setCommentActionId] = useState<number | null>(null);
+  const [stories, setStories] = useState<Story[]>([]);
+  const [storiesLoaded, setStoriesLoaded] = useState(false);
+  const [isStoriesLoading, setIsStoriesLoading] = useState(false);
+  const [storySearch, setStorySearch] = useState("");
+  const [storyFilter, setStoryFilter] = useState<"all" | "active" | "inactive">("all");
+  const [storyDeleteTarget, setStoryDeleteTarget] = useState<Story | null>(null);
+  const [deletingStoryId, setDeletingStoryId] = useState<number | null>(null);
+  const [togglingStoryId, setTogglingStoryId] = useState<number | null>(null);
   const commentsRequestId = useRef(0);
   const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    if (requestedTab === "posts" || requestedTab === "stories" || requestedTab === "comments") {
+      setActiveTab(requestedTab);
+    }
+  }, [requestedTab]);
+
+  useEffect(() => {
+    if (activeTab !== "stories" || storiesLoaded || isStoriesLoading) return;
+    setIsStoriesLoading(true);
+    listStories({ pageSize: 100, sort: "SortOrder:asc" })
+      .then((rows) => {
+        if (isMountedRef.current) {
+          setStories(rows.data);
+          setStoriesLoaded(true);
+        }
+      })
+      .catch((error: unknown) => {
+        if (isMountedRef.current) {
+          toast.error(getUserFacingErrorMessage(error, "دریافت استوری‌ها ناموفق بود."));
+        }
+      })
+      .finally(() => {
+        if (isMountedRef.current) setIsStoriesLoading(false);
+      });
+  }, [activeTab, isStoriesLoading, storiesLoaded]);
 
   useEffect(() => {
     return () => {
@@ -359,6 +515,48 @@ export default function ProfilePostsPage() {
     }
   }, [commentActionId]);
 
+  const filteredStories = useMemo(
+    () =>
+      stories.filter((story) => {
+        const matchesSearch = story.Title.toLowerCase().includes(storySearch.trim().toLowerCase());
+        const matchesFilter =
+          storyFilter === "all" ||
+          (storyFilter === "active" && story.IsActive) ||
+          (storyFilter === "inactive" && !story.IsActive);
+        return matchesSearch && matchesFilter;
+      }),
+    [stories, storyFilter, storySearch],
+  );
+
+  const handleStoryToggle = useCallback(async (story: Story) => {
+    if (togglingStoryId != null) return;
+    setTogglingStoryId(story.id);
+    try {
+      const updated = await updateStory(story.id, { IsActive: !story.IsActive });
+      setStories((prev) => prev.map((item) => (item.id === story.id ? updated : item)));
+      toast.success(story.IsActive ? "استوری غیرفعال شد." : "استوری فعال شد.");
+    } catch (error: unknown) {
+      toast.error(getUserFacingErrorMessage(error, "تغییر وضعیت استوری ناموفق بود."));
+    } finally {
+      setTogglingStoryId(null);
+    }
+  }, [togglingStoryId]);
+
+  const confirmStoryDelete = useCallback(async () => {
+    if (!storyDeleteTarget || deletingStoryId != null) return;
+    setDeletingStoryId(storyDeleteTarget.id);
+    try {
+      await deleteStory(storyDeleteTarget.id);
+      setStories((prev) => prev.filter((story) => story.id !== storyDeleteTarget.id));
+      toast.success("استوری حذف شد.");
+      setStoryDeleteTarget(null);
+    } catch (error: unknown) {
+      toast.error(getUserFacingErrorMessage(error, "حذف استوری ناموفق بود."));
+    } finally {
+      setDeletingStoryId(null);
+    }
+  }, [deletingStoryId, storyDeleteTarget]);
+
   return (
     <div className="flex w-full flex-col gap-6" dir="rtl">
       <div className="flex w-full flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -377,7 +575,10 @@ export default function ProfilePostsPage() {
         </div>
         <ProfilePostsTabs
           activeTab={activeTab}
-          onChange={setActiveTab}
+          onChange={(tab) => {
+            setActiveTab(tab);
+            router.replace(tab === "posts" ? "/profile/posts" : `/profile/posts?tab=${tab}`);
+          }}
           pendingCount={pendingComments.length}
         />
       </div>
@@ -435,6 +636,63 @@ export default function ProfilePostsPage() {
         />
       ))}
 
+      {activeTab === "stories" && (
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-1 flex-col gap-3 sm:flex-row">
+              <input
+                value={storySearch}
+                onChange={(event) => setStorySearch(event.target.value)}
+                placeholder="جستجو در عنوان استوری"
+                className="h-11 min-w-0 flex-1 rounded-2xl border-0 bg-white px-4 font-peyda text-sm shadow-[0_0_14.7px_rgba(0,0,0,0.04)] outline-none"
+              />
+              <div className="inline-flex rounded-2xl bg-white p-1 shadow-[0_0_14.7px_rgba(0,0,0,0.04)]">
+                {(["all", "active", "inactive"] as const).map((filter) => (
+                  <button
+                    key={filter}
+                    type="button"
+                    onClick={() => setStoryFilter(filter)}
+                    className={cx(
+                      "h-9 rounded-xl px-3 font-peyda text-sm transition-colors",
+                      storyFilter === filter ? "bg-[#3D4C6E] text-white" : "text-[#7B8498] hover:bg-slate-50",
+                    )}
+                  >
+                    {filter === "all" ? "همه" : filter === "active" ? "فعال" : "غیرفعال"}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => router.push("/profile/posts/add/story")}
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#3D4C6E] px-5 font-peyda text-sm font-medium text-white shadow-sm"
+            >
+              <Plus className="size-4" aria-hidden />
+              استوری جدید
+            </button>
+          </div>
+
+          {isStoriesLoading ? (
+            <SuspenseLoader />
+          ) : filteredStories.length === 0 ? (
+            <EmptyState
+              icon={Images}
+              title="استوری‌ای یافت نشد"
+              description="استوری‌های ایجادشده اینجا نمایش داده می‌شوند."
+            />
+          ) : (
+            <StoriesTable
+              stories={filteredStories}
+              togglingId={togglingStoryId}
+              deletingId={deletingStoryId}
+              onToggle={handleStoryToggle}
+              onEdit={(story) => router.push(`/profile/posts/stories/${story.id}/edit`)}
+              onDelete={setStoryDeleteTarget}
+            />
+          )}
+        </div>
+      )}
+
       <ConfirmDialog
         isOpen={deleteTarget != null}
         title="حذف پست"
@@ -444,6 +702,25 @@ export default function ProfilePostsPage() {
         onConfirm={confirmDelete}
         onCancel={closeDeleteConfirm}
       />
+      <ConfirmDialog
+        isOpen={storyDeleteTarget != null}
+        title="حذف استوری"
+        description="آیا از حذف این استوری مطمئن هستید؟ این عملیات قابل بازگشت نیست."
+        confirmText={deletingStoryId != null ? "در حال حذف..." : "بله، حذف کن"}
+        cancelText="انصراف"
+        onConfirm={confirmStoryDelete}
+        onCancel={() => {
+          if (deletingStoryId == null) setStoryDeleteTarget(null);
+        }}
+      />
     </div>
+  );
+}
+
+export default function ProfilePostsPage() {
+  return (
+    <Suspense fallback={<SuspenseLoader />}>
+      <ProfilePostsPageInner />
+    </Suspense>
   );
 }

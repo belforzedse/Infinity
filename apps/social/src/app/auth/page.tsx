@@ -6,7 +6,7 @@ export default function AuthPage() {
 }
 
 export const metadata: Metadata = {
-  title: "ورود | اینفینیتی‌گرام",
+  title: "ورود",
   description: "ورود یا ثبت‌نام در اینفینیتی‌گرام.",
   robots: { index: false, follow: false },
 };

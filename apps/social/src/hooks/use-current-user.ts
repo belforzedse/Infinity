@@ -9,6 +9,7 @@ const SUPER_ADMIN_ROLE = "superadmin";
 const STORE_MANAGER_ROLE = "store manager";
 
 type CurrentUserState = {
+  isLoading: boolean;
   isAuthenticated: boolean;
   firstName: string | null;
   roleName: string | null;
@@ -16,6 +17,7 @@ type CurrentUserState = {
 };
 
 const INITIAL_STATE: CurrentUserState = {
+  isLoading: true,
   isAuthenticated: false,
   firstName: null,
   roleName: null,
@@ -36,7 +38,7 @@ export function useCurrentUser() {
       if (typeof window === "undefined") return;
       const token = localStorage.getItem("accessToken");
       if (!token) {
-        setState(INITIAL_STATE);
+        setState({ ...INITIAL_STATE, isLoading: false });
         return;
       }
       try {
@@ -44,6 +46,7 @@ export function useCurrentUser() {
         const user = normalizeMeResponse(response);
         if (!cancelled) {
           setState({
+            isLoading: false,
             isAuthenticated: true,
             firstName: typeof user.FirstName === "string" ? user.FirstName : "",
             roleName: typeof user.roleName === "string" ? user.roleName : null,
@@ -52,7 +55,7 @@ export function useCurrentUser() {
         }
       } catch {
         if (!cancelled) {
-          setState(INITIAL_STATE);
+          setState({ ...INITIAL_STATE, isLoading: false });
         }
       }
     })();
@@ -67,6 +70,7 @@ export function useCurrentUser() {
   const isStoreManager = normalizedRole === STORE_MANAGER_ROLE;
 
   return {
+    isLoading: state.isLoading,
     isAuthenticated: state.isAuthenticated,
     firstName: state.firstName,
     roleName: state.roleName,

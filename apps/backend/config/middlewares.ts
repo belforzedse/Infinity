@@ -3,6 +3,7 @@ const corsOrigins = [
   frontendUrl.replace(/\/$/, ""),
   "https://new.infinitycolor.co",
   "https://infinitycolor.co",
+  "https://infinitygram.co",
   "http://localhost:2888",
   "http://127.0.0.1:2888",
   // @repo/social (`next dev -p 2890`)

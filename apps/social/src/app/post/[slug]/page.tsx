@@ -8,6 +8,7 @@ import { getHomeDemoPosts, isSocialHomePostsDemoEnabled } from "@/components/pos
 import { getHomeFeedPosts } from "@/services/feed-post.service";
 import { getPostDetailBySlug } from "@/services/post-detail.service";
 import { getActiveStories } from "@/services/story.service";
+import { SITE_NAME, SITE_URL } from "@/config/site";
 
 export const revalidate = 30;
 
@@ -49,13 +50,30 @@ export async function generateMetadata({ params }: PostPageProps): Promise<Metad
 
   if (!post) {
     return {
-      title: "پست یافت نشد | اینفینیتی‌گرام",
+      title: "پست یافت نشد",
+      robots: { index: false, follow: false },
     };
   }
 
+  const canonicalPath = `/post/${encodeURIComponent(post.slug)}`;
+  const canonicalUrl = `${SITE_URL}${canonicalPath}`;
+  const previewImage = post.media[0]?.url;
+
   return {
-    title: `${post.title} | اینفینیتی‌گرام`,
+    title: post.title,
     description: post.caption,
+    alternates: {
+      canonical: canonicalPath,
+    },
+    openGraph: {
+      title: `${post.title} | ${SITE_NAME}`,
+      description: post.caption,
+      url: canonicalUrl,
+      siteName: SITE_NAME,
+      locale: "fa_IR",
+      type: "article",
+      images: previewImage ? [{ url: previewImage }] : undefined,
+    },
   };
 }
 

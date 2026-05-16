@@ -3,11 +3,27 @@ import { peyda, peydaFanum, rokh, kaghaz } from "@repo/fonts";
 import { Providers } from "@/app/providers";
 import { AppChrome } from "@/components/AppChrome";
 import { NavigationProgress } from "@/components/ui/NavigationProgress";
+import { SITE_NAME, SITE_URL } from "@/config/site";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "اینفینیتی‌گرام",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: SITE_NAME,
+    template: `%s | ${SITE_NAME}`,
+  },
   description: "شبکه اجتماعی اینفینیتی",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: SITE_NAME,
+    description: "شبکه اجتماعی اینفینیتی",
+    url: SITE_URL,
+    siteName: SITE_NAME,
+    locale: "fa_IR",
+    type: "website",
+  },
 };
 
 export default function RootLayout({

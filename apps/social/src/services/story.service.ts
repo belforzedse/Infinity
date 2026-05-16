@@ -2,7 +2,7 @@
  * Story API — same endpoints and normalization as storefront `story.service.ts`.
  */
 import { getStrapiServerUrl } from "@repo/api/config";
-import type { Story } from "@/types/story";
+import type { CreateStoryData, Story, StoryListParams, UpdateStoryData } from "@/types/story";
 import { apiClient } from "@/lib/api-client";
 import { ENDPOINTS } from "@/lib/api-endpoints";
 
@@ -49,6 +49,18 @@ function normalizeStory(raw: unknown): Story {
   };
 }
 
+interface StrapiListResponse<T> {
+  data: T[];
+  meta?: {
+    pagination?: {
+      page: number;
+      pageSize: number;
+      pageCount: number;
+      total: number;
+    };
+  };
+}
+
 export async function getActiveStories(): Promise<Story[]> {
   const baseUrl = getStrapiServerUrl();
   const url = `${baseUrl}${ENDPOINTS.STORIES.ACTIVE}`;
@@ -79,3 +91,55 @@ export async function markStorySeen(storyId: number): Promise<{ created: boolean
   );
   return { created: res.data?.created ?? false };
 }
+
+export async function listStories(params: StoryListParams = {}): Promise<StrapiListResponse<Story>> {
+  const query = new URLSearchParams();
+  if (params.page) query.set("pagination[page]", String(params.page));
+  if (params.pageSize) query.set("pagination[pageSize]", String(params.pageSize));
+  if (params.sort) query.set("sort", params.sort);
+  if (typeof params.isActive === "boolean") {
+    query.set("filters[IsActive][$eq]", String(params.isActive));
+  }
+  if (params.search) query.set("filters[Title][$containsi]", params.search);
+
+  const suffix = query.toString();
+  const endpoint = suffix ? `${ENDPOINTS.STORIES.LIST}?${suffix}` : ENDPOINTS.STORIES.LIST;
+  const res = await apiClient.get<unknown[]>(endpoint, { cache: "no-store" });
+  return {
+    data: (res.data ?? []).map(normalizeStory),
+    meta: res.meta,
+  };
+}
+
+export async function getStory(id: number): Promise<Story> {
+  const res = await apiClient.get<unknown>(ENDPOINTS.STORIES.DETAIL(id), { cache: "no-store" });
+  if (res.data === undefined) throw new Error("Invalid story response");
+  return normalizeStory(res.data);
+}
+
+export async function createStory(data: CreateStoryData): Promise<Story> {
+  const res = await apiClient.post<unknown>(ENDPOINTS.STORIES.LIST, { data });
+  if (res.data === undefined) throw new Error("Invalid story response");
+  return normalizeStory(res.data);
+}
+
+export async function updateStory(id: number, data: UpdateStoryData): Promise<Story> {
+  const res = await apiClient.put<unknown>(ENDPOINTS.STORIES.DETAIL(id), { data });
+  if (res.data === undefined) throw new Error("Invalid story response");
+  return normalizeStory(res.data);
+}
+
+export async function deleteStory(id: number): Promise<void> {
+  await apiClient.delete(ENDPOINTS.STORIES.DETAIL(id));
+}
+
+export const StoryService = {
+  getActiveStories,
+  getMySeenStoryIds,
+  markStorySeen,
+  listStories,
+  getStory,
+  createStory,
+  updateStory,
+  deleteStory,
+};

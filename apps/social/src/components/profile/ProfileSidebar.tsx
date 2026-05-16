@@ -15,6 +15,7 @@ import {
   type ProfileNavIconKind,
 } from "@/components/profile/profile-nav-config";
 import { performLogout } from "@/utils/logout";
+import { useCurrentUser } from "@/hooks/use-current-user";
 
 const glassActiveNav = glassDefaultCrossfadeSurface("before:rounded-[19px]", "after:rounded-[19px]");
 
@@ -52,6 +53,7 @@ const menuItemActiveClass = cx(
 export function ProfileSidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { canCreatePost } = useCurrentUser();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const openLogoutConfirm = () => setShowLogoutConfirm(true);
@@ -61,7 +63,8 @@ export function ProfileSidebar() {
     return null;
   }
 
-  const activeItem = getActiveProfileNavItem(pathname);
+  const navItems = PROFILE_NAV_ITEMS.filter((item) => item.href !== "/profile/posts" || canCreatePost);
+  const activeItem = getActiveProfileNavItem(pathname, navItems);
 
   return (
     <>
@@ -73,7 +76,7 @@ export function ProfileSidebar() {
         >
           <div className="flex w-full max-w-[241px] flex-col justify-between gap-[101px] self-stretch lg:min-h-[334px]">
             <div className="flex w-full max-w-[241px] flex-col gap-[23px]">
-              {PROFILE_NAV_ITEMS.map(({ href, label, icon, match }) => {
+              {navItems.map(({ href, label, icon, match }) => {
                 const active = isProfileNavActive(pathname, href, match);
                 return (
                   <Link
@@ -152,7 +155,7 @@ export function ProfileSidebar() {
                   "data-[closed]:scale-95 data-[closed]:opacity-0 data-[enter]:duration-150 data-[enter]:ease-out data-[leave]:duration-100 data-[leave]:ease-in",
                 )}
               >
-                {PROFILE_NAV_ITEMS.map((item) => {
+                {navItems.map((item) => {
                   const navActive = isProfileNavActive(pathname, item.href, item.match);
                   return (
                     <MenuItem key={item.href}>

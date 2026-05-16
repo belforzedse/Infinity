@@ -3,13 +3,23 @@
 import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
 
-const STEPS = [
+const POST_STEPS = [
   { label: "نوع محتوا", path: "/profile/posts/add" },
   { label: "انتخاب سایز", path: "/profile/posts/add/post" },
   { label: "انتشار پست", path: "/profile/posts/add/post/content" },
 ] as const;
 
+const STORY_STEPS = [
+  { label: "نوع محتوا", path: "/profile/posts/add" },
+  { label: "انتشار استوری", path: "/profile/posts/add/story" },
+] as const;
+
+function getSteps(pathname: string) {
+  return pathname.startsWith("/profile/posts/add/story") ? STORY_STEPS : POST_STEPS;
+}
+
 function getActiveStep(pathname: string): number {
+  if (pathname.startsWith("/profile/posts/add/story")) return 1;
   if (pathname.startsWith("/profile/posts/add/post/content")) return 2;
   if (pathname.startsWith("/profile/posts/add/post")) return 1;
   return 0;
@@ -17,14 +27,15 @@ function getActiveStep(pathname: string): number {
 
 export default function AddPostLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const steps = getSteps(pathname);
   const activeStep = getActiveStep(pathname);
-  const progress = ((activeStep + 1) / STEPS.length) * 100;
+  const progress = ((activeStep + 1) / steps.length) * 100;
 
   return (
     <div className="flex w-full flex-col gap-6">
       {/* Step bubbles + connecting lines */}
       <div className="flex items-center justify-center gap-0" aria-label="مراحل ایجاد پست" role="list">
-        {STEPS.map((step, index) => {
+        {steps.map((step, index) => {
           const isPast = index < activeStep;
           const isActive = index === activeStep;
 

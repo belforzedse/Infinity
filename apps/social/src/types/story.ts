@@ -52,3 +52,28 @@ export interface Story {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface StoryListParams {
+  page?: number;
+  pageSize?: number;
+  sort?: string;
+  search?: string;
+  isActive?: boolean;
+}
+
+export interface CreateStoryData {
+  Title: string;
+  MediaType: StoryMediaType;
+  IsActive?: boolean;
+  SortOrder?: number;
+  Media?: number;
+  Thumbnail?: number;
+  StartAt?: string;
+  EndAt?: string;
+  DurationMs?: number;
+  CtaLabel?: string;
+  CtaUrl?: string;
+  Overlays?: StoryOverlay[];
+}
+
+export type UpdateStoryData = Partial<CreateStoryData>;

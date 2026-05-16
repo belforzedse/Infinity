@@ -320,3 +320,84 @@ frontend:deploy:
       	docker compose -f docker-compose.yml -f docker-compose.ci.yml -f docker-compose.scale.yml -f docker-compose.scale.ci.yml --env-file "\$ENV_FILE" up -d --remove-orphans
       	docker image prune -f || true
       REMOTE
+
+# -----------------------
+# SOCIAL BUILD
+# -----------------------
+social:build:
+  extends: .docker_build
+  stage: build
+  environment: production
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "main"'
+      changes: [apps/social/**/*, packages/**/*, package.json, pnpm-lock.yaml, pnpm-workspace.yaml, turbo.json, .gitlab-ci.yml]
+      variables:
+        RUNTIME_TAG: "main"
+    - when: never
+  script:
+    - |
+      set -euo pipefail
+
+      IMAGE="$CI_REGISTRY_IMAGE/infinity-social"
+      CACHE_REF="$CI_REGISTRY_IMAGE/cache/infinity-social:buildcache"
+
+      docker buildx build \
+        --build-arg NEXT_PUBLIC_API_BASE_URL="https://api.infinitycolor.co/api" \
+        --build-arg NEXT_PUBLIC_IMAGE_BASE_URL="https://api.infinitycolor.co" \
+        --build-arg NEXT_PUBLIC_SITE_URL="https://infinitygram.co" \
+        --file "apps/social/main.Dockerfile" \
+        --tag "$IMAGE:$CI_COMMIT_SHA" \
+        --tag "$IMAGE:$RUNTIME_TAG" \
+        --cache-from "type=registry,ref=$CACHE_REF" \
+        --cache-to "type=registry,ref=$CACHE_REF,mode=max" \
+        --push \
+        .
+
+# -----------------------
+# SOCIAL DEPLOY
+# -----------------------
+social:deploy:
+  extends: .deploy_ssh
+  stage: deploy
+  needs: ["social:build"]
+  environment: production
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "main"'
+      changes: [apps/social/**/*, packages/**/*, package.json, pnpm-lock.yaml, pnpm-workspace.yaml, turbo.json, .gitlab-ci.yml]
+      variables:
+        IMAGE_TAG: "main"
+    - when: never
+  script:
+    - |
+      set -euo pipefail
+
+      ssh -p "${DEPLOY_PORT:-3031}" "${DEPLOY_USER}@${DEPLOY_HOST}" "mkdir -p /opt/infinity/social"
+      scp -P "${DEPLOY_PORT:-3031}" \
+        apps/social/docker-compose.yml apps/social/docker-compose.scale.yml apps/social/docker-compose.ci.yml apps/social/docker-compose.scale.ci.yml \
+        "${DEPLOY_USER}@${DEPLOY_HOST}:/opt/infinity/social/"
+
+      ssh -p "${DEPLOY_PORT:-3031}" "${DEPLOY_USER}@${DEPLOY_HOST}" "bash -se" <<REMOTE
+      	set -euo pipefail
+      	cd /opt/infinity/social
+
+      	printf '%s' "$REGISTRY_PAT" | docker login registry.cyandm.org -u "$REGISTRY_USER" --password-stdin
+
+      	export REGISTRY_IMAGE_BASE="$CI_REGISTRY_IMAGE"
+      	export IMAGE_TAG="$IMAGE_TAG"
+
+      	pull_with_retry() {
+      		local img="\$1"
+      		for attempt in 1 2 3 4 5; do
+      			if docker pull "\$img"; then return 0; fi
+      			echo "pull failed for \$img (attempt \$attempt), retrying..."
+      			sleep \$((attempt * 5))
+      		done
+      		return 1
+      	}
+
+      	pull_with_retry "$CI_REGISTRY_IMAGE/infinity-social:$IMAGE_TAG"
+      	docker compose -f docker-compose.yml -f docker-compose.ci.yml -f docker-compose.scale.yml -f docker-compose.scale.ci.yml down --remove-orphans || true
+      	for c in infinity-social infinity-social-2 infinity-social-3 infinity-social-4; do docker rm -f "\$c" 2>/dev/null || true; done
+      	docker compose -f docker-compose.yml -f docker-compose.ci.yml -f docker-compose.scale.yml -f docker-compose.scale.ci.yml up -d --remove-orphans
+      	docker image prune -f || true
+      REMOTE

@@ -16,7 +16,9 @@ export const ENDPOINTS = {
     ME: "/auth/self",
   },
   STORIES: {
+    LIST: "/stories",
     ACTIVE: "/stories/active",
+    DETAIL: (id: number | string) => `/stories/${id}`,
     SEEN_MARK: "/story-seens/mark",
     SEEN_MINE: "/story-seens/mine",
   },
