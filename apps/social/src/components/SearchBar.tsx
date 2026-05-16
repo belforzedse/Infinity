@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Images, Search, X } from "lucide-react";
 import { BlurImage } from "@/components/ui/BlurImage";
-import { searchPosts } from "@/services/search.service";
+import { searchPosts, SEARCH_SUGGESTION_LIMIT } from "@/services/search.service";
 import type { HomeFeedPost } from "@/services/feed-post.service";
 
 function cx(...parts: (string | undefined | false)[]): string {
@@ -174,18 +174,24 @@ export function SearchBar({
       return;
     }
 
+    const abortController = new AbortController();
     setIsLoading(true);
     const id = window.setTimeout(() => {
-      searchPosts(q)
+      searchPosts(q, {
+        limit: SEARCH_SUGGESTION_LIMIT,
+        signal: abortController.signal,
+      })
         .then((posts) => {
           if (!cancelled) {
-            const unique = Array.from(new Map(posts.map((post) => [post.id, post])).values()).slice(0, 6);
+            const unique = Array.from(
+              new Map(posts.map((post) => [post.id, post])).values(),
+            );
             setSuggestions(unique);
             setIsOpen(true);
           }
         })
         .catch(() => {
-          if (!cancelled) {
+          if (!cancelled && !abortController.signal.aborted) {
             setSuggestions([]);
             setIsOpen(false);
           }
@@ -197,6 +203,7 @@ export function SearchBar({
 
     return () => {
       cancelled = true;
+      abortController.abort();
       window.clearTimeout(id);
     };
   }, [isFocused, query]);

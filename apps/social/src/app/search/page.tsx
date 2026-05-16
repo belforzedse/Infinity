@@ -11,7 +11,7 @@ import { SearchInput } from "@/components/search/SearchInput";
 import { SearchResultsGrid } from "@/components/search/SearchResultsGrid";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useSmoothLoading } from "@/hooks/useSmoothLoading";
-import { searchPosts } from "@/services/search.service";
+import { searchPosts, SEARCH_RESULTS_PAGE_SIZE } from "@/services/search.service";
 import type { HomeFeedPost } from "@/services/feed-post.service";
 import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
 
@@ -58,10 +58,14 @@ export default function SearchPage() {
     if (!q) return;
 
     let cancelled = false;
+    const abortController = new AbortController();
     const loadingTimer = window.setTimeout(() => {
       if (!cancelled) setIsLoading(true);
     }, 0);
-    searchPosts(q)
+    searchPosts(q, {
+      limit: SEARCH_RESULTS_PAGE_SIZE,
+      signal: abortController.signal,
+    })
       .then((posts) => {
         if (!cancelled) {
           setResults(posts);
@@ -73,7 +77,10 @@ export default function SearchPage() {
         }
       })
       .catch((error: unknown) => {
-        if (!cancelled) toast.error(getUserFacingErrorMessage(error, "جستجو ناموفق بود."));
+        if (cancelled || abortController.signal.aborted) return;
+        toast.error(
+          getUserFacingErrorMessage(error, "جستجو ناموفق بود. دوباره تلاش کنید."),
+        );
       })
       .finally(() => {
         if (!cancelled) setIsLoading(false);
@@ -81,6 +88,7 @@ export default function SearchPage() {
 
     return () => {
       cancelled = true;
+      abortController.abort();
       window.clearTimeout(loadingTimer);
     };
   }, [debouncedQuery]);

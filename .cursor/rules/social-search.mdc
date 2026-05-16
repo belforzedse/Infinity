@@ -1,0 +1,70 @@
+---
+description: Social app post search — server-backed AJAX via Strapi `/posts` filters, debounce, and abort. Use when changing SearchBar, `/search`, or search.service.
+globs:
+  - apps/social/src/services/search.service.ts
+  - apps/social/src/components/SearchBar.tsx
+  - apps/social/src/app/search/**
+  - apps/social/src/components/search/**
+---
+
+# Social app post search
+
+## Overview
+
+Post search is **server-backed**, not a client-side filter over the home feed. The UI debounces input (300 ms) and calls [`searchPosts`](apps/social/src/services/search.service.ts), which queries Strapi **`GET /posts`** with `$containsi` filters.
+
+## Service contract
+
+| Export | Role |
+|--------|------|
+| `searchPosts(query, options?)` | Returns `HomeFeedPost[]` via `normalizeStrapiPostEntry` |
+| `SearchPostsOptions` | `limit`, `page`, `signal` |
+| `SEARCH_SUGGESTION_LIMIT` | `6` — header [`SearchBar`](apps/social/src/components/SearchBar.tsx) |
+| `SEARCH_RESULTS_PAGE_SIZE` | `48` — [`/search`](apps/social/src/app/search/page.tsx) |
+
+### Strapi query (built in `buildSearchQuery`)
+
+- **Filters:** `filters[$or][0][Title][$containsi]` and `filters[$or][1][Slug][$containsi]` (trimmed query string).
+- **Populate:** same card shape as feed — `CoverImage`, `Media` (url, mime, alternativeText), `post_likes` / `post_comments` counts.
+- **Sort:** `createdAt:desc`
+- **Cache:** `apiClient.get(..., { cache: "no-store" })` so typing always hits the API.
+
+### Do not
+
+- Call `getHomeFeedPosts()` and `.filter()` in the browser for search.
+- Use `next: { revalidate }` on search requests (feed-only).
+
+## UI integration
+
+- **Header:** [`SearchBar.tsx`](apps/social/src/components/SearchBar.tsx) — min 2 chars, `AbortController` per debounced request, `limit: SEARCH_SUGGESTION_LIMIT`.
+- **Page:** [`search/page.tsx`](apps/social/src/app/search/page.tsx) — reads `?q=`, debounced via [`SearchInput`](apps/social/src/components/search/SearchInput.tsx), `limit: SEARCH_RESULTS_PAGE_SIZE`, abort on query change.
+- **Results:** [`SearchResultsGrid`](apps/social/src/components/search/SearchResultsGrid.tsx) → `HomePostsCollage` with `likeMode="api"`.
+
+On abort or unmount, do not toast; check `abortController.signal.aborted` in `catch`.
+
+## Backend / permissions
+
+- Posts: public `find` on `api::post.post` ([`apps/backend/src/index.ts`](apps/backend/src/index.ts) role grants).
+- No dedicated `post.search` route yet; Strapi REST filters are sufficient for title/slug search.
+- **User/profile search** is out of scope — no public user-discovery API is wired in social [`api-endpoints.ts`](apps/social/src/lib/api-endpoints.ts).
+
+## When to add a custom `post.search` endpoint
+
+Consider a backend custom route (mirror `product.search`) if you need:
+
+- Full-text / `Description` (richtext) search with sanitization
+- Ranked or fuzzy matching
+- Combined post + story + user results
+- Stricter rate limits or search analytics
+
+Until then, extend `search.service.ts` filters only.
+
+## Errors
+
+- Persian copy via [`getUserFacingErrorMessage`](apps/social/src/utils/userErrorMessage.ts); include **«دوباره تلاش کنید»** for generic failures.
+
+## Related
+
+- Feed normalization: [`feed-post.service.ts`](apps/social/src/services/feed-post.service.ts)
+- Story list search precedent: `filters[Title][$containsi]` in [`story.service.ts`](apps/social/src/services/story.service.ts)
+- Shell / header: [social-app-shell.mdc](social-app-shell.mdc)
