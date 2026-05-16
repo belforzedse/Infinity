@@ -52,8 +52,15 @@ variables:
   tags: ["infinity"]
   before_script:
     - set -euo pipefail
-    - sed -i 's|https://dl-cdn.alpinelinux.org/alpine|https://mirror.arvancloud.ir/alpine|g' /etc/apk/repositories
-    - apk add --no-cache openssh-client
+    - |
+      cp /etc/apk/repositories /tmp/apk.repositories.default
+      sed -i 's|https://dl-cdn.alpinelinux.org/alpine|https://mirror.arvancloud.ir/alpine|g' /etc/apk/repositories
+      if ! apk update; then
+        echo "Arvan Alpine mirror unavailable; falling back to default Alpine repositories."
+        cp /tmp/apk.repositories.default /etc/apk/repositories
+        apk update
+      fi
+      apk add --no-cache openssh-client
     - mkdir -p ~/.ssh && chmod 700 ~/.ssh
     # Prefer File-type variable so the key is never echoed (more secure). Fallback to Variable content.
     - |
