@@ -1,0 +1,12 @@
+# CI/GitLab override for the Social scale compose file.
+# Used by .gitlab-ci.yml deploy. Use with docker-compose.scale.yml.
+
+services:
+  social-2:
+    image: ${REGISTRY_IMAGE_BASE}/infinity-social:${IMAGE_TAG:-main}
+
+  social-3:
+    image: ${REGISTRY_IMAGE_BASE}/infinity-social:${IMAGE_TAG:-main}
+
+  social-4:
+    image: ${REGISTRY_IMAGE_BASE}/infinity-social:${IMAGE_TAG:-main}

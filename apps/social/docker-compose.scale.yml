@@ -1,0 +1,71 @@
+# Scale override: extra Social Next.js instances. Use with:
+#   docker compose -f docker-compose.yml -f docker-compose.scale.yml up -d
+# Nginx should proxy to social_upstream (2890-2893).
+
+services:
+  social-2:
+    image: ghcr.io/belforzedse/infinity-social:${IMAGE_TAG:-main}
+    container_name: infinity-social-2
+    restart: unless-stopped
+    networks:
+      - social-network
+    ports:
+      - "127.0.0.1:2891:3000"
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  social-3:
+    image: ghcr.io/belforzedse/infinity-social:${IMAGE_TAG:-main}
+    container_name: infinity-social-3
+    restart: unless-stopped
+    networks:
+      - social-network
+    ports:
+      - "127.0.0.1:2892:3000"
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  social-4:
+    image: ghcr.io/belforzedse/infinity-social:${IMAGE_TAG:-main}
+    container_name: infinity-social-4
+    restart: unless-stopped
+    networks:
+      - social-network
+    ports:
+      - "127.0.0.1:2893:3000"
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+networks:
+  social-network:
+    driver: bridge

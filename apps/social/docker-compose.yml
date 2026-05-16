@@ -1,0 +1,25 @@
+services:
+  social:
+    image: ghcr.io/belforzedse/infinity-social:${IMAGE_TAG:-main}
+    container_name: infinity-social
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${HOST_PORT:-2890}:3000"
+    networks:
+      - social-network
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+networks:
+  social-network:
+    driver: bridge

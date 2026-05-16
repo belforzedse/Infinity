@@ -1,0 +1,7 @@
+# CI/GitLab override for the base Social compose file.
+# Used by .gitlab-ci.yml deploy. REGISTRY_IMAGE_BASE is set on the server.
+# Usage: docker compose -f docker-compose.yml -f docker-compose.ci.yml -f docker-compose.scale.yml -f docker-compose.scale.ci.yml up -d
+
+services:
+  social:
+    image: ${REGISTRY_IMAGE_BASE}/infinity-social:${IMAGE_TAG:-main}
