@@ -138,9 +138,10 @@ export default factories.createCoreController("api::post-comment.post-comment", 
     }
 
     const parentCommentId = relationId(data.parent_comment);
+    let parentComment: any = null;
     if (parentCommentId) {
-      const parentComment = await strapi.entityService.findOne("api::post-comment.post-comment", parentCommentId, {
-        populate: ["post"],
+      parentComment = await strapi.entityService.findOne("api::post-comment.post-comment", parentCommentId, {
+        populate: ["post", "user"],
       });
       if (!parentComment) {
         return ctx.notFound("Parent comment not found");
@@ -153,6 +154,7 @@ export default factories.createCoreController("api::post-comment.post-comment", 
     const populatedUser = await fetchUserWithRole(strapi, user.id);
     const commentAuthor = populatedUser || user;
     const resolvedName = resolveUserDisplayName(commentAuthor);
+    const hasManagementRole = await this.hasManagementRole(commentAuthor);
 
     const comment = await strapi.entityService.create("api::post-comment.post-comment", {
       data: {
@@ -161,11 +163,20 @@ export default factories.createCoreController("api::post-comment.post-comment", 
         parent_comment: parentCommentId || undefined,
         user: user.id,
         Date: new Date(),
-        Status: "Pending",
+        Status: hasManagementRole ? "Approved" : "Pending",
         Name: resolvedName,
       },
       populate: ["user", "post", "parent_comment"],
     });
+
+    if (parentCommentId && parentComment?.user?.id) {
+      await strapi.service("api::notification.notification").createCommentReply({
+        recipientId: Number(parentComment.user.id),
+        actorId: Number(user.id),
+        actorName: resolvedName,
+        postId: Number(postId),
+      });
+    }
 
     return { data: comment };
   },
@@ -277,6 +288,13 @@ export default factories.createCoreController("api::post-comment.post-comment", 
       data: { Status: "Approved" },
       populate: ["user", "post", "parent_comment"],
     });
+
+    if (comment?.user?.id && comment?.post?.id) {
+      await strapi.service("api::notification.notification").createCommentApproved({
+        recipientId: Number(comment.user.id),
+        postId: Number(comment.post.id),
+      });
+    }
 
     return { data: comment };
   },

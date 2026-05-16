@@ -376,8 +376,8 @@ function ProfilePostsPageInner() {
   const [storyDeleteTarget, setStoryDeleteTarget] = useState<Story | null>(null);
   const [deletingStoryId, setDeletingStoryId] = useState<number | null>(null);
   const [togglingStoryId, setTogglingStoryId] = useState<number | null>(null);
-  const commentsRequestId = useRef(0);
-  const isMountedRef = useRef(true);
+  const storiesLoadingRef = useRef(false);
+  const commentsLoadingRef = useRef(false);
 
   useEffect(() => {
     if (requestedTab === "posts" || requestedTab === "stories" || requestedTab === "comments") {
@@ -386,30 +386,28 @@ function ProfilePostsPageInner() {
   }, [requestedTab]);
 
   useEffect(() => {
-    if (activeTab !== "stories" || storiesLoaded || isStoriesLoading) return;
+    if (activeTab !== "stories" || storiesLoaded || storiesLoadingRef.current) return;
+    storiesLoadingRef.current = true;
+    let cancelled = false;
     setIsStoriesLoading(true);
     listStories({ pageSize: 100, sort: "SortOrder:asc" })
       .then((rows) => {
-        if (isMountedRef.current) {
+        if (!cancelled) {
           setStories(rows.data);
           setStoriesLoaded(true);
         }
       })
       .catch((error: unknown) => {
-        if (isMountedRef.current) {
+        if (!cancelled) {
           toast.error(getUserFacingErrorMessage(error, "دریافت استوری‌ها ناموفق بود."));
         }
       })
       .finally(() => {
-        if (isMountedRef.current) setIsStoriesLoading(false);
+        storiesLoadingRef.current = false;
+        setIsStoriesLoading(false);
       });
-  }, [activeTab, isStoriesLoading, storiesLoaded]);
-
-  useEffect(() => {
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
+    return () => { cancelled = true; };
+  }, [activeTab, storiesLoaded]);
 
   useEffect(() => {
     let cancelled = false;
@@ -433,30 +431,29 @@ function ProfilePostsPageInner() {
   }, []);
 
   useEffect(() => {
-    if (activeTab !== "comments" || commentsLoaded || isCommentsLoading) return;
-
-    const requestId = commentsRequestId.current + 1;
-    commentsRequestId.current = requestId;
+    if (activeTab !== "comments" || commentsLoaded || commentsLoadingRef.current) return;
+    commentsLoadingRef.current = true;
+    let cancelled = false;
     setIsCommentsLoading(true);
 
     listPendingPostComments()
       .then((rows) => {
-        if (isMountedRef.current && commentsRequestId.current === requestId) {
+        if (!cancelled) {
           setPendingComments(rows);
           setCommentsLoaded(true);
         }
       })
       .catch((error: unknown) => {
-        if (isMountedRef.current && commentsRequestId.current === requestId) {
+        if (!cancelled) {
           toast.error(getUserFacingErrorMessage(error, "دریافت دیدگاه‌ها ناموفق بود."));
         }
       })
       .finally(() => {
-        if (isMountedRef.current && commentsRequestId.current === requestId) {
-          setIsCommentsLoading(false);
-        }
+        commentsLoadingRef.current = false;
+        setIsCommentsLoading(false);
       });
-  }, [activeTab, commentsLoaded, isCommentsLoading]);
+    return () => { cancelled = true; };
+  }, [activeTab, commentsLoaded]);
 
   const gridItems = useMemo(
     () =>

@@ -1,4 +1,4 @@
-export type ProfileNavIconKind = "user" | "infinity" | "bookmark";
+export type ProfileNavIconKind = "user" | "infinity" | "bookmark" | "bell";
 
 export type ProfileNavMatch = "exact" | "prefix";
 
@@ -16,6 +16,12 @@ export const PROFILE_NAV_ITEMS: readonly ProfileNavItem[] = [
     href: "/profile/bookmarks",
     label: "ذخیره‌شده‌ها",
     icon: "bookmark",
+    match: "prefix",
+  },
+  {
+    href: "/profile/notifications",
+    label: "اعلان‌ها",
+    icon: "bell",
     match: "prefix",
   },
 ] as const;

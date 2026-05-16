@@ -106,7 +106,9 @@ export default async function PostDetailPage({ params }: PostPageProps) {
           <h1 className="font-peyda min-w-0 flex-1 truncate text-start text-lg font-semibold leading-[21px] text-[#424242]">
             {post.title}
           </h1>
-          <PostDetailBackButton />
+          <div className="hidden lg:block">
+            <PostDetailBackButton />
+          </div>
         </div>
 
         <div className="post-page-drawer-enter">

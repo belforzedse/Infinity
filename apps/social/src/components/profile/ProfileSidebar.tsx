@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { Menu, MenuButton, MenuItem, MenuItems, MenuSeparator } from "@headlessui/react";
-import { Bookmark, ChevronDown, LogOut, User } from "lucide-react";
+import { Bell, Bookmark, ChevronDown, LogOut, User } from "lucide-react";
 import ConfirmDialog from "@/components/Kits/ConfirmDialog";
 import { InfinityMarkCircle } from "@/components/InfinityMarkCircle";
 import { glassDefaultCrossfadeSurface } from "@/components/ui/glass-default-crossfade";
@@ -33,6 +33,9 @@ function NavIcon({ kind }: { kind: ProfileNavIconKind }) {
   const iconClass = "size-6 shrink-0 stroke-[1.2] text-[#94A3B8]";
   if (kind === "user") {
     return <User className={iconClass} aria-hidden />;
+  }
+  if (kind === "bell") {
+    return <Bell className={iconClass} aria-hidden />;
   }
   return <Bookmark className={iconClass} aria-hidden />;
 }

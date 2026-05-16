@@ -169,6 +169,9 @@ const ROLE_PERMISSION_SPECS: Record<string, RolePermissionSpec> = {
       "api::post-comment-like": {
         "post-comment-like": ["toggle", "getUserLikes"],
       },
+      "api::notification": {
+        notification: ["listMine", "unreadCount", "markAllRead", "markRead"],
+      },
       "api::product-stock": {
         "product-stock": READ_ACTIONS,
       },

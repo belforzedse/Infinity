@@ -4,6 +4,8 @@
  */
 
 import { factories } from "@strapi/strapi";
+import { fetchUserWithRole } from "../../../utils/roles";
+import { resolveUserDisplayName } from "../../../utils/blog-helpers";
 
 function getPositiveInt(value: unknown, fallback: number): number {
   const parsed = Number(value);
@@ -23,7 +25,9 @@ export default factories.createCoreController("api::post-comment-like.post-comme
         return ctx.unauthorized("Authentication required");
       }
 
-      const comment = await strapi.entityService.findOne("api::post-comment.post-comment", commentId);
+      const comment = await strapi.entityService.findOne("api::post-comment.post-comment", commentId, {
+        populate: ["user", "post"],
+      });
       if (!comment) {
         return ctx.notFound("Comment not found");
       }
@@ -53,6 +57,17 @@ export default factories.createCoreController("api::post-comment-like.post-comme
           post_comment: commentId,
         },
       });
+
+      if (comment?.user?.id && comment?.post?.id) {
+        const populatedLiker = await fetchUserWithRole(strapi, pluginUserId);
+        const likerName = resolveUserDisplayName(populatedLiker || ctx.state.user);
+        await strapi.service("api::notification.notification").createCommentLiked({
+          recipientId: Number(comment.user.id),
+          actorId: Number(pluginUserId),
+          actorName: likerName,
+          postId: Number(comment.post.id),
+        });
+      }
 
       return ctx.send({
         success: true,

@@ -388,6 +388,8 @@ async function registerInfo(ctx) {
       .query("api::local-user-info.local-user-info")
       .findOne({ where: { user: pluginUserId } });
 
+    const wasNewProfile = !profileRecord;
+
     await strapi.db.transaction(async () => {
       if (!profileRecord) {
         profileRecord = await strapi.entityService.create("api::local-user-info.local-user-info", {
@@ -443,6 +445,10 @@ async function registerInfo(ctx) {
           email: `${normalizedPhone.replace(/\D/g, "") || "user"}@placeholder.local`,
         },
       });
+    }
+
+    if (wasNewProfile) {
+      await strapi.service("api::notification.notification").createWelcome(pluginUserId);
     }
 
     ctx.body = {

@@ -3,10 +3,12 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { StorefrontLogo } from "@repo/brand";
-import { Bell, Bookmark, User } from "lucide-react";
+import { Bookmark, User } from "lucide-react";
 import { SearchBar } from "@/components/SearchBar";
 import { HeaderProfileNav } from "@/components/HeaderProfileNav";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
+import { MobileHeaderBackButton } from "@/components/MobileHeaderBackButton";
 
 const LG_BREAKPOINT_PX = 1024;
 const NEAR_TOP_SCROLL_Y = 80;
@@ -17,7 +19,7 @@ function Divider() {
 
 /**
  * App shell header. Desktop: LTR grid search | logo | actions.
- * Mobile (&lt; lg): frosted bar, same `StorefrontLogo` as desktop (smaller), centered; notifications only.
+ * Mobile (&lt; lg): frosted bar, same `StorefrontLogo` as desktop (smaller), centered; route-aware actions.
  * Mobile: hides on scroll-down, shows on scroll-up or near top (aligned with storefront product layout).
  *
  * Icons: `lucide-react` (same stack as `@repo/frontend`).
@@ -75,14 +77,9 @@ export function Header() {
             <StorefrontLogo href="/" width={72} height={45} />
           </div>
         </div>
-        <div className="relative z-10 ml-auto">
-          <button
-            type="button"
-            className="rounded-2xl bg-white p-2.5 text-[#94A3B8] shadow-sm transition-colors hover:text-zinc-700"
-            aria-label="اعلان‌ها"
-          >
-            <Bell size={20} strokeWidth={1.5} aria-hidden />
-          </button>
+        <div className="relative z-10 ml-auto flex items-center gap-3">
+          <NotificationDropdown variant="mobile" />
+          <MobileHeaderBackButton />
         </div>
       </div>
 
@@ -105,13 +102,7 @@ export function Header() {
             <LeadingActionIcon size={20} strokeWidth={1.5} aria-hidden />
           </Link>
           <Divider />
-          <button
-            type="button"
-            className="rounded-lg p-1.5 text-[#94A3B8] transition-colors hover:bg-zinc-100 hover:text-zinc-800"
-            aria-label="اعلان‌ها"
-          >
-            <Bell size={20} strokeWidth={1.5} aria-hidden />
-          </button>
+          <NotificationDropdown variant="desktop" />
           <Divider />
           <HeaderProfileNav />
         </div>

@@ -12,6 +12,7 @@ export type PostDetailComment = {
   id: string;
   authorName: string;
   authorAvatarUrl: string | null;
+  isOfficialAuthor: boolean;
   createdAt: string;
   text: string;
   likesCount: number;
@@ -23,6 +24,7 @@ export type PostDetail = {
   slug: string;
   title: string;
   caption: string;
+  productLink: string;
   media: PostDetailMedia[];
   likesCount: number;
   commentsCount: number;
@@ -150,6 +152,18 @@ function commentAuthor(attrs: Record<string, unknown>): string {
   return "کاربر اینفینیتی";
 }
 
+function commentAuthorRole(attrs: Record<string, unknown>): string {
+  const userAttrs = readAttrs(attrs.user);
+  const roleAttrs = readAttrs(userAttrs.role);
+  const userRoleAttrs = readAttrs(userAttrs.user_role);
+  const roleName =
+    (typeof userRoleAttrs.Title === "string" && userRoleAttrs.Title) ||
+    (typeof userRoleAttrs.Name === "string" && userRoleAttrs.Name) ||
+    (typeof roleAttrs.name === "string" && roleAttrs.name) ||
+    "";
+  return roleName.trim().toLowerCase();
+}
+
 function normalizeComment(entry: unknown): InternalPostDetailComment | null {
   if (!entry || typeof entry !== "object") return null;
   const root = entry as Record<string, unknown>;
@@ -165,11 +179,14 @@ function normalizeComment(entry: unknown): InternalPostDetailComment | null {
       : typeof attrs.createdAt === "string"
         ? attrs.createdAt
         : new Date().toISOString();
+  const role = commentAuthorRole(attrs);
+  const isOfficialAuthor = role === "superadmin" || role === "store manager";
 
   return {
     id: String(id),
-    authorName: commentAuthor(attrs),
-    authorAvatarUrl: userAvatar(attrs.user),
+    authorName: isOfficialAuthor ? "اینفینیتی" : commentAuthor(attrs),
+    authorAvatarUrl: isOfficialAuthor ? null : userAvatar(attrs.user),
+    isOfficialAuthor,
     createdAt,
     text,
     likesCount: relationTotal(attrs.post_comment_likes),
@@ -183,6 +200,7 @@ function stripInternalParentId(comment: InternalPostDetailComment): PostDetailCo
     id: comment.id,
     authorName: comment.authorName,
     authorAvatarUrl: comment.authorAvatarUrl,
+    isOfficialAuthor: comment.isOfficialAuthor,
     createdAt: comment.createdAt,
     text: comment.text,
     likesCount: comment.likesCount,
@@ -215,9 +233,7 @@ function postDetailQuery(slug: string): string {
   p.set("fields[0]", "Title");
   p.set("fields[1]", "Slug");
   p.set("fields[2]", "Description");
-  p.set("populate[CoverImage][fields][0]", "url");
-  p.set("populate[CoverImage][fields][1]", "alternativeText");
-  p.set("populate[CoverImage][fields][2]", "mime");
+  p.set("fields[3]", "ProductLink");
   p.set("populate[Media][fields][0]", "url");
   p.set("populate[Media][fields][1]", "alternativeText");
   p.set("populate[Media][fields][2]", "mime");
@@ -230,6 +246,8 @@ function postDetailQuery(slug: string): string {
 function commentsQuery(): string {
   const p = new URLSearchParams();
   p.set("populate[user][populate][user_info][populate][Avatar][fields][0]", "url");
+  p.set("populate[user][populate][role]", "true");
+  p.set("populate[user][populate][user_role]", "true");
   p.set("populate[parent_comment]", "true");
   p.set("populate[post_comment_likes][count]", "true");
   return p.toString();
@@ -248,8 +266,7 @@ function normalizePostDetail(entry: unknown, comments: PostDetailComment[]): Pos
   const id = root.id ?? attrs.id;
   if (typeof id !== "number" && typeof id !== "string") return null;
 
-  const cover = normalizeSingleMedia(attrs.CoverImage);
-  const mediaRows = [cover, ...normalizeMediaList(attrs.Media)].filter(Boolean) as StrapiMediaAttrs[];
+  const mediaRows = normalizeMediaList(attrs.Media);
   const media: PostDetailMedia[] = [];
   const seenUrls = new Set<string>();
 
@@ -265,16 +282,16 @@ function normalizePostDetail(entry: unknown, comments: PostDetailComment[]): Pos
     });
   });
 
-  if (media.length === 0) return null;
-
   const title = typeof attrs.Title === "string" ? attrs.Title.trim() : "";
   const rawDescription = typeof attrs.Description === "string" ? attrs.Description : "";
+  const productLink = typeof attrs.ProductLink === "string" ? attrs.ProductLink.trim() : "";
 
   return {
     id: String(id),
     slug: typeof attrs.Slug === "string" ? attrs.Slug : "",
     title,
     caption: stripHtml(rawDescription) || title,
+    productLink,
     media,
     likesCount: relationTotal(attrs.post_likes),
     commentsCount: Math.max(relationTotal(attrs.post_comments), comments.length),
@@ -288,6 +305,7 @@ function demoComments(): PostDetailComment[] {
       id: "demo-comment-1",
       authorName: "مارال آذری",
       authorAvatarUrl: null,
+      isOfficialAuthor: false,
       createdAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
       text: "عاشقشم خیلی خوشگله",
       likesCount: 3,
@@ -297,6 +315,7 @@ function demoComments(): PostDetailComment[] {
       id: "demo-comment-2",
       authorName: "علی",
       authorAvatarUrl: null,
+      isOfficialAuthor: false,
       createdAt: new Date(Date.now() - 6 * 60 * 1000).toISOString(),
       text: "مرسی ازتون بابت عکس‌ها رو چجوری برای هم ارسال کنیم",
       likesCount: 2,
@@ -305,6 +324,7 @@ function demoComments(): PostDetailComment[] {
           id: "demo-reply-1",
           authorName: "اینفینیتی",
           authorAvatarUrl: null,
+          isOfficialAuthor: true,
           createdAt: new Date(Date.now() - 4 * 60 * 1000).toISOString(),
           text: "از گزینه ارسال دیدگاه می‌تونید استفاده کنید.",
           likesCount: 0,
@@ -318,9 +338,9 @@ function demoComments(): PostDetailComment[] {
 function getDemoPostDetail(slug: string): PostDetail | null {
   const post = getHomeDemoPosts().find((item) => item.slug === slug);
   if (!post) return null;
-  const media = [post.imageSrc, ...post.media.map((item) => item.url)].map((url, index) => ({
+  const media = post.media.map((item, index) => ({
+    url: item.url,
     id: `${post.id}-${index}`,
-    url,
     alternativeText: post.imageAlt,
     mime: "image/jpeg",
   }));
@@ -330,6 +350,7 @@ function getDemoPostDetail(slug: string): PostDetail | null {
     slug: post.slug,
     title: post.title,
     caption: "اصالت در عین سادگی؛ انتخابی مینیمال برای استایل روزمره.",
+    productLink: "",
     media,
     likesCount: post.likesCount,
     commentsCount: Math.max(post.commentsCount, comments.length),

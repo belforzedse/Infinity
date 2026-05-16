@@ -1,0 +1,57 @@
+{
+  "kind": "collectionType",
+  "collectionName": "notifications",
+  "info": {
+    "singularName": "notification",
+    "pluralName": "notifications",
+    "displayName": "Notification",
+    "description": "User notifications for social events"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "recipient": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "actor": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "post": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::post.post"
+    },
+    "Kind": {
+      "type": "enumeration",
+      "enum": [
+        "site_message",
+        "comment_reply",
+        "comment_approved",
+        "comment_liked"
+      ],
+      "required": true
+    },
+    "Title": {
+      "type": "string"
+    },
+    "Body": {
+      "type": "text"
+    },
+    "ActorName": {
+      "type": "string"
+    },
+    "Link": {
+      "type": "string"
+    },
+    "IsRead": {
+      "type": "boolean",
+      "default": false
+    }
+  }
+}

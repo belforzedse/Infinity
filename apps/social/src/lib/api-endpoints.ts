@@ -50,4 +50,10 @@ export const ENDPOINTS = {
     TOGGLE: "/post-bookmarks/toggle",
     USER_BOOKMARKS: "/post-bookmarks/user/me",
   },
+  NOTIFICATIONS: {
+    LIST_MINE: "/notifications/user/me",
+    UNREAD_COUNT: "/notifications/user/me/unread-count",
+    MARK_ALL_READ: "/notifications/user/me/read-all",
+    MARK_READ: (id: number | string) => `/notifications/${id}/read`,
+  },
 } as const;

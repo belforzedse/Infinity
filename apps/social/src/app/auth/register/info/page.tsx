@@ -111,7 +111,7 @@ export default function RegisterInfoPage() {
         if (redirectParam && redirectParam.startsWith("/")) {
           router.push(redirectParam);
         } else {
-          router.push("/");
+          router.push("/profile");
         }
       }
     } catch (error: unknown) {

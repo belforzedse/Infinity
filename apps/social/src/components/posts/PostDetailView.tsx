@@ -17,7 +17,9 @@ import { getLikedPostCommentIds, togglePostCommentLike } from "@/services/post-c
 import { getLikedPostIds, hasAccessToken, togglePostLike } from "@/services/post-like.service";
 import { getBookmarkedPostIds, togglePostBookmark } from "@/services/post-bookmark.service";
 import { BlurImage } from "@/components/ui/BlurImage";
+import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { InfinityMarkCircle } from "@/components/InfinityMarkCircle";
 import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
 
 function cx(...parts: (string | false | undefined)[]): string {
@@ -56,6 +58,10 @@ function initials(name: string): string {
 }
 
 function Avatar({ comment }: { comment: PostDetailComment }) {
+  if (comment.isOfficialAuthor) {
+    return <InfinityMarkCircle circleSize={42} markSize={30} className="shrink-0" />;
+  }
+
   if (comment.authorAvatarUrl) {
     return (
       <BlurImage
@@ -202,6 +208,7 @@ function MediaSlide({ media, active }: { media: PostDetailMedia; active: boolean
           controls
           playsInline
           preload="metadata"
+          draggable={false}
         />
       ) : (
         <BlurImage
@@ -212,6 +219,7 @@ function MediaSlide({ media, active }: { media: PostDetailMedia; active: boolean
           className="object-cover"
           priority={active}
           unoptimized={media.url.startsWith("data:")}
+          draggable={false}
         />
       )}
     </div>
@@ -227,6 +235,8 @@ function PostMediaCarousel({ media }: { media: PostDetailMedia[] }) {
   const pointerId = useRef<number | null>(null);
   const activeMedia = media[Math.min(activeIndex, media.length - 1)];
   const hasMultiple = media.length > 1;
+  const visualMedia = [...media].reverse();
+  const visualIndex = media.length - 1 - activeIndex;
 
   const goTo = useCallback(
     (index: number) => {
@@ -242,6 +252,9 @@ function PostMediaCarousel({ media }: { media: PostDetailMedia[] }) {
 
   function startDrag(event: ReactPointerEvent<HTMLDivElement>) {
     if (!hasMultiple || (event.pointerType === "mouse" && event.button !== 0)) return;
+    if (event.pointerType === "mouse") {
+      event.preventDefault();
+    }
     pointerId.current = event.pointerId;
     dragStartX.current = event.clientX;
     setIsDragging(true);
@@ -298,13 +311,14 @@ function PostMediaCarousel({ media }: { media: PostDetailMedia[] }) {
         onPointerMove={moveDrag}
         onPointerUp={endDrag}
         onPointerCancel={endDrag}
+        onDragStart={(event) => event.preventDefault()}
       >
         <div
           className={cx("flex h-full w-full", !isDragging && "transition-transform duration-200 ease-out")}
-          style={{ transform: `translateX(calc(${-activeIndex * 100}% + ${dragOffset}px))` }}
+          style={{ transform: `translateX(calc(${-visualIndex * 100}% + ${dragOffset}px))` }}
         >
-          {media.map((item, index) => (
-            <MediaSlide key={item.id} media={item} active={index === activeIndex} />
+          {visualMedia.map((item, index) => (
+            <MediaSlide key={item.id} media={item} active={index === visualIndex} />
           ))}
         </div>
       </div>
@@ -312,17 +326,17 @@ function PostMediaCarousel({ media }: { media: PostDetailMedia[] }) {
         <>
           <button
             type="button"
-            onClick={goPrevious}
+            onClick={goNext}
             className="absolute left-4 top-1/2 z-10 inline-flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-[#3D4C6E] shadow-[0_8px_24px_rgba(61,76,110,0.14)] backdrop-blur-md transition-colors hover:bg-white"
-            aria-label="اسلاید قبلی"
+            aria-label="اسلاید بعدی"
           >
             <ChevronLeft className="size-5" strokeWidth={1.8} aria-hidden />
           </button>
           <button
             type="button"
-            onClick={goNext}
+            onClick={goPrevious}
             className="absolute right-4 top-1/2 z-10 inline-flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-white/85 text-[#3D4C6E] shadow-[0_8px_24px_rgba(61,76,110,0.14)] backdrop-blur-md transition-colors hover:bg-white"
-            aria-label="اسلاید بعدی"
+            aria-label="اسلاید قبلی"
           >
             <ChevronRight className="size-5" strokeWidth={1.8} aria-hidden />
           </button>
@@ -659,6 +673,18 @@ export function PostDetailView({ post, className }: { post: PostDetail; classNam
           <p className="mt-1 line-clamp-2 font-peyda text-[13px] font-medium leading-6 text-[#3D4C6E]">
             {post.caption}
           </p>
+        ) : null}
+        {post.productLink ? (
+          <div className="mt-3">
+            <Button
+              variant="gray"
+              onClick={() => {
+                window.location.href = post.productLink;
+              }}
+            >
+              لینک خرید
+            </Button>
+          </div>
         ) : null}
       </div>
 

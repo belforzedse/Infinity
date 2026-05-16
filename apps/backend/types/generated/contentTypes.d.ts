@@ -1509,6 +1509,47 @@ export interface ApiNavigationNavigation extends Schema.SingleType {
   };
 }
 
+export interface ApiNotificationNotification extends Schema.CollectionType {
+  collectionName: "notifications";
+  info: {
+    description: "User notifications for social events";
+    displayName: "Notification";
+    pluralName: "notifications";
+    singularName: "notification";
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    actor: Attribute.Relation<
+      "api::notification.notification",
+      "manyToOne",
+      "plugin::users-permissions.user"
+    >;
+    ActorName: Attribute.String;
+    Body: Attribute.Text;
+    createdAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<"api::notification.notification", "oneToOne", "admin::user"> &
+      Attribute.Private;
+    IsRead: Attribute.Boolean & Attribute.DefaultTo<false>;
+    Kind: Attribute.Enumeration<
+      ["site_message", "comment_reply", "comment_approved", "comment_liked"]
+    > &
+      Attribute.Required;
+    Link: Attribute.String;
+    post: Attribute.Relation<"api::notification.notification", "manyToOne", "api::post.post">;
+    recipient: Attribute.Relation<
+      "api::notification.notification",
+      "manyToOne",
+      "plugin::users-permissions.user"
+    >;
+    Title: Attribute.String;
+    updatedAt: Attribute.DateTime;
+    updatedBy: Attribute.Relation<"api::notification.notification", "oneToOne", "admin::user"> &
+      Attribute.Private;
+  };
+}
+
 export interface ApiOrderItemOrderItem extends Schema.CollectionType {
   collectionName: "order_items";
   info: {
@@ -3500,6 +3541,7 @@ declare module "@strapi/types" {
       "api::local-user.local-user": ApiLocalUserLocalUser;
       "api::manual-admin-activity.manual-admin-activity": ApiManualAdminActivityManualAdminActivity;
       "api::navigation.navigation": ApiNavigationNavigation;
+      "api::notification.notification": ApiNotificationNotification;
       "api::order-item.order-item": ApiOrderItemOrderItem;
       "api::order-log.order-log": ApiOrderLogOrderLog;
       "api::order.order": ApiOrderOrder;

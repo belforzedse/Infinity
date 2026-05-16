@@ -64,10 +64,10 @@ export default function LoginPage() {
             router.push(storedRedirectUrl);
             setRedirectUrl(null);
           } else {
-            router.push("/");
+            router.push("/profile");
           }
         } catch {
-          router.push("/");
+          router.push("/profile");
         }
       } else {
         toast.error("رمز عبور یا شماره همراه اشتباه است");

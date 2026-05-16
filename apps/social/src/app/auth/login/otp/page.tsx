@@ -65,10 +65,10 @@ export default function LoginOtpPage() {
               router.push(storedRedirectUrl);
               setRedirectUrl(null);
             } else {
-              router.push("/");
+              router.push("/profile");
             }
           } catch {
-            router.push("/");
+            router.push("/profile");
           }
         } else {
           toast.error(fallbackMessage);
