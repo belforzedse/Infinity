@@ -58,6 +58,7 @@ function AddPostContentPageInner() {
           productLink: input.productLink,
           size: POST_SIZE_TO_ENUM[size],
         });
+        router.refresh();
         router.push(POSTS_HREF);
       }}
     />

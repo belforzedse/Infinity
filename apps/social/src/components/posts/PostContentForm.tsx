@@ -147,10 +147,10 @@ export function PostContentForm({
       </div>
 
       <div className="grid w-full grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-6">
-        <div className="order-1 lg:order-2 lg:col-span-1">
+        <div className="order-1 lg:col-span-1">
           <CoverImageCard controller={cover} aspectRatio={COVER_ASPECT_BY_CODE[size]} />
         </div>
-        <div className="order-2 lg:order-1 lg:col-span-2">
+        <div className="order-2 lg:col-span-2">
           <PostGalleryCard controller={gallery} />
         </div>
       </div>

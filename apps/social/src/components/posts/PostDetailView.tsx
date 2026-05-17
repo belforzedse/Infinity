@@ -96,6 +96,26 @@ function updateCommentById(
   });
 }
 
+function insertReplyById(
+  rows: PostDetailComment[],
+  parentId: string,
+  reply: PostDetailComment,
+): PostDetailComment[] {
+  return rows.map((comment) => {
+    if (comment.id === parentId) {
+      return {
+        ...comment,
+        replies: [reply, ...comment.replies],
+      };
+    }
+    if (comment.replies.length === 0) return comment;
+    return {
+      ...comment,
+      replies: insertReplyById(comment.replies, parentId, reply),
+    };
+  });
+}
+
 function CommentItem({
   comment,
   isReply = false,
@@ -363,6 +383,7 @@ function PostMediaCarousel({ media }: { media: PostDetailMedia[] }) {
 export function PostDetailView({ post, className }: { post: PostDetail; className?: string }) {
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(post.likesCount);
+  const [commentCount, setCommentCount] = useState(post.commentsCount);
   const [comments, setComments] = useState<PostDetailComment[]>(post.comments);
   const [isLikePending, setIsLikePending] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
@@ -382,7 +403,8 @@ export function PostDetailView({ post, className }: { post: PostDetail; classNam
 
   useEffect(() => {
     setLikeCount(post.likesCount);
-  }, [post.id, post.likesCount]);
+    setCommentCount(post.commentsCount);
+  }, [post.id, post.likesCount, post.commentsCount]);
 
   useEffect(() => {
     setComments(post.comments);
@@ -592,15 +614,37 @@ export function PostDetailView({ post, className }: { post: PostDetail; classNam
     setIsSubmitting(true);
     setSubmitHint(null);
     try {
-      await createPostComment({
+      const createdComment = await createPostComment({
         postId: post.id,
         content: value,
         parentCommentId: replyTarget?.id,
       });
       setComment("");
       setReplyTarget(null);
-      setSubmitHint("دیدگاه شما بعد از تایید نمایش داده می‌شود.");
-      toast.success(replyTarget ? "پاسخ ثبت شد و در انتظار تایید است." : "دیدگاه ثبت شد و در انتظار تایید است.");
+      if (createdComment.status === "Approved") {
+        const visibleComment: PostDetailComment = {
+          id: createdComment.id,
+          authorName: createdComment.isInfinity ? "اینفینیتی" : "",
+          authorAvatarUrl: null,
+          isOfficialAuthor: createdComment.isInfinity,
+          createdAt: createdComment.date,
+          text: createdComment.content,
+          likesCount: 0,
+          replies: [],
+        };
+
+        setComments((prev) =>
+          createdComment.parentCommentId
+            ? insertReplyById(prev, createdComment.parentCommentId, visibleComment)
+            : [visibleComment, ...prev],
+        );
+        setCommentCount((prev) => prev + 1);
+        setSubmitHint(null);
+        toast.success(replyTarget ? "پاسخ ثبت شد." : "دیدگاه ثبت شد.");
+      } else {
+        setSubmitHint("دیدگاه شما بعد از تایید نمایش داده می‌شود.");
+        toast.success(replyTarget ? "پاسخ ثبت شد و در انتظار تایید است." : "دیدگاه ثبت شد و در انتظار تایید است.");
+      }
     } catch (error: unknown) {
       const message = getUserFacingErrorMessage(error, "ثبت دیدگاه ناموفق بود.");
       setSubmitHint(message);
@@ -636,7 +680,7 @@ export function PostDetailView({ post, className }: { post: PostDetail; classNam
 
         <div className="flex flex-row items-center gap-4 font-peyda text-[18px] font-semibold text-[#424242]">
           <span className="inline-flex flex-row items-center gap-1.5">
-            {formatCount(post.commentsCount)}
+            {formatCount(commentCount)}
             <MessageCircle className="size-7 text-[#94A3B8]" strokeWidth={1.5} aria-hidden />
           </span>
           <button
@@ -688,7 +732,7 @@ export function PostDetailView({ post, className }: { post: PostDetail; classNam
         ) : null}
       </div>
 
-      <div className="mt-8 flex flex-row items-center justify-between gap-3">
+      <div dir="ltr" className="mt-8 flex flex-row items-center justify-between gap-3">
         <button
           type="button"
           className="inline-flex h-11 shrink-0 flex-row items-center gap-2 rounded-full bg-[#F7F8FF] px-4 font-peyda text-sm font-medium text-[#7B8498] shadow-[0_5px_18px_rgba(61,76,110,0.05)]"
@@ -696,9 +740,9 @@ export function PostDetailView({ post, className }: { post: PostDetail; classNam
           ارسال دیدگاه
           <SendHorizonal className="size-5" strokeWidth={1.5} aria-hidden />
         </button>
-        <div className="min-w-0 flex-1 text-right">
+        <div dir="rtl" className="min-w-0 flex-1 text-right">
           <h2 className="font-peyda text-[22px] font-bold leading-8 text-[#424242]">
-            {formatCount(post.commentsCount)} دیدگاه
+            {formatCount(commentCount)} دیدگاه
           </h2>
           <p className="font-peyda text-[12px] font-medium leading-6 text-[#9AA8BD]">
             شما هم توی این بحث شرکت کنید

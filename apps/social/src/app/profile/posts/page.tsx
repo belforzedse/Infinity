@@ -478,6 +478,7 @@ function ProfilePostsPageInner() {
     try {
       await PostService.delete(deleteTarget.id);
       setPosts((prev) => prev.filter((post) => post.id !== deleteTarget.id));
+      router.refresh();
       toast.success("پست حذف شد.");
       setDeleteTarget(null);
     } catch (error: unknown) {
@@ -485,7 +486,7 @@ function ProfilePostsPageInner() {
     } finally {
       setDeletingId(null);
     }
-  }, [deleteTarget, deletingId]);
+  }, [deleteTarget, deletingId, router]);
 
   const handleCommentAction = useCallback(async (comment: PendingPostComment, action: CommentAction) => {
     if (commentActionId != null) return;
@@ -499,6 +500,7 @@ function ProfilePostsPageInner() {
         await rejectPostComment(comment.id);
         toast.success("دیدگاه رد شد.");
       }
+      router.refresh();
       setPendingComments((prev) => prev.filter((item) => item.id !== comment.id));
     } catch (error: unknown) {
       toast.error(
@@ -510,7 +512,7 @@ function ProfilePostsPageInner() {
     } finally {
       setCommentActionId(null);
     }
-  }, [commentActionId]);
+  }, [commentActionId, router]);
 
   const filteredStories = useMemo(
     () =>
@@ -531,13 +533,14 @@ function ProfilePostsPageInner() {
     try {
       const updated = await updateStory(story.id, { IsActive: !story.IsActive });
       setStories((prev) => prev.map((item) => (item.id === story.id ? updated : item)));
+      router.refresh();
       toast.success(story.IsActive ? "استوری غیرفعال شد." : "استوری فعال شد.");
     } catch (error: unknown) {
       toast.error(getUserFacingErrorMessage(error, "تغییر وضعیت استوری ناموفق بود."));
     } finally {
       setTogglingStoryId(null);
     }
-  }, [togglingStoryId]);
+  }, [togglingStoryId, router]);
 
   const confirmStoryDelete = useCallback(async () => {
     if (!storyDeleteTarget || deletingStoryId != null) return;
@@ -545,6 +548,7 @@ function ProfilePostsPageInner() {
     try {
       await deleteStory(storyDeleteTarget.id);
       setStories((prev) => prev.filter((story) => story.id !== storyDeleteTarget.id));
+      router.refresh();
       toast.success("استوری حذف شد.");
       setStoryDeleteTarget(null);
     } catch (error: unknown) {
@@ -552,7 +556,7 @@ function ProfilePostsPageInner() {
     } finally {
       setDeletingStoryId(null);
     }
-  }, [deletingStoryId, storyDeleteTarget]);
+  }, [deletingStoryId, storyDeleteTarget, router]);
 
   return (
     <div className="flex w-full flex-col gap-6" dir="rtl">

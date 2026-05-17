@@ -36,6 +36,11 @@
       "required": false,
       "maxLength": 150
     },
+    "IsInfinity": {
+      "type": "boolean",
+      "default": false,
+      "required": true
+    },
     "user": {
       "type": "relation",
       "relation": "manyToOne",

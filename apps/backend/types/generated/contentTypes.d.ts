@@ -1869,6 +1869,7 @@ export interface ApiPostCommentPostComment extends Schema.CollectionType {
     createdBy: Attribute.Relation<"api::post-comment.post-comment", "oneToOne", "admin::user"> &
       Attribute.Private;
     Date: Attribute.DateTime & Attribute.Required;
+    IsInfinity: Attribute.Boolean & Attribute.Required & Attribute.DefaultTo<false>;
     Name: Attribute.String &
       Attribute.SetMinMaxLength<{
         maxLength: 150;

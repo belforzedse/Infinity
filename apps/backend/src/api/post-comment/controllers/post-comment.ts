@@ -165,6 +165,7 @@ export default factories.createCoreController("api::post-comment.post-comment", 
         Date: new Date(),
         Status: hasManagementRole ? "Approved" : "Pending",
         Name: resolvedName,
+        IsInfinity: hasManagementRole,
       },
       populate: ["user", "post", "parent_comment"],
     });
@@ -209,10 +210,11 @@ export default factories.createCoreController("api::post-comment.post-comment", 
       return ctx.badRequest("Comment content is required");
     }
 
+    const { IsInfinity: _ignoredIsInfinity, ...editableData } = data;
     const updateData = hasManagementRole
-      ? data
+      ? editableData
       : {
-          Content: data.Content,
+          Content: editableData.Content,
           Status: "Pending",
         };
 

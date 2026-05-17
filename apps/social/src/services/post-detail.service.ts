@@ -152,18 +152,6 @@ function commentAuthor(attrs: Record<string, unknown>): string {
   return "کاربر اینفینیتی";
 }
 
-function commentAuthorRole(attrs: Record<string, unknown>): string {
-  const userAttrs = readAttrs(attrs.user);
-  const roleAttrs = readAttrs(userAttrs.role);
-  const userRoleAttrs = readAttrs(userAttrs.user_role);
-  const roleName =
-    (typeof userRoleAttrs.Title === "string" && userRoleAttrs.Title) ||
-    (typeof userRoleAttrs.Name === "string" && userRoleAttrs.Name) ||
-    (typeof roleAttrs.name === "string" && roleAttrs.name) ||
-    "";
-  return roleName.trim().toLowerCase();
-}
-
 function normalizeComment(entry: unknown): InternalPostDetailComment | null {
   if (!entry || typeof entry !== "object") return null;
   const root = entry as Record<string, unknown>;
@@ -179,8 +167,7 @@ function normalizeComment(entry: unknown): InternalPostDetailComment | null {
       : typeof attrs.createdAt === "string"
         ? attrs.createdAt
         : new Date().toISOString();
-  const role = commentAuthorRole(attrs);
-  const isOfficialAuthor = role === "superadmin" || role === "store manager";
+  const isOfficialAuthor = attrs.IsInfinity === true;
 
   return {
     id: String(id),
@@ -246,8 +233,6 @@ function postDetailQuery(slug: string): string {
 function commentsQuery(): string {
   const p = new URLSearchParams();
   p.set("populate[user][populate][user_info][populate][Avatar][fields][0]", "url");
-  p.set("populate[user][populate][role]", "true");
-  p.set("populate[user][populate][user_role]", "true");
   p.set("populate[parent_comment]", "true");
   p.set("populate[post_comment_likes][count]", "true");
   return p.toString();

@@ -17,6 +17,7 @@ export default function AddStoryPage() {
     try {
       await createStory(data);
       toast.success("استوری ایجاد شد.");
+      router.refresh();
       router.push("/profile/posts?tab=stories");
     } catch (error: unknown) {
       toast.error(getUserFacingErrorMessage(error, "ایجاد استوری ناموفق بود."));

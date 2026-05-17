@@ -58,6 +58,7 @@ export default function EditStoryPage() {
     try {
       await updateStory(storyId, data);
       toast.success("استوری ویرایش شد.");
+      router.refresh();
       router.push("/profile/posts?tab=stories");
     } catch (error: unknown) {
       toast.error(getUserFacingErrorMessage(error, "ویرایش استوری ناموفق بود."));

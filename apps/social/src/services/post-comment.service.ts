@@ -25,6 +25,15 @@ export type PendingPostComment = {
   } | null;
 };
 
+export type CreatedPostComment = {
+  id: string;
+  content: string;
+  date: string;
+  status: "Pending" | "Approved" | "Rejected";
+  isInfinity: boolean;
+  parentCommentId: string | null;
+};
+
 type MaybeWrapped<T> = T | { data: T };
 
 function unwrap<T>(value: unknown): T {
@@ -56,6 +65,13 @@ function relationEntry(raw: unknown): unknown {
   if (!raw || typeof raw !== "object") return null;
   const r = raw as Record<string, unknown>;
   return r.data ?? raw;
+}
+
+function relationId(raw: unknown): string | null {
+  const entry = relationEntry(raw);
+  if (!entry || typeof entry !== "object") return null;
+  const id = (entry as Record<string, unknown>).id;
+  return typeof id === "number" || typeof id === "string" ? String(id) : null;
 }
 
 function normalizePendingComment(entry: unknown): PendingPostComment | null {
@@ -100,13 +116,39 @@ function normalizePendingComment(entry: unknown): PendingPostComment | null {
   };
 }
 
+function normalizeCreatedComment(entry: unknown): CreatedPostComment | null {
+  if (!entry || typeof entry !== "object") return null;
+  const root = entry as Record<string, unknown>;
+  const attrs = readAttrs(entry);
+  const id = root.id ?? attrs.id;
+  if (typeof id !== "number" && typeof id !== "string") return null;
+
+  const status = attrs.Status;
+  const normalizedStatus =
+    status === "Approved" || status === "Rejected" || status === "Pending" ? status : "Pending";
+
+  return {
+    id: String(id),
+    content: typeof attrs.Content === "string" ? attrs.Content : "",
+    date:
+      typeof attrs.Date === "string"
+        ? attrs.Date
+        : typeof attrs.createdAt === "string"
+          ? attrs.createdAt
+          : new Date().toISOString(),
+    status: normalizedStatus,
+    isInfinity: attrs.IsInfinity === true,
+    parentCommentId: relationId(attrs.parent_comment),
+  };
+}
+
 export async function createPostComment(input: {
   postId: string | number;
   content: string;
   parentCommentId?: string | number;
-}): Promise<void> {
+}): Promise<CreatedPostComment> {
   try {
-    await apiClient.post(
+    const response = await apiClient.post<unknown>(
       ENDPOINTS.POST_COMMENTS.CREATE,
       {
         data: {
@@ -122,6 +164,11 @@ export async function createPostComment(input: {
         retries: 0,
       },
     );
+    const created = normalizeCreatedComment(unwrap<unknown>(response));
+    if (!created) {
+      throw new Error("Invalid comment response");
+    }
+    return created;
   } catch (error: unknown) {
     handleAuthErrors(error as ApiError);
     throw error;

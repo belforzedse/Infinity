@@ -7,7 +7,7 @@ import { StoriesRail } from "@/components/StoriesRail";
 import { StoriesRailSkeleton } from "@/components/ui/skeletons/StoriesRailSkeleton";
 import { getActiveStories } from "@/services/story.service";
 
-export const revalidate = 60;
+export const revalidate = 10;
 
 async function HomeBody() {
   await connection();

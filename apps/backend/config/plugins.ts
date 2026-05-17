@@ -101,7 +101,7 @@ export default ({ env }) => {
             "api::faq-category.faq-category",
             "api::faq-question.faq-question",
           ],
-          // Not cached: cart, order, stock, wallet, address, transactions (real-time)
+          // Not cached: post, post-like, post-comment, post-comment-like, cart, order, stock, wallet, address, transactions (real-time/user-specific)
         },
       },
     },
