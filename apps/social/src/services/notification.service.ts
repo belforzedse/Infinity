@@ -67,6 +67,13 @@ function readUnreadCount(response: unknown): number {
   return Number.isFinite(count) ? count : 0;
 }
 
+function relationRecord(raw: unknown): Record<string, unknown> {
+  if (!raw || typeof raw !== "object") return {};
+  const r = raw as Record<string, unknown>;
+  const data = r.data;
+  return readRecord(data ?? raw);
+}
+
 export function normalizeNotification(entry: unknown): AppNotification | null {
   if (!entry || typeof entry !== "object") return null;
   const raw = entry as Record<string, unknown>;
@@ -74,15 +81,32 @@ export function normalizeNotification(entry: unknown): AppNotification | null {
   if (!Number.isFinite(id)) return null;
 
   const r = readRecord(entry);
+  const kind = (r.Kind ?? r.kind ?? "site_message") as NotificationKind;
+  const post = relationRecord(r.post);
+  const postSlug =
+    typeof post.Slug === "string"
+      ? post.Slug
+      : typeof post.slug === "string"
+        ? post.slug
+        : "";
+  const isPostNotification =
+    kind === "comment_reply" || kind === "comment_approved" || kind === "comment_liked";
 
   return {
     id,
-    kind: (r.Kind ?? r.kind ?? "site_message") as NotificationKind,
+    kind,
     title: typeof r.Title === "string" ? r.Title : typeof r.title === "string" ? r.title : "",
     body: typeof r.Body === "string" ? r.Body : typeof r.body === "string" ? r.body : "",
     actorName:
       typeof r.ActorName === "string" ? r.ActorName : typeof r.actorName === "string" ? r.actorName : "",
-    link: typeof r.Link === "string" ? r.Link : typeof r.link === "string" ? r.link : "/",
+    link:
+      isPostNotification && postSlug
+        ? `/post/${postSlug}`
+        : typeof r.Link === "string"
+          ? r.Link
+          : typeof r.link === "string"
+            ? r.link
+            : "/",
     isRead:
       r.IsRead === true || r.isRead === true
         ? true

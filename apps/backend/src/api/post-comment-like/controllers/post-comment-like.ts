@@ -66,6 +66,7 @@ export default factories.createCoreController("api::post-comment-like.post-comme
           actorId: Number(pluginUserId),
           actorName: likerName,
           postId: Number(comment.post.id),
+          postSlug: comment.post.Slug,
         });
       }
 

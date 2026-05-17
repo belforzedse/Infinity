@@ -16,6 +16,7 @@ interface NotifyParams {
   actorId?: number;
   actorName?: string;
   postId?: number;
+  postSlug?: string;
   title?: string;
   body?: string;
   link?: string;
@@ -61,8 +62,9 @@ export default factories.createCoreService("api::notification.notification", ({ 
     actorId: number;
     actorName: string;
     postId: number;
+    postSlug: string;
   }) {
-    const { recipientId, actorId, actorName, postId } = params;
+    const { recipientId, actorId, actorName, postId, postSlug } = params;
     if (!recipientId || recipientId === actorId) return null;
     return this.notify({
       recipientId,
@@ -72,12 +74,12 @@ export default factories.createCoreService("api::notification.notification", ({ 
       postId,
       title: "پاسخ به دیدگاه شما",
       body: `${actorName} به دیدگاه شما پاسخ داد`,
-      link: `/posts/${postId}`,
+      link: `/post/${postSlug}`,
     });
   },
 
-  async createCommentApproved(params: { recipientId: number; postId: number }) {
-    const { recipientId, postId } = params;
+  async createCommentApproved(params: { recipientId: number; postId: number; postSlug: string }) {
+    const { recipientId, postId, postSlug } = params;
     if (!recipientId) return null;
     return this.notify({
       recipientId,
@@ -85,7 +87,7 @@ export default factories.createCoreService("api::notification.notification", ({ 
       postId,
       title: "دیدگاه شما تایید شد",
       body: "دیدگاه شما منتشر شد و اکنون برای همه نمایش داده می‌شود.",
-      link: `/posts/${postId}`,
+      link: `/post/${postSlug}`,
     });
   },
 
@@ -94,8 +96,9 @@ export default factories.createCoreService("api::notification.notification", ({ 
     actorId: number;
     actorName: string;
     postId: number;
+    postSlug: string;
   }) {
-    const { recipientId, actorId, actorName, postId } = params;
+    const { recipientId, actorId, actorName, postId, postSlug } = params;
     if (!recipientId || recipientId === actorId) return null;
     return this.notify({
       recipientId,
@@ -105,7 +108,7 @@ export default factories.createCoreService("api::notification.notification", ({ 
       postId,
       title: "پسندیدن دیدگاه",
       body: `${actorName} دیدگاه شما را پسندید`,
-      link: `/posts/${postId}`,
+      link: `/post/${postSlug}`,
     });
   },
 }));

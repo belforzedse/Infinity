@@ -176,6 +176,7 @@ export default factories.createCoreController("api::post-comment.post-comment", 
         actorId: Number(user.id),
         actorName: resolvedName,
         postId: Number(postId),
+        postSlug: post.Slug,
       });
     }
 
@@ -295,6 +296,7 @@ export default factories.createCoreController("api::post-comment.post-comment", 
       await strapi.service("api::notification.notification").createCommentApproved({
         recipientId: Number(comment.user.id),
         postId: Number(comment.post.id),
+        postSlug: comment.post.Slug,
       });
     }
 
