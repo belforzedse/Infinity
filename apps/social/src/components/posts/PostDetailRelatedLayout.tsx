@@ -28,6 +28,7 @@ function relatedCardInitialStyle(variant: HomeFeedPost["desktopVariant"]) {
 }
 
 export function PostDetailRelatedLayout({ post, relatedPosts }: PostDetailRelatedLayoutProps) {
+  const selectedPostAnchorRef = useRef<HTMLDivElement | null>(null);
   const postRef = useRef<HTMLDivElement | null>(null);
   const probeRef = useRef<HTMLDivElement | null>(null);
   const frameRef = useRef<number | null>(null);
@@ -46,6 +47,17 @@ export function PostDetailRelatedLayout({ post, relatedPosts }: PostDetailRelate
   useEffect(() => {
     void savePostSnapshot(post).catch(() => undefined);
   }, [post]);
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      selectedPostAnchorRef.current?.scrollIntoView({
+        block: "start",
+        behavior: "auto",
+      });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [post.slug]);
 
   useEffect(() => {
     function calculateRowSpan() {
@@ -89,7 +101,7 @@ export function PostDetailRelatedLayout({ post, relatedPosts }: PostDetailRelate
     <>
       {/* Mobile / tablet: post then full collage stacked */}
       <div className="flex w-full min-w-0 flex-col gap-6 lg:hidden">
-        <aside className="w-full min-w-0">
+        <aside ref={selectedPostAnchorRef} className="scroll-mt-24 w-full min-w-0">
           <PostDetailView post={post} />
         </aside>
 
