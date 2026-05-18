@@ -87,7 +87,7 @@ export function MobileBottomNav() {
 
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-0 z-30 lg:hidden">
-      <div className="pointer-events-auto mx-5 mb-5 pb-[env(safe-area-inset-bottom)]">
+      <div className="pointer-events-auto mx-5 mb-3 pb-[env(safe-area-inset-bottom)]">
         <nav
           aria-label="ناوبری اصلی"
           className="flex flex-col items-start gap-[10px] rounded-[20px] bg-white pt-[10px] px-[30px] pb-[5px] shadow-[0_4px_19px_rgba(57,57,57,0.05)]"

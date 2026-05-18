@@ -2,6 +2,7 @@
 
 import { RefreshCw } from "lucide-react";
 import { useEffect, useState } from "react";
+import Modal from "@/components/Kits/Modal";
 
 export function ServiceWorkerRegistration() {
   const [waitingWorker, setWaitingWorker] = useState<ServiceWorker | null>(null);
@@ -58,22 +59,33 @@ export function ServiceWorkerRegistration() {
   if (!waitingWorker) return null;
 
   return (
-    <div className="fixed bottom-[calc(7.25rem+env(safe-area-inset-bottom))] left-4 right-4 z-[65] mx-auto max-w-sm rounded-[20px] bg-white p-4 shadow-[0_18px_42px_rgba(61,76,110,0.14)] lg:bottom-6 lg:right-6 lg:left-auto">
-      <div className="flex items-center gap-3" dir="rtl">
-        <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-[#F1F4FB] text-infinity-primary">
-          <RefreshCw className="size-5" aria-hidden />
+    <Modal
+      isOpen
+      onClose={() => setWaitingWorker(null)}
+      className="max-w-sm overflow-hidden"
+      aria-labelledby="social-pwa-update-title"
+    >
+      <div className="flex flex-col items-center text-center" dir="rtl">
+        <div className="flex size-14 items-center justify-center rounded-2xl bg-[#F1F4FB] text-infinity-primary">
+          <RefreshCw className="size-6" aria-hidden />
         </div>
-        <p className="min-w-0 flex-1 text-right font-peyda text-sm font-semibold text-[#424242]">
+        <h2
+          id="social-pwa-update-title"
+          className="mt-4 font-peyda text-base font-semibold text-[#424242]"
+        >
           نسخه جدید آماده است
+        </h2>
+        <p className="mt-2 font-peyda text-sm leading-6 text-[#7B8498]">
+          برای دریافت آخرین تغییرات، برنامه را به‌روزرسانی کنید.
         </p>
         <button
           type="button"
           onClick={() => waitingWorker.postMessage("SKIP_WAITING")}
-          className="inline-flex h-9 items-center justify-center rounded-xl bg-infinity-primary px-3 font-peyda text-sm font-semibold text-white"
+          className="mt-5 inline-flex h-11 w-full items-center justify-center rounded-xl bg-infinity-primary px-3 font-peyda text-sm font-semibold text-white"
         >
           بروزرسانی
         </button>
       </div>
-    </div>
+    </Modal>
   );
 }
