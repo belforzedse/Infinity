@@ -42,12 +42,23 @@ export default () => ({
           }),
         });
 
-        const responseData = (await response.json()) as any;
+        const responseBody = await response.text();
+        let responseData: any = null;
+        try {
+          responseData = responseBody ? JSON.parse(responseBody) : null;
+        } catch {
+          responseData = null;
+        }
+
+        const responseHeaders = Object.fromEntries(response.headers.entries());
         strapi.log.debug(
           `IP Panel response payload :: ${JSON.stringify(
             {
               status: response.status,
-              response: responseData,
+              statusText: response.statusText,
+              headers: responseHeaders,
+              body: responseBody,
+              parsedBody: responseData,
             },
             null,
             2,
@@ -64,7 +75,10 @@ export default () => ({
         if (!gatewaySuccess) {
           strapi.log.error(`SMS gateway failed for ${normalizedPhone}`, {
             status: response.status,
-            response: responseData,
+            statusText: response.statusText,
+            headers: responseHeaders,
+            body: responseBody,
+            parsedBody: responseData,
             request: {
               recipient: normalizedPhone,
               code: process.env.IP_PANEL_PATTERN_CODE,

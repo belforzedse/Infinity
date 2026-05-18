@@ -21,6 +21,11 @@ import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { InfinityMarkCircle } from "@/components/InfinityMarkCircle";
 import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
+import {
+  clearCommentDraft,
+  readCommentDraft,
+  saveCommentDraft,
+} from "@/lib/offline-snapshots";
 
 function cx(...parts: (string | false | undefined)[]): string {
   return parts.filter(Boolean).join(" ");
@@ -414,6 +419,14 @@ export function PostDetailView({ post, className }: { post: PostDetail; classNam
   }, [post.id, post.comments]);
 
   useEffect(() => {
+    setComment(readCommentDraft(post.id));
+  }, [post.id]);
+
+  useEffect(() => {
+    saveCommentDraft(post.id, comment);
+  }, [post.id, comment]);
+
+  useEffect(() => {
     if (isLiked && !previousIsLiked.current) {
       const id = window.setTimeout(() => setHeartBurstKey((key) => key + 1), 0);
       previousIsLiked.current = isLiked;
@@ -620,6 +633,7 @@ export function PostDetailView({ post, className }: { post: PostDetail; classNam
         parentCommentId: replyTarget?.id,
       });
       setComment("");
+      clearCommentDraft(post.id);
       setReplyTarget(null);
       if (createdComment.status === "Approved") {
         const visibleComment: PostDetailComment = {

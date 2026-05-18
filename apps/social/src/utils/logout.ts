@@ -1,6 +1,7 @@
 import { jotaiStore } from "@/lib/jotaiStore";
 import { currentUserAtom, userErrorAtom, userLoadingAtom } from "@/lib/atoms/auth";
 import { clearAccessToken } from "@/utils/accessToken";
+import { clearAllCommentDrafts } from "@/lib/offline-snapshots";
 
 /**
  * Social app logout — mirrors storefront `performLogout` intent: clear token, clear auth atoms, hard-navigate to `/auth`.
@@ -21,6 +22,7 @@ export function performLogout(): void {
     }
 
     clearAccessToken();
+    clearAllCommentDrafts();
     window.location.href = "/auth";
   } catch (error) {
     console.error("[Logout] Error during logout:", error);

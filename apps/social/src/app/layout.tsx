@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { peyda, peydaFanum, rokh, kaghaz } from "@repo/fonts";
 import { Providers } from "@/app/providers";
 import { AppChrome } from "@/components/AppChrome";
@@ -24,6 +24,24 @@ export const metadata: Metadata = {
     locale: "fa_IR",
     type: "website",
   },
+  manifest: "/manifest.webmanifest",
+  icons: {
+    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: SITE_NAME,
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  viewportFit: "cover",
+  themeColor: "#3d4c6e",
 };
 
 export default function RootLayout({

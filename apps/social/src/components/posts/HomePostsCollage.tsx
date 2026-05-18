@@ -1,7 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Images, Layers2, Video } from "lucide-react";
 import { InfinityMarkCircle } from "@/components/InfinityMarkCircle";
@@ -11,6 +11,7 @@ import type { HomeFeedCardOverlay, HomeFeedPost } from "@/services/feed-post.ser
 import { useIsLgUp } from "@/components/posts/use-is-lg-up";
 import { useCollageInteractions } from "@/components/posts/use-collage-interactions";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { saveHomeFeedSnapshot } from "@/lib/offline-snapshots";
 
 /** Tight horizontal gap; cards use `widthMode="fluid"` so tracks shrink without horizontal scroll. */
 const GRID_GAP_X_PX = 6;
@@ -61,6 +62,7 @@ export type HomePostsCollageProps = {
   likeMode?: "local" | "api";
   showHeading?: boolean;
   onSavedChange?: (postId: string, isSaved: boolean) => void;
+  persistSnapshot?: boolean;
 };
 
 /**
@@ -72,6 +74,7 @@ export function HomePostsCollage({
   likeMode = "local",
   showHeading = true,
   onSavedChange,
+  persistSnapshot = true,
 }: HomePostsCollageProps) {
   const isLgUp = useIsLgUp();
   const router = useRouter();
@@ -112,6 +115,11 @@ export function HomePostsCollage({
   };
 
   const hasPosts = posts.length > 0;
+
+  useEffect(() => {
+    if (!persistSnapshot || posts.length === 0 || !window.navigator.onLine) return;
+    void saveHomeFeedSnapshot(posts).catch(() => undefined);
+  }, [persistSnapshot, posts]);
 
   return (
     <section

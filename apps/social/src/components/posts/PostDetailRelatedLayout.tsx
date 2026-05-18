@@ -9,6 +9,7 @@ import { PostDetailView } from "@/components/posts/PostDetailView";
 import { useCollageInteractions } from "@/components/posts/use-collage-interactions";
 import type { HomeFeedPost } from "@/services/feed-post.service";
 import type { PostDetail } from "@/services/post-detail.service";
+import { savePostSnapshot } from "@/lib/offline-snapshots";
 
 type PostDetailRelatedLayoutProps = {
   post: PostDetail;
@@ -41,6 +42,10 @@ export function PostDetailRelatedLayout({ post, relatedPosts }: PostDetailRelate
     relatedPosts,
     "api",
   );
+
+  useEffect(() => {
+    void savePostSnapshot(post).catch(() => undefined);
+  }, [post]);
 
   useEffect(() => {
     function calculateRowSpan() {
