@@ -61,6 +61,20 @@ interface StrapiListResponse<T> {
   };
 }
 
+function getStorySortTimestamp(story: Story): number {
+  const value = story.updatedAt || story.createdAt;
+  const timestamp = value ? Date.parse(value) : 0;
+  return Number.isFinite(timestamp) ? timestamp : 0;
+}
+
+function sortStoriesNewestFirst(stories: Story[]): Story[] {
+  return [...stories].sort((a, b) => {
+    const timestampDiff = getStorySortTimestamp(b) - getStorySortTimestamp(a);
+    if (timestampDiff !== 0) return timestampDiff;
+    return b.id - a.id;
+  });
+}
+
 export async function getActiveStories(): Promise<Story[]> {
   const baseUrl = getStrapiServerUrl();
   const url = `${baseUrl}${ENDPOINTS.STORIES.ACTIVE}`;
@@ -76,7 +90,7 @@ export async function getActiveStories(): Promise<Story[]> {
 
   const json = (await res.json()) as { data?: unknown[] };
   const items = Array.isArray(json.data) ? json.data : [];
-  return items.map(normalizeStory);
+  return sortStoriesNewestFirst(items.map(normalizeStory));
 }
 
 export async function getMySeenStoryIds(): Promise<number[]> {
@@ -97,6 +111,8 @@ export async function listStories(params: StoryListParams = {}): Promise<StrapiL
   if (params.page) query.set("pagination[page]", String(params.page));
   if (params.pageSize) query.set("pagination[pageSize]", String(params.pageSize));
   if (params.sort) query.set("sort", params.sort);
+  query.set("populate[Media]", "true");
+  query.set("populate[Thumbnail]", "true");
   if (typeof params.isActive === "boolean") {
     query.set("filters[IsActive][$eq]", String(params.isActive));
   }

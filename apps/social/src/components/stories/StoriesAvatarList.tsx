@@ -15,6 +15,22 @@ const MOBILE_INFINITY_MARK_PX = 15;
 const STORY_CARD_OVERLAY_CLASS =
   "pointer-events-none absolute inset-0 bg-[linear-gradient(180.32deg,rgba(0,0,0,0.4)_0.28%,rgba(44,44,44,0)_19.42%,rgba(73,73,73,0)_80.88%,rgba(0,0,0,0.4)_99.73%)]";
 
+function isImageAsset(story: Story, url?: string): boolean {
+  if (!url) return false;
+  const mime = story.Media?.mime;
+  if (mime) return mime.startsWith("image/");
+  return /\.(avif|gif|jpe?g|png|webp)(?:[?#].*)?$/i.test(url);
+}
+
+function getStaticStoryPreviewUrl(story: Story): string {
+  if (story.Thumbnail?.url) return buildStoryMediaUrl(story.Thumbnail.url);
+  const mediaUrl = story.Media?.url;
+  if (story.MediaType === "image" && isImageAsset(story, mediaUrl) && mediaUrl) {
+    return buildStoryMediaUrl(mediaUrl);
+  }
+  return "";
+}
+
 /** Figma 92985: 80×80 outer, 74×74 media (3px ring). Unseen: gradient border; seen: 2px #C3C3C3 */
 function StoryAvatarRing({
   isSeen,
@@ -124,8 +140,7 @@ export function StoriesAvatarList({
   return (
     <div className="flex min-h-[188px] flex-none flex-row items-stretch gap-4 lg:min-h-0 lg:h-20 lg:items-center">
       {stories.map((story, index) => {
-        const mediaUrl = story.Thumbnail?.url ?? story.Media?.url ?? "";
-        const avatarUrl = mediaUrl ? buildStoryMediaUrl(mediaUrl) : "";
+        const avatarUrl = getStaticStoryPreviewUrl(story);
         const isSeen = seenIds.has(story.id);
 
         return (

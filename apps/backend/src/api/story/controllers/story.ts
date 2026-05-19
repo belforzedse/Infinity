@@ -58,7 +58,7 @@ export default factories.createCoreController("api::story.story", ({ strapi }: {
   async find(ctx: any) {
     const { user } = ctx.state;
     const actorRoleName = await getActorRoleName(strapi, user?.id);
-    const hasAdminRole = roleIsAllowed(actorRoleName, ["Superadmin", "Store manager"]);
+    const hasAdminRole = roleIsAllowed(actorRoleName, ["Superadmin", "Store manager", "Editor"]);
 
     if (!hasAdminRole) {
       ctx.query.filters = {
@@ -74,7 +74,7 @@ export default factories.createCoreController("api::story.story", ({ strapi }: {
     const { user } = ctx.state;
     const { id } = ctx.params;
     const actorRoleName = await getActorRoleName(strapi, user?.id);
-    const hasAdminRole = roleIsAllowed(actorRoleName, ["Superadmin", "Store manager"]);
+    const hasAdminRole = roleIsAllowed(actorRoleName, ["Superadmin", "Store manager", "Editor"]);
 
     const story = await strapi.entityService.findOne("api::story.story", id, {
       populate: { Media: true, Thumbnail: true },
@@ -95,7 +95,7 @@ export default factories.createCoreController("api::story.story", ({ strapi }: {
     const { user } = ctx.state;
     if (user) {
       const actorRoleName = await getActorRoleName(strapi, user.id);
-      if (!roleIsAllowed(actorRoleName, ["Superadmin", "Store manager"])) {
+      if (!roleIsAllowed(actorRoleName, ["Superadmin", "Store manager", "Editor"])) {
         return ctx.forbidden("شما مجاز به ایجاد استوری نیستید.");
       }
     }
@@ -115,7 +115,7 @@ export default factories.createCoreController("api::story.story", ({ strapi }: {
     const { user } = ctx.state;
     if (user) {
       const actorRoleName = await getActorRoleName(strapi, user.id);
-      if (!roleIsAllowed(actorRoleName, ["Superadmin", "Store manager"])) {
+      if (!roleIsAllowed(actorRoleName, ["Superadmin", "Store manager", "Editor"])) {
         return ctx.forbidden("شما مجاز به ویرایش استوری نیستید.");
       }
     }
@@ -132,7 +132,7 @@ export default factories.createCoreController("api::story.story", ({ strapi }: {
   async delete(ctx: any) {
     const { user } = ctx.state;
     const actorRoleName = await getActorRoleName(strapi, user?.id);
-    if (!user || !roleIsAllowed(actorRoleName, ["Superadmin", "Store manager"])) {
+    if (!user || !roleIsAllowed(actorRoleName, ["Superadmin", "Store manager", "Editor"])) {
       return ctx.forbidden("شما مجاز به حذف استوری نیستید.");
     }
     return await super.delete(ctx);
@@ -140,7 +140,7 @@ export default factories.createCoreController("api::story.story", ({ strapi }: {
 
   /**
    * GET /api/stories/active
-   * Returns active stories within their scheduled window, sorted by SortOrder.
+   * Returns active stories within their scheduled window, newest first.
    */
   async getActive(ctx: any) {
     try {
@@ -163,7 +163,7 @@ export default factories.createCoreController("api::story.story", ({ strapi }: {
           ],
         },
         populate: { Media: true, Thumbnail: true },
-        sort: { SortOrder: "asc" },
+        sort: [{ updatedAt: "desc" }, { createdAt: "desc" }, { id: "desc" }],
         limit: 50,
       });
 

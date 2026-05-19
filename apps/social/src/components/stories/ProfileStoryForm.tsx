@@ -49,7 +49,7 @@ export function ProfileStoryForm({
   onSubmit,
 }: ProfileStoryFormProps) {
   const [title, setTitle] = useState(initialValues?.Title ?? "");
-  const [isActive, setIsActive] = useState(initialValues?.IsActive ?? false);
+  const [isActive, setIsActive] = useState(initialValues?.IsActive ?? true);
   const [sortOrder, setSortOrder] = useState(initialValues?.SortOrder ?? 0);
   const [mediaType, setMediaType] = useState<StoryMediaType>(initialValues?.MediaType ?? "image");
   const [mediaId, setMediaId] = useState<number | undefined>(initialValues?.mediaId);
@@ -68,7 +68,7 @@ export function ProfileStoryForm({
       if (!uploaded) throw new Error("Upload missing response");
       setMediaId(uploaded.id);
       setMediaUrl(uploaded.url);
-      setMediaType(file.type.startsWith("video/") ? "video" : "image");
+      setMediaType(uploaded.mime.startsWith("video/") ? "video" : "image");
     } catch {
       toast.error("آپلود رسانه ناموفق بود.");
     } finally {
