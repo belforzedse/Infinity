@@ -94,8 +94,11 @@ export function PostContentForm({
 
   const canSubmit =
     title.trim().length > 0 &&
-    cover.hasMedia &&
+    cover.uploadedId != null &&
     gallery.items.length >= 1 &&
+    gallery.allUploaded &&
+    !cover.hasFailed &&
+    !gallery.hasFailed &&
     stripHtml(captionHtml).length > 0 &&
     !isSubmitting;
 
@@ -105,14 +108,18 @@ export function PostContentForm({
     const trimmedTitle = title.trim();
     const trimmedLink = productLink.trim();
     const captionForWire = captionHtml.trim();
+    const coverId = cover.uploadedId;
+    const mediaIds = gallery.items
+      .map((item) => item.uploadedId)
+      .filter((id): id is number => id != null);
+
+    if (coverId == null || mediaIds.length !== gallery.items.length) {
+      toast.error("لطفا صبر کنید تا آپلود همه رسانه ها کامل شود.");
+      return;
+    }
 
     setIsSubmitting(true);
     try {
-      const [coverId, mediaIds] = await Promise.all([
-        cover.upload(),
-        gallery.uploadAll(),
-      ]);
-
       await onSubmit({
         title: trimmedTitle,
         slug: slug.trim(),

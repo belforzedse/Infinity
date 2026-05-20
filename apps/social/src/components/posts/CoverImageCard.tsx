@@ -2,23 +2,20 @@
 
 /**
  * Cover-image upload card for the create-post flow.
- *
- * Ports the visual structure of the storefront `IndexPhotoUploader`
- * (`apps/frontend/src/components/Product/add/IndexPhotoUploader/index.tsx`) into
- * the social app:
- *
- * - White rounded card with a centred Persian header.
- * - Image preview box whose aspect ratio mirrors the user's chosen post size
- *   (so the preview literally shows the post's silhouette).
- * - Three icon buttons below: edit (active blue gradient), delete (gray),
- *   eye / view (gray) — the "active" treatment mirrors the storefront UI but
- *   uses the social `Button blue` gradient instead of the storefront's pink.
- * - Blue help text below.
  */
 
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import Image from "next/image";
-import { Camera, Eye, Pencil, Trash2 } from "lucide-react";
+import {
+  Camera,
+  CheckCircle2,
+  Eye,
+  Loader2,
+  Pencil,
+  RefreshCcw,
+  Trash2,
+  XCircle,
+} from "lucide-react";
 import type { CoverUploadController } from "@/hooks/use-file-upload";
 
 function cx(...parts: (string | false | undefined)[]): string {
@@ -27,6 +24,11 @@ function cx(...parts: (string | false | undefined)[]): string {
 
 const COVER_TITLE = "تصویر کاور";
 const COVER_HINT = "اینجا تصویر کاور را بارگذاری کنید";
+const STATUS_LABELS = {
+  uploading: "در حال آپلود",
+  uploaded: "آپلود شد",
+  failed: "آپلود ناموفق",
+} as const;
 
 const accentButtonClass = cx(
   "relative isolate flex h-11 w-11 cursor-pointer items-center justify-center overflow-hidden",
@@ -52,12 +54,6 @@ export type CoverImageCardProps = {
 
 export function CoverImageCard({ controller, aspectRatio }: CoverImageCardProps) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (fileInputRef.current) fileInputRef.current.value = "";
-    };
-  }, []);
 
   const openPicker = () => {
     fileInputRef.current?.click();
@@ -94,14 +90,38 @@ export function CoverImageCard({ controller, aspectRatio }: CoverImageCardProps)
         )}
       >
         {controller.preview ? (
-          <Image
-            src={controller.preview}
-            alt="پیش‌نمایش تصویر کاور"
-            fill
-            unoptimized
-            className="object-cover"
-            sizes="(max-width: 1024px) 100vw, 320px"
-          />
+          <>
+            <Image
+              src={controller.preview}
+              alt="پیش نمایش تصویر کاور"
+              fill
+              unoptimized
+              className="object-cover"
+              sizes="(max-width: 1024px) 100vw, 320px"
+            />
+            {controller.uploadStatus !== "idle" ? (
+              <span
+                className={cx(
+                  "pointer-events-none absolute bottom-2 right-2 z-10 inline-flex items-center gap-1.5 rounded-full",
+                  "px-2.5 py-1 font-peyda text-[11px] text-white shadow-sm",
+                  controller.uploadStatus === "uploaded" && "bg-emerald-600/90",
+                  controller.uploadStatus === "uploading" && "bg-[#3D4C6E]/90",
+                  controller.uploadStatus === "failed" && "bg-red-600/90",
+                )}
+              >
+                {controller.uploadStatus === "uploaded" ? (
+                  <CheckCircle2 className="size-3.5 stroke-[2]" aria-hidden />
+                ) : null}
+                {controller.uploadStatus === "uploading" ? (
+                  <Loader2 className="size-3.5 animate-spin stroke-[2]" aria-hidden />
+                ) : null}
+                {controller.uploadStatus === "failed" ? (
+                  <XCircle className="size-3.5 stroke-[2]" aria-hidden />
+                ) : null}
+                {STATUS_LABELS[controller.uploadStatus]}
+              </span>
+            ) : null}
+          </>
         ) : (
           <Camera className="size-14 text-zinc-400" aria-hidden />
         )}
@@ -138,13 +158,25 @@ export function CoverImageCard({ controller, aspectRatio }: CoverImageCardProps)
           className={subtleButtonClass}
           onClick={handlePreview}
           disabled={!controller.preview}
-          aria-label="پیش‌نمایش تصویر کاور"
+          aria-label="پیش نمایش تصویر کاور"
         >
           <Eye className="size-5 stroke-[1.5]" aria-hidden />
         </button>
+        {controller.hasFailed ? (
+          <button
+            type="button"
+            className={subtleButtonClass}
+            onClick={controller.retry}
+            aria-label="تلاش دوباره برای آپلود کاور"
+          >
+            <RefreshCcw className="size-5 stroke-[1.5]" aria-hidden />
+          </button>
+        ) : null}
       </div>
 
-      <p className="font-peyda text-xs text-[#566D97]">{COVER_HINT}</p>
+      <p className={cx("font-peyda text-xs", controller.hasFailed ? "text-red-600" : "text-[#566D97]")}>
+        {controller.uploadError ?? COVER_HINT}
+      </p>
     </div>
   );
 }
