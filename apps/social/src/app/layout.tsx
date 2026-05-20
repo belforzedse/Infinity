@@ -26,7 +26,13 @@ export const metadata: Metadata = {
   },
   manifest: "/manifest.webmanifest",
   icons: {
-    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+    apple: [
+      { url: "/pwa/touch-icons/apple-touch-icon-iphone-60x60.png", sizes: "60x60", type: "image/png" },
+      { url: "/pwa/touch-icons/apple-touch-icon-ipad-76x76.png", sizes: "76x76", type: "image/png" },
+      { url: "/pwa/touch-icons/apple-touch-icon-iphone-retina-120x120.png", sizes: "120x120", type: "image/png" },
+      { url: "/pwa/touch-icons/apple-touch-icon-ipad-retina-152x152.png", sizes: "152x152", type: "image/png" },
+      { url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
   },
   appleWebApp: {
     capable: true,
