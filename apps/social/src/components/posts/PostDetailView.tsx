@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import { useCallback, useEffect, useId, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import {
   Bookmark,
   ChevronLeft,
@@ -401,7 +401,9 @@ export function PostDetailView({ post, className }: { post: PostDetail; classNam
   const [replyTarget, setReplyTarget] = useState<PostDetailComment | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitHint, setSubmitHint] = useState<string | null>(null);
+  const commentInputId = useId();
   const likeButtonRef = useRef<HTMLButtonElement | null>(null);
+  const commentComposerRef = useRef<HTMLDivElement | null>(null);
   const commentInputRef = useRef<HTMLInputElement | null>(null);
   const previousIsLiked = useRef(isLiked);
   const previousIsSaved = useRef(isSaved);
@@ -616,6 +618,13 @@ export function PostDetailView({ post, className }: { post: PostDetail; classNam
     window.setTimeout(() => commentInputRef.current?.focus(), 0);
   }
 
+  function focusCommentComposer() {
+    setSubmitHint(null);
+    commentInputRef.current?.focus();
+    commentComposerRef.current?.scrollIntoView({ block: "center", behavior: "smooth" });
+    window.setTimeout(() => commentInputRef.current?.focus(), 160);
+  }
+
   async function submitComment() {
     const value = comment.trim();
     if (!value || isSubmitting) return;
@@ -747,13 +756,21 @@ export function PostDetailView({ post, className }: { post: PostDetail; classNam
       </div>
 
       <div dir="ltr" className="mt-8 flex flex-row items-center justify-between gap-3">
-        <button
-          type="button"
-          className="inline-flex h-11 shrink-0 flex-row items-center gap-2 rounded-full bg-[#F7F8FF] px-4 font-peyda text-sm font-medium text-[#7B8498] shadow-[0_5px_18px_rgba(61,76,110,0.05)]"
+        <label
+          htmlFor={commentInputId}
+          role="button"
+          tabIndex={0}
+          onClick={focusCommentComposer}
+          onKeyDown={(event) => {
+            if (event.key !== "Enter" && event.key !== " ") return;
+            event.preventDefault();
+            focusCommentComposer();
+          }}
+          className="pressable inline-flex h-11 shrink-0 cursor-pointer flex-row items-center gap-2 rounded-full bg-[#F7F8FF] px-4 font-peyda text-sm font-medium text-[#7B8498] shadow-[0_5px_18px_rgba(61,76,110,0.05)] transition-colors hover:text-[#3D4C6E] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400/70"
         >
           ارسال دیدگاه
           <SendHorizonal className="size-5" strokeWidth={1.5} aria-hidden />
-        </button>
+        </label>
         <div dir="rtl" className="min-w-0 flex-1 text-right">
           <h2 className="font-peyda text-[22px] font-bold leading-8 text-[#424242]">
             {formatCount(commentCount)} دیدگاه
@@ -788,7 +805,10 @@ export function PostDetailView({ post, className }: { post: PostDetail; classNam
         )}
       </div>
 
-      <div className="sticky bottom-3 mt-7 rounded-full bg-white/85 p-1 shadow-[0_10px_30px_rgba(61,76,110,0.08)] backdrop-blur-md">
+      <div
+        ref={commentComposerRef}
+        className="sticky bottom-3 mt-7 rounded-full bg-white/85 p-1 shadow-[0_10px_30px_rgba(61,76,110,0.08)] backdrop-blur-md"
+      >
         {replyTarget ? (
           <div className="mb-2 flex items-center justify-between rounded-2xl bg-[#F7F8FF] px-4 py-2 font-peyda text-xs text-[#3D4C6E]">
             <button
@@ -806,12 +826,13 @@ export function PostDetailView({ post, className }: { post: PostDetail; classNam
             type="button"
             onClick={submitComment}
             disabled={!comment.trim() || isSubmitting}
-            className="inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-white text-[#3D4C6E] shadow-sm transition-opacity disabled:opacity-40"
+            className="pressable inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-white text-[#3D4C6E] shadow-sm transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400/70 disabled:pointer-events-none disabled:opacity-40"
             aria-label="ارسال نظر"
           >
             <SendHorizonal className="size-5" strokeWidth={1.6} aria-hidden />
           </button>
           <input
+            id={commentInputId}
             ref={commentInputRef}
             value={comment}
             onChange={(event) => setComment(event.target.value)}

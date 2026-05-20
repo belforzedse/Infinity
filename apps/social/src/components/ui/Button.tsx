@@ -18,7 +18,7 @@ function cx(...parts: (string | undefined | false)[]): string {
  * - Inner row: **`justify-center gap-1.5`** (label + optional trailing icon).
  */
 const shellLayout = cx(
-  "relative isolate inline-flex h-11 min-h-11 max-w-full min-w-0",
+  "pressable relative isolate inline-flex h-11 min-h-11 max-w-full min-w-0",
   "cursor-pointer flex-row items-center justify-center overflow-hidden",
   "rounded-full border-0 box-border",
   "px-5 font-medium text-sm leading-[21px]",
