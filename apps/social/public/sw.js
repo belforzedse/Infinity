@@ -1,4 +1,4 @@
-const SW_VERSION = "social-pwa-v2";
+const SW_VERSION = "social-pwa-v3";
 const STATIC_CACHE = `${SW_VERSION}-static`;
 const IMAGE_CACHE = `${SW_VERSION}-images`;
 const OFFLINE_URL = "/offline";
