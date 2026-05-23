@@ -11,6 +11,33 @@ export interface CategoryData {
   };
 }
 
+function safeDecodeURIComponent(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
+function buildCategorySlugCandidates(slug: string) {
+  const decodedSlug = safeDecodeURIComponent(slug);
+  const candidates = new Set<string>([slug, decodedSlug, encodeURIComponent(decodedSlug)]);
+  const legacyMatch = decodedSlug.match(/^(.+)-(\d+)$/);
+
+  if (legacyMatch) {
+    const baseSlug = legacyMatch[1]?.trim();
+    if (baseSlug) {
+      candidates.add(baseSlug);
+      candidates.add(encodeURIComponent(baseSlug));
+    }
+  }
+
+  return {
+    slugs: Array.from(candidates).filter(Boolean),
+    externalId: legacyMatch?.[2],
+  };
+}
+
 /**
  * Sanitizes a category slug by removing trailing slashes and trimming whitespace
  * Also validates that the slug doesn't contain invalid characters or patterns
@@ -54,7 +81,20 @@ export async function validateCategorySlug(
   try {
     // Use internal Strapi URL on server to avoid TLS/DNS latency (same as PLP products fetch)
     const baseUrl = typeof window === "undefined" ? getStrapiServerUrl() : API_BASE_URL;
-    const endpoint = `${baseUrl}${ENDPOINTS.PRODUCT.CATEGORY}?filters[Slug][$eq]=${encodeURIComponent(sanitizedSlug)}&fields[0]=Title&fields[1]=Slug`;
+    const { slugs, externalId } = buildCategorySlugCandidates(sanitizedSlug);
+    const params = new URLSearchParams();
+    params.set("fields[0]", "Title");
+    params.set("fields[1]", "Slug");
+
+    slugs.forEach((candidate, index) => {
+      params.set(`filters[$or][${index}][Slug][$eq]`, candidate);
+    });
+
+    if (externalId) {
+      params.set(`filters[$or][${slugs.length}][external_id][$eq]`, externalId);
+    }
+
+    const endpoint = `${baseUrl}${ENDPOINTS.PRODUCT.CATEGORY}?${params.toString()}`;
     const response = await fetchWithTimeout(endpoint, {
       timeoutMs: 10000,
       next: { revalidate: 3600 }, // Cache for 1 hour
@@ -69,7 +109,10 @@ export async function validateCategorySlug(
     const categories = data?.data || [];
 
     if (categories.length === 0) {
-      logger.info(`[Category Validation] Category not found: ${sanitizedSlug}`);
+      logger.info(`[Category Validation] Category not found: ${sanitizedSlug}`, {
+        slugCandidates: slugs,
+        externalId,
+      });
       return null;
     }
 

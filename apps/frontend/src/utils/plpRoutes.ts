@@ -5,7 +5,12 @@ type QuerySource =
     };
 
 function normalizeCategorySlug(slug: string | null | undefined) {
-  return slug?.trim().replace(/\/+$/, "") || "";
+  const normalized = slug?.trim().replace(/\/+$/, "") || "";
+  try {
+    return decodeURIComponent(normalized);
+  } catch {
+    return normalized;
+  }
 }
 
 function cloneSearchParams(source?: QuerySource | null) {
