@@ -3,12 +3,20 @@ FROM docker.arvancloud.ir/node:22-alpine AS builder
 
 WORKDIR /repo
 ENV NEXT_TELEMETRY_DISABLED=1
+ARG NPM_REGISTRY_URL="https://mirror.abrha.net/repository/npm/"
+ENV COREPACK_NPM_REGISTRY=${NPM_REGISTRY_URL} \
+    npm_config_registry=${NPM_REGISTRY_URL} \
+    NPM_CONFIG_REGISTRY=${NPM_REGISTRY_URL}
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
 COPY apps/social/package.json ./apps/social/package.json
 COPY packages ./packages
 RUN --mount=type=cache,target=/root/.npm \
-    corepack enable && pnpm install --filter @repo/social... --frozen-lockfile
+    --mount=type=cache,target=/root/.cache/node/corepack \
+    corepack enable \
+    && corepack prepare pnpm@10.28.2 --activate \
+    && pnpm config set registry "${NPM_REGISTRY_URL}" \
+    && pnpm install --filter @repo/social... --frozen-lockfile
 
 COPY apps/social ./apps/social
 

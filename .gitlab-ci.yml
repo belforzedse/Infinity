@@ -124,6 +124,7 @@ backend:build:
         --build-arg STRAPI_DISABLE_SOURCEMAPS="$STRAPI_DISABLE_SOURCEMAPS" \
         --build-arg STRAPI_TELEMETRY_DISABLED="$STRAPI_TELEMETRY_DISABLED" \
         --build-arg NODE_OPTIONS="$NODE_OPTIONS_ARG" \
+        --build-arg NPM_REGISTRY_URL="${NPM_REGISTRY_URL:-https://mirror.abrha.net/repository/npm/}" \
         --push \
         "$BUILD_CONTEXT"
 
@@ -252,6 +253,7 @@ frontend:build:
         --build-arg NEXT_PUBLIC_SENTRY_DSN="${FRONTEND_SENTRY_DSN:-}" \
         --build-arg STRAPI_BUILD_TIME_URL="${STRAPI_BUILD_TIME_URL:-}" \
         --build-arg STRAPI_INTERNAL_URL="${STRAPI_INTERNAL_URL:-}" \
+        --build-arg NPM_REGISTRY_URL="${NPM_REGISTRY_URL:-https://mirror.abrha.net/repository/npm/}" \
         --build-arg GITHUB_SHA="$CI_COMMIT_SHA" \
         --file "$DOCKERFILE" \
         --tag "$IMAGE:$CI_COMMIT_SHA" \
@@ -352,6 +354,7 @@ social:build:
         --build-arg NEXT_PUBLIC_API_BASE_URL="https://api.infinitycolor.co/api" \
         --build-arg NEXT_PUBLIC_IMAGE_BASE_URL="https://api.infinitycolor.co" \
         --build-arg NEXT_PUBLIC_SITE_URL="https://infinitygram.co" \
+        --build-arg NPM_REGISTRY_URL="${NPM_REGISTRY_URL:-https://mirror.abrha.net/repository/npm/}" \
         --file "apps/social/main.Dockerfile" \
         --tag "$IMAGE:$CI_COMMIT_SHA" \
         --tag "$IMAGE:$RUNTIME_TAG" \
