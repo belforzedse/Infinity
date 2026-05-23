@@ -1,4 +1,4 @@
-import { API_BASE_URL, STRAPI_TOKEN } from "@/constants/api";
+import { API_BASE_URL, getStrapiServerUrl, STRAPI_TOKEN } from "@/constants/api";
 
 export interface FooterLink {
   Title: string;
@@ -27,8 +27,9 @@ export interface FooterData {
 
 export async function getFooterData(): Promise<FooterData> {
   try {
+    const baseUrl = typeof window === "undefined" ? getStrapiServerUrl() : API_BASE_URL;
     const response = await fetch(
-      `${API_BASE_URL}/footer?populate[0]=First.Links&populate[1]=Second.Links&populate[2]=Third.Links&populate[3]=ContactUs`,
+      `${baseUrl}/footer?populate[0]=First.Links&populate[1]=Second.Links&populate[2]=Third.Links&populate[3]=ContactUs`,
       {
         method: "GET",
         headers: {

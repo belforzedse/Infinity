@@ -9,7 +9,7 @@ The application uses the Sentry SDK to send error reports to a self-hosted Bugsi
 ## Bugsink Instance
 
 Your Bugsink instance should be running at:
-- **URL**: `https://errors.yourdomain.com` (e.g., `https://errors.infinitycolor.org`)
+- **URL**: `https://errors.yourdomain.com` (e.g., `https://errors.infinitycolor.co`)
 - **Projects**: Create separate projects for frontend and backend (recommended)
 
 ## Required CI/CD Variables
@@ -20,7 +20,7 @@ Your Bugsink instance should be running at:
 
 | Secret Name | Description | Example |
 |-------------|-------------|---------|
-| `FRONTEND_SENTRY_DSN` | DSN for frontend error tracking | `https://publickey@errors.infinitycolor.org/1` |
+| `FRONTEND_SENTRY_DSN` | DSN for frontend error tracking | `https://publickey@errors.infinitycolor.co/1` |
 
 #### Backend Secrets
 
@@ -72,7 +72,7 @@ The frontend Sentry DSN is baked into the build, so it comes from GitHub secrets
 
 ```bash
 # Optional: Runtime override (does not affect client-side errors which are baked at build)
-NEXT_PUBLIC_SENTRY_DSN=https://publickey@errors.infinitycolor.org/1
+NEXT_PUBLIC_SENTRY_DSN=https://publickey@errors.infinitycolor.co/1
 ```
 
 ### Backend Environment File (`main.env` / `dev.env`)
@@ -81,7 +81,7 @@ Add this line to your backend env file on the server (for both GitHub and GitLab
 
 ```bash
 # Sentry/Bugsink Error Tracking (optional - leave empty to disable)
-SENTRY_DSN=https://backendkey@errors.infinitycolor.org/2
+SENTRY_DSN=https://backendkey@errors.infinitycolor.co/2
 ```
 
 For GitLab: The backend env file is set via the `BACKEND_ENV_FILE` variable (file type or variable content) and deployed to `/opt/infinity/apps/backend/$ENV_FILE`.

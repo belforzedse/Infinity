@@ -8,7 +8,7 @@ import {
   syncMatomoConsentState,
 } from "@/lib/analytics/matomo";
 
-const DEFAULT_MATOMO_URL = "https://analytics.infinitycolor.org";
+const DEFAULT_MATOMO_URL = "https://analytics.infinitycolor.co";
 const DEFAULT_MATOMO_SITE_ID = "1";
 
 function trimTrailingSlash(value: string) {

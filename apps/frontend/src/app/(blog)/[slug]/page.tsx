@@ -6,7 +6,7 @@ import BlogPostDetail from "@/components/Blog/BlogPostDetail";
 import BlogComments from "@/components/Blog/BlogComments";
 import { blogService, BlogTag } from "@/services/blog/blog.service";
 import { generateBlogPostMetadata, generateJSONLD } from "@/utils/seo";
-import { IMAGE_BASE_URL, API_BASE_URL } from "@/constants/api";
+import { IMAGE_BASE_URL, getStrapiServerUrl } from "@/constants/api";
 import { User, FolderOpen, Tag } from "lucide-react";
 import { resolveBlogAuthorDisplayName } from "@/utils/blogAuthorName";
 import logger from "@/utils/logger";
@@ -62,6 +62,7 @@ function shouldExcludeSlug(slug: string): boolean {
 export async function generateStaticParams() {
   const env = process.env.NODE_ENV || 'development';
   const isStaging = process.env.NEXT_PUBLIC_SITE_URL?.includes('staging') || env === 'production';
+  const strapiBaseUrl = getStrapiServerUrl();
 
   try {
     const allPosts: Array<{ slug: string }> = [];
@@ -71,15 +72,16 @@ export async function generateStaticParams() {
     logger.info(`[generateStaticParams] Starting static params generation`, {
       env,
       isStaging,
-      API_BASE_URL: API_BASE_URL || 'NOT_SET',
-      hasApiBaseUrl: !!API_BASE_URL,
+      strapiBaseUrl: strapiBaseUrl || 'NOT_SET',
+      hasStrapiBaseUrl: !!strapiBaseUrl,
     });
 
-    // Validate API_BASE_URL is set
-    if (!API_BASE_URL || API_BASE_URL === 'undefined') {
-      logger.error('[generateStaticParams] API_BASE_URL is not configured', {
-        API_BASE_URL,
-        envVar: process.env.NEXT_PUBLIC_API_BASE_URL,
+    // Validate server-side Strapi URL is set
+    if (!strapiBaseUrl || strapiBaseUrl === 'undefined') {
+      logger.error('[generateStaticParams] Strapi server URL is not configured', {
+        strapiBaseUrl,
+        internalEnvVar: process.env.STRAPI_INTERNAL_URL,
+        publicEnvVar: process.env.NEXT_PUBLIC_API_BASE_URL,
         env,
       });
       logger.warn('[generateStaticParams] Returning empty array. ISR will handle blog post generation.');
@@ -87,14 +89,14 @@ export async function generateStaticParams() {
     }
 
     while (true) {
-      const endpoint = `${API_BASE_URL}/blog-posts?` +
+      const endpoint = `${strapiBaseUrl}/blog-posts?` +
         `filters[Status][$eq]=Published&` +
         `pagination[page]=${currentPage}&` +
         `pagination[pageSize]=${pageSize}&` +
         `fields[0]=Slug`;
 
       logger.info(`[generateStaticParams] Fetching page ${currentPage}`, {
-        endpoint: endpoint.replace(API_BASE_URL, '[API_BASE_URL]'),
+        endpoint: endpoint.replace(strapiBaseUrl, '[STRAPI_BASE_URL]'),
         isStaging,
       });
 
@@ -110,9 +112,9 @@ export async function generateStaticParams() {
       } catch (fetchError) {
         logger.error('[generateStaticParams] Network error during fetch', {
           error: fetchError instanceof Error ? fetchError.message : String(fetchError),
-          endpoint: endpoint.replace(API_BASE_URL, '[API_BASE_URL]'),
+          endpoint: endpoint.replace(strapiBaseUrl, '[STRAPI_BASE_URL]'),
           isStaging,
-          API_BASE_URL: API_BASE_URL || 'NOT_SET',
+          strapiBaseUrl: strapiBaseUrl || 'NOT_SET',
         });
         // If first page fails, return empty to let ISR handle it
         if (currentPage === 1) {
@@ -128,7 +130,7 @@ export async function generateStaticParams() {
         logger.error(
           `[generateStaticParams] API request failed: ${fetchResponse.status} ${fetchResponse.statusText}`,
           {
-            endpoint: endpoint.replace(API_BASE_URL, '[API_BASE_URL]'),
+            endpoint: endpoint.replace(strapiBaseUrl, '[STRAPI_BASE_URL]'),
             status: fetchResponse.status,
             statusText: fetchResponse.statusText,
             errorText: errorText.slice(0, 500),
@@ -205,7 +207,7 @@ export async function generateStaticParams() {
     if (allPosts.length === 0) {
       logger.warn('[generateStaticParams] No static params generated. This may cause 404s until ISR generates pages.', {
         isStaging,
-        API_BASE_URL: API_BASE_URL || 'NOT_SET',
+        strapiBaseUrl: strapiBaseUrl || 'NOT_SET',
       });
     }
 
@@ -214,7 +216,7 @@ export async function generateStaticParams() {
     logger.error('[generateStaticParams] Error generating static params for blog:', {
       error: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
-      API_BASE_URL: API_BASE_URL || 'NOT_SET',
+      strapiBaseUrl: strapiBaseUrl || 'NOT_SET',
       env,
       isStaging,
     });
@@ -267,6 +269,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const { slug } = await params;
   const env = process.env.NODE_ENV || 'development';
   const isStaging = process.env.NEXT_PUBLIC_SITE_URL?.includes('staging') || env === 'production';
+  const strapiBaseUrl = getStrapiServerUrl();
 
   // Exclude static files and other non-blog routes
   if (shouldExcludeSlug(slug)) {
@@ -284,23 +287,24 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     slug,
     env,
     isStaging,
-    API_BASE_URL: API_BASE_URL || 'NOT_SET',
-    hasApiBaseUrl: !!API_BASE_URL,
+    strapiBaseUrl: strapiBaseUrl || 'NOT_SET',
+    hasStrapiBaseUrl: !!strapiBaseUrl,
     timestamp: new Date().toISOString(),
   });
 
   let post;
 
-  // Validate API_BASE_URL before attempting fetch
-  if (!API_BASE_URL || API_BASE_URL === 'undefined') {
-    logger.error(`[BlogPostPage] API_BASE_URL is not configured`, {
+  // Validate server-side Strapi URL before attempting fetch
+  if (!strapiBaseUrl || strapiBaseUrl === 'undefined') {
+    logger.error(`[BlogPostPage] Strapi server URL is not configured`, {
       slug,
-      API_BASE_URL,
-      envVar: process.env.NEXT_PUBLIC_API_BASE_URL,
+      strapiBaseUrl,
+      internalEnvVar: process.env.STRAPI_INTERNAL_URL,
+      publicEnvVar: process.env.NEXT_PUBLIC_API_BASE_URL,
       env,
       isStaging,
     });
-    logger.error(`[BlogPostPage] Calling notFound() due to missing API_BASE_URL`);
+    logger.error(`[BlogPostPage] Calling notFound() due to missing Strapi server URL`);
     notFound();
     return;
   }
@@ -308,7 +312,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   try {
     logger.info(`[BlogPostPage] Fetching blog post with slug: ${slug}`, {
       slug,
-      API_BASE_URL: API_BASE_URL || 'NOT_SET',
+      strapiBaseUrl: strapiBaseUrl || 'NOT_SET',
       env,
       isStaging,
     });
@@ -361,7 +365,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     logger.error(`[BlogPostPage] Error fetching blog post with slug: ${slug}`, {
       error: errorMessage,
       stack: error instanceof Error ? error.stack : undefined,
-      API_BASE_URL: API_BASE_URL || 'NOT_SET',
+      strapiBaseUrl: strapiBaseUrl || 'NOT_SET',
       slug,
       env,
       isStaging,

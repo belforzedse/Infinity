@@ -9,7 +9,7 @@ import PageContainer from "@/components/layout/PageContainer";
 import { normalizeUserInfo, type ProductReview } from "@/services/product/product-review.service";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { IMAGE_BASE_URL, API_BASE_URL, ENDPOINTS } from "@/constants/api";
+import { IMAGE_BASE_URL, ENDPOINTS, getStrapiServerUrl } from "@/constants/api";
 import { SITE_NAME } from "@/config/site";
 import logger from "@/utils/logger";
 import { translateErrorMessage } from "@/lib/errorTranslations";
@@ -32,6 +32,7 @@ import {
  */
 export async function generateStaticParams() {
   try {
+    const strapiBaseUrl = getStrapiServerUrl();
     // Fetch top products by different criteria to get a diverse set
     // Include Slug field for SEO-friendly URLs
     const endpoints = [
@@ -43,7 +44,7 @@ export async function generateStaticParams() {
 
     const responses = await Promise.all(
       endpoints.map((endpoint) =>
-        fetch(`${API_BASE_URL}${endpoint}`, {
+        fetch(`${strapiBaseUrl}${endpoint}`, {
           next: { revalidate: 3600 }, // Cache for 1 hour
           headers: {
             'Content-Type': 'application/json',
@@ -119,7 +120,7 @@ export async function generateMetadata({
     // Use server-safe fetch for metadata generation too
     const encodedSlug = encodeURIComponent(decodedSlug);
     const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}/by-slug/${encodedSlug}`;
-    const apiUrl = `${API_BASE_URL}${endpoint}`;
+    const apiUrl = `${getStrapiServerUrl()}${endpoint}`;
 
     const response = await fetch(apiUrl, {
       method: "GET",
@@ -243,11 +244,16 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
 
   // Log for debugging (server-side logs appear in terminal)
   logger.info("[PDP] Fetching product", { slug, timestamp: new Date().toISOString() });
+  const strapiBaseUrl = getStrapiServerUrl();
 
-  // Verify API_BASE_URL is available (critical for server components)
-  if (!API_BASE_URL || API_BASE_URL === "undefined") {
-    const errorMsg = `API_BASE_URL is not configured. Current value: ${API_BASE_URL}`;
-    logger.error("[PDP] Configuration error", { errorMsg, envVar: process.env.NEXT_PUBLIC_API_BASE_URL });
+  // Verify the server-side Strapi URL is available (critical for server components)
+  if (!strapiBaseUrl || strapiBaseUrl === "undefined") {
+    const errorMsg = `Strapi server URL is not configured. Current value: ${strapiBaseUrl}`;
+    logger.error("[PDP] Configuration error", {
+      errorMsg,
+      internalEnvVar: process.env.STRAPI_INTERNAL_URL,
+      publicEnvVar: process.env.NEXT_PUBLIC_API_BASE_URL,
+    });
     throw new Error(errorMsg);
   }
 
@@ -272,7 +278,7 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
     // Encode the decoded slug for the URL
     const encodedSlug = encodeURIComponent(decodedSlug);
     const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}/by-slug/${encodedSlug}`;
-    const apiUrl = `${API_BASE_URL}${endpoint}`;
+    const apiUrl = `${strapiBaseUrl}${endpoint}`;
 
     logger.info("[PDP] Making API request", {
       originalSlug: slug,
@@ -280,8 +286,8 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
       encodedSlug,
       endpoint,
       apiUrl,
-      apiBaseUrl: API_BASE_URL,
-      hasApiBaseUrl: !!API_BASE_URL,
+      apiBaseUrl: strapiBaseUrl,
+      hasApiBaseUrl: !!strapiBaseUrl,
     });
 
     const response = await fetch(apiUrl, {
@@ -442,7 +448,7 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
     errorDetails = {
       message: err?.message || String(err),
       status: err?.status || (err as any)?.response?.status,
-      endpoint: errorDetails.endpoint || `${API_BASE_URL}${ENDPOINTS.PRODUCT.PRODUCT}/by-slug/${encodeURIComponent(slug)}`,
+      endpoint: errorDetails.endpoint || `${strapiBaseUrl}${ENDPOINTS.PRODUCT.PRODUCT}/by-slug/${encodeURIComponent(slug)}`,
     };
     logger.error("[PDP] Error fetching product", {
       slug,
@@ -459,7 +465,7 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
       try {
         // Server-safe fetch with same populate parameters as getProductById
         const fallbackEndpoint = `${ENDPOINTS.PRODUCT.PRODUCT}/${decodedSlug}?populate[0]=CoverImage&populate[1]=Media&populate[2]=product_main_category&populate[3]=product_reviews&populate[4]=product_tags&populate[5]=product_variations&populate[6]=product_variations.product_stock&populate[7]=product_variations.product_variation_color&populate[8]=product_variations.product_variation_size&populate[9]=product_variations.product_variation_model&populate[10]=product_other_categories&populate[11]=product_size_helper&populate[12]=product_reviews.user&populate[13]=product_reviews.user.user_info&populate[14]=product_reviews.product_review_replies&populate[15]=product_reviews.product_review_replies.user&populate[16]=product_reviews.product_review_replies.user.user_info`;
-        const fallbackUrl = `${API_BASE_URL}${fallbackEndpoint}`;
+        const fallbackUrl = `${strapiBaseUrl}${fallbackEndpoint}`;
 
         const fallbackResponse = await fetch(fallbackUrl, {
           method: "GET",
@@ -601,7 +607,7 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
             <p>Error: {translateErrorMessage(errorDetails.message, "متأسفانه مشکلی پیش آمد. دوباره تلاش کنید.")}</p>
             {errorDetails.status && <p>Status: {errorDetails.status}</p>}
             {errorDetails.endpoint && <p>Endpoint: {errorDetails.endpoint}</p>}
-            {API_BASE_URL && <p>API Base URL: {API_BASE_URL}</p>}
+            {strapiBaseUrl && <p>API Base URL: {strapiBaseUrl}</p>}
           </div>
         )}
         <Link href="/" className="text-blue-500">

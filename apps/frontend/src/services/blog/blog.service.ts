@@ -2,9 +2,8 @@
  * Blog API service. Throws English errors for logging.
  * Callers must use getUserFacingErrorMessage(error, fallback) in catch before showing toasts or inline errors.
  */
-import { apiClient } from "@/services";
 import { ApiResponse, PaginatedResponse } from "@/types/api";
-import { API_BASE_URL } from "@/constants/api";
+import { API_BASE_URL, getStrapiServerUrl } from "@/constants/api";
 import logger from "@/utils/logger";
 
 export interface BlogPost {
@@ -183,9 +182,7 @@ export interface CreateBlogAuthorData {
 
 class BlogService {
   private getBaseUrl(): string {
-    // Use the centralized API_BASE_URL constant which is already properly configured
-    // This ensures consistency across the application
-    return API_BASE_URL;
+    return typeof window === "undefined" ? getStrapiServerUrl() : API_BASE_URL;
   }
 
   private getAuthToken(): string | null {

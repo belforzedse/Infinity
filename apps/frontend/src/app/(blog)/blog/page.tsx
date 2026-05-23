@@ -9,7 +9,7 @@ import {
   isDefaultBlogBannerConfigured,
   sortBlogCategoriesByBannerOrder,
 } from "@/utils/blogCategoryBanners";
-import { API_BASE_URL } from "@/constants/api";
+import { getStrapiServerUrl } from "@/constants/api";
 import { SITE_NAME, SITE_URL } from "@/config/site";
 import resolveAssetUrl from "@/utils/resolveAssetUrl";
 
@@ -278,7 +278,7 @@ export async function generateMetadata({
   // If category filter is present, fetch category details for proper metadata
   if (categoryFilter) {
     try {
-      const endpoint = `${API_BASE_URL}/blog-categories?filters[Slug][$eq]=${encodeURIComponent(categoryFilter)}&fields[0]=Title&fields[1]=Slug`;
+      const endpoint = `${getStrapiServerUrl()}/blog-categories?filters[Slug][$eq]=${encodeURIComponent(categoryFilter)}&fields[0]=Title&fields[1]=Slug`;
       const response = await fetch(endpoint, {
         next: { revalidate: 3600 }, // Cache for 1 hour
       });

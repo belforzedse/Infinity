@@ -146,8 +146,8 @@ ssl_protocols TLSv1.2 TLSv1.3;  # Removed TLSv1 TLSv1.1
 ```nginx
 # Internal-only server block for Next.js -> Strapi (no TLS)
 server {
-    listen 127.0.0.1:8080;
-    server_name localhost;
+    listen <HOST_GATEWAY_IP>:8080;
+    server_name _;
 
     location / {
         proxy_pass http://strapi_upstream;
@@ -155,6 +155,8 @@ server {
         proxy_set_header Connection "";
         proxy_set_header Host api.infinitycolor.co;
         proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_buffering on;
         proxy_buffers 16 16k;
         proxy_buffer_size 16k;
@@ -172,10 +174,10 @@ Add to Next.js production environment (`.env` or GitHub Actions secrets):
 
 ```bash
 # Internal Strapi URL for server-side fetches (bypasses TLS/DNS)
-STRAPI_INTERNAL_URL=http://127.0.0.1:8080/api
+STRAPI_INTERNAL_URL=http://host.docker.internal:8080/api
 ```
 
-**Note:** This should point to the internal Nginx server block (port 8080) that proxies to Strapi without TLS.
+**Note:** This should point to the internal Nginx server block (port 8080) that proxies to `strapi_upstream` without TLS. Do not use `http://strapi_upstream`; that name only exists inside Nginx.
 
 ### Backend Production Environment
 
@@ -231,7 +233,7 @@ SELECT pg_reload_conf();
 **Frontend (Next.js):**
 ```bash
 # Add to production environment
-STRAPI_INTERNAL_URL=http://127.0.0.1:8080/api
+STRAPI_INTERNAL_URL=http://host.docker.internal:8080/api
 ```
 
 **Backend (Strapi):**
@@ -275,7 +277,7 @@ Expected: `Content-Encoding: gzip`
 
 ### 3. Check Internal URL Usage
 
-Monitor Next.js logs - should see requests to `127.0.0.1:8080` instead of `api.infinitycolor.co:443`.
+Monitor Next.js logs - should see requests to `host.docker.internal:8080` instead of `api.infinitycolor.co:443`.
 
 ### 4. Verify Redis Cache
 

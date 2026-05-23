@@ -4,8 +4,8 @@
 
 import {
   ApiClient,
-  API_BASE_URL,
   ERROR_MESSAGES,
+  getStrapiServerUrl,
   REQUEST_TIMEOUT,
   RETRY_CONFIG,
 } from "@repo/api";
@@ -37,7 +37,7 @@ function onHttpError(
 }
 
 export const apiClient = new ApiClient({
-  baseUrl: API_BASE_URL,
+  baseUrl: getStrapiServerUrl(),
   requestTimeout: REQUEST_TIMEOUT,
   retryConfig: RETRY_CONFIG,
   errorMessages: ERROR_MESSAGES,

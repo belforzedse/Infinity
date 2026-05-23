@@ -7,7 +7,7 @@ import PLPHeroBanner from "@/components/PLP/HeroBanner";
 import PLPList from "@/components/PLP/List";
 import PageContainer from "@/components/layout/PageContainer";
 import ProductListSkeleton from "@/components/Skeletons/ProductListSkeleton";
-import { API_BASE_URL, IMAGE_BASE_URL, getStrapiServerUrl } from "@/constants/api";
+import { IMAGE_BASE_URL, getStrapiServerUrl } from "@/constants/api";
 import fetchWithTimeout from "@/utils/fetchWithTimeout";
 import { searchProducts } from "@/services/product/search";
 import AsyncSidebarProducts from "@/components/PLP/List/AsyncSidebarProducts";
@@ -286,10 +286,9 @@ async function getProducts(
     queryParams.append("sort[0]", sort);
   }
 
-  // Construct final URL (internal first; fallback to public API if unreachable)
+  // Construct final URL through the server-side Strapi base.
   const queryString = queryParams.toString();
   const url = `${baseUrl}?${queryString}`;
-  const fallbackUrl = `${API_BASE_URL}/products?${queryString}`;
 
   let response: Response;
   let data: { data?: unknown[]; meta?: { pagination?: { total?: number; pageCount?: number } } };
@@ -300,23 +299,14 @@ async function getProducts(
     });
     data = await response.json();
   } catch (firstErr) {
-    logger.warn("[PLP] Products fetch failed (internal URL?), retrying with public API", {
+    logger.error("[PLP] Products fetch failed", {
       error: String(firstErr),
       urlHint: baseUrl.replace(/\?.*/, ""),
     });
-    try {
-      response = await fetchWithTimeout(fallbackUrl, {
-        timeoutMs: 15000,
-        next: { revalidate: 120 },
-      });
-      data = await response.json();
-    } catch (secondErr) {
-      logger.error("[PLP] Products fetch failed (public fallback)", { error: String(secondErr) });
-      return {
-        products: [],
-        pagination: { page, pageSize, pageCount: 0, total: 0 },
-      };
-    }
+    return {
+      products: [],
+      pagination: { page, pageSize, pageCount: 0, total: 0 },
+    };
   }
 
   if (!response.ok) {

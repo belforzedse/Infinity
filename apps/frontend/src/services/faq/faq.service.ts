@@ -1,11 +1,11 @@
 import { ApiResponse, PaginatedResponse } from "@/types/api";
-import { API_BASE_URL } from "@/constants/api";
+import { API_BASE_URL, getStrapiServerUrl } from "@/constants/api";
 import { FAQCategory, FAQQuestion } from "@/types/faq";
 import logger from "@/utils/logger";
 
 class FAQService {
   private getBaseUrl(): string {
-    return API_BASE_URL;
+    return typeof window === "undefined" ? getStrapiServerUrl() : API_BASE_URL;
   }
 
   private getHeaders(): HeadersInit {

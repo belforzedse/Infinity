@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next'
-import { API_BASE_URL, ENDPOINTS } from '@/constants/api'
+import { ENDPOINTS, getStrapiServerUrl } from '@/constants/api'
 import logger from '@/utils/logger'
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://new.infinitycolor.co'
@@ -47,6 +47,7 @@ async function getAllProducts(): Promise<StrapiProduct[]> {
   const allProducts: StrapiProduct[] = []
   let currentPage = 1
   const pageSize = 100 // Fetch 100 at a time
+  const strapiBaseUrl = getStrapiServerUrl()
 
   try {
     while (true) {
@@ -59,7 +60,7 @@ async function getAllProducts(): Promise<StrapiProduct[]> {
         `fields[1]=Slug&` +
         `fields[2]=updatedAt`
 
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      const response = await fetch(`${strapiBaseUrl}${endpoint}`, {
         next: { revalidate: 3600 }, // Cache for 1 hour
         headers: {
           'Content-Type': 'application/json',
@@ -95,10 +96,11 @@ async function getAllBlogPosts(): Promise<BlogPost[]> {
   const allPosts: BlogPost[] = []
   let currentPage = 1
   const pageSize = 100
+  const strapiBaseUrl = getStrapiServerUrl()
 
   try {
     while (true) {
-      const endpoint = `${API_BASE_URL}/blog-posts?` +
+      const endpoint = `${strapiBaseUrl}/blog-posts?` +
         `filters[Status][$eq]=Published&` +
         `pagination[page]=${currentPage}&` +
         `pagination[pageSize]=${pageSize}&` +
@@ -143,7 +145,7 @@ async function getAllBlogPosts(): Promise<BlogPost[]> {
  */
 async function getAllBlogCategories(): Promise<BlogCategory[]> {
   try {
-    const endpoint = `${API_BASE_URL}/blog-categories?` +
+    const endpoint = `${getStrapiServerUrl()}/blog-categories?` +
       `pagination[pageSize]=100&` +
       `fields[0]=Slug&` +
       `fields[1]=updatedAt`

@@ -1,5 +1,5 @@
 import { apiClient } from "@/services";
-import { ENDPOINTS, API_BASE_URL, getStrapiServerUrl } from "@/constants/api";
+import { ENDPOINTS, getStrapiServerUrl } from "@/constants/api";
 import { buildTitleKeywordFilter } from "@/constants/productKeywords";
 import type { ProductCardProps } from "@/components/Product/Card";
 import { formatProductsToCardProps } from "./product";

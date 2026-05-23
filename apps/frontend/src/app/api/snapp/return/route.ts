@@ -1,5 +1,6 @@
 import type { NextRequest} from "next/server";
 import { NextResponse } from "next/server";
+import { getStrapiServerUrl } from "@/constants/api";
 
 function isAllowedRedirect(raw: string): boolean {
   try {
@@ -26,9 +27,9 @@ export async function POST(req: NextRequest) {
     });
     const body = pairs.join("&");
 
-    const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL;
+    const apiBase = getStrapiServerUrl();
     if (!apiBase) {
-      throw new Error("NEXT_PUBLIC_API_BASE_URL is not defined");
+      throw new Error("Strapi server URL is not defined");
     }
     const url = `${apiBase.replace(/\/$/, "")}/orders/payment-callback`;
 

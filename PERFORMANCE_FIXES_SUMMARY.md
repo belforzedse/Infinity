@@ -199,7 +199,7 @@ pool: {
 **Impact:** Security improvement
 
 #### B1. Internal Nginx Server Block
-- Create internal-only server on `127.0.0.1:8080`
+- Create internal-only server on the Docker host gateway at port `8080`
 - Proxy to `strapi_upstream` without TLS
 
 **Impact:** Enables internal routing for server-side fetches
@@ -211,7 +211,7 @@ pool: {
 ### Frontend Production
 
 ```bash
-STRAPI_INTERNAL_URL=http://127.0.0.1:8080/api
+STRAPI_INTERNAL_URL=http://host.docker.internal:8080/api
 ```
 
 ### Backend Production
@@ -239,7 +239,7 @@ SELECT pg_reload_conf();
 
 ### Manual Testing Required
 - [ ] Verify internal URL routes correctly
-- [ ] Check server logs for connection to 127.0.0.1:8080
+- [ ] Check server logs for connection to host.docker.internal:8080
 - [ ] Confirm gzip compression in response headers
 - [ ] Monitor Redis cache hit rate
 - [ ] Verify database connection count stays below limit
