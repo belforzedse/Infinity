@@ -39,19 +39,19 @@ export const FOOTER_DATA: FooterData = {
   second: {
     header: "دسترسی سریع",
     links: [
-      { title: "خرید بافت", url: "https://new.infinitycolor.co/plp?category=پلیور-و-بافت/" },
-      { title: "خرید پیراهن زنانه", url: "https://new.infinitycolor.co/plp?category=shirt/" },
+      { title: "خرید بافت", url: "/plp/category/پلیور-و-بافت" },
+      { title: "خرید پیراهن زنانه", url: "/plp/category/shirt" },
       {
         title: "خرید شال و روسری",
-        url: "https://new.infinitycolor.co/plp?category=shawls-and-scarves/",
+        url: "/plp/category/shawls-and-scarves",
       },
       {
         title: "خرید شومیز",
-        url: "https://new.infinitycolor.co/plp?category=paperback-and-tonic/",
+        url: "/plp/category/paperback-and-tonic",
       },
       {
         title: "خرید مانتو",
-        url: "https://new.infinitycolor.co/plp?category=coat-and-mantle/",
+        url: "/plp/category/coat-and-mantle",
       },
     ],
   },

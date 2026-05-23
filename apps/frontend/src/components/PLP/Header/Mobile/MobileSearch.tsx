@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState, useRef, type SyntheticEvent } from "react";
 import { createPortal } from "react-dom";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { API_BASE_URL, IMAGE_BASE_URL } from "@/constants/api";
 import SearchSuggestionCard from "@/components/Search/SearchSuggestionCard";
 import { getDeviceInfo } from "@/utils/device-detection";
@@ -32,6 +32,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
   const [mounted, setMounted] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const backdropPointerDownRef = useRef(false);
   const ignoreBackdropUntilRef = useRef(0);
@@ -44,6 +45,10 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
     const isIOSDevice = isIOS || (typeof window !== "undefined" && getDeviceInfo().isIOS);
     if (isIOSDevice && !options?.force) return;
     onClose();
+  };
+  const getSearchHref = (term: string) => {
+    const basePath = pathname.startsWith("/plp/category/") ? pathname : "/plp";
+    return `${basePath}?search=${encodeURIComponent(term)}`;
   };
 
   useEffect(() => {
@@ -101,7 +106,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
     trackSearch(trimmed, "mobile");
 
     // Redirect to search results page with the query
-    router.push(`/plp?search=${encodeURIComponent(trimmed)}`);
+    router.push(getSearchHref(trimmed));
   };
 
   // Debounced suggestions (native fetch to avoid global overlays)
@@ -281,7 +286,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
                     onClick={() => {
                       closeModal({ force: true });
                       trackSearch(searchQuery.trim(), "mobile_view_all");
-                      router.push(`/plp?search=${encodeURIComponent(searchQuery.trim())}`);
+                      router.push(getSearchHref(searchQuery.trim()));
                     }}
                     className="text-xs block w-full border-t border-gray-200 bg-transparent px-3 py-2 text-right text-pink-700 transition-colors hover:bg-gray-50"
                   >

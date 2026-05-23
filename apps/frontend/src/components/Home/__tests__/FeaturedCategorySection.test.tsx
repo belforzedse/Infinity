@@ -40,7 +40,7 @@ describe("FeaturedCategorySection", () => {
 
     expect(screen.getByText("شاید بپسندید")).toBeInTheDocument();
     const cta = screen.getByRole("link", { name: /مشاهده همه/ });
-    expect(cta).toHaveAttribute("href", "/plp?category=special-category");
+    expect(cta).toHaveAttribute("href", "/plp/category/special-category");
     expect(screen.getAllByTestId("small-card")).toHaveLength(2);
     expect(screen.getByLabelText("Featured category banner")).toBeInTheDocument();
   });

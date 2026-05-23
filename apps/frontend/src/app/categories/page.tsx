@@ -5,6 +5,7 @@ import PageContainer from "@/components/layout/PageContainer";
 import { SITE_NAME, SITE_URL } from "@/config/site";
 import { getProductCategories } from "@/services/product/categories";
 import { CATEGORY_IMAGE_PLACEHOLDER } from "@/constants/placeholders";
+import { getCategoryPlpHref } from "@/utils/plpRoutes";
 
 export const metadata: Metadata = {
   title: "دسته‌بندی‌ها",
@@ -58,7 +59,7 @@ export default async function CategoriesPage() {
               return (
                 <Link
                   key={category.id}
-                  href={{ pathname: "/plp", query: { category: category.slug } }}
+                  href={getCategoryPlpHref(category.slug)}
                   className="flex flex-col items-center gap-2 rounded-2xl border border-slate-100 bg-white p-4 text-center transition-transform hover:-translate-y-0.5"
                   style={{ backgroundColor: bgColor }}
                 >

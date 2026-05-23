@@ -146,6 +146,11 @@ export const routes: RouteInfo[] = [
     description: "Product Listing Page",
   },
   {
+    name: "Category Product Listing (PLP)",
+    path: "/plp/category/[slug]",
+    description: "Category Product Listing Page",
+  },
+  {
     name: "Categories",
     path: "/categories",
     description: "Browse product categories",

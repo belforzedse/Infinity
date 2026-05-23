@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Sparkle } from "lucide-react";
 import ProductSmallCard, { type ProductSmallCardProps } from "@/components/Product/SmallCard";
 import resolveAssetUrl from "@/utils/resolveAssetUrl";
+import { getCategoryPlpHref } from "@/utils/plpRoutes";
 
 type FeaturedCategorySectionProps = {
   bannerImageUrl: string;
@@ -21,7 +22,7 @@ export default function FeaturedCategorySection({
     return null;
   }
 
-  const categoryHref = `/plp?category=${encodeURIComponent(normalizedCategorySlug)}`;
+  const categoryHref = getCategoryPlpHref(normalizedCategorySlug);
 
   return (
     <div className="space-y-5">

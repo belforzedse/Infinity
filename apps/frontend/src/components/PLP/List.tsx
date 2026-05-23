@@ -12,6 +12,7 @@ import SidebarSuggestions from "./List/SidebarSuggestions";
 import Pagination from "./Pagination";
 import { useQueryStates } from "nuqs";
 import { useEffect, useState, useMemo } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { SORT_LABELS } from "./sortOptions";
 import { hasAvailableStock, productTitleHasG } from "@/utils/product";
 import { useSidebarProducts } from "@/hooks/useSidebarProducts";
@@ -19,6 +20,7 @@ import PLPDesktopList from "./List/PLPDesktopList";
 import PLPMobileList from "./List/PLPMobileList";
 import type { PLPProduct, PLPPagination } from "./types";
 import { plpQueryOptions, plpQueryParsers } from "./queryState";
+import { getPlpHref } from "@/utils/plpRoutes";
 
 const humanize = (value: string) =>
   value
@@ -52,7 +54,6 @@ export default function PLPList({
 }: PLPListProps) {
   const [query, setQuery] = useQueryStates(plpQueryParsers, plpQueryOptions);
   const {
-    category,
     available,
     minPrice,
     maxPrice,
@@ -65,6 +66,8 @@ export default function PLPList({
     sort,
     hasDiscount: discountOnly,
   } = query;
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [isDesktop, setIsDesktop] = useState(false);
 
@@ -228,23 +231,23 @@ export default function PLPList({
   }, [validProducts, discountOnly]);
 
   const selectedCategoryTitle = useMemo(() => {
-    if (!category) return null;
+    if (!initialCategory) return null;
 
-    const option = categoryOptions.find((item) => item.id === category);
+    const option = categoryOptions.find((item) => item.id === initialCategory);
     if (option) return option.title;
 
     const dynamicMatch = validProducts.find(
       (product) =>
-        product.attributes.product_main_category?.data?.attributes?.Slug === category ||
-        product.attributes.product_main_category?.data?.attributes?.Title === category,
+        product.attributes.product_main_category?.data?.attributes?.Slug === initialCategory ||
+        product.attributes.product_main_category?.data?.attributes?.Title === initialCategory,
     );
 
     if (dynamicMatch?.attributes.product_main_category?.data?.attributes?.Title) {
       return dynamicMatch.attributes.product_main_category.data.attributes.Title;
     }
 
-    return category.replace(/[-_]/g, " ");
-  }, [category, categoryOptions, validProducts]);
+    return initialCategory.replace(/[-_]/g, " ");
+  }, [initialCategory, categoryOptions, validProducts]);
 
   const activeFilters = useMemo(
     () => {
@@ -260,12 +263,12 @@ export default function PLPList({
         });
       }
 
-      if (category) {
+      if (initialCategory) {
         filters.push({
           key: "category",
-          label: `دسته: ${selectedCategoryTitle || category}`,
+          label: `دسته: ${selectedCategoryTitle || initialCategory}`,
           onRemove: () => {
-            void setQuery({ category: null, page: 1 });
+            router.push(getPlpHref(searchParams));
           },
         });
       }
@@ -358,14 +361,16 @@ export default function PLPList({
     },
     [
       available,
-      category,
       discountOnly,
       gender,
+      initialCategory,
       material,
       maxPrice,
       minPrice,
+      router,
       season,
       selectedCategoryTitle,
+      searchParams,
       setQuery,
       size,
       sort,
@@ -374,8 +379,12 @@ export default function PLPList({
   );
 
   const clearAllFilters = () => {
+    if (initialCategory) {
+      router.push("/plp");
+      return;
+    }
+
     void setQuery({
-      category: null,
       available: null,
       minPrice: null,
       maxPrice: null,
@@ -407,6 +416,7 @@ export default function PLPList({
               showAvailableOnly={available === "true"}
               categories={categoryOptions}
               isLoadingCategories={isLoadingCategories}
+              selectedCategory={initialCategory}
             />
 
             {sidebarContent}
@@ -420,6 +430,7 @@ export default function PLPList({
                 <PLPListMobileFilter
                   categories={categoryOptions}
                   isLoadingCategories={isLoadingCategories}
+                  selectedCategory={initialCategory}
                 />
           </div>
 
@@ -456,7 +467,7 @@ export default function PLPList({
           )}
 
           {validProducts.length === 0 ? (
-            <NoData category={category || initialCategory} />
+            <NoData category={initialCategory} />
           ) : (
             <>
               <PLPDesktopList products={displayProducts} includeMedia={isDesktop} />

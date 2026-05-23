@@ -13,6 +13,7 @@ import { hapticButton } from "@/utils/haptics";
 import { ALLOWED_HOME_NAV_CATEGORY_NAME_SUBSTRINGS } from "@/constants/categories";
 import { useProductCategories } from "@/hooks/useProductCategories";
 import { CATEGORY_IMAGE_PLACEHOLDER } from "@/constants/placeholders";
+import { getCategoryPlpHref } from "@/utils/plpRoutes";
 
 const PLPBottomNavigation = () => {
   const pathname = usePathname();
@@ -187,7 +188,7 @@ const PLPBottomNavigation = () => {
                   return (
                     <Link
                       key={category.id}
-                      href={`/plp?category=${encodeURIComponent(category.slug)}`}
+                      href={getCategoryPlpHref(category.slug)}
                       prefetch={false}
                       onClick={closeCategories}
                       className="flex flex-col items-center gap-2"

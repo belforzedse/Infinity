@@ -3,7 +3,8 @@
 import ChevronDownIcon from "@/components/Search/Icons/ChevronDownIcon";
 import Link from "next/link";
 import { useProductCategories } from "@/hooks/useProductCategories";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
+import { getCategoryPlpHref } from "@/utils/plpRoutes";
 
 interface NavItem {
   label: string;
@@ -14,13 +15,12 @@ interface NavItem {
 export default function PLPHeaderDesktopNav() {
   const { categories, isLoading: loading } = useProductCategories({ mainOnly: true });
   const pathname = usePathname();
-  const params = useSearchParams();
 
   const navItems: NavItem[] = [
     { label: "خانه", href: "/" },
     ...categories.map((item) => ({
       label: item.name,
-      href: `/plp?category=${encodeURIComponent(item.slug)}`,
+      href: getCategoryPlpHref(item.slug),
       hasDropdown: false,
     })),
   ];
@@ -42,16 +42,8 @@ export default function PLPHeaderDesktopNav() {
       <div className="flex items-center justify-center gap-6">
         {navItems.map((item) => {
           const isHome = item.href === "/" && pathname === "/";
-          const isPlp = pathname === "/plp";
-          const activeSlug = params.get("category");
-          let itemSlug = null;
-          try {
-            const url = new URL(item.href || "/", "http://dummy");
-            itemSlug = url.searchParams.get("category");
-          } catch {
-            itemSlug = null;
-          }
-          const isActive = isHome || (isPlp && itemSlug && itemSlug === activeSlug);
+          const isActive =
+            isHome || (item.href !== "/" && decodeURI(pathname) === decodeURI(item.href));
           return (
             <Link
               key={item.href}

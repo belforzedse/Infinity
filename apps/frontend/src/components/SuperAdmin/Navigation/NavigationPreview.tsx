@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { NavigationCategory } from "@/types/super-admin/navigation";
+import { getCategoryPlpHref } from "@/utils/plpRoutes";
 
 type ProductCategoriesInput = NavigationCategory[] | string;
 
@@ -32,7 +33,7 @@ export default function NavigationPreview({ product_categories }: Props) {
     ...categories.map((cat) => ({
       key: `cat-${cat.id}`,
       label: cat.title || cat.slug || "—",
-      href: `/plp?category=${encodeURIComponent(cat.slug)}`,
+      href: getCategoryPlpHref(cat.slug),
     })),
   ];
 

@@ -6,6 +6,7 @@ import Link from "next/link";
 import Reveal from "@/components/Reveal";
 import type { ProductCategorySummary } from "@/services/product/categories";
 import { CATEGORY_IMAGE_PLACEHOLDER } from "@/constants/placeholders";
+import { getCategoryPlpHref } from "@/utils/plpRoutes";
 
 interface CategoryShowcaseProps {
   categories: ProductCategorySummary[];
@@ -32,7 +33,7 @@ export default function CategoryShowcase({ categories }: CategoryShowcaseProps) 
             className="flex-shrink-0"
           >
             <Link
-              href={{ pathname: "/plp", query: { category: category.slug } }}
+              href={getCategoryPlpHref(category.slug)}
               className="group flex flex-col items-center text-center transition-transform hover:-translate-y-1"
             >
               <div className="relative h-[200px] w-full overflow-hidden rounded-lg border border-slate-100 md:h-[240px] lg:h-[280px]">

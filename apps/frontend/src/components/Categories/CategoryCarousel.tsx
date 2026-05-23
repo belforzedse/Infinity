@@ -8,6 +8,7 @@ import ChevronLeftIcon from "@/components/PDP/Icons/ChevronLeftIcon";
 import ChevronRightIcon from "@/components/PDP/Icons/ChevronRightIcon";
 import type { ProductCategorySummary } from "@/services/product/categories";
 import { CATEGORY_IMAGE_PLACEHOLDER } from "@/constants/placeholders";
+import { getCategoryPlpHref } from "@/utils/plpRoutes";
 
 interface CategoryCarouselProps {
   categories: ProductCategorySummary[];
@@ -214,7 +215,7 @@ export default function CategoryCarousel({ categories }: CategoryCarouselProps) 
           return (
             <Link
               key={category.id}
-              href={{ pathname: "/plp", query: { category: category.slug } }}
+              href={getCategoryPlpHref(category.slug)}
               className="group flex w-full flex-shrink-0 snap-start flex-col items-center text-center"
               aria-label={label}
               data-carousel-item

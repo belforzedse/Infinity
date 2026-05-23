@@ -13,11 +13,13 @@ import { plpQueryOptions, plpQueryParsers } from "@/components/PLP/queryState";
 interface MobileFilterProps {
   categories?: Array<{ id: string; title: string }>;
   isLoadingCategories?: boolean;
+  selectedCategory?: string;
 }
 
 export default function PLPListMobileFilter({
   categories,
   isLoadingCategories = false,
+  selectedCategory,
 }: MobileFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useQueryStates(plpQueryParsers, plpQueryOptions);
@@ -77,6 +79,7 @@ export default function PLPListMobileFilter({
             showAvailableOnly={available === "true"}
             categories={categories}
             isLoadingCategories={isLoadingCategories}
+            selectedCategory={selectedCategory}
           />
 
           <PLPButton

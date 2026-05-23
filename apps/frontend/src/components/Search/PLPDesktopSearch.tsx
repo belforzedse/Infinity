@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import SearchIcon from "./Icons/SearchIcon";
 import { API_BASE_URL, IMAGE_BASE_URL, ENDPOINTS } from "@/constants/api";
 import SearchSuggestionCard from "./SearchSuggestionCard";
@@ -31,6 +31,7 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({ className = "" }) =
   const [activeIndex, setActiveIndex] = useState(-1);
   const containerRef = useRef<HTMLFormElement | null>(null);
   const router = useRouter();
+  const pathname = usePathname();
   const [isFocused, setIsFocused] = useState(false);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
 
@@ -38,6 +39,11 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({ className = "" }) =
     () => ["کیف", "کفش", "کتونی", "لباس زنانه", "پرفروش"],
     [],
   );
+
+  const getSearchHref = (term: string) => {
+    const basePath = pathname.startsWith("/plp/category/") ? pathname : "/plp";
+    return `${basePath}?search=${encodeURIComponent(term)}`;
+  };
 
   useEffect(() => {
     try {
@@ -72,7 +78,7 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({ className = "" }) =
     trackSearch(trimmed, "desktop");
 
     // Redirect to search results page with the query
-    router.push(`/plp?search=${encodeURIComponent(trimmed)}`);
+    router.push(getSearchHref(trimmed));
   };
 
   // Debounced live search suggestions (native fetch to avoid global overlays)
@@ -260,7 +266,7 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({ className = "" }) =
                             setSearchQuery(term);
                             setOpen(false);
                             trackSearch(term, "desktop_recent");
-                            router.push(`/plp?search=${encodeURIComponent(term)}`);
+                            router.push(getSearchHref(term));
                           }}
                           className="text-xs rounded-full border border-slate-200 px-3 py-1 text-pink-600 hover:border-pink-300 hover:bg-pink-50"
                         >
@@ -281,7 +287,7 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({ className = "" }) =
                           setSearchQuery(term);
                           setOpen(false);
                           trackSearch(term, "desktop_popular");
-                          router.push(`/plp?search=${encodeURIComponent(term)}`);
+                          router.push(getSearchHref(term));
                         }}
                         className="text-xs rounded-full border border-slate-200 px-3 py-1 text-neutral-600 hover:border-pink-300 hover:bg-pink-50"
                       >
@@ -334,7 +340,7 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({ className = "" }) =
                     onClick={() => {
                       persistRecent(searchQuery);
                       trackSearch(searchQuery.trim(), "desktop_view_all");
-                      router.push(`/plp?search=${encodeURIComponent(searchQuery.trim())}`);
+                      router.push(getSearchHref(searchQuery.trim()));
                     }}
                     className="text-xs block w-full border-t border-slate-200 bg-white/0 px-3 py-2 text-right text-pink-600 hover:bg-slate-50"
                   >

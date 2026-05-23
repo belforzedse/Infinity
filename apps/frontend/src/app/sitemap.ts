@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next'
 import { ENDPOINTS, getStrapiServerUrl } from '@/constants/api'
 import logger from '@/utils/logger'
+import { getCategoryPlpHref } from '@/utils/plpRoutes'
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://new.infinitycolor.co'
 
@@ -34,6 +35,12 @@ interface BlogPost {
 }
 
 interface BlogCategory {
+  id: number
+  Slug: string
+  updatedAt: string
+}
+
+interface ProductCategory {
   id: number
   Slug: string
   updatedAt: string
@@ -172,12 +179,44 @@ async function getAllBlogCategories(): Promise<BlogCategory[]> {
   }
 }
 
+async function getAllProductCategories(): Promise<ProductCategory[]> {
+  try {
+    const endpoint = `${getStrapiServerUrl()}${ENDPOINTS.PRODUCT.CATEGORY}?` +
+      `pagination[pageSize]=100&` +
+      `fields[0]=Slug&` +
+      `fields[1]=updatedAt`
+
+    const response = await fetch(endpoint, {
+      next: { revalidate: 3600 },
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+    }).then(res => res.json())
+
+    const categories = (response?.data || [])
+      .map((cat: any) => ({
+        id: cat.id,
+        Slug: cat.attributes?.Slug || cat.Slug,
+        updatedAt: cat.attributes?.updatedAt || cat.updatedAt,
+      }))
+      .filter((cat: ProductCategory) => Boolean(cat.Slug))
+
+    logger.info(`[Sitemap] Fetched ${categories.length} product categories for sitemap`)
+    return categories
+  } catch (error: string | Error | any) {
+    logger.error('[Sitemap] Error fetching product categories:', error)
+    return []
+  }
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Fetch all data in parallel
-  const [products, blogPosts, blogCategories] = await Promise.all([
+  const [products, blogPosts, blogCategories, productCategories] = await Promise.all([
     getAllProducts(),
     getAllBlogPosts(),
     getAllBlogCategories(),
+    getAllProductCategories(),
   ])
 
   // Disallow-list for sitemap (must stay aligned with robots.txt)
@@ -198,6 +237,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     1 + // PLP
     1 + // Categories
     1 + // Blog listing
+    productCategories.length +
     products.length +
     blogPosts.length +
     blogCategories.length
@@ -234,6 +274,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'weekly',
       priority: 0.9,
     },
+
+    // Product category PLPs
+    ...productCategories.map((category) => ({
+      url: `${BASE_URL}${getCategoryPlpHref(category.Slug)}`,
+      lastModified: new Date(category.updatedAt),
+      changeFrequency: 'daily' as const,
+      priority: 0.85,
+    })),
 
     // Blog listing page
     {

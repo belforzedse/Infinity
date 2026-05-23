@@ -154,7 +154,7 @@ function getFeaturedProducts(category?: string): Promise<ProcessedProduct[]> {
   url += `&filters[$or][0][Title][$containsi]=کیف&filters[$or][1][Title][$containsi]=کفش&filters[$or][2][Title][$containsi]=صندل&filters[$or][3][Title][$containsi]=کتونی`;
 
   if (category) {
-    url += `&filters[product_main_category][Slug][$eq]=${category}`;
+    url += `&filters[product_main_category][Slug][$eq]=${encodeURIComponent(category)}`;
   }
 
   return fetchProductsFromUrl(url);

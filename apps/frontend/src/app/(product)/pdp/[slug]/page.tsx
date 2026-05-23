@@ -23,6 +23,7 @@ import {
   getRelatedProductsByMainCategory,
   getRelatedProductsByOtherCategories,
 } from "@/services/product/product";
+import { getCategoryPlpHref } from "@/utils/plpRoutes";
 
 /**
  * Generate static params for popular products to pre-render at build time
@@ -717,7 +718,7 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
     },
     {
       label: categoryName,
-      href: `/plp?category=${categorySlug}`,
+      href: getCategoryPlpHref(categorySlug),
     },
     {
       label: productTitle,

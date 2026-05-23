@@ -11,6 +11,7 @@ import SearchIcon from "@/components/PLP/Icons/SearchIcon";
 import { useDrag } from "@use-gesture/react";
 import { hapticButton } from "@/utils/haptics";
 import React from "react";
+import { getCategoryPlpHref } from "@/utils/plpRoutes";
 
 interface Props {
   isOpen: boolean;
@@ -55,7 +56,7 @@ export default function MobileMenu({ isOpen, onClose, onSearchClick }: Props) {
     { label: "خانه", href: "/" },
     ...categories.map((item) => ({
       label: item.name,
-      href: `/plp?category=${encodeURIComponent(item.slug)}`,
+      href: getCategoryPlpHref(item.slug),
     })),
   ];
 

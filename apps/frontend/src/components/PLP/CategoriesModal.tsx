@@ -8,6 +8,7 @@ import { Fragment } from "react";
 import DeleteIcon from "@/components/Kits/Icons/DeleteIcon";
 import { CATEGORY_IMAGE_PLACEHOLDER } from "@/constants/placeholders";
 import { useProductCategories } from "@/hooks/useProductCategories";
+import { getCategoryPlpHref } from "@/utils/plpRoutes";
 
 interface CategoriesModalProps {
   isOpen: boolean;
@@ -71,7 +72,7 @@ export default function CategoriesModal({ isOpen, onClose }: CategoriesModalProp
                       return (
                         <Link
                           key={category.id}
-                          href={`/plp?category=${encodeURIComponent(category.slug)}`}
+                          href={getCategoryPlpHref(category.slug)}
                           prefetch={false}
                           onClick={onClose}
                           className="flex flex-col items-center gap-2"

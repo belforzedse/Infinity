@@ -1,7 +1,6 @@
 import { parseAsInteger, parseAsString } from "nuqs";
 
 export const plpQueryParsers = {
-  category: parseAsString,
   available: parseAsString,
   minPrice: parseAsString,
   maxPrice: parseAsString,

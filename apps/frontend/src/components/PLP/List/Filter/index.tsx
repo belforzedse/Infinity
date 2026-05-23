@@ -6,9 +6,11 @@ import PriceFilter from "./Price";
 import PLPFilterBox from "@/components/Kits/PLP/FilterBox";
 import { useQueryStates } from "nuqs";
 import { useCallback, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { getProductCategories } from "@/services/product/categories";
 import { SORT_OPTIONS } from "@/components/PLP/sortOptions";
 import { plpQueryOptions, plpQueryParsers } from "@/components/PLP/queryState";
+import { getCategoryPlpHrefWithQuery } from "@/utils/plpRoutes";
 
 interface Category {
   id: string;
@@ -19,15 +21,19 @@ interface FilterProps {
   showAvailableOnly?: boolean;
   categories?: Category[];
   isLoadingCategories?: boolean;
+  selectedCategory?: string;
 }
 
 export default function Filter({
   showAvailableOnly = false,
   categories: categoriesProp,
   isLoadingCategories: isLoadingCategoriesProp,
+  selectedCategory,
 }: FilterProps) {
   const [query, setQuery] = useQueryStates(plpQueryParsers, plpQueryOptions);
-  const { category, available, minPrice, maxPrice, sort } = query;
+  const { available, minPrice, maxPrice, sort } = query;
+  const router = useRouter();
+  const searchParams = useSearchParams();
   // State for categories
   const [localCategories, setLocalCategories] = useState<Category[]>([]);
   const [isFetchingCategories, setIsFetchingCategories] = useState(!categoriesProp);
@@ -77,9 +83,9 @@ export default function Filter({
   // Category filter handler
   const handleCategorySelect = useCallback(
     (id: string) => {
-      void setQuery({ category: id });
+      router.push(getCategoryPlpHrefWithQuery(id, searchParams));
     },
-    [setQuery],
+    [router, searchParams],
   );
 
   // Availability filter handler
@@ -121,7 +127,7 @@ export default function Filter({
   return (
     <div className="flex flex-col gap-3">
       <PLPListFilterCategory
-        value={category || ""}
+        value={selectedCategory || ""}
         title="دسته بندی محصولات"
         filterOptions={resolvedCategories.map((cat) => ({
           id: cat.id,
