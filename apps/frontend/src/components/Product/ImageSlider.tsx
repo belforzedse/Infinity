@@ -41,7 +41,7 @@ const ImageSlider: FC<ImageSliderProps> = ({
           src={coverImage}
           alt={title}
           fill
-          className={`select-none object-cover transition-all duration-300 ${
+          className={`select-none object-cover transition-all duration-500 md:group-hover:scale-[1.025] ${
             !isAvailable ? "opacity-60 saturate-[0.4] blur-sm" : ""
           }`}
           sizes="(max-width: 640px) 45vw, (max-width: 1024px) 33vw, 25vw"

@@ -66,7 +66,7 @@ const SearchSuggestionCard: FC<SearchSuggestionCardProps> = ({
     <button
       type="button"
       onClick={onClick}
-      className={`w-full border-b border-gray-100 p-3 text-right transition-colors last:border-b-0 active:scale-[0.98] ${
+      className={`pressable w-full border-b border-gray-100 p-3 text-right transition-colors last:border-b-0 ${
         isActive ? "bg-pink-50" : "hover:bg-gray-50"
       }`}
       role="option"
@@ -75,10 +75,10 @@ const SearchSuggestionCard: FC<SearchSuggestionCardProps> = ({
     >
       <div className="flex items-center gap-3">
         {/* Product Image */}
-        <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
+        <div className="relative h-12 w-12 flex-shrink-0 overflow-hidden rounded-xl bg-zinc-100">
           {/* Shimmer placeholder */}
           {!imgLoaded && (
-            <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-gray-200 to-gray-300" />
+            <div className="skeleton-shimmer absolute inset-0" />
           )}
           {image && !imgError ? (
             <Image
@@ -95,7 +95,7 @@ const SearchSuggestionCard: FC<SearchSuggestionCardProps> = ({
               onError={() => setImgError(true)}
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300">
+            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-zinc-100 to-zinc-200">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-gray-400">
                 <path
                   d="M21 19V5C21 3.9 20.1 3 19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19ZM8.5 13.5L11 16.51L14.5 12L19 18H5L8.5 13.5Z"
@@ -143,7 +143,7 @@ const SearchSuggestionCard: FC<SearchSuggestionCardProps> = ({
         {/* Discount Badge */}
         {showDiscount && (
           <div className="flex-shrink-0">
-            <div className="text-xs rounded-full bg-red-500 px-2 py-1 text-white">
+            <div className="text-xs rounded-full bg-pink-500 px-2 py-1 text-white">
               {faNum(discount ?? computedDiscount!)}%
             </div>
           </div>

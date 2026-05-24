@@ -1,7 +1,8 @@
 import PageContainer from "@/components/layout/PageContainer";
+import { SkeletonBlock } from "@repo/ui/skeleton";
 
 function PulseBlock({ className }: { className: string }) {
-  return <div className={`animate-pulse rounded bg-gray-200 ${className}`} />;
+  return <SkeletonBlock className={className} />;
 }
 
 export default function PdpSkeleton() {
@@ -36,7 +37,7 @@ export default function PdpSkeleton() {
             ))}
           </div>
 
-          <div className="space-y-3 rounded-2xl border border-gray-100 bg-white p-4">
+          <div className="space-y-3 rounded-2xl border border-zinc-100 bg-white p-4">
             <PulseBlock className="h-5 w-32" />
             <PulseBlock className="h-4 w-full" />
             <PulseBlock className="h-4 w-5/6" />

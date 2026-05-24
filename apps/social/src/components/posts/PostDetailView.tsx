@@ -17,7 +17,7 @@ import { getLikedPostCommentIds, togglePostCommentLike } from "@/services/post-c
 import { getLikedPostIds, hasAccessToken, togglePostLike } from "@/services/post-like.service";
 import { getBookmarkedPostIds, togglePostBookmark } from "@/services/post-bookmark.service";
 import { BlurImage } from "@/components/ui/BlurImage";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@repo/ui/button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { InfinityMarkCircle } from "@/components/InfinityMarkCircle";
 import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";

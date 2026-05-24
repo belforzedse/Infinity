@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { peyda, peydaFanum, rokh, kaghaz } from "@repo/fonts";
 import { Providers } from "@/app/providers";
 import { AppChrome } from "@/components/AppChrome";
-import { NavigationProgress } from "@/components/ui/NavigationProgress";
+import { NavigationProgress } from "@repo/ui/navigation-progress";
 import { SITE_NAME, SITE_URL } from "@/config/site";
 import "./globals.css";
 

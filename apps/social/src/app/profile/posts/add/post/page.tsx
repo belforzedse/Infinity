@@ -8,7 +8,7 @@ import {
   SIZE_PICKER_MOBILE_PREVIEW,
   type PostCreateSizeCode,
 } from "@/components/posts/post-size-config";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@repo/ui/button";
 
 type SizeOption = {
   value: PostCreateSizeCode;

@@ -4,7 +4,7 @@ import { useRef, useState, type FormEvent } from "react";
 import { ImagePlus, ToggleLeft, ToggleRight, Upload, X } from "lucide-react";
 import toast from "react-hot-toast";
 import { IMAGE_BASE_URL } from "@repo/api";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@repo/ui/button";
 import { uploadFile } from "@/services/upload.service";
 import type { CreateStoryData, StoryMediaType } from "@/types/story";
 

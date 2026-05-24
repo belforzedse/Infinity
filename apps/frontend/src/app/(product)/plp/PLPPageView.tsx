@@ -6,6 +6,7 @@ import PLPList from "@/components/PLP/List";
 import PageContainer from "@/components/layout/PageContainer";
 import ProductListSkeleton from "@/components/Skeletons/ProductListSkeleton";
 import AsyncSidebarProducts from "@/components/PLP/List/AsyncSidebarProducts";
+import { SkeletonBlock } from "@repo/ui/skeleton";
 import { CollectionPageSchema } from "@/components/SEO/CollectionPageSchema";
 import type { PLPProduct as PLPListProduct } from "@/components/PLP/types";
 import {
@@ -72,8 +73,8 @@ export default async function PLPPageView({ categorySlug, searchParams }: PLPPag
     <Suspense
       fallback={
         <div className="flex flex-col gap-7">
-          <div className="h-20 animate-pulse rounded bg-slate-100" />
-          <div className="h-20 animate-pulse rounded bg-slate-100" />
+          <SkeletonBlock tone="light" className="h-20 rounded" />
+          <SkeletonBlock tone="light" className="h-20 rounded" />
         </div>
       }
     >

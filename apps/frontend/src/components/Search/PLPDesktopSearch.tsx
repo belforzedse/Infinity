@@ -277,7 +277,7 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({ className = "" }) =
                             trackSearch(term, "desktop_recent");
                             router.push(getSearchHref(term));
                           }}
-                          className="text-xs rounded-full border border-slate-200 px-3 py-1 text-pink-600 hover:border-pink-300 hover:bg-pink-50"
+                          className="pressable text-xs rounded-full border border-slate-200 px-3 py-1 text-pink-600 hover:border-pink-300 hover:bg-pink-50"
                         >
                           {term}
                         </button>
@@ -298,7 +298,7 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({ className = "" }) =
                           trackSearch(term, "desktop_popular");
                           router.push(getSearchHref(term));
                         }}
-                        className="text-xs rounded-full border border-slate-200 px-3 py-1 text-neutral-600 hover:border-pink-300 hover:bg-pink-50"
+                        className="pressable text-xs rounded-full border border-slate-200 px-3 py-1 text-neutral-600 hover:border-pink-300 hover:bg-pink-50"
                       >
                         {term}
                       </button>
@@ -312,7 +312,19 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({ className = "" }) =
               </div>
             ) : (
               <>
-                {loading && <div className="text-xs px-3 py-2 text-neutral-500">در حال جستجو…</div>}
+                {loading && (
+                  <div className="space-y-2 px-3 py-3">
+                    {Array.from({ length: 3 }).map((_, index) => (
+                      <div key={index} className="flex items-center gap-3">
+                        <div className="skeleton-shimmer h-12 w-12 rounded-xl" />
+                        <div className="flex-1 space-y-2">
+                          <div className="skeleton-shimmer-light h-3 w-2/3 rounded" />
+                          <div className="skeleton-shimmer-light h-3 w-1/3 rounded" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
                 {!loading && suggestions.length === 0 && (
                   <div className="text-xs px-3 py-2 text-neutral-500">موردی یافت نشد</div>
                 )}

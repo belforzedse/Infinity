@@ -129,7 +129,10 @@ export function SearchBar({
   const [activeIndex, setActiveIndex] = useState(-1);
 
   useEffect(() => {
-    setRecentQueries(readRecents().slice(0, MAX_RECENTS));
+    const id = window.setTimeout(() => {
+      setRecentQueries(readRecents().slice(0, MAX_RECENTS));
+    }, 0);
+    return () => window.clearTimeout(id);
   }, []);
 
   const persistRecent = useCallback((value: string) => {
@@ -164,18 +167,29 @@ export function SearchBar({
 
   useEffect(() => {
     let cancelled = false;
-    setActiveIndex(-1);
+    const activeResetId = window.setTimeout(() => {
+      if (!cancelled) setActiveIndex(-1);
+    }, 0);
 
     const q = query.trim();
     if (q.length < 2) {
-      setSuggestions([]);
-      setIsLoading(false);
-      if (isFocused) setIsOpen(true);
-      return;
+      const id = window.setTimeout(() => {
+        if (cancelled) return;
+        setSuggestions([]);
+        setIsLoading(false);
+        if (isFocused) setIsOpen(true);
+      }, 0);
+      return () => {
+        cancelled = true;
+        window.clearTimeout(activeResetId);
+        window.clearTimeout(id);
+      };
     }
 
     const abortController = new AbortController();
-    setIsLoading(true);
+    const loadingId = window.setTimeout(() => {
+      if (!cancelled) setIsLoading(true);
+    }, 0);
     const id = window.setTimeout(() => {
       searchPosts(q, {
         limit: SEARCH_SUGGESTION_LIMIT,
@@ -204,6 +218,8 @@ export function SearchBar({
     return () => {
       cancelled = true;
       abortController.abort();
+      window.clearTimeout(activeResetId);
+      window.clearTimeout(loadingId);
       window.clearTimeout(id);
     };
   }, [isFocused, query]);

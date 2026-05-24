@@ -11,12 +11,14 @@ import ShoppingCartMobileTable from "./Table/Mobile";
 import ShoppingCartDesktopTable from "./Table/Desktop";
 import { useCart } from "@/contexts/CartContext";
 import CartSkeleton from "@/components/Skeletons/CartSkeleton";
+import { useCartShellReady } from "@/hooks/useCartShellReady";
 
 function ShoppingCart() {
   const [submitOrderStep, setSubmitOrderStep] = useAtom(submitOrderStepAtom);
   const { cartItems, isLoading } = useCart();
+  const isCartShellReady = useCartShellReady();
 
-  if (isLoading) return <CartSkeleton />;
+  if (!isCartShellReady || isLoading) return <CartSkeleton />;
 
   if (cartItems.length === 0) return <EmptyShoppingCart />;
 

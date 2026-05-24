@@ -10,9 +10,26 @@ import CartDrawerFooter from "./Footer";
 import EmptyCartDrawer from "./Empty";
 import { useDrag } from "@use-gesture/react";
 import { hapticButton } from "@/utils/haptics";
+import { SkeletonBlock, SkeletonText } from "@repo/ui/skeleton";
+
+function CartDrawerSkeleton() {
+  return (
+    <div className="flex flex-1 flex-col gap-4 p-4">
+      {Array.from({ length: 2 }).map((_, index) => (
+        <div key={index} className="flex items-center gap-3">
+          <SkeletonBlock className="h-16 w-16 shrink-0 rounded-xl" />
+          <div className="flex-1 space-y-2">
+            <SkeletonText className="h-4 w-2/3" />
+            <SkeletonText tone="light" className="h-4 w-1/2" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function CartDrawer() {
-  const { isDrawerOpen, closeDrawer, cartItems } = useCart();
+  const { isDrawerOpen, closeDrawer, cartItems, isCartReady, isLoading } = useCart();
   const [isAnimating, setIsAnimating] = useState(false);
   const panelRef = React.useRef<HTMLDivElement>(null);
 
@@ -63,7 +80,7 @@ export default function CartDrawer() {
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black bg-opacity-25" />
+          <div className="fixed inset-0 bg-black/25 backdrop-blur-[2px]" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto overflow-x-hidden">
@@ -85,7 +102,9 @@ export default function CartDrawer() {
                 <div className="flex h-full flex-col">
                   <CartDrawerHeader onClose={handleClose} />
 
-                  {cartItems.length === 0 ? (
+                  {!isCartReady || isLoading ? (
+                    <CartDrawerSkeleton />
+                  ) : cartItems.length === 0 ? (
                     <EmptyCartDrawer />
                   ) : (
                     <>

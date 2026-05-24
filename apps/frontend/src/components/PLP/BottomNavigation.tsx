@@ -118,7 +118,7 @@ const PLPBottomNavigation = () => {
     <>
       <nav
         data-bottom-nav
-        className="fixed bottom-0 left-0 right-0 z-30 rounded-t-xl border-t border-fuchsia-50 bg-white lg:hidden"
+        className="luxury-glass-header fixed bottom-0 left-0 right-0 z-30 rounded-t-xl border-t border-white/60 bg-white/70 lg:hidden"
         style={{
           paddingBottom: bottomPadding,
         }}
@@ -132,8 +132,8 @@ const PLPBottomNavigation = () => {
                 key={item.href}
                 href={item.href}
                 onClick={item.onClick}
-                className={`flex w-[74px] flex-col items-center gap-1 p-2 ${
-                  isActive ? "rounded-lg bg-pink-50 text-pink-600" : "text-neutral-800"
+                className={`pressable flex w-[74px] flex-col items-center gap-1 p-2 transition-colors ${
+                  isActive ? "rounded-lg bg-white/75 text-pink-600 shadow-sm" : "text-neutral-800"
                 }`}
               >
                 {item.icon(isActive)}
@@ -151,7 +151,7 @@ const PLPBottomNavigation = () => {
           onClick={closeCategories}
         >
           <div
-            className={`duration-250 max-h-[80vh] w-full max-w-screen-sm translate-y-0 rounded-t-2xl bg-white p-4 shadow-2xl transition-transform ease-out ${
+            className={`luxury-glass-panel duration-250 max-h-[80vh] w-full max-w-screen-sm translate-y-0 rounded-t-2xl bg-white/80 p-4 shadow-2xl transition-transform ease-out ${
               isCategoriesVisible ? "translate-y-0" : "translate-y-full"
             }`}
             style={{ transitionDuration: "250ms" }}
@@ -162,18 +162,20 @@ const PLPBottomNavigation = () => {
               <button
                 aria-label="Close categories"
                 onClick={closeCategories}
-                className="rounded p-2 text-neutral-500 hover:bg-neutral-100"
+                className="pressable luxury-glass-chip rounded-full p-2 text-neutral-500 hover:text-neutral-800"
               >
                 ×
               </button>
             </div>
 
             <div className="grid grid-cols-3 gap-4 overflow-y-auto pb-2">
-              {isLoadingCategories && (
-                <div className="col-span-3 text-center text-xs text-neutral-500">
-                  در حال بارگذاری...
-                </div>
-              )}
+              {isLoadingCategories &&
+                Array.from({ length: 6 }).map((_, index) => (
+                  <div key={index} className="flex flex-col items-center gap-2">
+                    <div className="skeleton-shimmer h-20 w-20 rounded-full" />
+                    <div className="skeleton-shimmer-light h-3 w-16 rounded" />
+                  </div>
+                ))}
               {!isLoadingCategories && categories.length === 0 && (
                 <div className="col-span-3 text-center text-xs text-neutral-500">
                   دسته‌بندی برای نمایش وجود ندارد.
@@ -190,7 +192,7 @@ const PLPBottomNavigation = () => {
                       key={category.id}
                       href={getCategoryPlpHref(category.slug)}
                       onClick={closeCategories}
-                      className="flex flex-col items-center gap-2"
+                      className="pressable flex flex-col items-center gap-2"
                     >
                       <div
                         className="relative h-20 w-20 overflow-hidden rounded-full"

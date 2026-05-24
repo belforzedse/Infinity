@@ -13,15 +13,17 @@ import HeartIcon from "@/components/PDP/Icons/HeartIcon";
 import PageContainer from "@/components/layout/PageContainer";
 import OrderSummaryCard from "@/components/ShoppingCart/OrderSummaryCard";
 import { trackMatomoEvent } from "@/lib/analytics/matomo";
+import { useCartShellReady } from "@/hooks/useCartShellReady";
 
 // Lazy load offers section - not critical for initial render
 const OffersListHomePage = dynamic(() => import("@/components/PDP/OffersListHomePage"), {
   ssr: false,
-  loading: () => <div className="h-64 animate-pulse bg-gray-100 rounded-lg" />,
+  loading: () => <div className="skeleton-shimmer-light h-64 rounded-lg" />,
 });
 
 export default function CartPageClient() {
   const { cartItems, isLoading } = useCart();
+  const isCartShellReady = useCartShellReady();
   const [randomProducts, setRandomProducts] = useState<ProductCardProps[]>([]);
   const [, setLoadingRandom] = useState(false);
   const hasOffers = randomProducts.length > 0;
@@ -66,7 +68,7 @@ export default function CartPageClient() {
     });
   }, [isLoading, cartItems.length, totalValue]);
 
-  if (isLoading) {
+  if (!isCartShellReady || isLoading) {
     return (
       <PageContainer variant="wide" className="space-y-6 pb-16 pt-8">
         <CartSkeleton />

@@ -20,6 +20,21 @@ Key features of the CartContext:
 - It maintains cart items in localStorage for persistence between sessions
 - Provides utility methods like `totalItems` and `totalPrice` for cart calculations
 - Handles the cart drawer state (open/closed)
+- Exposes `isCartReady` (false until the first client init: token check + API cart or guest `localStorage` load)
+
+## Hydration and cart page shells
+
+`CartProvider` state persists across client navigations, but RSC/SSR for `/cart` always renders with empty initial context. Branching on `isLoading` or `cartItems.length` alone causes hydration mismatches (e.g. server `EmptyShoppingCart` vs client `CartSkeleton`).
+
+**Rules:**
+
+1. Do **not** choose cart **page layout** (empty vs skeleton vs line items) until the shell is stable.
+2. Use [`useCartShellReady`](apps/frontend/src/hooks/useCartShellReady.ts) on cart **pages** (`isCartReady` from context **and** `isMounted` on the page). This matches [`cart/loading.tsx`](apps/frontend/src/app/(product)/cart/loading.tsx) on SSR and after client navigations.
+3. Gate on `!isCartShellReady || isLoading` → render [`CartSkeleton`](apps/frontend/src/components/Skeletons/CartSkeleton.tsx) (same structure as `loading.tsx`).
+4. In the **drawer** (client-only), gate on `!isCartReady || isLoading` before empty vs items; use inline drawer skeleton rows.
+5. Keep `isLoading` for add/remove/update **after** ready; do not use `isLoading` alone for the initial shell.
+
+**Reference consumers:** [`CartPageClient`](apps/frontend/src/app/(product)/cart/CartPageClient.tsx), [`ShoppingCart/index.tsx`](apps/frontend/src/components/ShoppingCart/index.tsx), [`ShoppingCart/Drawer/index.tsx`](apps/frontend/src/components/ShoppingCart/Drawer/index.tsx).
 
 ## Cart Hooks
 

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Toaster } from "react-hot-toast";
 import { Suspense } from "react";
+import "@repo/ui/styles.css";
 import "../styles/components.css";
 import "./globals.css";
 import { NuqsAdapter } from "nuqs/adapters/next";
@@ -8,7 +9,7 @@ import { CartProvider } from "@/contexts/CartContext";
 import Providers from "./Providers";
 import { peyda, peydaFanum, rokh, kaghaz } from "@repo/fonts";
 import { DebugPanel } from "@/components/Debug";
-import NavigationProgress from "@/components/ui/NavigationProgress";
+import { NavigationProgress } from "@repo/ui/navigation-progress";
 import { OrganizationSchema } from "@/components/SEO/OrganizationSchema";
 import { IMAGE_BASE_URL } from "@/constants/api";
 import { SITE_URL, SITE_NAME } from "@/config/site";

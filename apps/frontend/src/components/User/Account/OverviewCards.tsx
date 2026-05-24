@@ -3,6 +3,7 @@
 import type { UserAccountOverview } from "@/hooks/useUserAccountOverview";
 import { cn } from "@/lib/utils";
 import { faNum } from "@/utils/faNum";
+import { SkeletonBlock, SkeletonText } from "@repo/ui/skeleton";
 
 interface OverviewCardsProps {
   data: UserAccountOverview;
@@ -13,9 +14,9 @@ interface OverviewCardsProps {
 
 const SkeletonCard = () => (
   <div className="flex flex-col gap-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-    <div className="h-4 w-24 animate-pulse rounded bg-slate-200" />
-    <div className="h-8 w-20 animate-pulse rounded bg-slate-200" />
-    <div className="h-3 w-28 animate-pulse rounded bg-slate-200" />
+    <SkeletonText tone="light" className="h-4 w-24" />
+    <SkeletonBlock className="h-8 w-20 rounded" />
+    <SkeletonText tone="light" className="h-3 w-28" />
   </div>
 );
 

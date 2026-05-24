@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ArrowRight } from "lucide-react";
 import toast from "react-hot-toast";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@repo/ui/button";
 import { CaptionEditor } from "@/components/posts/CaptionEditor";
 import { CoverImageCard } from "@/components/posts/CoverImageCard";
 import { PostFieldsRow } from "@/components/posts/PostFieldsRow";

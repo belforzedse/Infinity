@@ -7,7 +7,7 @@ import { Menu, MenuButton, MenuItem, MenuItems, MenuSeparator } from "@headlessu
 import { Bell, Bookmark, ChevronDown, LogOut, User } from "lucide-react";
 import ConfirmDialog from "@/components/Kits/ConfirmDialog";
 import { InfinityMarkCircle } from "@/components/InfinityMarkCircle";
-import { glassDefaultCrossfadeSurface } from "@/components/ui/glass-default-crossfade";
+import { glassDefaultCrossfadeSurface } from "@repo/ui/glass";
 import {
   PROFILE_NAV_ITEMS,
   getActiveProfileNavItem,

@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@repo/ui/button";
 
 type CardValue = "post" | "story";
 

@@ -45,12 +45,15 @@ export default function SearchPage() {
 
   useEffect(() => {
     const q = searchParams.get("q") ?? "";
-    setQuery(q);
-    setDebouncedQuery(q);
-    if (!q.trim()) {
-      setResults([]);
-      setIsLoading(false);
-    }
+    const id = window.setTimeout(() => {
+      setQuery(q);
+      setDebouncedQuery(q);
+      if (!q.trim()) {
+        setResults([]);
+        setIsLoading(false);
+      }
+    }, 0);
+    return () => window.clearTimeout(id);
   }, [searchParams]);
 
   useEffect(() => {

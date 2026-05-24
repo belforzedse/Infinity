@@ -21,7 +21,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
   onShare,
 }) => {
   const buttonBaseClass =
-    "glass-chip flex h-7 w-7 md:h-8 md:w-8 items-center justify-center rounded-full ring-1 ring-white/60 transition-all hover:scale-110 hover:shadow-[0_0_15px_rgba(236,72,153,0.4)] shadow-[0_0_10px_rgba(236,72,153,0.15)] touch-manipulation";
+    "pressable luxury-glass-chip flex h-7 w-7 md:h-8 md:w-8 items-center justify-center rounded-full text-neutral-500 ring-1 ring-white/60 transition-all hover:text-pink-600 hover:shadow-[0_10px_24px_rgba(236,72,153,0.18)] touch-manipulation";
 
   return (
     <div

@@ -6,7 +6,7 @@ export default function CartDrawerFooter() {
   const { totalPrice, closeDrawer } = useCart();
 
   return (
-    <div className="border-t border-slate-100 p-4">
+    <div className="sticky bottom-0 border-t border-slate-100 bg-white p-4">
       <div className="mb-4 flex items-center justify-between">
         <span className="text-sm text-neutral-800">مجموع:</span>
         <span className="text-base font-medium text-neutral-800">
@@ -17,7 +17,7 @@ export default function CartDrawerFooter() {
       <div className="flex gap-2">
         <Link
           href="/cart"
-          className="text-sm flex-1 rounded-lg bg-slate-100 px-4 py-2 text-center text-neutral-800"
+          className="pressable text-sm flex-1 rounded-lg bg-slate-100 px-4 py-2 text-center text-neutral-800"
           onClick={closeDrawer}
         >
           مشاهده سبد خرید
@@ -25,7 +25,7 @@ export default function CartDrawerFooter() {
 
         <Link
           href="/checkout"
-          className="text-sm flex-1 rounded-lg bg-pink-500 px-4 py-2 text-center text-white"
+          className="pressable text-sm flex-1 rounded-lg bg-pink-500 px-4 py-2 text-center text-white"
           onClick={closeDrawer}
         >
           تکمیل خرید

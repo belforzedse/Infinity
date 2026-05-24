@@ -28,18 +28,18 @@ export default function PLPHeaderDesktopNav() {
 
   if (loading) {
     return (
-      <nav className="bg-stone-50 py-3">
+      <nav className="bg-stone-50/80 py-3">
         <StorefrontContainer className="flex items-center justify-center gap-6">
-          <div className="h-5 w-24 animate-pulse rounded bg-gray-200"></div>
-          <div className="h-5 w-24 animate-pulse rounded bg-gray-200"></div>
-          <div className="h-5 w-24 animate-pulse rounded bg-gray-200"></div>
+          <div className="skeleton-shimmer-light h-5 w-24 rounded"></div>
+          <div className="skeleton-shimmer-light h-5 w-24 rounded"></div>
+          <div className="skeleton-shimmer-light h-5 w-24 rounded"></div>
         </StorefrontContainer>
       </nav>
     );
   }
 
   return (
-    <nav className="bg-stone-50 py-3">
+    <nav className="bg-stone-50/80 py-3">
       <StorefrontContainer className="flex items-center justify-center gap-6">
         {navItems.map((item) => {
           const isHome = item.href === "/" && pathname === "/";

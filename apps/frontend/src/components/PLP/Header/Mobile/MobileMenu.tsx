@@ -83,7 +83,7 @@ export default function MobileMenu({ isOpen, onClose, onSearchClick }: Props) {
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black/25" />
+          <div className="fixed inset-0 bg-black/25 backdrop-blur-[2px]" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
@@ -113,9 +113,9 @@ export default function MobileMenu({ isOpen, onClose, onSearchClick }: Props) {
                   <div className="flex flex-col gap-3">
                     {loading ? (
                       <>
-                        <div className="h-12 animate-pulse rounded-xl bg-gray-200"></div>
-                        <div className="h-12 animate-pulse rounded-xl bg-gray-200"></div>
-                        <div className="h-12 animate-pulse rounded-xl bg-gray-200"></div>
+                        <div className="skeleton-shimmer h-12 rounded-xl"></div>
+                        <div className="skeleton-shimmer-light h-12 rounded-xl"></div>
+                        <div className="skeleton-shimmer-light h-12 rounded-xl"></div>
                       </>
                     ) : (
                       <>
@@ -129,7 +129,7 @@ export default function MobileMenu({ isOpen, onClose, onSearchClick }: Props) {
                             onSearchClick?.();
                             onClose();
                           }}
-                          className="relative flex items-center gap-2 rounded-lg px-5 py-3 text-gray-700 transition-all hover:bg-pink-50 w-full text-right"
+                          className="pressable relative flex w-full items-center gap-2 rounded-lg px-5 py-3 text-right text-gray-700 transition-all hover:bg-white/70 hover:text-pink-600"
                         >
                           <SearchIcon className="text-pink-500" />
                           <span className="text-sm font-medium">جستجو</span>
@@ -141,7 +141,7 @@ export default function MobileMenu({ isOpen, onClose, onSearchClick }: Props) {
                             <Link
                               key={item.href}
                               href={item.href}
-                              className="relative flex items-center gap-2 rounded-lg px-5 py-3 text-gray-700 transition-all hover:bg-pink-50"
+                              className="pressable relative flex items-center gap-2 rounded-lg px-5 py-3 text-gray-700 transition-all hover:bg-white/70 hover:text-pink-600"
                               onClick={onClose}
                             >
                               <span className="text-sm font-medium">{item.label}</span>

@@ -456,23 +456,24 @@ textarea:focus-visible {
   /* Pressable utility for cards/buttons */
   .pressable {
     transition:
-      transform 160ms ease,
-      box-shadow 200ms ease,
-      filter 160ms ease;
+      transform 160ms var(--ease-velvet, cubic-bezier(0.23, 1, 0.32, 1)),
+      box-shadow 200ms var(--ease-butter, cubic-bezier(0.16, 1, 0.3, 1)),
+      filter 160ms var(--ease-butter, cubic-bezier(0.16, 1, 0.3, 1));
   }
   .pressable:active {
-    transform: translateY(1px) scale(0.99);
+    transform: scale(0.97) translateY(1px);
   }
   .interactive-card {
     transition:
-      transform 200ms ease,
-      box-shadow 240ms ease,
-      filter 200ms ease;
+      transform 200ms var(--ease-butter, cubic-bezier(0.16, 1, 0.3, 1)),
+      box-shadow 220ms var(--ease-butter, cubic-bezier(0.16, 1, 0.3, 1)),
+      border-color 200ms var(--ease-butter, cubic-bezier(0.16, 1, 0.3, 1)),
+      filter 180ms var(--ease-butter, cubic-bezier(0.16, 1, 0.3, 1));
   }
   @media (hover: hover) {
     .interactive-card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 12px 24px rgba(17, 24, 39, 0.08);
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.075);
     }
   }
 }

@@ -11,7 +11,7 @@ import {
 import type { PLPProduct } from "@/components/PLP/types";
 
 const ProductSmallCard = dynamic(() => import("@/components/Product/SmallCard"), {
-  loading: () => <div className="h-24 animate-pulse rounded-lg bg-gray-200" />,
+  loading: () => <div className="skeleton-shimmer h-24 rounded-lg" />,
 });
 
 interface PLPMobileListProps {

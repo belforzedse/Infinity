@@ -49,6 +49,8 @@ interface CartContextType {
   subtotalBeforeDiscount: number;
   cartDiscountTotal: number;
   isLoading: boolean;
+  /** False until the first client-side cart init (token + API or localStorage) completes. */
+  isCartReady: boolean;
   checkCartStock: () => Promise<boolean>;
   migrateLocalCartToApi: () => Promise<void>;
 }
@@ -67,6 +69,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isCartReady, setIsCartReady] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const pathname = usePathname();
 
@@ -94,43 +97,55 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setIsDrawerOpen(false);
   }, [pathname]);
 
-  // Initialize cart based on authentication status
+  // Initialize cart based on authentication status (client-only)
   useEffect(() => {
-    if (isLoggedIn) {
-      // First check and clean up the cart (removes soft-deleted, inactive, and out-of-stock items)
-      // checkCartStock() will call fetchUserCart() if items were removed/adjusted
-      // If cart is valid (no changes), we need to fetch it ourselves
-      const initializeCart = async () => {
-        try {
+    if (typeof window === "undefined") return;
+
+    let cancelled = false;
+
+    const initializeCart = async () => {
+      const loggedIn = !!localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
+
+      try {
+        if (loggedIn) {
+          // checkCartStock() will call fetchUserCart() if items were removed/adjusted
           const isValid = await checkCartStock();
-          // If cart was valid (no changes), fetch it to display
-          // If invalid, checkCartStock already called fetchUserCart()
           if (isValid) {
             await fetchUserCart();
           }
-        } catch (error) {
-          console.error("Failed to initialize cart:", error);
-          // Try to fetch cart anyway on error
+        } else {
+          const storedCart = localStorage.getItem("cart");
+          if (storedCart) {
+            try {
+              setCartItems(JSON.parse(storedCart) as CartItem[]);
+            } catch (error) {
+              console.error("Error parsing stored cart:", error);
+              localStorage.removeItem("cart");
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Failed to initialize cart:", error);
+        if (loggedIn) {
           try {
             await fetchUserCart();
           } catch (fetchError) {
             console.error("Failed to fetch cart after error:", fetchError);
           }
         }
-      };
-      initializeCart();
-    } else {
-      // Load cart from localStorage for non-logged in users
-      const storedCart = localStorage.getItem("cart");
-      if (storedCart) {
-        try {
-          setCartItems(JSON.parse(storedCart));
-        } catch (error) {
-          console.error("Error parsing stored cart:", error);
-          localStorage.removeItem("cart");
+      } finally {
+        if (!cancelled) {
+          setIsCartReady(true);
         }
       }
-    }
+    };
+
+    void initializeCart();
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run when login mode changes; cart helpers are stable for the session
   }, [isLoggedIn]);
 
   // Save cart to localStorage when it changes (only for non-logged in users)
@@ -740,6 +755,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     subtotalBeforeDiscount,
     cartDiscountTotal,
     isLoading,
+    isCartReady,
     checkCartStock,
     migrateLocalCartToApi,
   };

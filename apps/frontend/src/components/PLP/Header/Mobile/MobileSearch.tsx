@@ -174,7 +174,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
   return createPortal(
     <div className="fixed inset-0 z-[1200]">
       <div
-        className="absolute inset-0 bg-black bg-opacity-25"
+        className="absolute inset-0 bg-black/25 backdrop-blur-[2px]"
         onPointerDown={markBackdropPointerDown}
         onTouchStart={markBackdropPointerDown}
         onPointerCancel={() => {
@@ -252,8 +252,16 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
 
             <div className="mt-2 overflow-hidden rounded-2xl border border-gray-200 bg-white" dir="rtl">
               {loading && (
-                <div className="text-xs px-3 py-2 text-gray-500">
-                  در حال جستجو…
+                <div className="space-y-2 px-3 py-3">
+                  {Array.from({ length: 3 }).map((_, index) => (
+                    <div key={index} className="flex items-center gap-3">
+                      <div className="skeleton-shimmer h-12 w-12 rounded-xl" />
+                      <div className="flex-1 space-y-2">
+                        <div className="skeleton-shimmer-light h-3 w-2/3 rounded" />
+                        <div className="skeleton-shimmer-light h-3 w-1/3 rounded" />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
               {!loading && suggestions.length === 0 && searchQuery.trim().length >= 2 && (
@@ -288,7 +296,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
                       trackSearch(searchQuery.trim(), "mobile_view_all");
                       router.push(getSearchHref(searchQuery.trim()));
                     }}
-                    className="text-xs block w-full border-t border-gray-200 bg-transparent px-3 py-2 text-right text-pink-700 transition-colors hover:bg-gray-50"
+                    className="pressable text-xs block w-full border-t border-white/70 bg-transparent px-3 py-2 text-right text-pink-700 transition-colors hover:bg-white/70"
                   >
                     مشاهده همه نتایج
                   </button>
@@ -299,7 +307,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
             <div className="mt-4">
               <button
                 type="button"
-                className="text-sm inline-flex justify-center rounded-md border border-transparent bg-pink-100 px-4 py-2 font-medium text-pink-900 hover:bg-pink-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2"
+                className="pressable text-sm inline-flex justify-center rounded-full border border-transparent bg-pink-100 px-4 py-2 font-medium text-pink-900 hover:bg-pink-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2"
                 onClick={() => closeModal({ force: true })}
               >
                 بستن

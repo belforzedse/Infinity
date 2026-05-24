@@ -13,7 +13,7 @@ import type { PLPProduct } from "@/components/PLP/types";
 import { StorefrontGrid } from "@/components/storefront";
 
 const ProductCard = dynamic(() => import("@/components/Product/Card"), {
-  loading: () => <div className="h-48 animate-pulse rounded-lg bg-gray-200" />,
+  loading: () => <div className="skeleton-shimmer h-48 rounded-lg" />,
 });
 
 interface PLPDesktopListProps {

@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 import { HTTP_STATUS } from "@repo/api/config";
 import type { ApiError } from "@repo/api/types";
 import Text from "@/components/Kits/Text";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@repo/ui/button";
 import { SocialTextField } from "@/components/ui/SocialTextField";
 import { currentUserAtom } from "@/lib/atoms/auth";
 import UserService from "@/services/user";

@@ -4,6 +4,7 @@ import type { UserAccountOverview } from "@/hooks/useUserAccountOverview";
 import Link from "next/link";
 import { faNum } from "@/utils/faNum";
 import clsx from "clsx";
+import { SkeletonBlock, SkeletonText } from "@repo/ui/skeleton";
 
 interface RecentOrdersProps {
   data: UserAccountOverview["orders"]["recent"];
@@ -59,15 +60,15 @@ export default function RecentOrders({ data, loading }: RecentOrdersProps) {
   if (loading) {
     return (
       <div className="flex flex-col gap-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-        <div className="h-4 w-24 animate-pulse rounded bg-slate-200" />
+        <SkeletonText tone="light" className="h-4 w-24" />
         <div className="space-y-2">
           {Array.from({ length: 3 }).map((_, idx) => (
             <div key={idx} className="flex items-center justify-between gap-3">
               <div className="flex flex-col gap-2">
-                <div className="h-4 w-32 animate-pulse rounded bg-slate-200" />
-                <div className="h-3 w-24 animate-pulse rounded bg-slate-200" />
+                <SkeletonText tone="light" className="h-4 w-32" />
+                <SkeletonText tone="light" className="h-3 w-24" />
               </div>
-              <div className="h-5 w-16 animate-pulse rounded bg-slate-200" />
+              <SkeletonBlock tone="light" className="h-5 w-16 rounded" />
             </div>
           ))}
         </div>

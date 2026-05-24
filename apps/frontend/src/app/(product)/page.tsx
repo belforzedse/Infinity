@@ -23,6 +23,7 @@ import { SITE_NAME, SITE_URL } from "@/config/site";
 import HomePromoBanners from "@/components/Home/PromoBanners";
 import { getPublicSuperAdminSettings } from "@/services/super-admin/settings/public";
 import HomeProductSections from "./HomeProductSections";
+import { SkeletonBlock, SkeletonMedia, SkeletonText } from "@repo/ui/skeleton";
 
 export const metadata: Metadata = {
   title: {
@@ -68,10 +69,10 @@ async function getStoriesForHome() {
 function ProductSectionsFallback() {
   return (
     <section className="space-y-8">
-      <div className="h-8 w-48 animate-pulse rounded bg-gray-200" />
+      <SkeletonText className="h-8 w-48" />
       <div className="grid min-w-0 grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {[...Array(8)].map((_, index) => (
-          <div key={index} className="aspect-[250/270] w-full animate-pulse rounded-lg bg-gray-200" />
+          <SkeletonMedia key={index} aspect="250 / 270" className="rounded-lg" />
         ))}
       </div>
     </section>
@@ -84,8 +85,8 @@ function StoriesRailFallback() {
       <div className="flex gap-4 overflow-hidden">
         {[...Array(6)].map((_, index) => (
           <div key={index} className="flex shrink-0 flex-col items-center gap-2">
-            <div className="h-16 w-16 animate-pulse rounded-full bg-gray-200" />
-            <div className="h-3 w-14 animate-pulse rounded bg-gray-200" />
+            <SkeletonBlock className="h-16 w-16 rounded-full" />
+            <SkeletonText tone="light" className="h-3 w-14" />
           </div>
         ))}
       </div>
@@ -97,15 +98,15 @@ function BlogSectionFallback() {
   return (
     <section className="space-y-4">
       <div className="flex items-center justify-between">
-        <div className="h-7 w-40 animate-pulse rounded bg-gray-200" />
-        <div className="h-5 w-24 animate-pulse rounded bg-gray-200" />
+        <SkeletonText className="h-7 w-40" />
+        <SkeletonText tone="light" className="h-5 w-24" />
       </div>
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {[...Array(4)].map((_, index) => (
           <div key={index} className="space-y-3">
-            <div className="aspect-[304/260] animate-pulse rounded-2xl bg-gray-200" />
-            <div className="h-4 w-3/4 animate-pulse rounded bg-gray-200" />
-            <div className="h-10 animate-pulse rounded bg-gray-200" />
+            <SkeletonMedia aspect="304 / 260" />
+            <SkeletonText tone="light" className="h-4 w-3/4" />
+            <SkeletonBlock tone="light" className="h-10 rounded" />
           </div>
         ))}
       </div>
