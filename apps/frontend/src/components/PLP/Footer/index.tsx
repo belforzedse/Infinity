@@ -9,10 +9,7 @@ import PageContainer from "@/components/layout/PageContainer";
 const PLPFooter = () => {
   return (
     <footer className="rounded-t-3xl bg-stone-100">
-      <PageContainer
-        variant="wide"
-        className="space-y-6 pb-10 pt-8"
-      >
+      <PageContainer className="space-y-6 pb-10 pt-8">
         <div className="hidden items-start justify-between gap-4 lg:flex lg:flex-row-reverse">
           <LogoSection />
           <StoresSection

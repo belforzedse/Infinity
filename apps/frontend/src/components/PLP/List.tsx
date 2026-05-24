@@ -401,7 +401,7 @@ export default function PLPList({
 
   return (
     <div
-      className="container mx-auto px-4"
+      className="w-full"
       data-plp-top
       style={{ scrollMarginTop: "var(--header-offset, 88px)" }}
     >

@@ -289,7 +289,7 @@ export async function generateMetadata({
 
         if (categoryData) {
           const categoryTitle = categoryData.attributes?.Title || categoryFilter;
-          const title = `${categoryTitle} | وبلاگ ${SITE_NAME}`;
+          const title = `${categoryTitle} | وبلاگ`;
           const description = `مقالات دسته‌بندی ${categoryTitle} در ${SITE_NAME}. آخرین مطالب و آموزش‌ها.`;
           const url = `${SITE_URL}/blog?category=${encodeURIComponent(categoryFilter)}`;
 

@@ -25,7 +25,9 @@ import { getPublicSuperAdminSettings } from "@/services/super-admin/settings/pub
 import HomeProductSections from "./HomeProductSections";
 
 export const metadata: Metadata = {
-  title: `${SITE_NAME} | خرید آنلاین پوشاک زنانه`,
+  title: {
+    absolute: SITE_NAME,
+  },
   description:
     "جدیدترین مانتو، شومیز، شال و روسری، پلیور و اکسسوری را با ارسال سریع از فروشگاه اینفینیتی خرید کنید.",
   alternates: {
@@ -185,11 +187,7 @@ export default async function Home() {
       {hasPromoBanners && (
         <section>
           <Reveal variant="fade-up" duration={700}>
-            <div className="-mx-4 sm:-mx-6 lg:-mx-8">
-              <div className="px-2 sm:px-4 lg:px-6">
-                <HomePromoBanners banners={promoBanners} />
-              </div>
-            </div>
+            <HomePromoBanners banners={promoBanners} />
           </Reveal>
         </section>
       )}

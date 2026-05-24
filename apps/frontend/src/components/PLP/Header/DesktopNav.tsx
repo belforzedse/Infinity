@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useProductCategories } from "@/hooks/useProductCategories";
 import { usePathname } from "next/navigation";
 import { getCategoryPlpHref } from "@/utils/plpRoutes";
+import { StorefrontContainer } from "@/components/storefront";
 
 interface NavItem {
   label: string;
@@ -27,19 +28,19 @@ export default function PLPHeaderDesktopNav() {
 
   if (loading) {
     return (
-      <nav className="bg-stone-50 px-10 py-3">
-        <div className="flex items-center justify-center gap-6">
+      <nav className="bg-stone-50 py-3">
+        <StorefrontContainer className="flex items-center justify-center gap-6">
           <div className="h-5 w-24 animate-pulse rounded bg-gray-200"></div>
           <div className="h-5 w-24 animate-pulse rounded bg-gray-200"></div>
           <div className="h-5 w-24 animate-pulse rounded bg-gray-200"></div>
-        </div>
+        </StorefrontContainer>
       </nav>
     );
   }
 
   return (
-    <nav className="bg-stone-50 px-10 py-3">
-      <div className="flex items-center justify-center gap-6">
+    <nav className="bg-stone-50 py-3">
+      <StorefrontContainer className="flex items-center justify-center gap-6">
         {navItems.map((item) => {
           const isHome = item.href === "/" && pathname === "/";
           const isActive =
@@ -62,7 +63,7 @@ export default function PLPHeaderDesktopNav() {
             </Link>
           );
         })}
-      </div>
+      </StorefrontContainer>
     </nav>
   );
 }

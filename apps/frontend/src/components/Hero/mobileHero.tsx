@@ -82,7 +82,7 @@ export default function MobileHero({ layout, slideKey = 0 }: Props) {
           </AnimatePresence>
         </div>
 
-        <div className="relative h-[360px] w-full overflow-hidden rounded-3xl [backface-visibility:hidden] [transform:translateZ(0)] [will-change:transform]">
+        <div className="relative aspect-[746/462] w-full overflow-hidden rounded-3xl [backface-visibility:hidden] [transform:translateZ(0)] [will-change:transform]">
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={`hero-${slideKey}`}
@@ -99,7 +99,7 @@ export default function MobileHero({ layout, slideKey = 0 }: Props) {
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <div className="relative overflow-visible rounded-xl [backface-visibility:hidden] [transform:translateZ(0)]">
+          <div className="relative aspect-[364/190] overflow-visible rounded-xl [backface-visibility:hidden] [transform:translateZ(0)]">
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
                 key={`leftCard-${slideKey}`}
@@ -115,7 +115,7 @@ export default function MobileHero({ layout, slideKey = 0 }: Props) {
             </AnimatePresence>
           </div>
 
-          <div className="relative overflow-visible rounded-xl [backface-visibility:hidden] [transform:translateZ(0)]">
+          <div className="relative aspect-[364/190] overflow-visible rounded-xl [backface-visibility:hidden] [transform:translateZ(0)]">
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
                 key={`rightCard-${slideKey}`}

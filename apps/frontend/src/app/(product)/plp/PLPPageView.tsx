@@ -85,7 +85,7 @@ export default async function PLPPageView({ categorySlug, searchParams }: PLPPag
   const collectionItems = buildCollectionItems(products);
 
   return (
-    <PageContainer variant="wide" className="space-y-6 pb-20 pt-6">
+    <PageContainer className="space-y-6 pb-20 pt-6">
       {products.length > 0 && (
         <CollectionPageSchema
           name={pageName}

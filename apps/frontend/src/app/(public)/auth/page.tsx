@@ -7,7 +7,7 @@ export default function AuthPage() {
 }
 
 export const metadata: Metadata = {
-  title: `احراز هویت | ${SITE_NAME}`,
+  title: "احراز هویت",
   description: `ورود یا ثبت‌نام در ${SITE_NAME}.`,
   robots: { index: false, follow: false },
   alternates: { canonical: `${SITE_URL}/auth` },

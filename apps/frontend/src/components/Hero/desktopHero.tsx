@@ -11,6 +11,9 @@ type Props = {
   slideKey: string | number;
 };
 
+const DESKTOP_HERO_WIDTH = 1358;
+const DESKTOP_HERO_HEIGHT = 480;
+
 /**
  * Desktop Hero Layout
  * Structure:
@@ -21,6 +24,43 @@ type Props = {
  */
 export default function DesktopHero({ layout, slideKey }: Props) {
   const prefersReduced = useReducedMotion();
+  const frameRef = React.useRef<HTMLDivElement>(null);
+  const [scale, setScale] = React.useState(1);
+
+  React.useEffect(() => {
+    const frame = frameRef.current;
+    if (!frame) return;
+    let animationFrame = 0;
+    const timeouts: number[] = [];
+
+    const updateScale = () => {
+      const width = frame.offsetWidth || frame.getBoundingClientRect().width;
+      if (width > 0) {
+        setScale(Math.min(1, width / DESKTOP_HERO_WIDTH));
+      }
+    };
+
+    const scheduleUpdate = () => {
+      window.cancelAnimationFrame(animationFrame);
+      animationFrame = window.requestAnimationFrame(updateScale);
+    };
+
+    updateScale();
+    scheduleUpdate();
+    timeouts.push(window.setTimeout(updateScale, 80));
+    timeouts.push(window.setTimeout(updateScale, 240));
+
+    const resizeObserver = new ResizeObserver(updateScale);
+    resizeObserver.observe(frame);
+    window.addEventListener("resize", scheduleUpdate, { passive: true });
+
+    return () => {
+      window.cancelAnimationFrame(animationFrame);
+      timeouts.forEach((timeout) => window.clearTimeout(timeout));
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", scheduleUpdate);
+    };
+  }, []);
 
   const outsideOpts = prefersReduced
     ? {
@@ -69,8 +109,19 @@ export default function DesktopHero({ layout, slideKey }: Props) {
   });
 
   return (
-    <div className="h-[480px] w-full max-w-[1358px] overflow-hidden mx-auto">
-      <div className="relative h-full w-full">
+    <div
+      ref={frameRef}
+      className="relative mx-auto w-full max-w-[1358px] overflow-visible"
+      style={{
+        height: DESKTOP_HERO_HEIGHT * scale,
+      }}
+    >
+      <div
+        className="absolute left-0 top-0 h-[480px] w-[1358px] origin-top-left overflow-hidden"
+        style={{
+          transform: `scale(${scale})`,
+        }}
+      >
         <div className="flex h-full items-stretch gap-2 lg:gap-0">
           {/* Left section (7/12): Text banner + action banners */}
           <div className="w-7/12 mt-[50px] flex-none overflow-hidden h-full">

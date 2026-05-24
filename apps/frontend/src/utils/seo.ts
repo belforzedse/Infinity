@@ -97,7 +97,7 @@ export function generateBlogPostMetadata(
     : buildImageUrl(config.defaultImage, config);
 
   const metadata: Metadata = {
-    title: `${title} | ${config.siteName}`,
+    title,
     description,
     keywords: post.keywords,
     authors: post.author ? [{ name: post.author.Name }] : undefined,
@@ -159,7 +159,7 @@ export function generateBlogPostMetadata(
 export function generateBlogListingMetadata(
   config: SEOConfig = defaultSEOConfig
 ): Metadata {
-  const title = `وبلاگ | ${config.siteName}`;
+  const title = "وبلاگ";
   const description = `آخرین مقالات، آموزش‌ها و بینش‌های ${config.siteName} را در این بخش بخوانید.`;
   const url = `${config.siteUrl}/blog`;
 

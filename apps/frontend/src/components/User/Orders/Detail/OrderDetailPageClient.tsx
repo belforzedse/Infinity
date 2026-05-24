@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import UserContainer from "@/components/layout/UserContainer";
-import UserSidebar from "@/components/User/Sidebar";
 import OrderService, { Order } from "@/services/order";
 import OrderTimeline from "./OrderTimeline";
 import PaymentSummaryCard from "./PaymentSummaryCard";
@@ -12,6 +11,7 @@ import OrderItemsList from "./OrderItemsList";
 import SupportActions from "./SupportActions";
 import ReserveInfoCard from "./ReserveInfoCard";
 import toast from "react-hot-toast";
+import { StorefrontAccountShell } from "@/components/storefront";
 
 interface OrderDetailPageClientProps {
   orderId: string;
@@ -143,12 +143,7 @@ export default function OrderDetailPageClient({ orderId }: OrderDetailPageClient
 
   return (
     <UserContainer className="flex flex-col gap-6 py-6 lg:py-10" dir="rtl">
-      <div className="flex flex-col gap-6 lg:flex-row lg:gap-8">
-        <aside className="hidden w-full max-w-[240px] flex-shrink-0 lg:block">
-          <UserSidebar />
-        </aside>
-
-        <main className="flex flex-1 flex-col gap-6">
+      <StorefrontAccountShell contentClassName="flex flex-col gap-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <button
@@ -196,8 +191,7 @@ export default function OrderDetailPageClient({ orderId }: OrderDetailPageClient
           </div>
 
           <OrderItemsList order={order} />
-        </main>
-      </div>
+      </StorefrontAccountShell>
     </UserContainer>
   );
 }

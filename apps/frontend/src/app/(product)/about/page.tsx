@@ -12,7 +12,7 @@ import { SITE_NAME, SITE_URL } from "@/config/site";
 import { getProductCategories } from "@/services/product/categories";
 
 export const metadata: Metadata = {
-  title: `درباره ما | ${SITE_NAME}`,
+  title: "درباره ما",
   description:
     "اینفینیتی یک فروشگاه آنلاین پیشرو در زمینه پوشاک است که با هدف ارائه تجربه خرید آنلاین منحصر به فرد و لذت‌بخش، بر تنوع، کیفیت و قیمت‌های رقابتی برای پوشاک مردانه، زنانه و کودکان تمرکز دارد.",
   alternates: {

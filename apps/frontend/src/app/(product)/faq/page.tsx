@@ -19,7 +19,7 @@ const breadcrumbItems = [
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: `سوالات متداول | ${SITE_NAME}`,
+    title: "سوالات متداول",
     description: `سوالات متداول ${SITE_NAME} - پاسخ به سوالات شما درباره محصولات، ارسال، پرداخت و خدمات مشتریان`,
     alternates: {
       canonical: `${SITE_URL}/faq`,

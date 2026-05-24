@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Metadata } from "next";
 import PageContainer from "@/components/layout/PageContainer";
+import { StorefrontGrid } from "@/components/storefront";
 import { SITE_NAME, SITE_URL } from "@/config/site";
 import { getProductCategories } from "@/services/product/categories";
 import { CATEGORY_IMAGE_PLACEHOLDER } from "@/constants/placeholders";
@@ -50,7 +51,7 @@ export default async function CategoriesPage() {
 
       <section>
         {categories.length > 0 ? (
-          <div className="grid grid-cols-3 gap-4 md:grid-cols-5 lg:grid-cols-6">
+          <StorefrontGrid variant="categories">
             {categories.map((category) => {
               const imageSrc = category.imageUrl || CATEGORY_IMAGE_PLACEHOLDER;
               const label = category.name || category.slug;
@@ -79,7 +80,7 @@ export default async function CategoriesPage() {
                 </Link>
               );
             })}
-          </div>
+          </StorefrontGrid>
         ) : (
           <div className="rounded-2xl border border-slate-100 bg-white p-6 text-center text-sm text-slate-500">
             دسته‌بندی برای نمایش وجود ندارد.

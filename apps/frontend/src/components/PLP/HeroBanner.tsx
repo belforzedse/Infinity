@@ -7,7 +7,6 @@ import imageLoader from "@/utils/imageLoader";
 import ProductSmallCard from "../Product/SmallCard";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import PageContainer from "@/components/layout/PageContainer";
 import type { ProductStatus } from "@/components/PLP/types";
 
 interface PLPHeroBannerProps {
@@ -226,12 +225,8 @@ export default function PLPHeroBanner({ category }: PLPHeroBannerProps) {
     .slice(0, columnCount * 2);
 
   return (
-    <div className="w-full bg-slate-50 rounded-2xl py-4">
-      <PageContainer
-        variant="wide"
-        disablePadding
-        className="space-y-3 bg-transparent px-4 pb-0 md:px-4"
-      >
+    <div className="w-full rounded-2xl bg-slate-50 px-4 py-4">
+      <div className="space-y-3 bg-transparent">
         <div className="flex flex-col gap-3 md:flex-row">
           <div className="xl:grid xl:flex-1 xl:grid-cols-3 xl:justify-items-center xl:gap-3 hidden">
             {visibleProducts.map((product) => (
@@ -255,7 +250,7 @@ export default function PLPHeroBanner({ category }: PLPHeroBannerProps) {
             </div>
           </Link>
         </div>
-      </PageContainer>
+      </div>
     </div>
   );
 }

@@ -38,8 +38,7 @@ export default function OffersListHomePage(props: Props) {
 
   // Calculate pagination - responsive products per page
   const getProductsPerPage = () => {
-    if (windowWidth >= 1440) return 5; // 1440px+ (5 products)
-    if (windowWidth >= 1024) return 4; // 1024-1440px (4 products)
+    if (windowWidth >= 1024) return 4; // 1024px+ fits the 1280px storefront rail
     if (windowWidth >= 768) return 3; // tablets (3 products)
     return 2; // phones (2 products)
   };
@@ -241,7 +240,7 @@ export default function OffersListHomePage(props: Props) {
         <div className="hidden md:block">
           <div
             ref={scrollRef}
-            className={`grid grid-cols-2 gap-4 transition-all duration-300 ease-out md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 ${
+            className={`grid grid-cols-2 gap-4 transition-all duration-300 ease-out md:grid-cols-3 lg:grid-cols-4 ${
               isAnimating ? "scale-95 opacity-0" : "scale-100 opacity-100"
             }`}
           >

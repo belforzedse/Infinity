@@ -8,6 +8,7 @@ import { UserService } from "@/services";
 import SuspenseLoader from "@/components/ui/SuspenseLoader";
 import { currentUserAtom, userLoadingAtom } from "@/lib/atoms/auth";
 import { jotaiStore } from "@/lib/jotaiStore";
+import { StorefrontContainer } from "@/components/storefront";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -51,7 +52,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <main className="flex min-h-screen items-start justify-center bg-pink-50 p-4 md:items-center">
-      <div className="container mx-auto flex flex-col items-center justify-center gap-8 py-8 md:flex-row md:py-0">
+      <StorefrontContainer className="flex flex-col items-center justify-center gap-8 py-8 md:flex-row md:py-0">
         <div className="card w-full max-w-[630px] p-2">
           <div className="relative mx-auto max-w-[516px] px-2 py-4 md:py-6">
             <div className="mb-[4px] flex flex-col items-center gap-4 md:mb-[20px] md:gap-5">
@@ -67,7 +68,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <div className="block w-full max-w-[350px] md:max-w-[651px]">
           <AuthIllustration />
         </div>
-      </div>
+      </StorefrontContainer>
     </main>
   );
 }

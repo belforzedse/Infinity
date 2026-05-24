@@ -235,7 +235,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
   // Exclude non-blog routes early to prevent API calls
   if (shouldExcludeSlug(slug)) {
     return {
-      title: "صفحه یافت نشد | وبلاگ فروشگاه اینفینیتی",
+      title: "صفحه یافت نشد | وبلاگ",
       description: "صفحه مورد نظر یافت نشد.",
     };
   }
@@ -258,7 +258,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
     });
   } catch (error) {
     return {
-      title: "پست یافت نشد | وبلاگ فروشگاه اینفینیتی",
+      title: "پست یافت نشد | وبلاگ",
       description: "پست مورد نظر یافت نشد.",
     };
   }

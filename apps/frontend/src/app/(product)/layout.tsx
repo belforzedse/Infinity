@@ -13,6 +13,7 @@ import React, { Suspense } from "react";
 import ScrollToTop from "@/components/ScrollToTop";
 import { usePathname } from "next/navigation";
 import GlassSurface from "@/components/GlassSurface";
+import { StorefrontContainer } from "@/components/storefront";
 
 const CartDrawer = dynamic(() => import("@/components/ShoppingCart/Drawer"), {
   ssr: false,
@@ -162,8 +163,8 @@ export default function ProductLayout({ children }: { children: React.ReactNode 
             />
           )}
           <div className="hidden lg:block">
-            <div className="px-10 py-3">
-              <div className="mx-auto max-w-[1440px]">
+            <div className="py-3">
+              <StorefrontContainer>
                 <div className="grid grid-cols-[1fr_auto_1fr] items-center">
                   <div className="justify-self-start">
                     <DesktopHeaderActions />
@@ -184,7 +185,7 @@ export default function ProductLayout({ children }: { children: React.ReactNode 
                     <DesktopSearch />
                   </div>
                 </div>
-              </div>
+              </StorefrontContainer>
             </div>
           </div>
 
@@ -201,9 +202,9 @@ export default function ProductLayout({ children }: { children: React.ReactNode 
         </Suspense>
       </div>
 
-      <section key={pathname} id="content">
+      <main key={pathname} id="content">
         {children}
-      </section>
+      </main>
 
       <footer>
         <Footer />

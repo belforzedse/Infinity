@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { SITE_NAME, SITE_URL } from "@/config/site";
+import { SITE_URL } from "@/config/site";
 import CheckoutPageClient from "./CheckoutPageClient";
 
 export const metadata: Metadata = {
-  title: `تسویه حساب | ${SITE_NAME}`,
+  title: "تسویه حساب",
   description: "اطلاعات ارسال و پرداخت خود را برای نهایی‌سازی سفارش تکمیل کنید.",
   robots: {
     index: false,

@@ -4,6 +4,7 @@ import React, { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import PaymentStatus from "@/components/User/Orders/PaymentStatus";
 import { useCart } from "@/contexts/CartContext";
+import { StorefrontContainer } from "@/components/storefront";
 
 interface OrderDetails {
   id: number;
@@ -95,18 +96,18 @@ function PaymentSuccessContent() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-10">
+      <StorefrontContainer className="py-10">
         <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-8">
           <div className="flex justify-center items-center h-40">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pink-500"></div>
           </div>
         </div>
-      </div>
+      </StorefrontContainer>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-10" dir="rtl">
+    <StorefrontContainer className="py-10" dir="rtl">
       <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-8">
         <div className="flex flex-col items-center text-center">
           {/* Success Icon */}
@@ -208,7 +209,7 @@ function PaymentSuccessContent() {
           </div>
         </div>
       </div>
-    </div>
+    </StorefrontContainer>
   );
 }
 
@@ -216,13 +217,13 @@ export default function PaymentSuccessPageClient() {
   return (
     <Suspense
       fallback={
-        <div className="container mx-auto px-4 py-10">
+        <StorefrontContainer className="py-10">
           <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-8">
             <div className="flex justify-center items-center h-40">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pink-500"></div>
             </div>
           </div>
-        </div>
+        </StorefrontContainer>
       }
     >
       <PaymentSuccessContent />

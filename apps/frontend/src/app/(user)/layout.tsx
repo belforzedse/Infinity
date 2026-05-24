@@ -9,6 +9,7 @@ import { useAccountFreshData } from "@/hooks/useAccountFreshData";
 import useUser from "@/hooks/useUser";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { StorefrontContainer } from "@/components/storefront";
 
 const CartDrawer = dynamic(() => import("@/components/ShoppingCart/Drawer"), {
   ssr: false,
@@ -48,15 +49,14 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
   }
   return (
     <div className="public-layout bg-white pt-5">
-      <div className="container mx-auto px-4 lg:p-0">
+      <StorefrontContainer>
         <Header />
         <ProfileCompletionBanner />
-        {children}
+      </StorefrontContainer>
 
-        <footer>
-          <Footer />
-        </footer>
-      </div>
+      {children}
+
+      <Footer />
 
       {/* Cart Drawer */}
       {isDrawerOpen && <CartDrawer />}

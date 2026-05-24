@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
     template: `%s | ${SITE_NAME}`,
-    default: `${SITE_NAME} | فروشگاه پوشاک آنلاین`,
+    default: SITE_NAME,
   },
   description: "فروشگاه پوشاک آنلاین اینفینیتی - جدیدترین محصولات، تخفیف‌ها و پیشنهادهای ویژه",
   keywords: ["پوشاک", "فروشگاه آنلاین", "مد", "لباس", "اینفینیتی", "خرید آنلاین"],

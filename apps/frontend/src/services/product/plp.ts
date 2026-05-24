@@ -478,14 +478,14 @@ export function buildCollectionItems(products: PLPProduct[]) {
 }
 
 export function buildPLPMetadata(query: PLPQuery, category?: PLPCategoryContext): Metadata {
-  const baseTitle = `فروشگاه | ${SITE_NAME}`;
+  const baseTitle = "فروشگاه";
 
   if (query.search) {
     const q = query.search.slice(0, 60);
     const pathname = category ? getCategoryPlpHref(category.slug) : "/plp";
     const title = category
-      ? `جستجو در ${category.title}: "${q}" | ${SITE_NAME}`
-      : `نتایج جستجو برای "${q}" | ${SITE_NAME}`;
+      ? `جستجو در ${category.title}: "${q}"`
+      : `نتایج جستجو برای "${q}"`;
     const description = category
       ? `مشاهده نتایج جستجو برای «${q}» در دسته ${category.title}.`
       : `مشاهده نتایج جستجو برای «${q}» در ${SITE_NAME}. جدیدترین و محبوب‌ترین محصولات.`;
@@ -507,7 +507,7 @@ export function buildPLPMetadata(query: PLPQuery, category?: PLPCategoryContext)
   }
 
   if (category) {
-    const title = `خرید ${category.title} | ${SITE_NAME}`;
+    const title = `خرید ${category.title}`;
     const description = `خرید ${category.title} با بهترین قیمت و ارسال سریع از ${SITE_NAME}. جدیدترین محصولات ${category.title}.`;
     const canonicalUrl = `${SITE_URL}${getCategoryPlpHref(category.slug)}`;
     return {
@@ -534,7 +534,7 @@ export function buildPLPMetadata(query: PLPQuery, category?: PLPCategoryContext)
 
 export function buildInvalidPLPMetadata(): Metadata {
   return {
-    title: `فروشگاه | ${SITE_NAME}`,
+    title: "فروشگاه",
     description: `مشاهده و خرید انواع محصولات با بهترین قیمت در ${SITE_NAME}.`,
     robots: {
       index: false,

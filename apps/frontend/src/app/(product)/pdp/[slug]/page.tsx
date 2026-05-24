@@ -149,22 +149,22 @@ export async function generateMetadata({
     }
 
     if (!product) {
-      const fallbackTitle = `مشاهده محصول | ${SITE_NAME}`;
       return {
-        title: fallbackTitle,
+        title: "مشاهده محصول",
         description: `جزئیات و مشخصات کامل محصول در ${SITE_NAME}`,
         alternates: { canonical: `${SITE_URL}/pdp/${slug}` },
       };
     }
 
     const titleRaw = product.attributes?.Title || "";
+    const titleSegment = titleRaw.length > 70 ? `${titleRaw.slice(0, 67)}...` : titleRaw;
     const descRaw = product.attributes?.Description || "";
     const description = String(descRaw).slice(0, 160);
     const imageUrl = product.attributes?.CoverImage?.data?.attributes?.url
       ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
       : undefined;
 
-    const title = `خرید ${titleRaw} | ${SITE_NAME}`;
+    const title = `خرید ${titleSegment}`;
     const productId = product?.id || slug;
 
     // Get price info for OpenGraph
@@ -230,9 +230,8 @@ export async function generateMetadata({
       slug,
       error: String(error)
     });
-    const fallbackTitle = `مشاهده محصول | ${SITE_NAME}`;
     return {
-      title: fallbackTitle,
+      title: "مشاهده محصول",
       description: `جزئیات و مشخصات کامل محصول در ${SITE_NAME}`,
       alternates: { canonical: `${SITE_URL}/pdp/${slug}` },
     };
