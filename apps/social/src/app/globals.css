@@ -5,6 +5,7 @@
 
 /* Ensure Tailwind sees shared UI in workspace packages (v4 content detection may not follow pnpm links). */
 @source "../../../../packages/brand/src/**/*.tsx";
+@source "../../../../packages/story-rail/src/**/*.tsx";
 @source "../**/*.tsx";
 
 /* Light brand canvas only: do not tie to prefers-color-scheme (OS dark mode would override #F9FAFF). */

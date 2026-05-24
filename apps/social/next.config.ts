@@ -4,7 +4,7 @@ import path from "path";
 const nextConfig: NextConfig = {
   output: "standalone",
   outputFileTracingRoot: path.join(__dirname, "../.."),
-  transpilePackages: ["@repo/api", "@repo/brand", "@repo/fonts"],
+  transpilePackages: ["@repo/api", "@repo/brand", "@repo/fonts", "@repo/story-rail"],
   async headers() {
     return [
       {
