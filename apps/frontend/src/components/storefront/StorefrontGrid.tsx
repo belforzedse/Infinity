@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import type { HTMLAttributes, ReactNode } from "react";
 
-type StorefrontGridVariant = "products" | "categories" | "cards";
+type StorefrontGridVariant = "products" | "plp" | "categories" | "cards";
 
 type StorefrontGridProps = HTMLAttributes<HTMLDivElement> & {
   children: ReactNode;
@@ -9,9 +9,14 @@ type StorefrontGridProps = HTMLAttributes<HTMLDivElement> & {
 };
 
 const variantClasses: Record<StorefrontGridVariant, string> = {
-  products: "grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4",
-  categories: "grid grid-cols-3 gap-4 md:grid-cols-5 lg:grid-cols-6",
-  cards: "grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3",
+  /** Homepage / full-width product rails */
+  products:
+    "grid min-w-0 grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4",
+  /** PLP main column (280px sidebar on md+) */
+  plp: "grid min-w-0 grid-cols-2 gap-4 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3",
+  categories:
+    "grid min-w-0 grid-cols-3 gap-4 md:grid-cols-4 min-[900px]:grid-cols-5 xl:grid-cols-6",
+  cards: "grid min-w-0 grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3",
 };
 
 export function StorefrontGrid({

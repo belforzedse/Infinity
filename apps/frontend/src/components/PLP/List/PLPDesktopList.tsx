@@ -10,6 +10,7 @@ import {
   hasAvailableStock,
 } from "@/utils/product";
 import type { PLPProduct } from "@/components/PLP/types";
+import { StorefrontGrid } from "@/components/storefront";
 
 const ProductCard = dynamic(() => import("@/components/Product/Card"), {
   loading: () => <div className="h-48 animate-pulse rounded-lg bg-gray-200" />,
@@ -22,7 +23,7 @@ interface PLPDesktopListProps {
 
 export default function PLPDesktopList({ products, includeMedia }: PLPDesktopListProps) {
   return (
-    <div className="hidden gap-4 md:grid md:grid-cols-2 lg:grid-cols-3">
+    <StorefrontGrid variant="plp" className="hidden md:grid">
       {products.map((product, index) => {
         const firstValidVariation = getFirstValidVariation(product);
         const { price, discount, discountPrice } = getVariationPriceDetails(firstValidVariation);
@@ -65,6 +66,6 @@ export default function PLPDesktopList({ products, includeMedia }: PLPDesktopLis
           />
         );
       })}
-    </div>
+    </StorefrontGrid>
   );
 }

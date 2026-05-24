@@ -1,14 +1,15 @@
 import React from "react";
+import { StorefrontGrid } from "@/components/storefront";
 
 export default function ProductListSkeleton() {
   return (
     <>
       {/* Desktop grid skeleton */}
-      <div className="hidden grid-cols-2 gap-4 md:grid lg:grid-cols-3">
+      <StorefrontGrid variant="plp" className="hidden md:grid">
         {[...Array(6)].map((_, i) => (
-          <div key={i} className="h-72 w-full animate-pulse rounded-lg bg-gray-200" />
+          <div key={i} className="aspect-[250/270] w-full animate-pulse rounded-lg bg-gray-200" />
         ))}
-      </div>
+      </StorefrontGrid>
 
       {/* Mobile list skeleton */}
       <div className="flex flex-col gap-3 md:hidden">

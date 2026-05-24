@@ -69,9 +69,9 @@ function ProductSectionsFallback() {
   return (
     <section className="space-y-8">
       <div className="h-8 w-48 animate-pulse rounded bg-gray-200" />
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+      <div className="grid min-w-0 grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {[...Array(8)].map((i) => (
-          <div key={i} className="aspect-[3/4] animate-pulse rounded-lg bg-gray-200" />
+          <div key={i} className="aspect-[250/270] w-full animate-pulse rounded-lg bg-gray-200" />
         ))}
       </div>
     </section>

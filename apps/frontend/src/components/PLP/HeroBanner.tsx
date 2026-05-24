@@ -168,7 +168,6 @@ export default function PLPHeroBanner({ category }: PLPHeroBannerProps) {
   const [title, setTitle] = useState("همه محصولات");
   const [imageUrl, setImageUrl] = useState("/images/PLP.webp");
   const [featuredProducts, setFeaturedProducts] = useState<ProcessedProduct[]>([]);
-  const [columnCount, setColumnCount] = useState(3);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -207,49 +206,36 @@ export default function PLPHeroBanner({ category }: PLPHeroBannerProps) {
     fetchData();
   }, [category]);
 
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    const mediaQuery = window.matchMedia("(min-width: 1280px)");
-    const updateColumns = () => setColumnCount(mediaQuery.matches ? 4 : 3);
-
-    updateColumns();
-    mediaQuery.addEventListener("change", updateColumns);
-    return () => mediaQuery.removeEventListener("change", updateColumns);
-  }, []);
-
   const visibleProducts = featuredProducts
     .filter((product) => product.image && product.image !== "")
-    .slice(0, columnCount * 2);
+    .slice(0, 6);
 
   return (
     <div className="w-full rounded-2xl bg-slate-50 px-4 py-4">
-      <div className="space-y-3 bg-transparent">
-        <div className="flex flex-col gap-3 md:flex-row">
-          <div className="xl:grid xl:flex-1 xl:grid-cols-3 xl:justify-items-center xl:gap-3 hidden">
+      <div className="flex flex-col gap-4">
+        <Link href="/" className="block w-full">
+          <div className="relative h-[244px] w-full overflow-hidden rounded-2xl sm:h-[280px]">
+            {imageUrl && (
+              <Image
+                src={imageUrl}
+                alt={title}
+                fill
+                className="object-cover"
+                sizes="(max-width: 1280px) 100vw, 1280px"
+                priority
+                loader={imageUrl.startsWith("http") ? imageLoader : undefined}
+              />
+            )}
+          </div>
+        </Link>
+
+        {visibleProducts.length > 0 && (
+          <div className="hidden min-w-0 grid-cols-2 gap-3 xl:grid xl:grid-cols-3">
             {visibleProducts.map((product) => (
-              <ProductSmallCard key={product.id} {...product}  />
+              <ProductSmallCard key={product.id} {...product} />
             ))}
           </div>
-
-          <Link href="/" className="flex-shrink-0">
-            <div className="relative h-[244px] w-full overflow-hidden rounded-2xl md:w-[517px]">
-              {imageUrl && (
-                <Image
-                  src={imageUrl}
-                  alt={title}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 517px"
-                  priority
-                  loader={imageUrl.startsWith("http") ? imageLoader : undefined}
-                />
-              )}
-            </div>
-          </Link>
-        </div>
+        )}
       </div>
     </div>
   );

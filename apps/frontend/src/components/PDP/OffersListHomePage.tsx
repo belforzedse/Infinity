@@ -1,9 +1,11 @@
 "use client";
 import ProductCard, { type ProductCardProps } from "@/components/Product/Card";
+import { StorefrontGrid } from "@/components/storefront";
 import PDPHeroNavigationButtons from "./NavigationButtons";
 import { useRef, useState, useEffect } from "react";
 import ArrowLeftIcon from "./Icons/ArrowLeftIcon";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 type Props = {
   icon: React.ReactNode;
@@ -36,11 +38,12 @@ export default function OffersListHomePage(props: Props) {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Calculate pagination - responsive products per page
+  // Align with StorefrontGrid `products` variant column counts
   const getProductsPerPage = () => {
-    if (windowWidth >= 1024) return 4; // 1024px+ fits the 1280px storefront rail
-    if (windowWidth >= 768) return 3; // tablets (3 products)
-    return 2; // phones (2 products)
+    if (windowWidth >= 1280) return 4;
+    if (windowWidth >= 1024) return 3;
+    if (windowWidth >= 768) return 2;
+    return 2;
   };
 
   const productsPerPage = getProductsPerPage();
@@ -162,7 +165,7 @@ export default function OffersListHomePage(props: Props) {
           transition: scroll-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
       `}</style>
-      <div className="flex flex-col gap-3">
+      <div className="flex min-w-0 flex-col gap-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1">
             {icon}
@@ -212,7 +215,7 @@ export default function OffersListHomePage(props: Props) {
             {products.map((product, index) => (
               <div
                 key={product.id}
-                className="flex-shrink-0 transform snap-start transition-all duration-200 ease-out hover:scale-[1.02]"
+                className="w-[calc((100vw-2.5rem)/2)] max-w-[200px] min-w-[140px] flex-shrink-0 transform snap-start transition-all duration-200 ease-out hover:scale-[1.02]"
                 style={{
                   animationDelay: `${index * 60}ms`,
                   animation: `fadeInUp 0.3s ease-out forwards ${index * 60}ms`,
@@ -237,22 +240,23 @@ export default function OffersListHomePage(props: Props) {
         </div>
 
         {/* Desktop grid view - responsive columns */}
-        <div className="hidden md:block">
-          <div
-            ref={scrollRef}
-            className={`grid grid-cols-2 gap-4 transition-all duration-300 ease-out md:grid-cols-3 lg:grid-cols-4 ${
-              isAnimating ? "scale-95 opacity-0" : "scale-100 opacity-100"
-            }`}
+        <div className="hidden min-w-0 md:block">
+          <StorefrontGrid
+            variant="products"
+            className={cn(
+              "transition-all duration-300 ease-out",
+              isAnimating ? "scale-95 opacity-0" : "scale-100 opacity-100",
+            )}
           >
-            {currentProducts.map((product, index) => (
+            {currentProducts.map((product) => (
               <div
                 key={product.id}
-                className="transform transition-all duration-200 ease-out hover:-translate-y-1 hover:scale-[1.02]"
+                className="min-w-0 transform transition-all duration-200 ease-out hover:-translate-y-1 hover:scale-[1.02]"
               >
                 <ProductCard {...product} />
               </div>
             ))}
-          </div>
+          </StorefrontGrid>
         </div>
 
         {/* Desktop view more button */}

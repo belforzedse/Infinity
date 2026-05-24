@@ -32,7 +32,7 @@ const ImageSlider: FC<ImageSliderProps> = ({
 
   return (
     <div
-      className="relative mx-auto h-[196px] w-[168px] overflow-hidden rounded-[21px] md:h-[270px] md:w-[250px]"
+      className="relative h-full w-full overflow-hidden rounded-[21px]"
       role="img"
       aria-label={!isAvailable ? `محصول ${title} ناموجود است` : undefined}
     >
@@ -44,7 +44,7 @@ const ImageSlider: FC<ImageSliderProps> = ({
           className={`select-none object-cover transition-all duration-300 ${
             !isAvailable ? "opacity-60 saturate-[0.4] blur-sm" : ""
           }`}
-          sizes="(max-width: 768px) 168px, (max-width: 1024px) 200px, 250px"
+          sizes="(max-width: 640px) 45vw, (max-width: 1024px) 33vw, 25vw"
           priority={priority}
           loading={priority ? "eager" : "lazy"}
           loader={imageLoader}

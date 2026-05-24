@@ -170,7 +170,7 @@ const ProductCard: FC<ProductCardProps> = ({
   return (
     <>
       <article
-        className={`${isAvailable ? "group" : ""} relative w-full md:mx-auto md:w-fit`}
+        className={`${isAvailable ? "group" : ""} relative w-full min-w-0`}
         aria-label={`محصول ${title}`}
         onMouseEnter={handleInteractionIntent}
         onFocusCapture={handleInteractionIntent}
@@ -181,9 +181,9 @@ const ProductCard: FC<ProductCardProps> = ({
           className="block rounded-3xl focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
           aria-label={`مشاهده جزئیات ${title}`}
         >
-          <div className="interactive-card pressable flex h-full w-full flex-col rounded-3xl border border-pink-50 bg-white p-1 transition-all duration-300 md:w-[258px] md:group-hover:border-pink-100 md:group-hover:shadow-lg">
+          <div className="interactive-card pressable flex h-full w-full min-w-0 flex-col rounded-3xl border border-pink-50 bg-white p-1 transition-all duration-300 md:group-hover:border-pink-100 md:group-hover:shadow-lg">
             {/* Image Section */}
-            <div className="relative overflow-hidden rounded-[20px] md:h-[270px] md:w-[250px]">
+            <div className="relative aspect-[250/270] w-full min-w-0 overflow-hidden rounded-[20px]">
               <ImageSlider
                 images={enrichedImages}
                 title={title}

@@ -204,7 +204,7 @@ export default function CategoryCarousel({ categories }: CategoryCarouselProps) 
     <div className="relative">
       <div
         ref={scrollRef}
-        className="scrollbar-hide grid snap-x snap-mandatory auto-cols-[calc(100%/3)] grid-flow-col items-stretch gap-4 overflow-x-auto scroll-smooth pb-4 md:auto-cols-[calc(100%/4)] md:gap-6 lg:auto-cols-[calc(100%/6)] lg:gap-0"
+        className="scrollbar-hide grid snap-x snap-mandatory auto-cols-[calc(100%/3)] grid-flow-col items-stretch gap-4 overflow-x-auto scroll-smooth pb-4 md:auto-cols-[calc(100%/4)] md:gap-6 min-[900px]:auto-cols-[calc(100%/5)] xl:auto-cols-[calc(100%/6)] xl:gap-0"
       >
         {categories.map((category, index) => {
           const imageSrc = category.imageUrl || CATEGORY_IMAGE_PLACEHOLDER;
@@ -240,7 +240,7 @@ export default function CategoryCarousel({ categories }: CategoryCarouselProps) 
                       unoptimized={useUnoptimizedImage}
                       className="max-h-[230px] w-auto object-contain drop-shadow-md"
                       loading="lazy"
-                      sizes="(min-width: 1024px) calc(100vw/6), (min-width: 768px) calc(100vw/4), calc(100vw/3)"
+                      sizes="(min-width: 1280px) calc(100vw/6), (min-width: 900px) calc(100vw/5), (min-width: 768px) calc(100vw/4), calc(100vw/3)"
                     />
                   </div>
                   <span className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-xl bg-white px-3 py-1.5 text-base font-medium shadow-[0_10px_20px_rgba(0,0,0,0.15)]">

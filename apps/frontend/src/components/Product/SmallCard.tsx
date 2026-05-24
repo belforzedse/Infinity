@@ -135,7 +135,7 @@ const ProductSmallCard: React.FC<ProductSmallCardProps> = ({
 
   return (
     <>
-      <article className={clsx("relative w-full md:w-[269px]", className)}>
+      <article className={clsx("relative w-full min-w-0", className)}>
         <Link
           href={productUrl}
           className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"

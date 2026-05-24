@@ -424,7 +424,7 @@ export default function PLPList({
         </div>
 
         {/* Main content */}
-        <div className="flex-1">
+        <div className="min-w-0 flex-1">
           {/* Mobile filter buttons */}
           <div className="mb-4 md:hidden">
                 <PLPListMobileFilter

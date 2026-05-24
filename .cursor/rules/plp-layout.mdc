@@ -58,9 +58,23 @@ The PLP is structured to display product listings with filtering capabilities:
 - **No slider**: [ImageSlider](apps/apps/frontend/src/components/Product/ImageSlider.tsx) on PLP displays a single cover image only (no horizontal scroll/slider) to avoid loading many images per card.
 
 ## Responsive Components
-- Desktop: Shows sidebar filter panel and grid of products
-- Mobile: Filter drawer accessed via button and product grid
-- Different card styles for different viewports
+- Desktop: Shows sidebar filter panel (280px) and product grid via [`StorefrontGrid` variant `plp`](apps/frontend/src/components/storefront/StorefrontGrid.tsx) in [`PLPDesktopList`](apps/frontend/src/components/PLP/List/PLPDesktopList.tsx)
+- Mobile: Filter drawer + [`PLPMobileList`](apps/frontend/src/components/PLP/List/PLPMobileList.tsx) (`ProductSmallCard` stack)
+- Main column uses `min-w-0 flex-1` in [`PLP/List.tsx`](apps/frontend/src/components/PLP/List.tsx) so grids do not overflow beside the sidebar
+
+### Fluid product cards (grids)
+- [`ProductCard`](apps/frontend/src/components/Product/Card.tsx): `w-full min-w-0` in grid cells; image area `aspect-[250/270]` (no fixed `md:w-[258px]`)
+- [`ImageSlider`](apps/frontend/src/components/Product/ImageSlider.tsx): fills the aspect-ratio box (`h-full w-full`)
+
+### PLP grid breakpoints (with 280px sidebar)
+| Viewport | Columns |
+|----------|---------|
+| md (768–1023) | 2 |
+| lg (1024–1279) | 2 |
+| xl (1280+) | 3 |
+
+### PLP hero banner
+- [`HeroBanner`](apps/frontend/src/components/PLP/HeroBanner.tsx): full-width category image; featured mini-cards in a **stacked** grid below the banner at `xl+` only (`grid-cols-2` / `xl:grid-cols-3`), not side-by-side with a fixed 517px banner (avoids overlap at ~1280px)
 
 ## Pagination and Performance
 - **API pagination**: Products are fetched one page at a time (`pagination[page]`, `pagination[pageSize]=30`). No 500-product fetch; server uses Strapi `meta.pagination` for total and pageCount.
