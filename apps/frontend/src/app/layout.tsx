@@ -68,6 +68,9 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
+  verification: {
+    google: "l6i1v4-mkeaMxCGEXenzCdyBdhipiZdHuyiaIE011Kg",
+  },
 };
 
 // Ensure proper mobile scaling and responsiveness

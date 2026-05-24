@@ -55,7 +55,7 @@ export default function PLPHeaderDesktopNav() {
                 "pressable text-sm flex items-center underline-offset-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white",
                 isActive
                   ? "rounded-full bg-pink-50 px-3 py-1 text-pink-600"
-                  : "text-foreground-primary transition-colors hover:text-pink-500",
+                  : "text-neutral-800 transition-colors hover:text-pink-500",
               ].join(" ")}
             >
               {item.label}

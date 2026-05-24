@@ -1,0 +1,52 @@
+---
+description: Storefront desktop header and search bar aligned with Figma `header` / `desktop-model2` (10151:23342) and search frame (10151:23345). Use when changing PLP header chrome, search, or category nav row.
+globs:
+  - apps/frontend/src/components/PLP/Header/**
+  - apps/frontend/src/components/Search/PLPDesktopSearch.tsx
+  - apps/frontend/src/app/(product)/layout.tsx
+  - apps/frontend/src/app/(blog)/layout.tsx
+alwaysApply: false
+---
+
+# PLP desktop header (Figma)
+
+Figma: [desktop-model2](https://www.figma.com/design/x4y3qlCXNd3ZB6ocY09PPm/infinity-Store--main-?node-id=10151-23342) · [search bar](https://www.figma.com/design/x4y3qlCXNd3ZB6ocY09PPm/infinity-Store--main-?node-id=10151-23345)
+
+## Top row (`PLPDesktopHeaderTopBar`)
+
+- **Grid (RTL):** actions `justify-self-start` (right) · logo center · search `justify-self-end` (left)
+- **Logo:** `@repo/brand` `StorefrontLogo` **92×58**
+- **Container:** `StorefrontContainer` + `py-3` (same vertical rhythm as pre-Figma header)
+- **Header chrome bg:** unchanged in `(product)` / `(blog)` layouts (`bg-white/80`, `glass-panel` on scroll) — do not replace with `stone/50` on the sticky bar
+
+## Search (`PLPDesktopSearch`)
+
+| Token | Value |
+|-------|--------|
+| Width | `282px` default; expands to `360px` / `lg:420px` on focus or open dropdown |
+| Motion | `transition-all duration-300`, `focus-within:ring-2 ring-pink-200`, `shadow-sm`, submit `hover:scale-105`, dropdown `animate-in fade-in slide-in-from-top-2` |
+| Radius | `28px` |
+| Fill | `bg-stone-50` + `border-slate-50` (search control only) |
+| Padding | `py-2 pl-2 pr-5` |
+| Submit | `h-8 w-9` pink pill, white search glyph |
+| Placeholder | 12px, `neutral-400` — «دنبال چی میگردی؟» |
+| Layout | `dir="ltr"` on inner row — pink search button on the **left**, RTL text input on the right |
+
+Suggestions dropdown: `min-w-[282px]`, existing PLP search API behavior unchanged.
+
+## Actions (`DesktopActions`)
+
+- `gap-4` (16px), `flex-row-reverse` (cart toward outer edge, profile toward logo)
+- Hover: `hover:scale-105` / `active:scale-95` on icon controls
+- Cart: icon + **سبد خرید** label, `text-pink-500`, `text-xs`
+- Dividers: `h-[20.5px] w-px bg-slate-200`
+- Wallet / orders / profile: `text-slate-400`, 24px icons
+
+## Category nav (`DesktopNav`)
+
+- Row: `bg-stone-50`, `py-3`, `StorefrontContainer`, `gap-6` (24px)
+- Links: `text-sm`, inactive `text-neutral-800`, active pink pill unchanged
+
+## Mobile
+
+Mobile header (`PLPMobileHeader`) is separate; this rule is desktop-only.

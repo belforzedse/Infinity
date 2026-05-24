@@ -197,13 +197,29 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({ className = "" }) =
     }
   };
 
+  const isExpanded = isFocused || open;
+
   return (
     <form
       onSubmit={handleSubmit}
       ref={containerRef}
-      className={`relative flex w-[320px] items-center justify-between rounded-[28px] border border-slate-200 bg-white py-2 pl-2 pr-4 shadow-sm focus-within:ring-2 focus-within:ring-pink-200 md:w-[360px] lg:w-[420px] ${className}`}
+      className={[
+        "relative rounded-[28px] border border-slate-50 bg-stone-50 shadow-sm",
+        "transition-all duration-300 ease-out",
+        "focus-within:border-zinc-200 focus-within:ring-2 focus-within:ring-pink-200",
+        isExpanded ? "w-[360px] lg:w-[420px]" : "w-[282px]",
+        className,
+      ].join(" ")}
     >
-      <div className="flex w-full items-center justify-between px-2">
+      <div className="flex items-center gap-2 py-2 pl-2 pr-5" dir="ltr">
+        <button
+          type="submit"
+          className="flex h-8 w-9 shrink-0 items-center justify-center rounded-[28px] bg-pink-500 shadow-sm transition-transform duration-200 hover:scale-105 active:scale-95"
+          aria-label="جستجو"
+        >
+          <SearchIcon className="h-5 w-5" />
+        </button>
+
         <input
           type="text"
           name="search"
@@ -217,31 +233,24 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({ className = "" }) =
             setOpen(true);
           }}
           onBlur={() => {
-            // Give time for clicks inside dropdown
             setTimeout(() => {
               if (!open) setIsFocused(false);
             }, 80);
           }}
           onKeyDown={onKeyDown}
           placeholder="دنبال چی میگردی؟"
-          className="text-sm flex-1 bg-transparent text-right text-neutral-600 placeholder-neutral-400 outline-none"
+          dir="rtl"
+          className="min-w-0 flex-1 bg-transparent text-right text-xs leading-[21px] text-neutral-600 placeholder:text-neutral-400 outline-none"
           role="combobox"
           aria-expanded={open}
           aria-controls="plp-desktop-suggestions"
         />
-
-        <button
-          type="submit"
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-pink-500 shadow-sm active:scale-95 transition-transform"
-        >
-          <SearchIcon className="h-5 w-5 text-white" />
-        </button>
       </div>
 
       {/* Suggestions dropdown */}
       {open && (
         <div
-          className="absolute inset-x-0 top-full z-[1000] mt-2 max-h-96 w-full min-w-[320px] overflow-y-auto rounded-2xl border border-slate-200 bg-white text-neutral-800 shadow-xl"
+          className="absolute inset-x-0 top-full z-[1000] mt-2 max-h-96 w-full min-w-[282px] overflow-y-auto rounded-2xl border border-slate-200 bg-white text-neutral-800 shadow-xl duration-200 animate-in fade-in slide-in-from-top-2"
           role="listbox"
           aria-label="پیشنهادهای جستجو"
           id="plp-desktop-suggestions"

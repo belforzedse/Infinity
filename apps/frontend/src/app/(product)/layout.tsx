@@ -1,8 +1,5 @@
 "use client";
-import Image from "next/image";
-import Link from "next/link";
-import DesktopHeaderActions from "@/components/PLP/Header/DesktopActions";
-import DesktopSearch from "@/components/Search/PLPDesktopSearch";
+import PLPDesktopHeaderTopBar from "@/components/PLP/Header/DesktopTopBar";
 import HeaderDesktopNav from "@/components/PLP/Header/DesktopNav";
 import Footer from "@/components/PLP/Footer";
 import MobileHeader from "@/components/PLP/Header/Mobile";
@@ -13,7 +10,6 @@ import React, { Suspense } from "react";
 import ScrollToTop from "@/components/ScrollToTop";
 import { usePathname } from "next/navigation";
 import GlassSurface from "@/components/GlassSurface";
-import { StorefrontContainer } from "@/components/storefront";
 
 const CartDrawer = dynamic(() => import("@/components/ShoppingCart/Drawer"), {
   ssr: false,
@@ -163,30 +159,7 @@ export default function ProductLayout({ children }: { children: React.ReactNode 
             />
           )}
           <div className="hidden lg:block">
-            <div className="py-3">
-              <StorefrontContainer>
-                <div className="grid grid-cols-[1fr_auto_1fr] items-center">
-                  <div className="justify-self-start">
-                    <DesktopHeaderActions />
-                  </div>
-                  <div className="justify-self-center">
-                    <Link href="/">
-                      <Image
-                        alt="logo"
-                        width={210}
-                        height={72}
-                        src="/images/full-logo.png"
-                        className="h-[48px] w-[150px] object-contain md:h-[72px] md:w-[210px]"
-                        priority
-                      />
-                    </Link>
-                  </div>
-                  <div className="justify-self-end">
-                    <DesktopSearch />
-                  </div>
-                </div>
-              </StorefrontContainer>
-            </div>
+            <PLPDesktopHeaderTopBar />
           </div>
 
           <div className="lg:hidden">

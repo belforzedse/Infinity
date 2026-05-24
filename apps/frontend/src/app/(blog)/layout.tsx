@@ -1,12 +1,9 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
-import Link from "next/link";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
-import DesktopHeaderActions from "@/components/PLP/Header/DesktopActions";
-import DesktopSearch from "@/components/Search/PLPDesktopSearch";
+import PLPDesktopHeaderTopBar from "@/components/PLP/Header/DesktopTopBar";
 import HeaderDesktopNav from "@/components/PLP/Header/DesktopNav";
 import Footer from "@/components/PLP/Footer";
 import MobileHeader from "@/components/PLP/Header/Mobile";
@@ -125,30 +122,7 @@ export default function BlogLayout({ children }: { children: React.ReactNode }) 
             />
           )}
           <div className="hidden lg:block">
-            <div className="px-10 py-3">
-              <div className="mx-auto max-w-[1440px]">
-                <div className="grid grid-cols-[1fr_auto_1fr] items-center">
-                  <div className="justify-self-start">
-                    <DesktopHeaderActions />
-                  </div>
-                  <div className="justify-self-center">
-                    <Link href="/">
-                      <Image
-                        alt="logo"
-                        width={210}
-                        height={72}
-                        src="/images/full-logo.png"
-                        className="h-[48px] w-[150px] object-contain md:h-[72px] md:w-[210px]"
-                        priority
-                      />
-                    </Link>
-                  </div>
-                  <div className="justify-self-end">
-                    <DesktopSearch />
-                  </div>
-                </div>
-              </div>
-            </div>
+            <PLPDesktopHeaderTopBar />
           </div>
 
           <div className="lg:hidden">
