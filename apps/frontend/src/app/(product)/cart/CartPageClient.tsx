@@ -66,7 +66,13 @@ export default function CartPageClient() {
     });
   }, [isLoading, cartItems.length, totalValue]);
 
-  if (isLoading) return <CartSkeleton />;
+  if (isLoading) {
+    return (
+      <PageContainer variant="wide" className="space-y-6 pb-16 pt-8">
+        <CartSkeleton />
+      </PageContainer>
+    );
+  }
   if (cartItems.length === 0) {
     return (
       <PageContainer variant="wide" className="flex min-h-[60vh] items-center justify-center pb-16 pt-8">

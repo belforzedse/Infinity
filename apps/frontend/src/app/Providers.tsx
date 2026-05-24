@@ -5,7 +5,6 @@ import { Provider } from "jotai";
 import jotaiStore from "@/lib/jotaiStore";
 import TopProgressBar from "@/components/ui/TopProgressBar";
 import PreloadBlur from "@/components/ui/PreloadBlur";
-import NavigationProgress from "@/components/ui/NavigationProgress";
 import GlobalFetchInterceptor from "@/components/ui/GlobalFetchInterceptor";
 import GlobalLoadingOverlay from "@/components/ui/GlobalLoadingOverlay";
 import GlobalErrorDisplay from "@/components/ui/GlobalErrorDisplay";
@@ -40,10 +39,6 @@ export default function Providers({ children }: { children: ReactNode }) {
       <ServiceWorkerRegistration />
       <PreloadBlur />
       <TopProgressBar />
-      {/* Navigation progress relies on Suspense to avoid blocking the initial render */}
-      <Suspense fallback={null}>
-        <NavigationProgress />
-      </Suspense>
       {/* Intercepts fetch calls to show global error/loading states */}
       <GlobalFetchInterceptor />
       {/* Displays friendly error notifications for 401/403/etc */}

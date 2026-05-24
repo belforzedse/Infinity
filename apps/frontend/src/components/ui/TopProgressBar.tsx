@@ -1,15 +1,13 @@
 "use client";
 
 import { useAtomValue } from "jotai";
-import { isGlobalLoadingAtom, navigationInProgressAtom } from "@/atoms/loading";
+import { isGlobalLoadingAtom } from "@/atoms/loading";
 import clsx from "clsx";
 import useSmoothLoading from "@/hooks/useSmoothLoading";
 
 export default function TopProgressBar() {
   const apiLoading = useAtomValue(isGlobalLoadingAtom);
-  const navLoading = useAtomValue(navigationInProgressAtom);
-  const active = apiLoading || navLoading;
-  const visible = useSmoothLoading(active);
+  const visible = useSmoothLoading(apiLoading);
 
   return (
     <div

@@ -189,7 +189,6 @@ const PLPBottomNavigation = () => {
                     <Link
                       key={category.id}
                       href={getCategoryPlpHref(category.slug)}
-                      prefetch={false}
                       onClick={closeCategories}
                       className="flex flex-col items-center gap-2"
                     >

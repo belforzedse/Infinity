@@ -1,7 +1,7 @@
 "use client";
 
 import { useAtomValue } from "jotai";
-import { isGlobalLoadingAtom, navigationInProgressAtom } from "@/atoms/loading";
+import { isGlobalLoadingAtom } from "@/atoms/loading";
 import SuspenseLoader from "./SuspenseLoader";
 import useSmoothLoading from "@/hooks/useSmoothLoading";
 import { usePathname } from "next/navigation";
@@ -14,11 +14,8 @@ const MAX_BLOCKING_MS = GLOBAL_OVERLAY_MAX_BLOCKING_MS;
 export default function GlobalLoadingOverlay() {
   const pathname = usePathname();
   const apiLoading = useAtomValue(isGlobalLoadingAtom);
-  const navLoading = useAtomValue(navigationInProgressAtom);
-  const active = apiLoading || navLoading;
-  // Show immediately on navigation; keep minimum to avoid flicker
-  const visible = useSmoothLoading(active, {
-    showDelayMs: 0,
+  const visible = useSmoothLoading(apiLoading, {
+    showDelayMs: 250,
     minVisibleMs: 300,
   });
 

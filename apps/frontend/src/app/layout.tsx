@@ -8,6 +8,7 @@ import { CartProvider } from "@/contexts/CartContext";
 import Providers from "./Providers";
 import { peyda, peydaFanum, rokh, kaghaz } from "@repo/fonts";
 import { DebugPanel } from "@/components/Debug";
+import NavigationProgress from "@/components/ui/NavigationProgress";
 import { OrganizationSchema } from "@/components/SEO/OrganizationSchema";
 import { IMAGE_BASE_URL } from "@/constants/api";
 import { SITE_URL, SITE_NAME } from "@/config/site";
@@ -150,6 +151,8 @@ export default function RootLayout({
         <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
       </head>
       <body className={`${peydaFanum.className} bg-white antialiased`}>
+        <NavigationProgress />
+
         {/* Organization Schema for SEO */}
         <OrganizationSchema />
 

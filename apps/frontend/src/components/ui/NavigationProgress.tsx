@@ -1,165 +1,168 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
-import { setNavigationInProgress } from "@/atoms/loading";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
+
+type Phase = "hidden" | "enter" | "progress" | "done";
 
 export default function NavigationProgress() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const lastUrlRef = useRef<string>("");
-  const failSafeRef = useRef<number | null>(null);
+  const previousPathname = useRef(pathname);
+  const activeRef = useRef(false);
+  const timersRef = useRef<number[]>([]);
+  const [phase, setPhase] = useState<Phase>("hidden");
+  const [reducedMotion] = useState(
+    () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+  );
 
-  const clearFailSafe = useCallback(() => {
-    if (failSafeRef.current) {
-      try {
-        clearTimeout(failSafeRef.current);
-      } catch {}
-      failSafeRef.current = null;
-    }
+  const clearTimers = useCallback(() => {
+    timersRef.current.forEach((timer) => window.clearTimeout(timer));
+    timersRef.current = [];
   }, []);
 
-  const startFailSafe = useCallback(() => {
-    clearFailSafe();
-    failSafeRef.current = window.setTimeout(() => setNavigationInProgress(false), 2000);
-  }, [clearFailSafe]);
+  const queueTimer = useCallback((callback: () => void, delay: number) => {
+    const timer = window.setTimeout(callback, delay);
+    timersRef.current.push(timer);
+  }, []);
 
-  // Start on internal link clicks (event delegation)
+  const queuePhase = useCallback(
+    (nextPhase: Phase, delay = 0) => {
+      queueTimer(() => setPhase(nextPhase), delay);
+    },
+    [queueTimer],
+  );
+
+  const startNavigation = useCallback(() => {
+    clearTimers();
+    activeRef.current = true;
+
+    if (reducedMotion) {
+      queuePhase("enter");
+      queueTimer(() => {
+        activeRef.current = false;
+        setPhase("hidden");
+      }, 2000);
+      return;
+    }
+
+    queuePhase("enter");
+    queuePhase("progress", 50);
+    queueTimer(() => {
+      activeRef.current = false;
+      setPhase("done");
+    }, 2200);
+    queuePhase("hidden", 2500);
+  }, [clearTimers, queuePhase, queueTimer, reducedMotion]);
+
+  const finishNavigation = useCallback(() => {
+    clearTimers();
+    activeRef.current = false;
+
+    if (reducedMotion) {
+      queuePhase("hidden");
+      return;
+    }
+
+    queuePhase("done");
+    queuePhase("hidden", 300);
+  }, [clearTimers, queuePhase, reducedMotion]);
+
   useEffect(() => {
-    const restore: {
-      pushState?: History["pushState"];
-      replaceState?: History["replaceState"];
-      router?: any;
-      routerPush?: (...args: any[]) => any;
-      routerReplace?: (...args: any[]) => any;
-      navigationListener?: (e: any) => void;
-    } = {};
+    function shouldStartForUrl(rawHref: string | null) {
+      if (!rawHref || rawHref.startsWith("#")) return false;
 
-    function onClick(e: MouseEvent) {
-      // Ignore modified clicks
-      if ((e as any).metaKey || (e as any).ctrlKey || (e as any).shiftKey || (e as any).altKey)
-        return;
-      const el = (e.target as HTMLElement)?.closest?.("a");
-      if (!el) return;
-      const href = el.getAttribute("href");
-      const target = el.getAttribute("target");
-      // Allow opting-out on specific links
-      if (el.getAttribute("data-nav-ignore") === "true") return;
-      if (!href || href.startsWith("#") || target === "_blank") return;
       try {
         const current = new URL(window.location.href);
-        const url = new URL(href, current.href);
-        if (url.origin !== current.origin) return;
-        // If clicking a link to the same URL (no real navigation), skip
-        const nextPathAndQuery = url.pathname + (url.search || "");
-        const currentPathAndQuery = current.pathname + (current.search || "");
-        if (nextPathAndQuery === currentPathAndQuery) return;
+        const target = new URL(rawHref, current.href);
+        if (target.origin !== current.origin) return false;
 
-        // Start immediately so overlay appears before router acts
-        setNavigationInProgress(true);
-        startFailSafe();
-
-        // Revert if another handler cancels the navigation
-        queueMicrotask(() => {
-          if (e.defaultPrevented) {
-            setNavigationInProgress(false);
-            clearFailSafe();
-          }
-        });
+        const currentPath = `${current.pathname}${current.search}`;
+        const targetPath = `${target.pathname}${target.search}`;
+        return currentPath !== targetPath;
       } catch {
-        // ignore
+        return false;
       }
     }
 
-    function onPopState() {
-      setNavigationInProgress(true);
-      startFailSafe();
+    function handleClick(event: MouseEvent) {
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
+      const link = (event.target as HTMLElement | null)?.closest?.("a");
+      if (!link) return;
+      if (link.getAttribute("target") === "_blank") return;
+      if (link.getAttribute("data-nav-ignore") === "true") return;
+      if (!shouldStartForUrl(link.getAttribute("href"))) return;
+
+      startNavigation();
+      queueMicrotask(() => {
+        if (event.defaultPrevented) finishNavigation();
+      });
     }
 
-    // Capture phase so we run before Next's internal link handler
-    window.addEventListener("click", onClick, true);
-
-    window.addEventListener("popstate", onPopState);
-
-    // Start when navigation API is used (router.push, etc.)
-    if ("navigation" in window) {
-      const onNavigate = (e: any) => {
-        try {
-          const current = new URL(window.location.href);
-          const destinationUrl = e.destination?.url;
-          if (!destinationUrl) return;
-          const url = new URL(destinationUrl, current.href);
-          if (url.origin !== current.origin) return;
-          const next = url.pathname + (url.search || "");
-          const cur = current.pathname + (current.search || "");
-          if (next === cur) return;
-          setNavigationInProgress(true);
-          startFailSafe();
-        } catch {}
-      };
-      (window as any).navigation.addEventListener("navigate", onNavigate);
-      restore.navigationListener = onNavigate;
+    function handlePopState() {
+      startNavigation();
     }
 
-    // Also capture programmatic navigations (history/router.push)
-    try {
-      restore.pushState = history.pushState.bind(history);
-      restore.replaceState = history.replaceState.bind(history);
-      history.pushState = function (...args: Parameters<History["pushState"]>) {
-        // Only show loader for push navigations
-        setNavigationInProgress(true);
-        startFailSafe();
-        return restore.pushState!(...args);
-      } as any;
-      history.replaceState = function (...args: Parameters<History["replaceState"]>) {
-        // Do not show loader for replaceState to avoid flicker from query updates (nuqs)
-        return restore.replaceState!(...args);
-      } as any;
+    const originalPushState = history.pushState.bind(history);
+    history.pushState = function (...args: Parameters<History["pushState"]>) {
+      if (shouldStartForUrl(typeof args[2] === "string" ? args[2] : args[2]?.toString() ?? null)) {
+        startNavigation();
+      }
+      return originalPushState(...args);
+    } as History["pushState"];
 
-      const nextRouter: any = (window as any).next?.router;
-      if (nextRouter?.push) {
-        restore.router = nextRouter;
-        restore.routerPush = nextRouter.push.bind(nextRouter);
-        nextRouter.push = (...args: any[]) => {
-          setNavigationInProgress(true);
-          startFailSafe();
-          return restore.routerPush!(...args);
-        };
-      }
-      if (nextRouter?.replace) {
-        restore.router = nextRouter;
-        restore.routerReplace = nextRouter.replace.bind(nextRouter);
-        nextRouter.replace = (...args: any[]) => {
-          setNavigationInProgress(true);
-          startFailSafe();
-          return restore.routerReplace!(...args);
-        };
-      }
-    } catch {}
+    window.addEventListener("click", handleClick, true);
+    window.addEventListener("popstate", handlePopState);
 
     return () => {
-      window.removeEventListener("click", onClick, true);
-      window.removeEventListener("popstate", onPopState);
-      clearFailSafe();
-      // restore history methods
-      if (restore.pushState) history.pushState = restore.pushState;
-      if (restore.replaceState) history.replaceState = restore.replaceState;
-      if (restore.navigationListener && "navigation" in window)
-        (window as any).navigation.removeEventListener("navigate", restore.navigationListener);
-      if (restore.router && restore.routerPush) restore.router.push = restore.routerPush;
-      if (restore.router && restore.routerReplace) restore.router.replace = restore.routerReplace;
+      clearTimers();
+      history.pushState = originalPushState;
+      window.removeEventListener("click", handleClick, true);
+      window.removeEventListener("popstate", handlePopState);
     };
-  }, [clearFailSafe, startFailSafe]);
+  }, [clearTimers, finishNavigation, queueTimer, reducedMotion, startNavigation]);
 
-  // Stop immediately after URL changes
   useEffect(() => {
-    const currentUrl = pathname + "?" + (searchParams?.toString() || "");
-    if (currentUrl === lastUrlRef.current) return;
-    lastUrlRef.current = currentUrl;
+    if (pathname === previousPathname.current) return;
+    previousPathname.current = pathname;
 
-    setNavigationInProgress(false);
-    clearFailSafe();
-  }, [pathname, searchParams, clearFailSafe]);
+    if (activeRef.current) {
+      queueTimer(finishNavigation, 0);
+      return;
+    }
 
-  return null;
+    queueTimer(() => {
+      startNavigation();
+      queueTimer(finishNavigation, reducedMotion ? 200 : 650);
+    }, 0);
+  }, [finishNavigation, pathname, queueTimer, reducedMotion, startNavigation]);
+
+  if (phase === "hidden") return null;
+
+  const barStyle = reducedMotion
+    ? { width: "100%", opacity: 1 }
+    : {
+        opacity: phase === "done" ? 0 : 1,
+        width: phase === "enter" ? "15%" : phase === "progress" ? "80%" : "100%",
+        transition:
+          phase === "enter"
+            ? "opacity 80ms linear"
+            : phase === "progress"
+              ? "width 540ms cubic-bezier(0.16, 1, 0.3, 1)"
+              : "width 150ms linear, opacity 250ms linear 150ms",
+      };
+
+  return (
+    <div
+      className="pointer-events-none fixed inset-x-0 top-0 z-[9999] h-[2px]"
+      role="progressbar"
+      aria-label="بارگذاری صفحه"
+      aria-busy={phase !== "done"}
+    >
+      <div
+        className="h-full bg-gradient-to-l from-[#334155] via-[#db2777] to-[#fb7185] shadow-[0_0_10px_rgba(219,39,119,0.55)]"
+        style={barStyle}
+      />
+    </div>
+  );
 }

@@ -49,7 +49,6 @@ export default function PLPHeaderDesktopNav() {
             <Link
               key={item.href}
               href={item.href}
-              prefetch={item.href === "/"}
               aria-current={isActive ? "page" : undefined}
               className={[
                 "pressable text-sm flex items-center underline-offset-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white",

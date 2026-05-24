@@ -9,6 +9,7 @@ import CartIcon from "../../Icons/CartIcon";
 import MenuIcon from "../../Icons/MenuIcon";
 import { StorefrontLogo } from "@repo/brand";
 import { useCart } from "@/contexts/CartContext";
+import { useRouter } from "next/navigation";
 
 type Props = object;
 
@@ -17,6 +18,7 @@ export default function PLPMobileHeader({}: Props) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { totalItems, openDrawer } = useCart();
   const [isStandalone, setIsStandalone] = useState(false);
+  const router = useRouter();
 
   const openSearch = (event?: React.SyntheticEvent) => {
     if (event) {
@@ -67,7 +69,7 @@ export default function PLPMobileHeader({}: Props) {
       >
       <div className="flex flex-row-reverse items-center justify-between bg-transparent px-4 py-3">
         <button
-          onClick={() => window.location.href = "/orders"}
+          onClick={() => router.push("/orders")}
           className="flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-2"
           aria-label="پیگیری سفارش"
         >

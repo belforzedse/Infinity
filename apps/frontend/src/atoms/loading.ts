@@ -1,6 +1,5 @@
 import { atom } from "jotai";
 import jotaiStore from "@/lib/jotaiStore";
-import { startTransition } from "react";
 
 // Tracks the number of in-flight API requests
 export const pendingRequestsAtom = atom(0);
@@ -16,23 +15,3 @@ export function adjustPendingRequests(delta: number) {
   store.set(pendingRequestsAtom, next);
 }
 
-// Navigation progress (SPA route changes)
-export const navigationInProgressAtom = atom(false);
-
-export function setNavigationInProgress(v: boolean) {
-  const store = jotaiStore;
-  // Defer updates to avoid scheduling during insertion effects
-  // which can happen if callers run inside early lifecycle hooks.
-  if (typeof window !== "undefined") {
-    window.setTimeout(() => {
-      startTransition(() => {
-        store.set(navigationInProgressAtom, v);
-      });
-    }, 0);
-  } else {
-    // Fallback for non-DOM environments
-    startTransition(() => {
-      store.set(navigationInProgressAtom, v);
-    });
-  }
-}

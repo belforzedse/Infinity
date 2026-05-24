@@ -141,7 +141,6 @@ export default function MobileMenu({ isOpen, onClose, onSearchClick }: Props) {
                             <Link
                               key={item.href}
                               href={item.href}
-                              prefetch={false}
                               className="relative flex items-center gap-2 rounded-lg px-5 py-3 text-gray-700 transition-all hover:bg-pink-50"
                               onClick={onClose}
                             >

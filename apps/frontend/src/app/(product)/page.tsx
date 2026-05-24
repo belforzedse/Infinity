@@ -70,10 +70,99 @@ function ProductSectionsFallback() {
     <section className="space-y-8">
       <div className="h-8 w-48 animate-pulse rounded bg-gray-200" />
       <div className="grid min-w-0 grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {[...Array(8)].map((i) => (
-          <div key={i} className="aspect-[250/270] w-full animate-pulse rounded-lg bg-gray-200" />
+        {[...Array(8)].map((_, index) => (
+          <div key={index} className="aspect-[250/270] w-full animate-pulse rounded-lg bg-gray-200" />
         ))}
       </div>
+    </section>
+  );
+}
+
+function StoriesRailFallback() {
+  return (
+    <section>
+      <div className="flex gap-4 overflow-hidden">
+        {[...Array(6)].map((_, index) => (
+          <div key={index} className="flex shrink-0 flex-col items-center gap-2">
+            <div className="h-16 w-16 animate-pulse rounded-full bg-gray-200" />
+            <div className="h-3 w-14 animate-pulse rounded bg-gray-200" />
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function BlogSectionFallback() {
+  return (
+    <section className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="h-7 w-40 animate-pulse rounded bg-gray-200" />
+        <div className="h-5 w-24 animate-pulse rounded bg-gray-200" />
+      </div>
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        {[...Array(4)].map((_, index) => (
+          <div key={index} className="space-y-3">
+            <div className="aspect-[304/260] animate-pulse rounded-2xl bg-gray-200" />
+            <div className="h-4 w-3/4 animate-pulse rounded bg-gray-200" />
+            <div className="h-10 animate-pulse rounded bg-gray-200" />
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+async function StoriesSection() {
+  const activeStories = await getStoriesForHome();
+
+  if (activeStories.length === 0) return null;
+
+  return (
+    <section>
+      <StoriesRail stories={activeStories} />
+    </section>
+  );
+}
+
+async function ProductSectionsBlock({
+  featuredCategorySlug,
+  featuredCategoryBannerImage,
+}: {
+  featuredCategorySlug: string;
+  featuredCategoryBannerImage: string;
+}) {
+  const parentCategories = await getProductCategories({
+    mainOnly: true,
+    sort: "Title:asc",
+    featuredOnly: true,
+    allowedNameSubstrings: ALLOWED_HOME_NAV_CATEGORY_NAME_SUBSTRINGS,
+    revalidate: 90,
+  });
+
+  return (
+    <HomeProductSections
+      featuredCategorySlug={featuredCategorySlug}
+      featuredCategoryBannerImage={featuredCategoryBannerImage}
+      mainCategories={parentCategories}
+    />
+  );
+}
+
+async function BlogSection() {
+  const latestBlogPosts = await getLatestBlogPosts();
+
+  if (latestBlogPosts.length === 0) return null;
+
+  return (
+    <section>
+      <Reveal variant="fade-up" duration={700}>
+        <BlogCarousel
+          posts={latestBlogPosts}
+          title="اینفینیتی مگ"
+          viewAllHref="/blog"
+        />
+      </Reveal>
     </section>
   );
 }
@@ -82,18 +171,7 @@ export default async function Home() {
   // Ensure env (e.g. STRAPI_INTERNAL_URL) is read at request time in the container, not build time (Next.js 16)
   await connection();
 
-  const [latestBlogPosts, parentCategories, homepageSettings, activeStories] = await Promise.all([
-    getLatestBlogPosts(),
-    getProductCategories({
-        mainOnly: true,
-        sort: "Title:asc",
-        featuredOnly: true,
-        allowedNameSubstrings: ALLOWED_HOME_NAV_CATEGORY_NAME_SUBSTRINGS,
-        revalidate: 90,
-      }),
-    getPublicSuperAdminSettings(),
-    getStoriesForHome(),
-  ]);
+  const homepageSettings = await getPublicSuperAdminSettings();
 
   const promoBanners = [
     {
@@ -169,18 +247,14 @@ export default async function Home() {
         </Reveal>
       </section>
 
-      {/* Stories Rail */}
-      {activeStories.length > 0 && (
-        <section>
-          <StoriesRail stories={activeStories} />
-        </section>
-      )}
+      <Suspense fallback={<StoriesRailFallback />}>
+        <StoriesSection />
+      </Suspense>
 
       <Suspense fallback={<ProductSectionsFallback />}>
-        <HomeProductSections
+        <ProductSectionsBlock
           featuredCategorySlug={featuredCategorySlug}
           featuredCategoryBannerImage={featuredCategoryBannerImage}
-          mainCategories={parentCategories}
         />
       </Suspense>
 
@@ -192,18 +266,9 @@ export default async function Home() {
         </section>
       )}
 
-      {/* Blog Section */}
-      {latestBlogPosts.length > 0 && (
-        <section>
-          <Reveal variant="fade-up" duration={700}>
-            <BlogCarousel
-              posts={latestBlogPosts}
-              title="اینفینیتی مگ"
-              viewAllHref="/blog"
-            />
-          </Reveal>
-        </section>
-      )}
+      <Suspense fallback={<BlogSectionFallback />}>
+        <BlogSection />
+      </Suspense>
     </PageContainer>
   );
 }
