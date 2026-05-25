@@ -97,7 +97,7 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({ className = "" }) =
     setLoading(true);
     const t = setTimeout(async () => {
       try {
-        const url = `${API_BASE_URL}${ENDPOINTS.PRODUCT.SEARCH}?q=${encodeURIComponent(q)}&page=1&pageSize=6&_skip_global_loader=1`;
+        const url = `${API_BASE_URL}${ENDPOINTS.PRODUCT.SEARCH}?q=${encodeURIComponent(q)}&page=1&pageSize=6&view=suggestion&_skip_global_loader=1`;
         const res = await fetch(url, {
           method: "GET",
           cache: "no-store",
@@ -106,9 +106,6 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({ className = "" }) =
         });
         if (!mounted) return;
         const json = await res.json();
-
-        // Debug: Log the response
-        console.log("Search API response:", json);
 
         const items = (json?.data || []).map((raw: any) => {
           const attrs = raw?.attributes ? raw.attributes : raw;

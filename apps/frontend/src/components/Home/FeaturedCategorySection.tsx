@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Sparkle } from "lucide-react";
 import ProductSmallCard, { type ProductSmallCardProps } from "@/components/Product/SmallCard";
 import resolveAssetUrl from "@/utils/resolveAssetUrl";
@@ -48,15 +49,16 @@ export default function FeaturedCategorySection({
             <ProductSmallCard key={product.id} {...product} className="md:w-full lg:max-w-none" />
           ))}
         </div>
-        <div
-          className="h-[280px] overflow-hidden rounded-[32px] border border-slate-100 bg-slate-100 sm:h-[360px] lg:h-full"
-          style={{
-            backgroundImage: `url(${resolveAssetUrl(normalizedBannerImage)})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-          aria-label="Featured category banner"
-        />
+        <div className="relative h-[280px] overflow-hidden rounded-[32px] border border-slate-100 bg-slate-100 sm:h-[360px] lg:h-full">
+          <Image
+            src={resolveAssetUrl(normalizedBannerImage)}
+            alt="Featured category banner"
+            fill
+            className="object-cover"
+            sizes="(max-width: 1024px) 100vw, 50vw"
+            loading="lazy"
+          />
+        </div>
       </div>
     </div>
   );

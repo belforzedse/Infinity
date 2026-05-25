@@ -10,6 +10,13 @@ export interface PLPProduct {
     AverageRating?: number | null;
     RatingCount?: number | null;
     SeenCount?: number | null;
+    Price?: number | string | null;
+    DiscountPrice?: number | string | null;
+    Discount?: number | string | null;
+    IsAvailable?: boolean | null;
+    InventoryCount?: number | string | null;
+    ColorsCount?: number | string | null;
+    ColorCodes?: string[] | null;
     CoverImage?: {
       data?: {
         attributes?: {

@@ -142,20 +142,26 @@ export default function PLPList({
       filteredInitialProducts.filter((product) => {
         try {
           // Basic product structure validation
-          if (!product?.attributes?.product_variations?.data) {
+          const hasCompactProjection = product?.attributes?.Price !== undefined;
+          if (!hasCompactProjection && !product?.attributes?.product_variations?.data) {
             return false;
           }
 
           // Check if any variation has a valid price
-          const hasValidPrice = product.attributes.product_variations.data.some((variation) => {
-            if (!variation?.attributes?.Price) return false;
-            const price = parseInt(variation.attributes.Price);
-            return !isNaN(price) && price > 0;
-          });
+          const hasValidPrice = hasCompactProjection
+            ? Number(product.attributes.Price) > 0
+            : product.attributes.product_variations!.data!.some((variation) => {
+                if (!variation?.attributes?.Price) return false;
+                const price = parseInt(variation.attributes.Price);
+                return !isNaN(price) && price > 0;
+              });
 
           // If showAvailableOnly is true, check if any variation is published AND has stock
           if (available === "true") {
-            const hasInStockVariation = hasAvailableStock(product);
+            const hasInStockVariation =
+              typeof product.attributes.IsAvailable === "boolean"
+                ? product.attributes.IsAvailable
+                : hasAvailableStock(product);
             if (!(hasValidPrice && hasInStockVariation)) return false;
           } else if (!hasValidPrice) {
             return false;
@@ -163,28 +169,32 @@ export default function PLPList({
 
           // Discount-only filter
           if (discountOnly === "true") {
-            const hasDiscount = product.attributes.product_variations.data.some((variation) => {
-              if (!variation?.attributes) return false;
+            const hasDiscount = hasCompactProjection
+              ? Number(product.attributes.Discount ?? 0) > 0 ||
+                (Number(product.attributes.DiscountPrice ?? 0) > 0 &&
+                  Number(product.attributes.DiscountPrice) < Number(product.attributes.Price))
+              : product.attributes.product_variations!.data!.some((variation) => {
+                  if (!variation?.attributes) return false;
 
-              // Check for general_discounts first
-              const generalDiscounts = variation.attributes.general_discounts?.data;
-              if (
-                generalDiscounts &&
-                Array.isArray(generalDiscounts) &&
-                generalDiscounts.length > 0
-              ) {
-                return true;
-              }
+                  // Check for general_discounts first
+                  const generalDiscounts = variation.attributes.general_discounts?.data;
+                  if (
+                    generalDiscounts &&
+                    Array.isArray(generalDiscounts) &&
+                    generalDiscounts.length > 0
+                  ) {
+                    return true;
+                  }
 
-              // Fallback to DiscountPrice field
-              const price = parseFloat(variation.attributes.Price || "0");
-              const discountPrice = variation.attributes.DiscountPrice
-                ? parseFloat(variation.attributes.DiscountPrice)
-                : null;
-              return (
-                discountPrice && !isNaN(discountPrice) && !isNaN(price) && discountPrice < price
-              );
-            });
+                  // Fallback to DiscountPrice field
+                  const price = parseFloat(variation.attributes.Price || "0");
+                  const discountPrice = variation.attributes.DiscountPrice
+                    ? parseFloat(variation.attributes.DiscountPrice)
+                    : null;
+                  return (
+                    discountPrice && !isNaN(discountPrice) && !isNaN(price) && discountPrice < price
+                  );
+                });
             if (!hasDiscount) return false;
           }
 

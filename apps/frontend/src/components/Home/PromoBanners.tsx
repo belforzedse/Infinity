@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import resolveAssetUrl from "@/utils/resolveAssetUrl";
 
 export type HomePromoBanner = {
@@ -39,12 +40,15 @@ export default function HomePromoBanners({ banners }: HomePromoBannersProps) {
         <div
           key={banner.id}
           className="relative h-[452px] overflow-hidden rounded-[34px] bg-slate-100"
-          style={{
-            backgroundImage: `url(${banner.imageUrl})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
         >
+          <Image
+            src={banner.imageUrl}
+            alt={banner.title}
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, 50vw"
+            loading="lazy"
+          />
           <div className="absolute inset-0 bg-gradient-to-t from-black/15 via-black/5 to-transparent" />
           <div className="relative z-10 flex h-full flex-col items-center justify-start gap-4 px-6 pt-10 text-center md:pt-14">
             <h3

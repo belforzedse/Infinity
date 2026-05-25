@@ -1,5 +1,5 @@
 import { apiClient } from "@/services";
-import { ENDPOINTS } from "@/constants/api";
+import { API_BASE_URL, ENDPOINTS, getStrapiServerUrl } from "@/constants/api";
 import type { ApiResponse } from "@/types/api";
 import type { ProductCardProps } from "@/components/Product/Card";
 import logger from "@/utils/logger";
@@ -222,6 +222,50 @@ type VariationAttributesInput = NonNullable<VariationInput["attributes"]> & {
   product_variation_color?: VariationColorInput;
 };
 
+export interface ProductCardProjection {
+  id: number;
+  attributes?: {
+    Title?: string;
+    Slug?: string;
+    SeenCount?: number | null;
+    Price?: number | string | null;
+    DiscountPrice?: number | string | null;
+    Discount?: number | string | null;
+    IsAvailable?: boolean | null;
+    InventoryCount?: number | string | null;
+    ColorsCount?: number | string | null;
+    ColorCodes?: string[] | null;
+    CoverImage?: {
+      url?: string | null;
+      formats?: {
+        thumbnail?: { url?: string | null };
+        small?: { url?: string | null };
+        medium?: { url?: string | null };
+      } | null;
+      data?: {
+        attributes?: {
+          url?: string | null;
+          formats?: {
+            thumbnail?: { url?: string | null };
+            small?: { url?: string | null };
+            medium?: { url?: string | null };
+          } | null;
+        } | null;
+      } | null;
+    } | null;
+    product_main_category?: {
+      Title?: string | null;
+      Slug?: string | null;
+      data?: {
+        attributes?: {
+          Title?: string | null;
+          Slug?: string | null;
+        } | null;
+      } | null;
+    } | null;
+  };
+}
+
 /**
  * Extracts variation attributes, handling both nested Strapi format (with .attributes)
  * and flattened format (direct properties).
@@ -245,7 +289,89 @@ const resolveColorData = (
   return input as VariationColorRelation;
 };
 
+const readCompactProductAttrs = (product: any) => product?.attributes ?? product ?? {};
+
+const getCompactCoverUrl = (cover: unknown): string => {
+  const coverAny = cover as any;
+  const url =
+    coverAny?.formats?.small?.url ||
+    coverAny?.formats?.thumbnail?.url ||
+    coverAny?.formats?.medium?.url ||
+    coverAny?.url ||
+    coverAny?.data?.attributes?.formats?.small?.url ||
+    coverAny?.data?.attributes?.formats?.thumbnail?.url ||
+    coverAny?.data?.attributes?.url;
+
+  return normalizeAssetUrl(url);
+};
+
+const getCompactCategoryTitle = (category: any): string => {
+  return (
+    category?.Title ||
+    category?.data?.attributes?.Title ||
+    category?.Name ||
+    category?.data?.attributes?.Name ||
+    ""
+  );
+};
+
+const hasCompactCardProjection = (product: any): boolean => {
+  const attrs = readCompactProductAttrs(product);
+  return attrs && attrs.Price !== undefined && attrs.IsAvailable !== undefined;
+};
+
+export const formatProductCardProjection = (product: ProductCardProjection): ProductCardProps | null => {
+  if (!product || !product.id) return null;
+  const attrs = readCompactProductAttrs(product);
+  const price = parseNumber(attrs.Price) ?? 0;
+
+  if (!price || price <= 0) return null;
+
+  const discountPrice = parseNumber(attrs.DiscountPrice) ?? 0;
+  const discount = parseNumber(attrs.Discount) ?? 0;
+  const colorsCount = parseNumber(attrs.ColorsCount) ?? 0;
+  const inventoryCount = parseNumber(attrs.InventoryCount) ?? 0;
+  const colorCodes = Array.isArray(attrs.ColorCodes)
+    ? attrs.ColorCodes.filter((code: unknown): code is string => typeof code === "string" && code.trim() !== "")
+    : [];
+
+  const result: ProductCardProps = {
+    id: Number(product.id),
+    slug: attrs.Slug || undefined,
+    images: [getCompactCoverUrl(attrs.CoverImage)].filter(Boolean),
+    category: getCompactCategoryTitle(attrs.product_main_category),
+    title: attrs.Title || "",
+    price,
+    seenCount: parseNumber(attrs.SeenCount) || 0,
+    isAvailable: attrs.IsAvailable === true,
+    colorsCount: colorsCount > 0 ? colorsCount : undefined,
+    colorCodes: colorCodes.length > 0 ? colorCodes : undefined,
+    inventoryCount: inventoryCount > 0 ? inventoryCount : undefined,
+  };
+
+  if (discountPrice > 0 && discountPrice < price) {
+    result.discountPrice = discountPrice;
+    result.discount = discount > 0 ? discount : Math.round(((price - discountPrice) / price) * 100);
+  } else if (discount > 0) {
+    result.discount = discount;
+  }
+
+  return result;
+};
+
 const DEFAULT_LAZY_SECONDARY_MEDIA_LIMIT = 3;
+
+const CARD_FETCH_OPTIONS = {
+  next: { revalidate: 30 } as const,
+  headers: {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+    "Accept-Encoding": "gzip",
+  },
+};
+
+const getProductCardFetchBaseUrl = () =>
+  typeof window === "undefined" ? getStrapiServerUrl() : API_BASE_URL;
 
 type LazyMediaAsset = {
   attributes?: {
@@ -815,10 +941,12 @@ export const getRelatedProductsByMainCategory = async (
     return [];
   }
 
-  const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?filters[product_main_category][id][$eq]=${categoryId}&filters[id][$ne]=${productId}&filters[Status][$eq]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.product_stock&populate[4]=product_variations.product_variation_color&populate[5]=Media&fields[0]=Title&fields[1]=Slug&pagination[limit]=${limit}`;
+  const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?view=card&filters[product_main_category][id][$eq]=${categoryId}&filters[id][$ne]=${productId}&filters[Status][$eq]=Active&filters[removedAt][$null]=true&filters[product_variations][Price][$gte]=1&filters[product_variations][product_stock][Count][$gt]=0&pagination[limit]=${limit}`;
 
   try {
-    const response = await apiClient.get<any>(endpoint);
+    const response = await fetch(`${getProductCardFetchBaseUrl()}${endpoint}`, CARD_FETCH_OPTIONS).then((res) =>
+      res.json(),
+    );
     return formatProductsToCardProps((response as any).data);
   } catch (error) {
     console.error("Error fetching related products by main category:", error);
@@ -852,9 +980,11 @@ export const getRelatedProductsByOtherCategories = async (
       .map((id, index) => `filters[product_other_categories][id][$in][${index}]=${id}`)
       .join("&");
 
-    const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?${categoryFilters}&filters[id][$ne]=${productId}&filters[Status][$eq]=Active&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.product_stock&populate[4]=product_variations.product_variation_color&populate[5]=Media&fields[0]=Title&fields[1]=Slug&pagination[limit]=${limit}`;
+    const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?view=card&${categoryFilters}&filters[id][$ne]=${productId}&filters[Status][$eq]=Active&filters[removedAt][$null]=true&filters[product_variations][Price][$gte]=1&filters[product_variations][product_stock][Count][$gt]=0&pagination[limit]=${limit}`;
 
-    const response = await apiClient.get<any>(endpoint);
+    const response = await fetch(`${getProductCardFetchBaseUrl()}${endpoint}`, CARD_FETCH_OPTIONS).then((res) =>
+      res.json(),
+    );
     return formatProductsToCardProps((response as any).data);
   } catch (error) {
     console.error("Error fetching related products by other categories:", error);
@@ -914,6 +1044,10 @@ export const formatProductsToCardProps = (products: any[]): ProductCardProps[] =
 
   return products
     .map((product) => {
+      if (hasCompactCardProjection(product)) {
+        return formatProductCardProjection(product);
+      }
+
       // Skip products with missing attributes
       if (!product || !product.attributes || !product.id) {
         return null;
@@ -930,7 +1064,7 @@ export const formatProductsToCardProps = (products: any[]): ProductCardProps[] =
 
       if (!variation) return null;
 
-            const price = parseNumber(variation.attributes.Price);
+      const price = parseNumber(variation.attributes.Price);
       if (!price || price <= 0) {
         return null;
       }
@@ -941,16 +1075,7 @@ export const formatProductsToCardProps = (products: any[]): ProductCardProps[] =
         general_discounts: variation.attributes.general_discounts,
       });
 
-      if (process.env.NODE_ENV !== "production") {
-        console.log(`formatProductsToCardProps - Product ${product.id}:`, {
-          title: product.attributes.Title.substring(0, 30),
-          variationId: variation.id,
-          price,
-          discountEvaluation,
-        });
-      }
-
-// Check if any variation has stock available
+      // Check if any variation has stock available
       const isAvailable =
         product.attributes.product_variations?.data?.some((v: any) => {
           if (v.attributes.IsPublished !== true) return false;
@@ -1033,7 +1158,7 @@ export const getProductsByIds = async (
 
   // Build filter for multiple IDs using $in operator
   const idFilter = `filters[id][$in]=${validIds.join(",")}`;
-  const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?${idFilter}&filters[Status][$eq]=Active&filters[removedAt][$null]=true&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.product_stock&populate[4]=product_variations.general_discounts&populate[5]=product_variations.product_variation_color&populate[6]=Media&fields[0]=Title&fields[1]=Slug&pagination[limit]=${validIds.length}`;
+  const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?view=card&${idFilter}&filters[Status][$eq]=Active&filters[removedAt][$null]=true&filters[product_variations][Price][$gte]=1&pagination[limit]=${validIds.length}`;
 
   try {
     const response = await apiClient.get<any>(endpoint);
@@ -1064,7 +1189,7 @@ export const getProductsBySlugs = async (slugs: string[]): Promise<ProductCardPr
 
   // Build filter for multiple slugs using $in operator
   const slugFilter = `filters[Slug][$in]=${validSlugs.map((slug) => encodeURIComponent(slug)).join(",")}`;
-  const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?${slugFilter}&filters[Status][$eq]=Active&filters[removedAt][$null]=true&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.product_stock&populate[4]=product_variations.general_discounts&populate[5]=product_variations.product_variation_color&populate[6]=Media&fields[0]=Title&fields[1]=Slug&pagination[limit]=${validSlugs.length}`;
+  const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?view=card&${slugFilter}&filters[Status][$eq]=Active&filters[removedAt][$null]=true&filters[product_variations][Price][$gte]=1&pagination[limit]=${validSlugs.length}`;
 
   try {
     const response = await apiClient.get<any>(endpoint);

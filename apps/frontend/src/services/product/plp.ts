@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { IMAGE_BASE_URL, getStrapiServerUrl } from "@/constants/api";
+import { ENDPOINTS, IMAGE_BASE_URL, getStrapiServerUrl } from "@/constants/api";
 import { SITE_NAME, SITE_URL } from "@/config/site";
 import type { PLPPagination } from "@/components/PLP/types";
 import type { Variation } from "@/types/Product";
@@ -11,6 +11,8 @@ import { getCategoryAndDescendantSlugs } from "@/utils/category-descendants";
 import { getValidatedCategoryCached, type CategoryData } from "@/utils/category-validation";
 import { getCategoryPlpHref } from "@/utils/plpRoutes";
 import { getProductCategories, type ProductCategorySummary } from "./categories";
+import { formatProductsToCardProps } from "./product";
+import type { ProductSmallCardProps } from "@/components/Product/SmallCard";
 
 export interface PLPProduct {
   id: number;
@@ -22,6 +24,13 @@ export interface PLPProduct {
     AverageRating?: number | null;
     RatingCount?: number | null;
     SeenCount?: number | null;
+    Price?: number | string | null;
+    DiscountPrice?: number | string | null;
+    Discount?: number | string | null;
+    IsAvailable?: boolean | null;
+    InventoryCount?: number | string | null;
+    ColorsCount?: number | string | null;
+    ColorCodes?: string[] | null;
     createdAt?: string;
     CoverImage?: {
       data?: {
@@ -72,6 +81,32 @@ export interface PLPProductsResult {
   products: PLPProduct[];
   pagination: PLPPagination;
 }
+
+const PLP_HERO_KEYWORDS = [
+  "\u06a9\u06cc\u0641",
+  "\u06a9\u0641\u0634",
+  "\u0635\u0646\u062f\u0644",
+  "\u06a9\u062a\u0648\u0646\u06cc",
+];
+
+const PLP_HERO_TITLE_FILTER = PLP_HERO_KEYWORDS
+  .map((keyword, index) => `filters[$or][${index}][Title][$containsi]=${encodeURIComponent(keyword)}`)
+  .join("&");
+
+const cardToSmallCard = (product: ReturnType<typeof formatProductsToCardProps>[number]): ProductSmallCardProps => ({
+  id: product.id,
+  slug: product.slug,
+  title: product.title,
+  category: product.category,
+  likedCount: product.seenCount || 0,
+  price: product.price,
+  discountedPrice: product.discountPrice,
+  discount: product.discount,
+  image: product.images[0] || "",
+  isAvailable: product.isAvailable,
+  colorsCount: product.colorsCount,
+  colorCodes: product.colorCodes,
+});
 
 export function parsePLPQuery(params: { [key: string]: string | string[] | undefined }): PLPQuery {
   return {
@@ -177,6 +212,16 @@ function normalizeRelation(rel: any, isVariation = false): any {
     return { data: { id, attributes: rest } };
   }
 
+  if (
+    typeof rel === "object" &&
+    (rel.url !== undefined ||
+      rel.formats !== undefined ||
+      rel.Title !== undefined ||
+      rel.Slug !== undefined)
+  ) {
+    return { data: { id: rel.id ?? 0, attributes: rel } };
+  }
+
   return null;
 }
 
@@ -214,6 +259,10 @@ function hasImage(product: PLPProduct): boolean {
 }
 
 function hasValidPrice(product: PLPProduct): boolean {
+  if (product.attributes.Price !== undefined && product.attributes.Price !== null) {
+    return Number(product.attributes.Price) > 0;
+  }
+
   return Boolean(
     product.attributes.product_variations?.data?.some((variation) => {
       const price = variation.attributes.Price;
@@ -223,6 +272,10 @@ function hasValidPrice(product: PLPProduct): boolean {
 }
 
 function hasStock(product: PLPProduct): boolean {
+  if (typeof product.attributes.IsAvailable === "boolean") {
+    return product.attributes.IsAvailable;
+  }
+
   return Boolean(
     product.attributes.product_variations?.data?.some((variation) => {
       if (!variation.attributes?.IsPublished) return false;
@@ -233,6 +286,13 @@ function hasStock(product: PLPProduct): boolean {
 }
 
 function hasDiscountedVariation(product: PLPProduct): boolean {
+  const attrs = product.attributes;
+  const price = Number(attrs.Price ?? 0);
+  const discountPrice = Number(attrs.DiscountPrice ?? 0);
+  const discount = Number(attrs.Discount ?? 0);
+  if (discount > 0) return true;
+  if (price > 0 && discountPrice > 0 && discountPrice < price) return true;
+
   return Boolean(
     product.attributes.product_variations?.data?.some((variation: any) => {
       if (!variation?.attributes?.IsPublished) return false;
@@ -250,6 +310,11 @@ function hasDiscountedVariation(product: PLPProduct): boolean {
 }
 
 function getMinVariationPrice(product: PLPProduct): number {
+  const compactDiscountPrice = Number(product.attributes.DiscountPrice ?? 0);
+  const compactPrice = Number(product.attributes.Price ?? 0);
+  if (compactDiscountPrice > 0) return compactDiscountPrice;
+  if (compactPrice > 0) return compactPrice;
+
   const variations = product.attributes.product_variations?.data || [];
   let minPrice = Infinity;
   for (const variation of variations) {
@@ -272,18 +337,7 @@ export async function getPLPProducts(
   const baseUrl = `${strapiBase}/products`;
   const queryParams = new URLSearchParams();
 
-  queryParams.append("populate[0]", "CoverImage");
-  queryParams.append("populate[1]", "product_main_category");
-  queryParams.append("populate[2]", "product_variations");
-  queryParams.append("populate[3]", "product_variations.product_stock");
-  queryParams.append("populate[4]", "product_variations.general_discounts");
-  queryParams.append("populate[5]", "product_variations.product_variation_color");
-  queryParams.append("fields[0]", "Title");
-  queryParams.append("fields[1]", "Slug");
-  queryParams.append("fields[2]", "Description");
-  queryParams.append("fields[3]", "Status");
-  queryParams.append("fields[4]", "createdAt");
-  queryParams.append("fields[5]", "SeenCount");
+  queryParams.append("view", "card");
   queryParams.append("pagination[page]", String(query.page));
   queryParams.append("pagination[pageSize]", String(pageSize));
   queryParams.append("filters[Status][$eq]", "Active");
@@ -431,6 +485,49 @@ export async function getPLPProducts(
   }
 }
 
+export async function getPLPHeroProducts(categorySlug?: string): Promise<ProductSmallCardProps[]> {
+  const strapiBase = getStrapiServerUrl();
+  const baseParams =
+    `view=card&filters[Status][$eq]=Active&filters[removedAt][$null]=true&` +
+    `filters[product_variations][Price][$gte]=1&` +
+    `filters[product_variations][product_stock][Count][$gt]=0&`;
+  const categoryParam = categorySlug
+    ? `&filters[product_main_category][Slug][$eq]=${encodeURIComponent(categorySlug)}`
+    : "";
+
+  const fetchCards = async (endpoint: string) => {
+    const response = await fetchWithTimeout(`${strapiBase}${endpoint}`, {
+      timeoutMs: 10000,
+      next: { revalidate: 120 },
+    });
+    if (!response.ok) return [];
+    const data = await response.json();
+    return formatProductsToCardProps(Array.isArray(data?.data) ? data.data : []);
+  };
+
+  try {
+    const featuredEndpoint =
+      `${ENDPOINTS.PRODUCT.PRODUCT}?${baseParams}${PLP_HERO_TITLE_FILTER}` +
+      `${categoryParam}&pagination[pageSize]=6&pagination[withCount]=false`;
+    const featured = await fetchCards(featuredEndpoint);
+    const source =
+      featured.length > 0
+        ? featured
+        : await fetchCards(
+            `${ENDPOINTS.PRODUCT.PRODUCT}?${baseParams}${categoryParam}&pagination[pageSize]=20&pagination[withCount]=false`,
+          );
+
+    return source
+      .filter((product) => product.images[0])
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 6)
+      .map(cardToSmallCard);
+  } catch (error) {
+    logger.error("[PLP] Hero products fetch failed", { error: String(error) });
+    return [];
+  }
+}
+
 export function buildPLPPageCopy(query: PLPQuery, category?: PLPCategoryContext) {
   const pageName = category
     ? `خرید ${category.title}`
@@ -452,18 +549,25 @@ export function buildPLPPageCopy(query: PLPQuery, category?: PLPCategoryContext)
 
 export function buildCollectionItems(products: PLPProduct[]) {
   return products.slice(0, 20).map((product) => {
+    const compactPrice = Number(product.attributes.DiscountPrice || product.attributes.Price || 0);
     const variations = product.attributes.product_variations?.data || [];
-    const prices = variations
-      .map((v: Variation) => {
-        const price = parseFloat(String(v.attributes.Price || "0"));
-        const discountPrice = parseFloat(String(v.attributes.DiscountPrice || "0"));
-        return discountPrice > 0 ? discountPrice : price;
-      })
-      .filter((price: number) => price > 0);
+    const prices = compactPrice > 0
+      ? [compactPrice]
+      : variations
+          .map((v: Variation) => {
+            const price = parseFloat(String(v.attributes.Price || "0"));
+            const discountPrice = parseFloat(String(v.attributes.DiscountPrice || "0"));
+            return discountPrice > 0 ? discountPrice : price;
+          })
+          .filter((price: number) => price > 0);
     const minPrice = prices.length > 0 ? Math.min(...prices) : undefined;
-    const imageUrl = product.attributes.CoverImage?.data?.attributes?.url
-      ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
-      : undefined;
+    const cover: any = product.attributes.CoverImage;
+    const coverUrl =
+      cover?.data?.attributes?.url ||
+      cover?.formats?.small?.url ||
+      cover?.formats?.thumbnail?.url ||
+      cover?.url;
+    const imageUrl = coverUrl ? `${IMAGE_BASE_URL}${coverUrl}` : undefined;
     const productSlug = product.attributes.Slug || product.id.toString();
 
     return {

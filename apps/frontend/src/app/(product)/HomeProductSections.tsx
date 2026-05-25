@@ -10,20 +10,23 @@ import {
 } from "@/services/product/homepage";
 import type { ProductSmallCardProps } from "@/components/Product/SmallCard";
 import type { ProductCategorySummary } from "@/services/product/categories";
+import type { SuperAdminSettings } from "@/types/super-admin/settings";
 
 /** Streamed block: heavy product sections so shell can send first and reduce server blocking. */
 export default async function HomeProductSections({
   featuredCategorySlug,
   featuredCategoryBannerImage,
   mainCategories,
+  homepageSettings,
 }: {
   featuredCategorySlug: string;
   featuredCategoryBannerImage: string;
   mainCategories: ProductCategorySummary[];
+  homepageSettings?: SuperAdminSettings;
 }) {
   const [{ discounted, new: newProducts, favorites }, featuredCategoryProducts] =
     await Promise.all([
-      getHomepageSections(),
+      getHomepageSections(homepageSettings),
       featuredCategorySlug && featuredCategoryBannerImage
         ? getFeaturedCategoryProductsByRating(featuredCategorySlug, 6)
         : Promise.resolve([]),

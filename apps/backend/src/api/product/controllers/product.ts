@@ -94,6 +94,39 @@ const PRODUCT_POPULATE = {
   },
 } as const;
 
+const PRODUCT_CARD_POPULATE = {
+  CoverImage: {
+    fields: ["url", "alternativeText", "formats", "mime", "width", "height"],
+  },
+  product_main_category: {
+    fields: ["Title", "Slug"],
+  },
+  product_variations: {
+    fields: ["IsPublished", "Price", "DiscountPrice", "SKU"],
+    populate: {
+      product_stock: {
+        fields: ["Count"],
+      },
+      product_variation_color: {
+        fields: ["Title", "ColorCode"],
+      },
+      general_discounts: {
+        fields: ["Amount"],
+      },
+    },
+  },
+} as const;
+
+const PRODUCT_CARD_FIELDS = [
+  "Title",
+  "Slug",
+  "Status",
+  "SeenCount",
+  "AverageRating",
+  "RatingCount",
+  "createdAt",
+] as const;
+
 async function findProductBySlugInternal(
   strapi: any,
   decodedSlug: string,
@@ -238,8 +271,29 @@ export default factories.createCoreController(
     },
 
     async find(ctx, next) {
+      const view = String(ctx.query?.view || "");
+      const isCardView = view === "card";
+
       // @ts-expect-error Strapi controller typings require two args; we only need ctx for filtering
       this.applyPublicProductFilters(ctx);
+
+      if (isCardView) {
+        const { view: _view, populate: _populate, fields: _fields, ...restQuery } = ctx.query || {};
+        ctx.query = {
+          ...restQuery,
+          fields: PRODUCT_CARD_FIELDS,
+          populate: PRODUCT_CARD_POPULATE,
+        };
+
+        const response = await (super.find as any)(ctx, next);
+        const productService: any = strapi.service("api::product.product");
+
+        return {
+          data: productService.serializeProductCards(response?.data || []),
+          meta: response?.meta,
+        };
+      }
+
       const response = await (super.find as any)(ctx, next);
 
       return response;
@@ -317,11 +371,14 @@ export default factories.createCoreController(
             const productService: any = strapi.service("api::product.product");
             const resultList = Array.isArray(results) ? results : [];
             return {
-              data: resultList.filter((p: any) =>
-                productService.hasPublishedStockedVariation(
-                  p?.attributes ? { product_variations: p.attributes.product_variations?.data } : p,
-                ),
-              ),
+              data:
+                ctx.query?.view === "card" || ctx.query?.view === "suggestion"
+                  ? resultList
+                  : resultList.filter((p: any) =>
+                      productService.hasPublishedStockedVariation(
+                        p?.attributes ? { product_variations: p.attributes.product_variations?.data } : p,
+                      ),
+                    ),
               meta: { pagination },
             };
           },

@@ -27,6 +27,12 @@ export interface ProductSearchItem {
     Slug?: string;
     Title: string;
     Description: string;
+    Price?: number | string;
+    DiscountPrice?: number | string;
+    Discount?: number | string;
+    IsAvailable?: boolean;
+    ColorsCount?: number;
+    ColorCodes?: string[];
     product_main_category?: {
       data: {
         id: number;
@@ -34,6 +40,8 @@ export interface ProductSearchItem {
           Title: string;
         };
       } | null;
+      Title?: string;
+      Slug?: string;
     };
     product_variations?: {
       data: Array<{
@@ -159,7 +167,7 @@ export const searchProducts = async (
   try {
     const endpoint = `${ENDPOINTS.PRODUCT.SEARCH}?q=${encodeURIComponent(
       q,
-    )}&page=${page}&pageSize=${pageSize}`;
+    )}&page=${page}&pageSize=${pageSize}&view=suggestion`;
     const response = await apiClient.getPublic<ProductSearchResponse>(endpoint);
 
     const data = Array.isArray((response as any)?.data) ? (response as any).data : [];

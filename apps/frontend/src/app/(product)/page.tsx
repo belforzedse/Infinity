@@ -3,7 +3,6 @@
 export const revalidate = 60;
 
 import type { Metadata } from "next";
-import { connection } from "next/server";
 import { ALLOWED_HOME_NAV_CATEGORY_NAME_SUBSTRINGS } from "@/constants/categories";
 import { getProductCategories } from "@/services/product/categories";
 import { blogService } from "@/services/blog/blog.service";
@@ -24,6 +23,7 @@ import HomePromoBanners from "@/components/Home/PromoBanners";
 import { getPublicSuperAdminSettings } from "@/services/super-admin/settings/public";
 import HomeProductSections from "./HomeProductSections";
 import { SkeletonBlock, SkeletonMedia, SkeletonText } from "@repo/ui/skeleton";
+import type { SuperAdminSettings } from "@/types/super-admin/settings";
 
 export const metadata: Metadata = {
   title: {
@@ -129,9 +129,11 @@ async function StoriesSection() {
 async function ProductSectionsBlock({
   featuredCategorySlug,
   featuredCategoryBannerImage,
+  homepageSettings,
 }: {
   featuredCategorySlug: string;
   featuredCategoryBannerImage: string;
+  homepageSettings: SuperAdminSettings;
 }) {
   const parentCategories = await getProductCategories({
     mainOnly: true,
@@ -146,6 +148,7 @@ async function ProductSectionsBlock({
       featuredCategorySlug={featuredCategorySlug}
       featuredCategoryBannerImage={featuredCategoryBannerImage}
       mainCategories={parentCategories}
+      homepageSettings={homepageSettings}
     />
   );
 }
@@ -169,9 +172,6 @@ async function BlogSection() {
 }
 
 export default async function Home() {
-  // Ensure env (e.g. STRAPI_INTERNAL_URL) is read at request time in the container, not build time (Next.js 16)
-  await connection();
-
   const homepageSettings = await getPublicSuperAdminSettings();
 
   const promoBanners = [
@@ -256,6 +256,7 @@ export default async function Home() {
         <ProductSectionsBlock
           featuredCategorySlug={featuredCategorySlug}
           featuredCategoryBannerImage={featuredCategoryBannerImage}
+          homepageSettings={homepageSettings}
         />
       </Suspense>
 

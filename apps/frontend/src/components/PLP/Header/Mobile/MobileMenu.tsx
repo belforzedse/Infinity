@@ -26,7 +26,10 @@ interface MenuItem {
 
 export default function MobileMenu({ isOpen, onClose, onSearchClick }: Props) {
   const pathname = usePathname();
-  const { categories, isLoading: loading } = useProductCategories({ mainOnly: true });
+  const { categories, isLoading: loading } = useProductCategories({
+    mainOnly: true,
+    enabled: isOpen,
+  });
   const panelRef = React.useRef<HTMLDivElement>(null);
 
   // Swipe-to-close gesture for mobile

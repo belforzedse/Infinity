@@ -1,10 +1,8 @@
 import { useMemo } from "react";
 import type { ProductCardProps } from "@/components/Product/Card";
 import type { ProductSmallCardProps } from "@/components/Product/SmallCard";
-import { IMAGE_BASE_URL } from "@/constants/api";
-import { calculateUniqueColorsCount, getUniqueColorCodes } from "@/services/product/product";
+import { formatProductsToCardProps } from "@/services/product/product";
 import type { PLPProduct } from "@/components/PLP/types";
-import { getProductPrimaryPricing, hasAvailableStock } from "@/utils/product";
 
 interface UseSidebarProductsArgs {
   validProducts: PLPProduct[];
@@ -54,34 +52,29 @@ export const useSidebarProducts = ({
 }: UseSidebarProductsArgs): UseSidebarProductsResult => {
   const sidebarProducts = useMemo(() => {
     return validProducts
-      .filter((product) => hasAvailableStock(product) && hasImage(product))
+      .filter((product) => product.attributes.IsAvailable === true && hasImage(product))
       .slice(0, 3)
       .map((product): ProductSmallCardProps | null => {
         try {
-          const { price, discount, discountPrice } = getProductPrimaryPricing(product, {
-            requirePositiveGeneralDiscount: true,
-          });
+          const card = formatProductsToCardProps([product])[0];
 
-          if (Number.isNaN(price) || price <= 0) {
+          if (!card || Number.isNaN(card.price) || card.price <= 0) {
             throw new Error("Invalid price for sidebar product");
           }
 
           return {
-            id: product.id,
-            title: product.attributes.Title || "",
-            category: product.attributes.product_main_category?.data?.attributes?.Title || "",
-            likedCount: product.attributes.SeenCount || 0,
-            price: price,
-            discountedPrice: discountPrice,
-            discount: discount,
-            image: product.attributes.CoverImage?.data?.attributes?.url
-              ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
-              : "",
-            colorsCount: calculateUniqueColorsCount(
-              product.attributes.product_variations?.data || [],
-            ),
-            colorCodes: getUniqueColorCodes(product.attributes.product_variations?.data || []),
-            isAvailable: true,
+            id: card.id,
+            slug: card.slug,
+            title: card.title,
+            category: card.category,
+            likedCount: card.seenCount || 0,
+            price: card.price,
+            discountedPrice: card.discountPrice,
+            discount: card.discount,
+            image: card.images[0] || "",
+            colorsCount: card.colorsCount,
+            colorCodes: card.colorCodes,
+            isAvailable: card.isAvailable,
           };
         } catch (error) {
           return null;

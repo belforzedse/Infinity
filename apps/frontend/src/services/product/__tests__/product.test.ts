@@ -292,14 +292,13 @@ describe("Product Service Helpers", () => {
       expect(result[0].type).toBe("image");
     });
 
-    it("should add default placeholder when no images", () => {
+    it("should return empty gallery when no images", () => {
       const product = createMockProduct();
       product.attributes.CoverImage.data = null as any;
 
       const result = formatGalleryAssets(product);
 
-      expect(result).toHaveLength(1);
-      expect(result[0].id).toBe("default");
+      expect(result).toEqual([]);
     });
   });
 
@@ -329,6 +328,7 @@ describe("Product Service Helpers", () => {
                 {
                   id: 1,
                   attributes: {
+                    IsPublished: true,
                     Price: 100000,
                     product_stock: {
                       data: {
@@ -352,6 +352,49 @@ describe("Product Service Helpers", () => {
       expect(result[0].price).toBe(100000);
     });
 
+    it("should format compact card projection without variations", () => {
+      const result = formatProductsToCardProps([
+        {
+          id: 12,
+          attributes: {
+            Title: "Projected Product",
+            Slug: "projected-product",
+            SeenCount: 9,
+            Price: 120000,
+            DiscountPrice: 90000,
+            Discount: 25,
+            IsAvailable: true,
+            InventoryCount: 3,
+            ColorsCount: 2,
+            ColorCodes: ["#111111", "#ffffff"],
+            CoverImage: {
+              url: "/uploads/projected.jpg",
+            },
+            product_main_category: {
+              Title: "Bags",
+              Slug: "bags",
+            },
+          },
+        },
+      ]);
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toMatchObject({
+        id: 12,
+        slug: "projected-product",
+        title: "Projected Product",
+        category: "Bags",
+        price: 120000,
+        discountPrice: 90000,
+        discount: 25,
+        isAvailable: true,
+        inventoryCount: 3,
+        colorsCount: 2,
+        colorCodes: ["#111111", "#ffffff"],
+      });
+      expect(result[0].images[0]).toContain("/uploads/projected.jpg");
+    });
+
     it("should handle empty array", () => {
       const result = formatProductsToCardProps([]);
 
@@ -368,6 +411,7 @@ describe("Product Service Helpers", () => {
               data: [
                 {
                   attributes: {
+                    IsPublished: true,
                     Price: 100000,
                     product_stock: {
                       data: {

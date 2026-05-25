@@ -70,6 +70,7 @@ export interface ProductVariation {
 
 interface ProductWithVariations {
   attributes?: {
+    IsAvailable?: boolean | null;
     product_variations?: {
       data?: ProductVariation[] | null;
     } | null;
@@ -123,6 +124,10 @@ export function getProductImages(
 }
 
 export const hasAvailableStock = (product: ProductWithVariations): boolean => {
+  if (typeof product.attributes?.IsAvailable === "boolean") {
+    return product.attributes.IsAvailable;
+  }
+
   return getVariations(product).some((variation) => isVariationInStock(variation));
 };
 

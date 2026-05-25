@@ -2,56 +2,57 @@
 
 import { API_BASE_URL, IMAGE_BASE_URL } from "@/constants/api";
 import Image from "next/image";
-import { calculateUniqueColorsCount, getUniqueColorCodes } from "@/services/product/product";
 import imageLoader from "@/utils/imageLoader";
 import ProductSmallCard from "../Product/SmallCard";
+import type { ProductSmallCardProps } from "../Product/SmallCard";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { ProductStatus } from "@/components/PLP/types";
 
 interface PLPHeroBannerProps {
   category?: string;
+  initialTitle?: string;
+  initialImageUrl?: string;
+  initialProducts?: ProductSmallCardProps[];
 }
 
 interface ProductData {
   id: number;
   attributes: {
     Title: string;
+    Slug?: string;
     Description: string;
     Status: ProductStatus;
     AverageRating: number | null;
     RatingCount: number | null;
     SeenCount?: number | null;
+    Price?: number | string | null;
+    DiscountPrice?: number | string | null;
+    Discount?: number | string | null;
+    IsAvailable?: boolean | null;
+    ColorsCount?: number | string | null;
+    ColorCodes?: string[] | null;
     CoverImage: {
-      data: {
+      url?: string;
+      formats?: {
+        thumbnail?: { url?: string };
+        small?: { url?: string };
+      };
+      data?: {
         attributes: {
           url: string;
         };
       };
     };
     product_main_category: {
-      data: {
+      Title?: string;
+      Slug?: string;
+      data?: {
         attributes: {
           Title: string;
           Slug: string;
         };
       };
-    };
-    product_variations: {
-      data: Array<{
-        attributes: {
-          SKU: string;
-          Price: string;
-          IsPublished: boolean;
-          general_discounts?: {
-            data: Array<{
-              attributes: {
-                Amount: number;
-              };
-            }>;
-          };
-        };
-      }>;
     };
   };
 }
@@ -67,11 +68,13 @@ interface ProcessedProduct {
   image: string;
   colorsCount: number;
   colorCodes: string[];
+  isAvailable: boolean;
+  slug?: string;
 }
 
 const MAX_HERO_PRODUCTS = 6;
 
-const BASE_PRODUCT_FETCH_URL = `${API_BASE_URL}/products?filters[Status]=Active&filters[removedAt][$null]=true&populate[0]=CoverImage&populate[1]=product_main_category&populate[2]=product_variations&populate[3]=product_variations.product_stock&populate[4]=product_variations.product_variation_color`;
+const BASE_PRODUCT_FETCH_URL = `${API_BASE_URL}/products?view=card&filters[Status]=Active&filters[removedAt][$null]=true&filters[product_variations][Price][$gte]=1&filters[product_variations][product_stock][Count][$gt]=0`;
 
 // Helper to ensure image URLs have proper format
 const formatImageUrl = (path?: string): string => {
@@ -91,48 +94,32 @@ const formatImageUrl = (path?: string): string => {
 };
 
 const mapProduct = (product: ProductData): ProcessedProduct => {
-  const firstValidVariation = product.attributes.product_variations.data.find((variation) => {
-    const price = variation.attributes.Price;
-    const isPublished = variation.attributes.IsPublished === true;
-    return isPublished && price && parseInt(price) > 0;
-  });
-
-  if (!firstValidVariation) {
-    return {
-      id: product.id,
-      title: product.attributes.Title,
-      category: product.attributes.product_main_category?.data?.attributes?.Title,
-      likedCount: product.attributes.SeenCount || 0,
-      price: 0,
-      discountedPrice: 0,
-      discount: 0,
-      image: formatImageUrl(product.attributes.CoverImage?.data?.attributes?.url),
-      colorsCount: calculateUniqueColorsCount(product.attributes.product_variations?.data || []),
-      colorCodes: getUniqueColorCodes(product.attributes.product_variations?.data || []),
-    };
-  }
-
-  const hasDiscount =
-    firstValidVariation.attributes.general_discounts?.data &&
-    firstValidVariation.attributes.general_discounts.data.length > 0;
-  const discount =
-    hasDiscount && firstValidVariation.attributes.general_discounts?.data
-      ? firstValidVariation.attributes.general_discounts.data[0].attributes.Amount
-      : 0;
-  const price = parseInt(firstValidVariation.attributes.Price || "0");
-  const discountedPrice = hasDiscount && discount ? price * (1 - discount / 100) : price;
+  const price = Number(product.attributes.Price || 0);
+  const discount = Number(product.attributes.Discount || 0);
+  const discountedPrice = Number(product.attributes.DiscountPrice || 0);
+  const cover = product.attributes.CoverImage;
+  const imagePath =
+    cover?.formats?.small?.url ||
+    cover?.formats?.thumbnail?.url ||
+    cover?.url ||
+    cover?.data?.attributes?.url;
 
   return {
     id: product.id,
+    slug: product.attributes.Slug,
     title: product.attributes.Title,
-    category: product.attributes.product_main_category?.data?.attributes?.Title,
-      likedCount: product.attributes.SeenCount || 0,
+    category:
+      product.attributes.product_main_category?.Title ||
+      product.attributes.product_main_category?.data?.attributes?.Title ||
+      "",
+    likedCount: product.attributes.SeenCount || 0,
     price,
     discountedPrice,
     discount,
-    image: formatImageUrl(product.attributes.CoverImage?.data?.attributes?.url),
-    colorsCount: calculateUniqueColorsCount(product.attributes.product_variations?.data || []),
-    colorCodes: getUniqueColorCodes(product.attributes.product_variations?.data || []),
+    image: formatImageUrl(imagePath),
+    colorsCount: Number(product.attributes.ColorsCount || 0),
+    colorCodes: product.attributes.ColorCodes || [],
+    isAvailable: product.attributes.IsAvailable === true,
   };
 };
 
@@ -164,12 +151,21 @@ function getRandomProducts(): Promise<ProcessedProduct[]> {
   return fetchProductsFromUrl(url).then((products) => shuffle(products).slice(0, MAX_HERO_PRODUCTS));
 }
 
-export default function PLPHeroBanner({ category }: PLPHeroBannerProps) {
-  const [title, setTitle] = useState("همه محصولات");
-  const [imageUrl, setImageUrl] = useState("/images/PLP.webp");
-  const [featuredProducts, setFeaturedProducts] = useState<ProcessedProduct[]>([]);
+export default function PLPHeroBanner({
+  category,
+  initialTitle,
+  initialImageUrl,
+  initialProducts,
+}: PLPHeroBannerProps) {
+  const [title, setTitle] = useState(initialTitle || "همه محصولات");
+  const [imageUrl, setImageUrl] = useState(initialImageUrl || "/images/PLP.webp");
+  const [featuredProducts, setFeaturedProducts] = useState<Array<ProcessedProduct | ProductSmallCardProps>>(
+    initialProducts || [],
+  );
 
   useEffect(() => {
+    if (initialProducts) return;
+
     const fetchData = async () => {
       try {
         const [categoryData, products] = await Promise.all([
@@ -204,7 +200,7 @@ export default function PLPHeroBanner({ category }: PLPHeroBannerProps) {
     };
 
     fetchData();
-  }, [category]);
+  }, [category, initialProducts]);
 
   const visibleProducts = featuredProducts
     .filter((product) => product.image && product.image !== "")

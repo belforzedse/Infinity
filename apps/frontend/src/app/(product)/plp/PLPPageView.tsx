@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import { connection } from "next/server";
 import { notFound, redirect } from "next/navigation";
 import PLPHeroBanner from "@/components/PLP/HeroBanner";
 import PLPList from "@/components/PLP/List";
@@ -13,6 +12,7 @@ import {
   buildCollectionItems,
   buildPLPPageCopy,
   getPLPCategoryContext,
+  getPLPHeroProducts,
   getPLPProducts,
   parsePLPQuery,
 } from "@/services/product/plp";
@@ -37,7 +37,6 @@ function toURLSearchParams(params: { [key: string]: string | string[] | undefine
 }
 
 export default async function PLPPageView({ categorySlug, searchParams }: PLPPageViewProps) {
-  await connection();
   const params = await searchParams;
   const query = parsePLPQuery(params);
 
@@ -64,6 +63,9 @@ export default async function PLPPageView({ categorySlug, searchParams }: PLPPag
   }
 
   const resolvedCategoryContext = categoryContext ?? undefined;
+  const heroProductsPromise = !query.search
+    ? getPLPHeroProducts(resolvedCategoryContext?.slug)
+    : Promise.resolve([]);
   const { products, pagination } = await getPLPProducts(
     query,
     resolvedCategoryContext?.categorySlugs,
@@ -84,6 +86,7 @@ export default async function PLPPageView({ categorySlug, searchParams }: PLPPag
 
   const { pageName, pageDescription, url } = buildPLPPageCopy(query, resolvedCategoryContext);
   const collectionItems = buildCollectionItems(products);
+  const heroProducts = await heroProductsPromise;
 
   return (
     <PageContainer className="space-y-6 pb-20 pt-6">
@@ -97,7 +100,13 @@ export default async function PLPPageView({ categorySlug, searchParams }: PLPPag
         />
       )}
 
-      {!query.search && <PLPHeroBanner category={resolvedCategoryContext?.slug} />}
+      {!query.search && (
+        <PLPHeroBanner
+          category={resolvedCategoryContext?.slug}
+          initialTitle={resolvedCategoryContext?.title}
+          initialProducts={heroProducts}
+        />
+      )}
 
       <Suspense fallback={<ProductListSkeleton />}>
         <PLPList
