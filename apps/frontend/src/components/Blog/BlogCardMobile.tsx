@@ -18,7 +18,7 @@ interface BlogCardMobileProps {
 const BlogCardMobile: React.FC<BlogCardMobileProps> = ({
   post,
   priority = false,
-  className = ""
+  className = "",
 }) => {
   const getImageUrl = () => {
     if (!post.FeaturedImage) return null;
@@ -31,79 +31,61 @@ const BlogCardMobile: React.FC<BlogCardMobileProps> = ({
   };
 
   const imageUrl = getImageUrl();
+  const publishedDate = new Date(post.PublishedAt || post.createdAt).toLocaleDateString("fa-IR");
+  const categoryName = post.blog_category?.Name || "اینفینیتی";
+  const excerpt = post.Excerpt || post.ShortContent;
 
   return (
-    <article className={`group w-full max-w-[361px] ${className}`}>
+    <article className={`group w-full min-w-0 ${className}`}>
       <Link
         href={`/${post.Slug}`}
-        className="flex gap-2 rounded-2xl bg-white border-2 border-pink-100 p-2 transition-all duration-200 hover:shadow-md hover:border-pink-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2"
+        className="block overflow-hidden rounded-2xl border-2 border-pink-100 bg-white transition-all duration-200 hover:border-pink-200 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2"
       >
-        {/* Featured Image */}
-        <div className="relative h-[110px] w-[110px] flex-shrink-0 overflow-hidden rounded-xl">
+        <div className="relative aspect-[16/10] w-full overflow-hidden bg-gradient-to-br from-pink-50 to-pink-100">
           {imageUrl ? (
             <BlurImage
               src={imageUrl}
               alt={post.Title}
               fill
               className="object-cover transition-transform duration-300 group-hover:scale-105"
-              sizes="110px"
+              sizes="(max-width: 768px) 100vw, 361px"
               priority={priority}
               loader={imageLoader}
             />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-pink-50 to-pink-100" />
-          )}
+          ) : null}
 
-          {/* Watermark */}
-          <div className="absolute top-2 left-2 z-10">
-            <span className="text-[10px] font-medium text-neutral-600 bg-white/80 backdrop-blur-sm px-1.5 py-0.5 rounded">
+          <div className="absolute start-2 top-2 z-10">
+            <span className="rounded bg-white/85 px-1.5 py-0.5 text-[10px] font-medium text-neutral-600 backdrop-blur-sm">
               اینفینیتی
             </span>
           </div>
         </div>
 
-        {/* Content Section */}
-        <div className="flex flex-1 flex-col justify-between gap-2 min-w-0 text-right">
-          {/* Metadata Row */}
-          <div className="flex items-center justify-between gap-2 flex-wrap">
-            {/* Category */}
-            <div className="flex items-center gap-1">
-              <LayoutGrid className="h-4 w-4 text-neutral-400" />
-              <span className="text-xs text-neutral-400 leading-[1.74]">
-                {post.blog_category?.Name || 'اینفینیتی'}
-              </span>
-            </div>
-
-            {/* Date */}
-            <div className="flex items-center gap-1">
-              <Calendar className="h-4 w-4 text-neutral-400" />
-              <span className="text-xs text-neutral-400 leading-[1.74]">
-                {new Date(post.PublishedAt || post.createdAt).toLocaleDateString("fa-IR")}
-              </span>
-            </div>
+        <div className="flex flex-col gap-2 p-3 text-right">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-neutral-400">
+            <span className="inline-flex items-center gap-1">
+              <LayoutGrid className="h-3.5 w-3.5 shrink-0" aria-hidden />
+              <span className="line-clamp-1">{categoryName}</span>
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <Calendar className="h-3.5 w-3.5 shrink-0" aria-hidden />
+              <span>{publishedDate}</span>
+            </span>
           </div>
 
-          {/* Content */}
-          <div className="flex flex-col items-end gap-1">
-            {/* Title */}
-            <h3 className="text-sm font-medium text-neutral-700 text-right line-clamp-2 leading-[1.9] w-full">
-              {post.Title}
-            </h3>
+          <h3 className="line-clamp-2 text-base font-medium leading-snug text-neutral-700">
+            {post.Title}
+          </h3>
 
-            {/* Author */}
-            {post.blog_author && (
-              <p className="text-xs text-neutral-500 text-right w-full">
-                نویسنده: {resolveBlogAuthorDisplayName(post.blog_author)}
-              </p>
-            )}
+          {post.blog_author && (
+            <p className="line-clamp-1 text-xs text-neutral-500">
+              نویسنده: {resolveBlogAuthorDisplayName(post.blog_author)}
+            </p>
+          )}
 
-            {/* Excerpt */}
-            {post.Excerpt && (
-              <p className="text-xs text-neutral-400 text-right line-clamp-2 leading-[1.74] w-full">
-                {post.Excerpt}
-              </p>
-            )}
-          </div>
+          {excerpt ? (
+            <p className="line-clamp-2 text-xs leading-relaxed text-neutral-400">{excerpt}</p>
+          ) : null}
         </div>
       </Link>
     </article>

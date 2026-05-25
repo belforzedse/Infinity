@@ -3,6 +3,7 @@ import { API_BASE_URL, ENDPOINTS, getStrapiServerUrl } from "@/constants/api";
 import type { ApiResponse } from "@/types/api";
 import type { ProductCardProps } from "@/components/Product/Card";
 import logger from "@/utils/logger";
+import { parseStockCount } from "@/utils/product";
 import { computeDiscountForVariation, parseNumber } from "@/utils/discounts";
 import { resolveAssetUrl } from "@/utils/resolveAssetUrl";
 
@@ -330,7 +331,6 @@ export const formatProductCardProjection = (product: ProductCardProjection): Pro
   const discountPrice = parseNumber(attrs.DiscountPrice) ?? 0;
   const discount = parseNumber(attrs.Discount) ?? 0;
   const colorsCount = parseNumber(attrs.ColorsCount) ?? 0;
-  const inventoryCount = parseNumber(attrs.InventoryCount) ?? 0;
   const colorCodes = Array.isArray(attrs.ColorCodes)
     ? attrs.ColorCodes.filter((code: unknown): code is string => typeof code === "string" && code.trim() !== "")
     : [];
@@ -346,7 +346,6 @@ export const formatProductCardProjection = (product: ProductCardProjection): Pro
     isAvailable: attrs.IsAvailable === true,
     colorsCount: colorsCount > 0 ? colorsCount : undefined,
     colorCodes: colorCodes.length > 0 ? colorCodes : undefined,
-    inventoryCount: inventoryCount > 0 ? inventoryCount : undefined,
   };
 
   if (discountPrice > 0 && discountPrice < price) {
@@ -701,7 +700,7 @@ export const getDefaultProductVariation = (product: ProductDetail) => {
 
     // Check if it has stock data and quantity > 0
     const stock = variation.attributes.product_stock?.data?.attributes;
-    return stock && typeof stock.Count === "number" && stock.Count > 0;
+    return stock ? parseStockCount(stock.Count) > 0 : false;
   });
 
   if (publishedWithStock) {
@@ -855,9 +854,65 @@ export const getAvailableStockCount = (
   }
 
   const stockData = variation.attributes.product_stock.data.attributes;
-  const stockQuantity = stockData.Count;
+  return parseStockCount(stockData.Count);
+};
 
-  return typeof stockQuantity === "number" ? stockQuantity : 0;
+export type PdpSelectionState = {
+  colorId: string;
+  sizeId: string;
+  modelId: string;
+  hasStock: boolean;
+  variationId?: string;
+};
+
+export const getVariationRelationIds = (
+  variation: ProductDetail["attributes"]["product_variations"]["data"][0],
+): { colorId: string; sizeId: string; modelId: string } => ({
+  colorId: variation.attributes.product_variation_color?.data?.id?.toString() ?? "",
+  sizeId: variation.attributes.product_variation_size?.data?.id?.toString() ?? "",
+  modelId: variation.attributes.product_variation_model?.data?.id?.toString() ?? "",
+});
+
+/** Picks color/size/model from the first in-stock variation so PDP matches card availability. */
+export const getInitialPdpSelection = (
+  productData: ProductDetail | null | undefined,
+  colors: { id: string }[],
+  sizes: { id: string }[],
+  models: { id: string }[],
+): PdpSelectionState => {
+  const empty: PdpSelectionState = { colorId: "", sizeId: "", modelId: "", hasStock: false };
+  const variations = productData?.attributes?.product_variations?.data;
+  if (!variations?.length) return empty;
+
+  const purchasable = variations.filter(
+    (variation) =>
+      variation.attributes.IsPublished === true && hasStockForVariation(variation, 1),
+  );
+
+  const preferred =
+    purchasable[0] ??
+    (productData ? getDefaultProductVariation(productData) : null);
+
+  if (preferred) {
+    const ids = getVariationRelationIds(preferred);
+    return {
+      ...ids,
+      hasStock: hasStockForVariation(preferred, 1),
+      variationId: preferred.id?.toString(),
+    };
+  }
+
+  const firstColor =
+    colors.length > 0 ? colors[0].id : "";
+  const firstSize = sizes.length > 0 ? sizes[0].id : "";
+  const firstModel = models.length > 0 ? models[0].id : "";
+
+  return {
+    colorId: firstColor,
+    sizeId: firstSize,
+    modelId: firstModel,
+    hasStock: false,
+  };
 };
 
 // Helper function to check if a variation has sufficient stock
@@ -892,14 +947,13 @@ export const hasStockForVariation = (
     });
   }
 
-  const stockQuantity = stockData.Count;
+  const stockQuantity = parseStockCount(stockData.Count);
   if (process.env.NODE_ENV !== "production") {
     logger.info("Stock Count value", { stockQuantity });
     logger.info("Requested quantity", { requestedQuantity });
   }
 
-  // Updated validation: Check if stock is sufficient for the requested quantity
-  const hasStock = typeof stockQuantity === "number" && stockQuantity >= requestedQuantity;
+  const hasStock = stockQuantity >= requestedQuantity;
   if (process.env.NODE_ENV !== "production") {
     logger.info("Has sufficient stock", { hasStock });
     logger.info("=== END STOCK CHECK ===");
@@ -923,8 +977,9 @@ export const findProductVariation = (
     const colorMatch =
       !colorId || variation.attributes.product_variation_color?.data?.id === colorId;
     const sizeMatch = !sizeId || variation.attributes.product_variation_size?.data?.id === sizeId;
+    const variationModelId = variation.attributes.product_variation_model?.data?.id;
     const modelMatch =
-      !modelId || variation.attributes.product_variation_model?.data?.id === modelId;
+      !modelId || variationModelId === undefined || variationModelId === modelId;
 
     return variation.attributes.IsPublished && colorMatch && sizeMatch && modelMatch;
   });
@@ -1058,7 +1113,7 @@ export const formatProductsToCardProps = (products: any[]): ProductCardProps[] =
         if (v.attributes.IsPublished !== true) return false;
         const hasPrice = v.attributes.Price && parseInt(v.attributes.Price) > 0;
         const stockCount = v.attributes.product_stock?.data?.attributes?.Count;
-        const hasStock = typeof stockCount === "number" && stockCount > 0;
+        const hasStock = parseStockCount(stockCount) > 0;
         return hasPrice && hasStock;
       });
 
@@ -1080,7 +1135,7 @@ export const formatProductsToCardProps = (products: any[]): ProductCardProps[] =
         product.attributes.product_variations?.data?.some((v: any) => {
           if (v.attributes.IsPublished !== true) return false;
           const stockCount = v.attributes.product_stock?.data?.attributes?.Count;
-          return typeof stockCount === "number" && stockCount > 0;
+          return parseStockCount(stockCount) > 0;
         }) || false;
 
       // Calculate unique colors count and codes

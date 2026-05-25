@@ -84,6 +84,17 @@ describe("PDPHeroInfo selection logic", () => {
     expect(screen.getByText(/قیمت/i) || true).toBeTruthy();
   });
 
+  test("shows in stock when first color is out of stock but another variation has stock", () => {
+    const outOfStock = makeVariation(1, true, 0, 10, 1, 100);
+    const inStock = makeVariation(2, true, 3, 11, 2, 101);
+    const productData = makeProductData([outOfStock, inStock]);
+
+    render(<PDPHeroInfo {...baseProps} productData={productData} />);
+
+    expect(screen.queryByText("ناموجود")).not.toBeInTheDocument();
+    expect(screen.getByText(/تومان/)).toBeInTheDocument();
+  });
+
   test("clicking enabled options updates variation", () => {
     const v1 = makeVariation(1, true, 2, 10, 1, 100);
     const v2 = makeVariation(2, true, 2, 11, 2, 101);

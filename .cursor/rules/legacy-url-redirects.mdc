@@ -1,0 +1,30 @@
+---
+description: Legacy storefront URL redirects (WordPress / old paths) to current Next.js routes.
+globs:
+  - apps/frontend/redirects.ts
+  - apps/frontend/next.config.ts
+---
+
+# Legacy URL Redirects
+
+Permanent **301** redirects are defined in [`apps/frontend/redirects.ts`](apps/frontend/redirects.ts) and wired in `next.config.ts` via `redirects()`.
+
+| Legacy path | Destination |
+|-------------|-------------|
+| `/shop` | `/plp` |
+| `/shop/:slug` | `/plp/category/:slug` |
+| `/product/:slug` | `/pdp/:slug` |
+| `/my-account` | `/account` |
+| `/سوالات-متداول` | `/faq` |
+
+## Notes
+
+- Query strings are preserved automatically by Next.js.
+- Trailing slashes are normalized in [`middleware.ts`](apps/frontend/middleware.ts) (`/shop/foo/` → `/shop/foo` → redirect to `/plp/category/foo`).
+- Add new legacy paths to `legacyRedirects` in `redirects.ts`; keep the list in this rule in sync.
+
+## Related
+
+- FAQ page: `apps/frontend/src/app/(product)/faq/page.tsx` (`/faq`)
+- PLP category: `apps/frontend/src/app/(product)/plp/category/[slug]/page.tsx`
+- PDP: `apps/frontend/src/app/(product)/pdp/[slug]/page.tsx`

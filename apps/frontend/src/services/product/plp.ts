@@ -6,7 +6,7 @@ import type { Variation } from "@/types/Product";
 import { computeDiscountForVariation } from "@/utils/discounts";
 import fetchWithTimeout from "@/utils/fetchWithTimeout";
 import logger from "@/utils/logger";
-import { getProductCreatedAt, productTitleHasG } from "@/utils/product";
+import { getProductCreatedAt, parseStockCount, productTitleHasG } from "@/utils/product";
 import { getCategoryAndDescendantSlugs } from "@/utils/category-descendants";
 import { getValidatedCategoryCached, type CategoryData } from "@/utils/category-validation";
 import { getCategoryPlpHref } from "@/utils/plpRoutes";
@@ -280,7 +280,7 @@ function hasStock(product: PLPProduct): boolean {
     product.attributes.product_variations?.data?.some((variation) => {
       if (!variation.attributes?.IsPublished) return false;
       const stockCount = variation.attributes.product_stock?.data?.attributes?.Count;
-      return typeof stockCount === "number" && stockCount > 0;
+      return parseStockCount(stockCount) > 0;
     }),
   );
 }
@@ -297,7 +297,7 @@ function hasDiscountedVariation(product: PLPProduct): boolean {
     product.attributes.product_variations?.data?.some((variation: any) => {
       if (!variation?.attributes?.IsPublished) return false;
       const stockCount = variation.attributes.product_stock?.data?.attributes?.Count;
-      if (typeof stockCount !== "number" || stockCount <= 0) return false;
+      if (parseStockCount(stockCount) <= 0) return false;
       const price = parseFloat(variation.attributes.Price || "0");
       const generalDiscounts = variation.attributes.general_discounts?.data;
       if (generalDiscounts && generalDiscounts.length > 0) return true;
@@ -320,7 +320,7 @@ function getMinVariationPrice(product: PLPProduct): number {
   for (const variation of variations) {
     if (!variation.attributes.IsPublished) continue;
     const stockCount = variation.attributes.product_stock?.data?.attributes?.Count;
-    if (typeof stockCount === "number" && stockCount <= 0) continue;
+    if (parseStockCount(stockCount) <= 0) continue;
     const discountResult = computeDiscountForVariation(variation.attributes);
     const finalPrice = discountResult?.finalPrice || Number(variation.attributes.Price) || 0;
     if (finalPrice > 0 && finalPrice < minPrice) minPrice = finalPrice;

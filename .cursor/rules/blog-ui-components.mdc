@@ -39,13 +39,14 @@ interface BlogCardProps {
 
 ### BlogCardMobile (`BlogCardMobile.tsx`)
 
-Compact horizontal blog card for mobile layouts.
+Compact **vertical** blog card for viewports below `md` (homepage carousels, blog sections).
 
 **Features:**
-- Horizontal layout with image on the right
-- Fixed image size: 110x110px
-- Same styling as BlogCard (thick border, visible icons, watermark)
-- Condensed metadata and content
+- Full-width stack: image on top (`aspect-[16/10]`), content below
+- Same border/watermark styling as `BlogCard`
+- Metadata row: category + date inline with wrap (no cramped side-by-side with image)
+- Title, optional author, excerpt with line clamps
+- Used inside `BlogCarousel` mobile block (`md:hidden`), not centered in a fixed `max-w-[361px]` box
 
 **Props:**
 ```typescript

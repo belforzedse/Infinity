@@ -3,7 +3,7 @@ import { ENDPOINTS, getStrapiServerUrl } from "@/constants/api";
 import { buildTitleKeywordFilter } from "@/constants/productKeywords";
 import type { ProductCardProps } from "@/components/Product/Card";
 import { formatProductsToCardProps } from "./product";
-import { productTitleMatchesKeywords } from "@/utils/product";
+import { parseStockCount, productTitleMatchesKeywords } from "@/utils/product";
 import logger from "@/utils/logger";
 import { getPublicSuperAdminSettings } from "@/services/super-admin/settings/public";
 
@@ -19,13 +19,7 @@ const productHasStock = (product: any): boolean => {
   return variations.some((variation: any) => {
     if (variation?.attributes?.IsPublished !== true) return false;
     const stockCount = variation?.attributes?.product_stock?.data?.attributes?.Count;
-    const numericStock =
-      typeof stockCount === "number"
-        ? stockCount
-        : stockCount !== undefined && stockCount !== null
-          ? Number(stockCount)
-          : 0;
-    return Number.isFinite(numericStock) && numericStock > 0;
+    return parseStockCount(stockCount) > 0;
   });
 };
 
@@ -41,8 +35,7 @@ const productHasDiscount = (product: any): boolean => {
   if (!Array.isArray(variations)) return false;
   return variations.some((variation: any) => {
     const stockCount = variation.attributes?.product_stock?.data?.attributes?.Count;
-    const hasStock = typeof stockCount === "number" && stockCount > 0;
-    if (!hasStock) return false;
+    if (parseStockCount(stockCount) <= 0) return false;
     const variationPrice = parseFloat(String(variation.attributes?.Price ?? 0));
     const generalDiscounts = variation.attributes?.general_discounts?.data;
     if (Array.isArray(generalDiscounts) && generalDiscounts.length > 0) return true;

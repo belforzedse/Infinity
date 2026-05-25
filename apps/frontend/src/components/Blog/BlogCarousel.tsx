@@ -189,13 +189,11 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({
         </div>
       </div>
 
-      {/* Mobile Grid */}
+      {/* Mobile list — vertical cards, full width */}
       <div className="block md:hidden">
-        <div className="flex flex-col gap-4 items-center">
+        <div className="flex w-full min-w-0 flex-col gap-3">
           {currentPosts.map((post, index) => (
-            <div key={post.id} className="w-full flex justify-center">
-              <BlogCardMobile post={post} priority={index === 0} />
-            </div>
+            <BlogCardMobile key={post.id} post={post} priority={index === 0} />
           ))}
         </div>
 

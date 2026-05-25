@@ -8,6 +8,10 @@ alwaysApply: false
 
 Use this when the homepage shows only blogs, the site is slow, or things broke after: **adding more Next instances**, **switching to GitLab**, or **adding the cache handler**.
 
+## Local dev: many homepage console errors
+
+If Next dev logs repeated `[Settings]`, `[ProductCategories]`, `[BatchHomepage]` errors with `fetch failed` / `other side closed` to `localhost:1337`, Strapi is not running or not healthy. Start `@repo/backend` and confirm `curl http://localhost:1337/api/settings` returns JSON. See [apps/frontend/dev.env.example](../apps/frontend/dev.env.example) and [frontend-strapi-url-env.mdc](frontend-strapi-url-env.mdc).
+
 ## 1. Can frontend containers reach the internal Strapi URL?
 
 Most homepage data (hero, settings, categories, product sections) uses `getStrapiServerUrl()` → **STRAPI_INTERNAL_URL** at runtime. Blog uses the public URL, so if only blog shows, internal URL is likely failing.
@@ -129,7 +133,7 @@ If the homepage is empty but build succeeded, the problem is almost always **run
 
 ## Related
 
-- [frontend-strapi-url-env.mdc](frontend-strapi-url-env.mdc) – build vs runtime URLs, `connection()`
+- [frontend-strapi-url-env.mdc](frontend-strapi-url-env.mdc) – build vs runtime URLs, `getStrapiServerUrl()`, local dev on port 1337
 - [docker-load-scaling.mdc](docker-load-scaling.mdc) – scale files, Nginx upstreams
 - [frontend-cache-handler.mdc](frontend-cache-handler.mdc) – Redis cache handler (currently disabled)
 - [docs/nginx-internal-api-for-docker.md](../docs/nginx-internal-api-for-docker.md) – Nginx listen on bridge IP

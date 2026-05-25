@@ -1,5 +1,6 @@
 import {
   getDefaultProductVariation,
+  getInitialPdpSelection,
   getProductColors,
   getProductSizes,
   getProductModels,
@@ -241,6 +242,69 @@ describe("Product Service Helpers", () => {
       expect(hasStockForVariation(variation, 5)).toBe(true);
       expect(hasStockForVariation(variation, 15)).toBe(false);
     });
+
+    it("should treat numeric string Count as in stock", () => {
+      const product = createMockProduct();
+      const variation = product.attributes.product_variations.data[0];
+      variation.attributes.product_stock!.data.attributes.Count = "8" as unknown as number;
+
+      expect(hasStockForVariation(variation)).toBe(true);
+    });
+  });
+
+  describe("getInitialPdpSelection", () => {
+    it("selects first in-stock variation when earlier colors are out of stock", () => {
+      const product = createMockProduct();
+      product.attributes.product_variations.data = [
+        {
+          id: 1,
+          attributes: {
+            IsPublished: true,
+            SKU: "SKU-1",
+            Price: 100000,
+            product_stock: { data: { id: 1, attributes: { Count: 0 } } },
+            product_variation_color: {
+              data: { id: 10, attributes: { Title: "Red", ColorCode: "#f00" } },
+            },
+            product_variation_size: {
+              data: { id: 1, attributes: { Title: "S" } },
+            },
+          },
+        },
+        {
+          id: 2,
+          attributes: {
+            IsPublished: true,
+            SKU: "SKU-2",
+            Price: 100000,
+            product_stock: { data: { id: 2, attributes: { Count: 5 } } },
+            product_variation_color: {
+              data: { id: 11, attributes: { Title: "Blue", ColorCode: "#00f" } },
+            },
+            product_variation_size: {
+              data: { id: 2, attributes: { Title: "M" } },
+            },
+          },
+        },
+      ];
+
+      const selection = getInitialPdpSelection(
+        product,
+        [
+          { id: "10", title: "Red", colorCode: "#f00" },
+          { id: "11", title: "Blue", colorCode: "#00f" },
+        ],
+        [
+          { id: "1", title: "S" },
+          { id: "2", title: "M" },
+        ],
+        [],
+      );
+
+      expect(selection.colorId).toBe("11");
+      expect(selection.sizeId).toBe("2");
+      expect(selection.hasStock).toBe(true);
+    });
   });
 
   describe("getAvailableStockCount", () => {
@@ -388,7 +452,6 @@ describe("Product Service Helpers", () => {
         discountPrice: 90000,
         discount: 25,
         isAvailable: true,
-        inventoryCount: 3,
         colorsCount: 2,
         colorCodes: ["#111111", "#ffffff"],
       });

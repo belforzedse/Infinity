@@ -1,0 +1,29 @@
+# Product availability: cards vs PDP
+
+## Symptom
+
+Product cards show as available (price visible), but PDP opens with **ناموجود**.
+
+## Rules
+
+1. **Single source for stock count:** Use `parseStockCount()` from `@/utils/product` (or `hasStockForVariation()` in `@/services/product/product`) everywhere. Strapi may return `Count` as a number or numeric string; strict `typeof === "number"` checks cause false "out of stock" on PDP.
+
+2. **Cards:** `IsAvailable` on compact `view=card` payloads comes from backend `inventoryCount > 0`. Full product lists use `parseStockCount` on variations (same semantics).
+
+3. **PDP default selection:** On load, use `getInitialPdpSelection()` — pick the **first published variation with stock**, not the first color/size in the UI list. Do not default to `colors[0]` + `sizes[0]` unless that combination is in stock.
+
+4. **PDP price/stock UI:** `hasStock` on `PDPHeroInfo` reflects the **currently selected** variation. After init, changing color/size/model updates via `findProductVariation` + `hasStockForVariation`.
+
+5. **Optional model:** `findProductVariation` must match variations without a model even when other variations in the product have models (`modelMatch` allows missing `product_variation_model`).
+
+## Key files
+
+- `apps/frontend/src/utils/product.ts` — `parseStockCount`, `hasAvailableStock`
+- `apps/frontend/src/services/product/product.ts` — `hasStockForVariation`, `getInitialPdpSelection`, `getDefaultProductVariation`
+- `apps/frontend/src/components/PDP/Hero/Info/index.tsx` — PDP selection + price
+- `apps/backend/src/api/product/services/product.ts` — `IsAvailable` / card serializer
+
+## Tests
+
+- `apps/frontend/src/services/product/__tests__/product.test.ts` — string `Count`, `getInitialPdpSelection`
+- `apps/frontend/src/__tests__/pdp-selection.test.tsx` — first color OOS, second in stock

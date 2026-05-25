@@ -31,30 +31,49 @@ the design: Figma — https://www.figma.com/design/x4y3qlCXNd3ZB6ocY09PPm/infini
 - Node.js 20+ (matches Docker images)
 - npm 10+ or Yarn (repo includes `yarn.lock` and `.yarnrc.yml`)
 
-## Quick Start
+## Quick Start (monorepo)
 
-1. Clone and enter the project
+The storefront needs **both** the Strapi backend and this frontend. Without Strapi on port **1337**, the homepage will render with fallbacks but server logs will show many API fetch errors.
 
-```bash
-git clone <repo-url>
-cd infinity-frontend
-```
-
-2. Install dependencies
+1. From the repo root, install dependencies:
 
 ```bash
-npm install --legacy-peer-deps
+pnpm install
 ```
 
-3. Run the dev server (port 2888)
+2. Copy environment template (first time only):
 
 ```bash
-npm run dev
+cp apps/frontend/dev.env.example apps/frontend/.env.local
 ```
 
-Open http://localhost:2888
+Edit `.env.local` if you use a remote API instead of local Strapi.
 
-Environment variables are automatically loaded from `dev.env` - no manual configuration needed!
+3. Start **backend** (Strapi on http://localhost:1337):
+
+```bash
+pnpm --filter @repo/backend dev
+```
+
+4. In another terminal, start **frontend** (http://localhost:2888):
+
+```bash
+pnpm --filter @repo/frontend dev
+```
+
+Or run both via Turbo from the repo root:
+
+```bash
+pnpm dev
+```
+
+5. Verify the API responds before relying on homepage data:
+
+```bash
+curl http://localhost:1337/api/settings
+```
+
+You should see JSON with a `"data"` field.
 
 ## Blog System
 
@@ -89,17 +108,21 @@ For detailed documentation, see `BLOG_SYSTEM.md` in the project root.
 
 ## Environment Variables
 
-Environment variables are automatically loaded by `load-env.js`:
+`load-env.js` runs before `next dev` / `next build` and loads, in order:
 
-- **`dev.env`** - Development environment (auto-loaded in dev mode)
-- **`main.env`** - Production environment (auto-loaded when `NODE_ENV=production`)
-- **`.env.local`** - Personal overrides (optional, gitignored)
+1. **`.env.local`** (gitignored, overrides everything)
+2. **`dev.env`** if present, else **`main.env`** (both gitignored on real machines)
+
+Committed template for local work: **`dev.env.example`** — copy to `.env.local` or `dev.env`.
 
 Key variables:
 
-- `NEXT_PUBLIC_API_BASE_URL`: Base URL for backend API
-- `NEXT_PUBLIC_IMAGE_BASE_URL`: Base host for media/CDN
-- `NEXT_PUBLIC_STRAPI_TOKEN`: Public token for Strapi endpoints
+- `NEXT_PUBLIC_API_BASE_URL`: Backend API (default local: `http://localhost:1337/api`)
+- `NEXT_PUBLIC_IMAGE_BASE_URL`: Media host (default local: `http://localhost:1337/`)
+- `NEXT_PUBLIC_STRAPI_TOKEN`: Public token for Strapi endpoints (if required locally)
+- `STRAPI_INTERNAL_URL`: Server-only; set in Docker runtime (leave empty for local dev)
+
+Server-side fetches use `getStrapiServerUrl()` (see `.cursor/rules/frontend-strapi-url-env.mdc`) — no extra page setup required for homepage/PLP.
 - `NEXT_PUBLIC_MATOMO_URL`: Matomo base URL (for example `https://analytics.example.com`)
 - `NEXT_PUBLIC_MATOMO_SITE_ID`: Matomo site ID used by frontend tracker
 - `REVALIDATION_SECRET`: Secret for blog post cache invalidation (must match backend)

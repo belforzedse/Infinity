@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { type FC, useState, useMemo, useCallback, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
-import { faNum } from "@/utils/faNum";
 import useProductLike from "@/hooks/useProductLike";
 import { getLazySecondaryMediaByProductId } from "@/services/product/product";
 
@@ -44,7 +43,6 @@ export interface ProductCardProps {
   isAvailable?: boolean;
   priority?: boolean;
   productCode?: string;
-  inventoryCount?: number;
 }
 
 const ProductCard: FC<ProductCardProps> = ({
@@ -61,7 +59,6 @@ const ProductCard: FC<ProductCardProps> = ({
   colorCodes,
   isAvailable = true,
   priority = false,
-  inventoryCount,
 }) => {
   // State
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
@@ -103,11 +100,6 @@ const ProductCard: FC<ProductCardProps> = ({
   const hasVariations = useMemo(
     () => isAvailable && (validImages.length > 1 || (colorsCount && colorsCount > 1)),
     [isAvailable, validImages.length, colorsCount],
-  );
-
-  const isLowStock = useMemo(
-    () => isAvailable && inventoryCount && inventoryCount > 0 && inventoryCount < 5,
-    [isAvailable, inventoryCount],
   );
 
   // Event handlers
@@ -203,15 +195,8 @@ const ProductCard: FC<ProductCardProps> = ({
               )}
 
               {/* Badges */}
-              <div className="absolute left-1 right-1 top-1 flex items-center justify-between">
+              <div className="absolute left-1 right-1 top-1">
                 <DiscountBadge discount={discount} />
-                {isLowStock && (
-                  <div className="flex items-center gap-1 rounded-full bg-orange-500/90 px-2 py-1 backdrop-blur-sm">
-                    <span className="text-xs text-white">
-                      {faNum(inventoryCount!)} عدد
-                    </span>
-                  </div>
-                )}
               </div>
 
               {/* Color Swatches - Mobile */}

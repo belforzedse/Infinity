@@ -51,6 +51,8 @@ The PLP is structured to display product listings with filtering capabilities:
   - Title
   - Price (with discount if applicable)
   - Rating/popularity indicators
+  - Discount badge when applicable (no per-card stock quantity badge)
+- **Stock:** Used server-side and in list filters (`hasAvailableStock`, `IsAvailable` on card payloads) so only in-stock products appear; exact counts are not shown on cards.
 
 ### Product card images (performance)
 - **Desktop**: Only 4 images per product are used—cover image plus 3 media for the hover overlay. The API is asked for at most 3 Media items (`populate[Media][pagination][limit]=3`); [getProductImages](apps/apps/frontend/src/utils/product.ts) caps to cover + 3. The main card shows the **cover only** (no slider); the 3 extra images appear in the hover overlay ([VariationOverlay](apps/apps/frontend/src/components/Product/CardParts/VariationOverlay.tsx)).

@@ -11,9 +11,30 @@ alwaysApply: false
 - **Runtime (e.g. Docker container):** Frontend and Strapi are on the same host. Use an internal URL (`STRAPI_INTERNAL_URL`, e.g. `http://host.docker.internal:8080/api`) to skip TLS and public Nginx.
 - **Build (e.g. CI / Docker build stage):** The build runner is not in the same network as the running container. It cannot reach `host.docker.internal` or internal hostnames. Use a public URL (`STRAPI_BUILD_TIME_URL`, e.g. `https://api.infinitycolor.co/api`) so Server Component fetches during `next build` succeed.
 
-Per **Next.js 16** docs ([environment variables](https://nextjs.org/docs/app/building-your-application/configuring/environment-variables), [version 16 upgrade](https://nextjs.org/docs/app/building-your-application/upgrading/version-16)): `process.env` is replaced at build time for static references. Reading env inside a **function** (`getStrapiServerUrl()`) ensures the value is read when the code runs—at build time in the build process, at request time in the server process—so build and runtime can use different env vars.
+## Next.js 16 and `process.env`
 
-For reading env **at request time**, Next.js 16 requires calling `await connection()` from `next/server` at the start of the Server Component. Otherwise `process.env.STRAPI_INTERNAL_URL` is inlined at build (e.g. undefined in CI) and the runtime container env is never used. **Any page or layout that fetches from Strapi on the server and should use STRAPI_INTERNAL_URL must call `await connection()` before any code that calls `getStrapiServerUrl()`.** Examples: **Homepage** (`(product)/page.tsx`) and **PLP** (`plp/page.tsx`) both call `await connection()` at the top of the page so product/settings fetches use the internal URL in the container.
+Next.js 16 can inline `process.env.*` at **build time** when referenced at **module top level** in Server Components. That breaks runtime-only vars like `STRAPI_INTERNAL_URL` in Docker if they are read statically.
+
+**Storefront pattern (homepage, PLP, settings, categories):** use `getStrapiServerUrl()` from `@/constants/api` for every **server-side** Strapi `fetch`. It reads env **inside a function** when the fetch runs, so build and runtime can use different URLs without page-level `connection()`.
+
+Defined in [`packages/api/src/config/public.ts`](packages/api/src/config/public.ts):
+
+```ts
+export function getStrapiServerUrl(): string {
+  if (typeof window !== "undefined") return API_BASE_URL;
+  return (
+    process.env.STRAPI_BUILD_TIME_URL ||
+    process.env.STRAPI_INTERNAL_URL ||
+    API_BASE_URL
+  );
+}
+```
+
+**Do not** read `process.env.STRAPI_INTERNAL_URL` at module scope in new storefront server code. **Do not** add `await connection()` to homepage/PLP solely for Strapi URL resolution—the current `getStrapiServerUrl()` calls already satisfy runtime env for this codebase.
+
+### When `await connection()` is still relevant
+
+Optional for apps that **must** read `process.env` at **module top level** in Server Components (Next.js 16 upgrade guide). Example: [`apps/social/src/app/page.tsx`](apps/social/src/app/page.tsx). The storefront does not use that pattern for Strapi URLs.
 
 ## Env vars
 
@@ -21,14 +42,28 @@ For reading env **at request time**, Next.js 16 requires calling `await connecti
 |----------|------|--------|
 | `STRAPI_BUILD_TIME_URL` | Set only in **build** (CI / Docker build). Leave unset in runtime container. | `https://api.infinitycolor.co/api` |
 | `STRAPI_INTERNAL_URL` | Set in **runtime** container. Optional at build if `STRAPI_BUILD_TIME_URL` is set. | `http://host.docker.internal:8080/api` |
+| `NEXT_PUBLIC_API_BASE_URL` | Client + server fallback; **local dev** default target | `http://localhost:1337/api` |
 
-**Priority:** `STRAPI_BUILD_TIME_URL` > `STRAPI_INTERNAL_URL` > `API_BASE_URL`
+**Priority (server):** `STRAPI_BUILD_TIME_URL` > `STRAPI_INTERNAL_URL` > `NEXT_PUBLIC_API_BASE_URL` (via `API_BASE_URL`)
 
-## Code
+## Local development
 
-- **Use** `getStrapiServerUrl()` from `@/constants/api` for all server-side Strapi fetches (PLP, homepage, settings, categories). Do not use `STRAPI_INTERNAL_URL` or `STRAPI_SERVER_URL` for new server fetch code.
-- **Defined in:** [apps/apps/frontend/src/constants/api.ts](apps/apps/frontend/src/constants/api.ts)
-- **Used in:** PLP page, homepage service, public settings service, categories service.
+- Strapi (`@repo/backend`) must be running on **port 1337** (or override `NEXT_PUBLIC_API_BASE_URL`).
+- Copy [`apps/frontend/dev.env.example`](apps/frontend/dev.env.example) to `.env.local` or `dev.env` (both gitignored).
+- Frontend alone (`pnpm --filter @repo/frontend dev`) will show empty homepage sections and console fetch errors if the API is down.
+
+## Code checklist
+
+- **Use** `getStrapiServerUrl()` for server-side Strapi fetches (PLP, homepage, settings, categories, stories).
+- **Client** code uses `API_BASE_URL` / `apiClient` (browser cannot use internal Docker URLs).
+- Re-export: [`apps/frontend/src/constants/api.ts`](apps/frontend/src/constants/api.ts).
+
+## Docker / production checklist
+
+1. Runtime container: set `STRAPI_INTERNAL_URL` (internal Nginx or `host.docker.internal:8080/api`).
+2. CI / `next build`: set `STRAPI_BUILD_TIME_URL` to the public API URL.
+3. Verify from inside a frontend container (see [infra-diagnosis.mdc](infra-diagnosis.mdc)).
+4. No homepage/PLP code change required if env vars are correct.
 
 ## Nginx + host.docker.internal
 
@@ -37,6 +72,7 @@ For reading env **at request time**, Next.js 16 requires calling `await connecti
 
 ## Related
 
-- [infra-diagnosis.mdc](infra-diagnosis.mdc) – step-by-step diagnosis when homepage is empty or slow (internal URL, Nginx, GitLab, scaling)
+- [infra-diagnosis.mdc](infra-diagnosis.mdc) – empty homepage / slow site (internal URL, Nginx, GitLab)
 - [backend-api-domain.mdc](backend-api-domain.mdc) – production API domain
-- Next.js 16: [Environment Variables](https://nextjs.org/docs/app/building-your-application/configuring/environment-variables), [connection() for runtime env](https://nextjs.org/docs/app/building-your-application/upgrading/version-16)
+- [apps/frontend/README.md](apps/frontend/README.md) – local dev and `dev.env.example`
+- Next.js 16: [Environment Variables](https://nextjs.org/docs/app/building-your-application/configuring/environment-variables)

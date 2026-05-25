@@ -8,7 +8,11 @@ import Main from "./Main";
 import Model from "./Model";
 import Price from "./Price";
 import Size from "./Size";
-import { findProductVariation, hasStockForVariation } from "@/services/product/product";
+import {
+  findProductVariation,
+  getInitialPdpSelection,
+  hasStockForVariation,
+} from "@/services/product/product";
 import logger from "@/utils/logger";
 import type { ProductData } from "@/types/Product";
 
@@ -99,10 +103,15 @@ export default function PDPHeroInfo(props: Props) {
     }
   }, [isDebugEnabled]);
 
-  // State for selected variation properties
-  const [selectedColor, setSelectedColor] = useState<string>(colors.length > 0 ? colors[0].id : "");
-  const [selectedSize, setSelectedSize] = useState<string>(sizes.length > 0 ? sizes[0].id : "");
-  const [selectedModel, setSelectedModel] = useState<string>(models.length > 0 ? models[0].id : "");
+  const initialSelection = useMemo(
+    () => getInitialPdpSelection(productData, colors, sizes, models),
+    [productData, colors, sizes, models],
+  );
+
+  // State for selected variation properties (default to first in-stock variation)
+  const [selectedColor, setSelectedColor] = useState<string>(initialSelection.colorId);
+  const [selectedSize, setSelectedSize] = useState<string>(initialSelection.sizeId);
+  const [selectedModel, setSelectedModel] = useState<string>(initialSelection.modelId);
 
   // Compute disabled ids for colors, sizes and models based on productData stock
   const { disabledColors, disabledSizes, disabledModels, availableVariations } = useMemo(() => {
@@ -173,65 +182,10 @@ export default function PDPHeroInfo(props: Props) {
   const [currentPrice, setCurrentPrice] = useState(product.price);
   const [currentDiscount, setCurrentDiscount] = useState(product.discount || 0);
   const [currentDiscountPrice, setCurrentDiscountPrice] = useState(product.discountPrice || 0);
-  const [currentVariationId, setCurrentVariationId] = useState<string | undefined>(undefined); // Will be set properly in useEffect based on default selections
-  // Initialize stock status based on the initial/default variation
-  const getInitialStockStatus = () => {
-    debugLog("=== INITIAL STOCK STATUS DEBUG ===");
-    debugLog("Product data:", productData);
-    debugLog("Product variations:", productData?.attributes?.product_variations?.data);
-
-    if (productData?.attributes?.product_variations?.data?.length) {
-      debugLog("Number of variations:", productData.attributes.product_variations.data.length);
-
-      // Try to get the default variation (same logic as in Hero component)
-      const defaultVariation = productData.attributes.product_variations.data.find(
-        (variation: any) => {
-          debugLog(
-            "Checking variation:",
-            variation.id,
-            "Published:",
-            variation.attributes.IsPublished,
-          );
-
-          // Check if the variation is published
-          if (!variation.attributes.IsPublished) {
-            return false;
-          }
-          // Check if it has stock data and count > 0
-          const stock = variation.attributes.product_stock?.data?.attributes;
-          debugLog("Variation stock data:", stock);
-          return stock && typeof stock.Count === "number" && stock.Count > 0;
-        },
-      );
-
-      debugLog("Found default variation with stock:", defaultVariation);
-
-      if (defaultVariation) {
-        const stockStatus = hasStockForVariation(defaultVariation as any);
-        debugLog("Default variation stock status:", stockStatus);
-        return stockStatus;
-      }
-
-      // Fallback: check if any published variation exists
-      const anyPublished = productData.attributes.product_variations.data.find(
-        (variation: any) => variation.attributes.IsPublished === true,
-      );
-
-      debugLog("Found any published variation:", anyPublished);
-
-      if (anyPublished) {
-        const stockStatus = hasStockForVariation(anyPublished as any);
-        debugLog("Any published variation stock status:", stockStatus);
-        return stockStatus;
-      }
-    }
-
-    debugLog("No variations found - returning false");
-    debugLog("=== END INITIAL STOCK STATUS DEBUG ===");
-    return false;
-  };
-
-  const [hasStock, setHasStock] = useState(getInitialStockStatus());
+  const [currentVariationId, setCurrentVariationId] = useState<string | undefined>(
+    initialSelection.variationId,
+  );
+  const [hasStock, setHasStock] = useState(initialSelection.hasStock);
 
   // moved useEffect that initializes variation details to below
 
@@ -330,64 +284,18 @@ export default function PDPHeroInfo(props: Props) {
     [productData, product.price, product.discountPrice, product.discount],
   );
 
-  // Initialize variation details based on default selections when component mounts
+  // Sync price/stock with the first in-stock variation (matches product card availability)
   useEffect(() => {
-    if (!productData || !productData.attributes?.product_variations?.data) return;
+    if (!productData?.attributes?.product_variations?.data?.length) return;
 
-    // If there's exactly one available variation (stock), auto-select it
-    const availableVariations = productData.attributes.product_variations.data.filter((v: any) =>
-      hasStockForVariation(v as any, 1),
-    );
-    if (availableVariations.length === 1) {
-      const v = availableVariations[0];
-      const colorId =
-        v.attributes.product_variation_color?.data?.id?.toString() ||
-        (colors.length > 0 ? colors[0].id : "") ||
-        "";
-      const sizeId =
-        v.attributes.product_variation_size?.data?.id?.toString() ||
-        (sizes.length > 0 ? sizes[0].id : "") ||
-        "";
-      const modelId =
-        v.attributes.product_variation_model?.data?.id?.toString() ||
-        (models.length > 0 ? models[0].id : "") ||
-        "";
+    const selection = getInitialPdpSelection(productData, colors, sizes, models);
+    if (!selection.colorId && !selection.sizeId) return;
 
-      setSelectedColor(colorId);
-      setSelectedSize(sizeId);
-      setSelectedModel(modelId);
-      updateVariationDetails(colorId, sizeId, modelId);
-      return;
-    }
-
-    // Otherwise use first non-disabled/defaults - only if arrays are not empty
-    const firstColor =
-      colors.length > 0 ? colors.find((c) => !disabledColors.includes(c.id)) || colors[0] : null;
-    const firstSize =
-      sizes.length > 0 ? sizes.find((s) => !disabledSizes.includes(s.id)) || sizes[0] : null;
-    const firstModel =
-      models.length > 0 ? models.find((m) => !disabledModels.includes(m.id)) || models[0] : null;
-
-    if (firstColor && firstSize) {
-      setSelectedColor(firstColor.id);
-      setSelectedSize(firstSize.id);
-      if (firstModel) setSelectedModel(firstModel.id);
-      updateVariationDetails(firstColor.id, firstSize.id, firstModel ? firstModel.id : "");
-    } else if (firstColor) {
-      // If only color is available, set it
-      setSelectedColor(firstColor.id);
-      updateVariationDetails(firstColor.id, "", "");
-    }
-  }, [
-    productData,
-    colors,
-    sizes,
-    models,
-    updateVariationDetails,
-    disabledColors,
-    disabledSizes,
-    disabledModels,
-  ]);
+    setSelectedColor(selection.colorId);
+    setSelectedSize(selection.sizeId);
+    setSelectedModel(selection.modelId);
+    updateVariationDetails(selection.colorId, selection.sizeId, selection.modelId);
+  }, [productData, colors, sizes, models, updateVariationDetails]);
 
   // Get selected color and size objects
   const selectedColorObj = colors.find((color) => color.id === selectedColor);

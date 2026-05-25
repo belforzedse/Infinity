@@ -1,5 +1,6 @@
 import { withSentryConfig } from "@sentry/nextjs";
 import path from "path";
+import { legacyRedirects } from "./redirects";
 
 /**
  * Load build version from generated JSON file
@@ -67,6 +68,9 @@ const nextConfig = {
       ? require.resolve("./cache-handler.mjs")
       : undefined,
   cacheMaxMemorySize: 256 * 1024 * 1024, // 256MB in-memory cache per instance
+  async redirects() {
+    return legacyRedirects;
+  },
 };
 module.exports = withSentryConfig(nextConfig, {
   silent: !process.env.CI,

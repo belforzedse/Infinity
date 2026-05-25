@@ -82,11 +82,23 @@ const getVariations = (product: ProductWithVariations): ProductVariation[] => {
   return Array.isArray(variations) ? variations : [];
 };
 
+/** Coerces Strapi stock Count (number or numeric string) to a finite non-negative integer. */
+export const parseStockCount = (value: unknown): number => {
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? Math.max(0, value) : 0;
+  }
+  if (typeof value === "string" && value.trim() !== "") {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? Math.max(0, parsed) : 0;
+  }
+  return 0;
+};
+
 const isVariationInStock = (variation?: ProductVariation): boolean => {
   const attrs = variation?.attributes;
   if (!attrs?.IsPublished) return false;
   const stockCount = attrs.product_stock?.data?.attributes?.Count;
-  return typeof stockCount === "number" && stockCount > 0;
+  return parseStockCount(stockCount) > 0;
 };
 
 /**
