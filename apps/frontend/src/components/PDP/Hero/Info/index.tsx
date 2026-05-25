@@ -12,9 +12,9 @@ import {
   findProductVariation,
   getInitialPdpSelection,
   hasStockForVariation,
+  type ProductDetail,
 } from "@/services/product/product";
 import logger from "@/utils/logger";
-import type { ProductData } from "@/types/Product";
 
 // Runtime-aware debug logger. It checks NODE_ENV and a runtime flag stored
 // in localStorage (`pdp_debug`) or the build-time env `NEXT_PUBLIC_PDP_DEBUG`.
@@ -70,7 +70,7 @@ type Props = {
   }[];
 
   // Minimal typed shape for productData used in this component
-  productData?: ProductData | null; // Add productData to be able to call findProductVariation
+  productData?: ProductDetail | null;
   productId: string;
 };
 
