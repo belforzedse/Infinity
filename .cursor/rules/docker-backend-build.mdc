@@ -28,6 +28,20 @@ Strapi creates a `.strapi` directory (cache/CLI state) during `strapi build`. In
    ```
    Do not remove it only in a separate `RUN` if that would leave it in an earlier layer that is still extracted.
 
+## NPM registry (build)
+
+`main.Dockerfile` and `dev.Dockerfile` default `NPM_REGISTRY_URL` to the Liara mirror:
+
+`https://package-mirror.liara.ir/repository/npm/`
+
+Override at build time when needed:
+
+```bash
+docker build --build-arg NPM_REGISTRY_URL="https://…" -f apps/backend/main.Dockerfile .
+```
+
+`COREPACK_NPM_REGISTRY`, `npm_config_registry`, and `pnpm config set registry` all use this URL so Corepack can fetch `pnpm@10.28.2` and `pnpm install` uses the same mirror.
+
 ## Runtime
 
 Strapi may create `.strapi` again at runtime; that is fine. The issue is only with the path being present in the built image layers and then extracted on the deployment host.

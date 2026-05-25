@@ -24,7 +24,7 @@ function ShoppingCartQuantityControl({ itemId, quantity }: Props) {
   };
 
   return (
-    <div className="flex w-full items-center justify-between gap-6 rounded-lg bg-stone-50 px-5 py-2 lg:w-fit lg:justify-normal">
+    <div className="flex w-full items-center justify-between gap-4 rounded-lg bg-stone-50 px-4 py-2 lg:w-fit lg:justify-normal lg:gap-3 lg:px-3">
       <div className="flex items-center gap-0">
         <button
           onClick={() => handleQuantityChange(itemId, 1)}
@@ -32,7 +32,7 @@ function ShoppingCartQuantityControl({ itemId, quantity }: Props) {
         >
           <PlusIcon />
         </button>
-        <span className="text-sm w-8 text-center text-neutral-800">{faNum(quantity)}</span>
+        <span className="w-8 text-center text-sm text-neutral-800">{faNum(quantity)}</span>
         <button
           onClick={() => handleQuantityChange(itemId, -1)}
           className="flex h-6 w-6 items-center justify-center rounded-md border border-slate-100 bg-white text-neutral-800 lg:h-8 lg:w-8"
