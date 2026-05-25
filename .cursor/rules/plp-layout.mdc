@@ -60,6 +60,7 @@ The PLP is structured to display product listings with filtering capabilities:
 ## Responsive Components
 - Desktop: Shows sidebar filter panel (280px) and product grid via [`StorefrontGrid` variant `plp`](apps/frontend/src/components/storefront/StorefrontGrid.tsx) in [`PLPDesktopList`](apps/frontend/src/components/PLP/List/PLPDesktopList.tsx)
 - Mobile: Filter drawer + [`PLPMobileList`](apps/frontend/src/components/PLP/List/PLPMobileList.tsx) (`ProductSmallCard` stack)
+- **Mobile filter drawer** ([`PLPListMobileFilter`](apps/frontend/src/components/PLP/List/MobileFilter.tsx)): Headless UI `Dialog` at `z-[1200]` (same as menu/search), slides from inline-start (RTL right). Do not use `--header-offset` inside the panel. Footer padding clears bottom nav (`5rem + safe-area`). Availability toggle stays in the toolbar row; pass `hideAvailability` to [`Filter`](apps/frontend/src/components/PLP/List/Filter/index.tsx) inside the drawer to avoid duplicate controls.
 - Main column uses `min-w-0 flex-1` in [`PLP/List.tsx`](apps/frontend/src/components/PLP/List.tsx) so grids do not overflow beside the sidebar
 
 ### Fluid product cards (grids)

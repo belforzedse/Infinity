@@ -22,6 +22,8 @@ interface FilterProps {
   categories?: Category[];
   isLoadingCategories?: boolean;
   selectedCategory?: string;
+  /** Hide availability toggle (e.g. mobile drawer shows it in the toolbar). */
+  hideAvailability?: boolean;
 }
 
 export default function Filter({
@@ -29,6 +31,7 @@ export default function Filter({
   categories: categoriesProp,
   isLoadingCategories: isLoadingCategoriesProp,
   selectedCategory,
+  hideAvailability = false,
 }: FilterProps) {
   const [query, setQuery] = useQueryStates(plpQueryParsers, plpQueryOptions);
   const { available, minPrice, maxPrice, sort } = query;
@@ -137,10 +140,12 @@ export default function Filter({
         isLoading={resolvedIsLoading}
       />
 
-      <AvailabilityFilter
-        onChange={handleAvailabilityChange}
-        defaultChecked={available === "true"}
-      />
+      {!hideAvailability && (
+        <AvailabilityFilter
+          onChange={handleAvailabilityChange}
+          defaultChecked={available === "true"}
+        />
+      )}
 
       <PLPFilterBox title="قیمت">
         <PriceFilter

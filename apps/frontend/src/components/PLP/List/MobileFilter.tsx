@@ -2,11 +2,11 @@
 
 import PLPButton from "@/components/Kits/PLP/Button";
 import FilterIcon from "../Icons/FilterIcon";
-import SortDescIcon from "../Icons/SortDescIcon";
 import AvailabilityFilter from "./Filter/Availability";
 import PLPListFilter from "./Filter";
 import XIcon from "../Icons/XIcon";
-import { useState } from "react";
+import { Fragment, useEffect, useState } from "react";
+import { Dialog, Transition } from "@headlessui/react";
 import { useQueryStates } from "nuqs";
 import { plpQueryOptions, plpQueryParsers } from "@/components/PLP/queryState";
 
@@ -15,6 +15,8 @@ interface MobileFilterProps {
   isLoadingCategories?: boolean;
   selectedCategory?: string;
 }
+
+const MOBILE_NAV_CLEARANCE = "calc(5rem + env(safe-area-inset-bottom))";
 
 export default function PLPListMobileFilter({
   categories,
@@ -32,63 +34,98 @@ export default function PLPListMobileFilter({
     void setQuery({ available: checked ? "true" : null });
   };
 
-  const handleApplyFilters = () => {
-    handleClose();
-  };
+  useEffect(() => {
+    if (!isOpen) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [isOpen]);
 
   return (
-    <div className="flex gap-1">
-      <PLPButton className="h-auto w-auto" text="نمایش فیلتر ها" rightIcon={<FilterIcon />} onClick={handleOpen} />
-
-      {/* <PLPButton text="مرتب سازی" rightIcon={<SortDescIcon className="h-6 w-6" />} /> */}
+    <div className="flex flex-wrap items-center gap-2">
+      <PLPButton
+        className="h-auto w-auto shrink-0"
+        text="نمایش فیلتر ها"
+        rightIcon={<FilterIcon />}
+        onClick={handleOpen}
+      />
 
       <AvailabilityFilter
         onChange={handleAvailabilityChange}
         defaultChecked={available === "true"}
       />
 
-      {/* Backdrop */}
-      <div
-        onClick={handleClose}
-        className={`fixed right-0 top-0 z-20 h-[100vh] w-[100vw] bg-gray-500/50 transition-opacity duration-300 ${
-          isOpen ? "visible opacity-100" : "invisible opacity-0"
-        }`}
-      >
-        {/* Sidebar */}
-        <div
-          onClick={(e) => e.stopPropagation()}
-          className={`flex h-full w-[70vw] flex-col gap-[18px] overflow-y-auto bg-white px-4 pb-8 transition-transform duration-300 ${
-            isOpen ? "translate-x-0" : "translate-x-full"
-          }`}
-        >
-          <div
-            className="sticky z-30 flex items-center justify-between bg-white pb-4 pt-8"
-            style={{ top: "var(--header-offset, 88px)" }}
+      <Transition appear show={isOpen} as={Fragment}>
+        <Dialog as="div" className="relative z-[1200]" onClose={handleClose} dir="rtl">
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
           >
-            <span className="text-lg">همه فیلتر‌ها</span>
+            <div className="fixed inset-0 bg-black/40" aria-hidden="true" />
+          </Transition.Child>
 
-            <button
-              onClick={handleClose}
-              className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200"
-            >
-              <XIcon />
-            </button>
+          <div className="fixed inset-0 overflow-hidden">
+            <div className="flex h-full justify-start">
+              <Transition.Child
+                as={Fragment}
+                enter="transform transition ease-out duration-300"
+                enterFrom="translate-x-full"
+                enterTo="translate-x-0"
+                leave="transform transition ease-in duration-200"
+                leaveFrom="translate-x-0"
+                leaveTo="translate-x-full"
+              >
+                <Dialog.Panel className="flex h-[100dvh] w-[min(100vw,20rem)] flex-col bg-white shadow-xl">
+                  <header
+                    className="flex shrink-0 items-center justify-between border-b border-slate-100 px-4 pb-3"
+                    style={{
+                      paddingTop: "max(1rem, calc(0.75rem + env(safe-area-inset-top)))",
+                    }}
+                  >
+                    <span className="text-lg font-medium text-neutral-900">همه فیلتر‌ها</span>
+                    <button
+                      type="button"
+                      onClick={handleClose}
+                      aria-label="بستن فیلترها"
+                      className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200"
+                    >
+                      <XIcon />
+                    </button>
+                  </header>
+
+                  <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-3">
+                    <PLPListFilter
+                      showAvailableOnly={available === "true"}
+                      categories={categories}
+                      isLoadingCategories={isLoadingCategories}
+                      selectedCategory={selectedCategory}
+                      hideAvailability
+                    />
+                  </div>
+
+                  <footer
+                    className="shrink-0 border-t border-slate-100 px-4 pt-3"
+                    style={{ paddingBottom: MOBILE_NAV_CLEARANCE }}
+                  >
+                    <PLPButton
+                      text="اعمال فیلتر ها"
+                      className="!text-base flex w-full items-center justify-center bg-pink-500 text-white"
+                      onClick={handleClose}
+                    />
+                  </footer>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
           </div>
-
-          <PLPListFilter
-            showAvailableOnly={available === "true"}
-            categories={categories}
-            isLoadingCategories={isLoadingCategories}
-            selectedCategory={selectedCategory}
-          />
-
-          <PLPButton
-            text="اعمال فیلتر ها"
-            className="!text-base flex w-full items-center justify-center bg-pink-500 text-white"
-            onClick={handleApplyFilters}
-          />
-        </div>
-      </div>
+        </Dialog>
+      </Transition>
     </div>
   );
 }
