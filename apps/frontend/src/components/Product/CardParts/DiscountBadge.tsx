@@ -11,7 +11,7 @@ export const DiscountBadge: FC<DiscountBadgeProps> = ({ discount }) => {
 
   return (
     <div
-      className="flex items-center rounded-bl-3xl rounded-tr-3xl bg-rose-600 px-3 py-1"
+      className="inline-flex w-fit shrink-0 items-center rounded-bl-3xl rounded-tr-3xl bg-rose-600 px-3 py-1"
       role="status"
       aria-label={`${discount} درصد تخفیف`}
     >

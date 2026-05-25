@@ -233,7 +233,7 @@ export default function PDPHeroInfo(props: Props) {
 
       debugLog("Converted IDs - Color:", colorIdNum, "Size:", sizeIdNum, "Model:", modelIdNum);
 
-      const variation = findProductVariation(productData as any, colorIdNum, sizeIdNum, modelIdNum);
+      const variation = findProductVariation(productData, colorIdNum, sizeIdNum, modelIdNum);
 
       debugLog("Found variation:", variation);
 

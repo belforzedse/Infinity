@@ -195,7 +195,7 @@ const ProductCard: FC<ProductCardProps> = ({
               )}
 
               {/* Badges */}
-              <div className="absolute left-1 right-1 top-1">
+              <div className="absolute left-1 right-1 top-1 flex items-center justify-between">
                 <DiscountBadge discount={discount} />
               </div>
 
