@@ -18,6 +18,45 @@ interface UseProductCategoryProps {
   isEditMode?: boolean;
 }
 
+const areCategoriesEqual = (
+  currentCategories: categoryResponseType[] | undefined,
+  nextCategories: categoryResponseType[],
+) => {
+  if (!Array.isArray(currentCategories) || currentCategories.length !== nextCategories.length) {
+    return false;
+  }
+
+  return currentCategories.every((currentCategory, index) => {
+    const nextCategory = nextCategories[index];
+
+    return (
+      currentCategory.id === nextCategory.id &&
+      currentCategory.attributes?.Title === nextCategory.attributes?.Title &&
+      currentCategory.attributes?.Slug === nextCategory.attributes?.Slug &&
+      currentCategory.attributes?.Parent === nextCategory.attributes?.Parent
+    );
+  });
+};
+
+const areCategoryMetaEqual = (
+  currentMeta: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    itemsPerPage: number;
+  },
+  nextMeta: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    itemsPerPage: number;
+  },
+) =>
+  currentMeta.currentPage === nextMeta.currentPage &&
+  currentMeta.totalPages === nextMeta.totalPages &&
+  currentMeta.totalItems === nextMeta.totalItems &&
+  currentMeta.itemsPerPage === nextMeta.itemsPerPage;
+
 export function useProductCategory(props?: UseProductCategoryProps) {
   const { isEditMode = false } = props || {};
 
@@ -92,9 +131,16 @@ export function useProductCategory(props?: UseProductCategoryProps) {
         console.log("fetchAllCategories: About to setCategoriesData with:", categories.length, "items");
       }
 
-      // Set the atom with the categories
-      setCategoriesData(categories);
-      setCategoriesDataPagination(meta);
+      // Avoid writing equivalent values back into Jotai atoms. The product
+      // pages and selector both request categories on mount, and an empty or
+      // unchanged response must not create a fresh atom value that retriggers
+      // fetch effects.
+      setCategoriesData((currentCategories) =>
+        areCategoriesEqual(currentCategories, categories) ? currentCategories : categories,
+      );
+      setCategoriesDataPagination((currentMeta) =>
+        areCategoryMetaEqual(currentMeta, meta) ? currentMeta : meta,
+      );
 
       if (process.env.NODE_ENV === "development") {
         console.log("fetchAllCategories: setCategoriesData called with", categories.length, "categories");
@@ -103,7 +149,11 @@ export function useProductCategory(props?: UseProductCategoryProps) {
       if (process.env.NODE_ENV === "development") {
         console.error("Failed to get product categories:", error);
       }
-      setCategoriesData([]);
+      setCategoriesData((currentCategories) =>
+        Array.isArray(currentCategories) && currentCategories.length === 0
+          ? currentCategories
+          : [],
+      );
       // Don't throw error, just log it to prevent crashes
     } finally {
       setIsGetCategoriesLoading(false);
@@ -176,21 +226,33 @@ export function useProductCategory(props?: UseProductCategoryProps) {
 
       // Handle both response formats
       if (Array.isArray(response)) {
-        setCategoriesData(response);
-        setCategoriesDataPagination({
+        const meta = {
           currentPage: 1,
           totalPages: 1,
           totalItems: response.length,
           itemsPerPage: 25,
-        });
+        };
+
+        setCategoriesData((currentCategories) =>
+          areCategoriesEqual(currentCategories, response) ? currentCategories : response,
+        );
+        setCategoriesDataPagination((currentMeta) =>
+          areCategoryMetaEqual(currentMeta, meta) ? currentMeta : meta,
+        );
       } else if (response?.data && Array.isArray(response.data)) {
-        setCategoriesData(response.data);
-        setCategoriesDataPagination(response.meta || {
+        const meta = response.meta || {
           currentPage: 1,
           totalPages: 1,
           totalItems: response.data.length,
           itemsPerPage: 25,
-        });
+        };
+
+        setCategoriesData((currentCategories) =>
+          areCategoriesEqual(currentCategories, response.data) ? currentCategories : response.data,
+        );
+        setCategoriesDataPagination((currentMeta) =>
+          areCategoryMetaEqual(currentMeta, meta) ? currentMeta : meta,
+        );
       }
     } catch (error) {
       console.error("Failed to refresh categories:", error);
