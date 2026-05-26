@@ -91,10 +91,10 @@ export default function PDPHeroGallery(props: Props) {
   if (!assets.length) {
     return (
       <div
-        className="flex min-w-0 flex-1 flex-col gap-2 xl:sticky md:h-[450px] md:min-w-[300px] tablet:min-w-[400px] xl:flex-row"
+        className="flex min-w-0 flex-1 flex-col gap-2 xl:sticky md:min-w-[300px] tablet:min-w-[400px] xl:flex-row xl:items-start"
         style={{ top: "calc(var(--header-offset, 88px) + 0.5rem)" }}
       >
-        <div className="flex h-full w-full items-center justify-center bg-gray-200 rounded-lg">
+        <div className="flex aspect-[4/5] w-full items-center justify-center rounded-lg bg-gray-200">
           <svg className="w-24 h-24 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
           </svg>
@@ -106,7 +106,7 @@ export default function PDPHeroGallery(props: Props) {
   return (
     <div
       ref={galleryRef}
-      className="flex min-w-0 flex-1 flex-col gap-2 xl:sticky md:h-[450px] md:min-w-[300px] tablet:min-w-[400px] xl:flex-row"
+      className="flex min-w-0 flex-1 flex-col gap-2 xl:sticky md:min-w-[300px] tablet:min-w-[400px] xl:flex-row xl:items-start"
       style={{ top: "calc(var(--header-offset, 88px) + 0.5rem)" }}
     >
       <div className="hidden xl:block">

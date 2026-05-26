@@ -18,7 +18,7 @@ export default function PdpSkeleton() {
         <div className="grid gap-3 sm:grid-cols-[88px_minmax(0,1fr)]">
           <div className="hidden flex-col gap-3 sm:flex">
             {Array.from({ length: 4 }).map((_, index) => (
-              <PulseBlock key={index} className="aspect-square w-full rounded-2xl" />
+              <PulseBlock key={index} className="aspect-[4/5] w-full rounded-2xl" />
             ))}
           </div>
           <PulseBlock className="aspect-[4/5] w-full rounded-[28px]" />
