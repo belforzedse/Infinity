@@ -12,7 +12,7 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
   initialImages = [],
   isEditMode = false,
 }) => {
-  const { images, handleFileUpload, removeFile, reorderImages } = useUpload({
+  const { images, handleFileUpload, removeFile, retryFile, reorderImages } = useUpload({
     initialImages,
     isEditMode,
   });
@@ -24,8 +24,9 @@ const PhotoUploader: React.FC<PhotoUploaderProps> = ({
         <UploadButton onUpload={(e) => handleFileUpload(e, "image")} accept="image/*" />
       </div>
       <PhotoUploaderImageGrid
-        previews={images.map((image) => image.preview)}
+        items={images}
         onRemoveFile={(index) => removeFile(index, "image")}
+        onRetryFile={(index) => retryFile(index, "image")}
         onReorder={reorderImages}
       />
     </div>

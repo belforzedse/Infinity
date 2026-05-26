@@ -69,13 +69,22 @@ jest.mock("@dnd-kit/utilities", () => ({
   },
 }));
 
+const createItems = (previews: string[]) =>
+  previews.map((preview, index) => ({
+    id: `item-${index}`,
+    file: new File([], `image-${index}`),
+    preview,
+    uploadStatus: "uploaded" as const,
+    uploadError: null,
+  }));
+
 describe("PhotoUploaderImageGrid", () => {
   it("calls onReorder with resolved indexes on drag end", () => {
     const onReorder = jest.fn();
 
     render(
       <PhotoUploaderImageGrid
-        previews={["/one.jpg", "/two.jpg"]}
+        items={createItems(["/one.jpg", "/two.jpg"])}
         onRemoveFile={jest.fn()}
         onReorder={onReorder}
       />,
@@ -90,7 +99,7 @@ describe("PhotoUploaderImageGrid", () => {
     const onRemoveFile = jest.fn();
 
     render(
-      <PhotoUploaderImageGrid previews={["/one.jpg", "/two.jpg"]} onRemoveFile={onRemoveFile} />,
+      <PhotoUploaderImageGrid items={createItems(["/one.jpg", "/two.jpg"])} onRemoveFile={onRemoveFile} />,
     );
 
     fireEvent.click(screen.getByTestId("remove-0"));
@@ -101,7 +110,7 @@ describe("PhotoUploaderImageGrid", () => {
   it("does not mount DndContext when onReorder is not provided", () => {
     render(
       <PhotoUploaderImageGrid
-        previews={["/one.jpg", "/two.jpg"]}
+        items={createItems(["/one.jpg", "/two.jpg"])}
         onRemoveFile={jest.fn()}
       />,
     );

@@ -16,7 +16,17 @@ const IndexPhotoUploader: React.FC<IndexPhotoUploaderProps> = ({
   onImageDelete,
   isEditMode = false,
 }) => {
-  const { imagePreview, fileInputRef, handleImageUpload, handleDelete, handlePreviewClick } =
+  const {
+    imagePreview,
+    fileInputRef,
+    handleImageUpload,
+    handleDelete,
+    handlePreviewClick,
+    retryUpload,
+    uploadStatus,
+    uploadError,
+    previewMimeType,
+  } =
     useIndexImageUpload({ onImageUpload, onImageDelete, isEditMode });
 
   return (
@@ -27,6 +37,10 @@ const IndexPhotoUploader: React.FC<IndexPhotoUploaderProps> = ({
 
       <IndexPhotoUploaderImagePreview
         imagePreview={imagePreview}
+        uploadStatus={uploadStatus}
+        uploadError={uploadError}
+        mimeType={previewMimeType}
+        onRetry={retryUpload}
         onUploadButtonClick={() => fileInputRef.current?.click()}
       />
 

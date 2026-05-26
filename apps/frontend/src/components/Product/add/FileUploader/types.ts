@@ -10,8 +10,9 @@ export interface UploadedFile {
 }
 
 export interface FileItemProps {
-  file: File;
+  file: FileWithPreview;
   onDelete: (index: number, type: FileType) => void;
+  onRetry?: (index: number, type: FileType) => void;
   iconSrc?: string;
   index: number;
   fileType: FileType;
@@ -20,6 +21,7 @@ export interface FileItemProps {
 export interface FileListProps {
   files: FileWithPreview[];
   onDeleteFile: (index: number, type: FileType) => void;
+  onRetryFile?: (index: number, type: FileType) => void;
   onUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   title: string;
   fileType: FileType;

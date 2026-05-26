@@ -20,7 +20,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({
   initialFiles = [],
   isEditMode = false,
 }) => {
-  const { images, videos, files, handleFileUpload, removeFile } = useUpload({
+  const { images, videos, files, handleFileUpload, removeFile, retryFile } = useUpload({
     initialImages: fileType === "image" ? initialFiles : undefined,
     initialVideos: fileType === "video" ? initialFiles : undefined,
     initialFiles: fileType === "other" ? initialFiles : undefined,
@@ -44,6 +44,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({
     <FileList
       files={getFilesByType()}
       onDeleteFile={removeFile}
+      onRetryFile={retryFile}
       onUpload={(e) => handleFileUpload(e, fileType)}
       title={title}
       fileType={fileType}

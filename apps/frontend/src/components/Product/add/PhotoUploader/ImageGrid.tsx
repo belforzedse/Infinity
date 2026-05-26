@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useRef } from "react";
 import PhotoUploaderImagePreview from "@/components/Product/add/PhotoUploader/ImagePreview";
+import type { FileWithPreview } from "@/hooks/product/useUpload";
 import { generateStableId } from "@/utils/stableId";
 import {
   DndContext,
@@ -19,24 +20,27 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 
 export interface ImageGridProps {
-  previews: string[];
+  items: FileWithPreview[];
   onRemoveFile: (index: number) => void;
+  onRetryFile?: (index: number) => void;
   onReorder?: (oldIndex: number, newIndex: number) => void;
 }
 
 interface SortablePreviewItemProps {
   id: string;
-  preview: string;
+  item: FileWithPreview;
   index: number;
   onRemoveFile: (index: number) => void;
+  onRetryFile?: (index: number) => void;
   sortable: boolean;
 }
 
 const SortablePreviewItem: React.FC<SortablePreviewItemProps> = ({
   id,
-  preview,
+  item,
   index,
   onRemoveFile,
+  onRetryFile,
   sortable,
 }) => {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
@@ -65,14 +69,27 @@ const SortablePreviewItem: React.FC<SortablePreviewItemProps> = ({
         </button>
       )}
 
-      <PhotoUploaderImagePreview preview={preview} index={index} onRemove={() => onRemoveFile(index)} />
+      <PhotoUploaderImagePreview
+        preview={item.preview}
+        index={index}
+        mimeType={item.file.type}
+        uploadStatus={item.uploadStatus}
+        uploadError={item.uploadError}
+        onRemove={() => onRemoveFile(index)}
+        onRetry={onRetryFile ? () => onRetryFile(index) : undefined}
+      />
     </div>
   );
 };
 
 const KEYBOARD_SENSOR_OPTIONS = { coordinateGetter: sortableKeyboardCoordinates };
 
-const PhotoUploaderImageGrid: React.FC<ImageGridProps> = ({ previews, onRemoveFile, onReorder }) => {
+const PhotoUploaderImageGrid: React.FC<ImageGridProps> = ({
+  items,
+  onRemoveFile,
+  onRetryFile,
+  onReorder,
+}) => {
   const stableIdsRef = useRef<string[]>([]);
 
   const sensors = useSensors(
@@ -82,24 +99,24 @@ const PhotoUploaderImageGrid: React.FC<ImageGridProps> = ({ previews, onRemoveFi
 
   const sortableItems = useMemo(() => {
     let ids = stableIdsRef.current;
-    if (ids.length < previews.length) {
+    if (ids.length < items.length) {
       ids = [...ids];
-      while (ids.length < previews.length) {
+      while (ids.length < items.length) {
         ids.push(generateStableId());
       }
       stableIdsRef.current = ids;
-    } else if (ids.length > previews.length) {
+    } else if (ids.length > items.length) {
       // When list shrinks, trim from the end. IDs only need to be unique per drag session;
       // the DnD context resets on re-render, so dropping from the tail is intentional.
-      ids = ids.slice(0, previews.length);
+      ids = ids.slice(0, items.length);
       stableIdsRef.current = ids;
     }
-    return previews.map((preview, index) => ({
-      id: stableIdsRef.current[index],
-      preview,
+    return items.map((item, index) => ({
+      id: item.id || stableIdsRef.current[index],
+      item,
       index,
     }));
-  }, [previews]);
+  }, [items]);
 
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
@@ -124,9 +141,10 @@ const PhotoUploaderImageGrid: React.FC<ImageGridProps> = ({ previews, onRemoveFi
         <SortablePreviewItem
           key={item.id}
           id={item.id}
-          preview={item.preview}
+          item={item.item}
           index={item.index}
           onRemoveFile={onRemoveFile}
+          onRetryFile={onRetryFile}
           sortable={Boolean(onReorder)}
         />
       ))}

@@ -12,7 +12,7 @@ const VideoUploader: React.FC<VideoUploaderProps> = ({
   initialVideos = [],
   isEditMode = false,
 }) => {
-  const { videos, handleFileUpload, removeFile } = useUpload({
+  const { videos, handleFileUpload, removeFile, retryFile } = useUpload({
     initialVideos,
     isEditMode,
   });
@@ -24,8 +24,9 @@ const VideoUploader: React.FC<VideoUploaderProps> = ({
         <UploadButton onUpload={(e) => handleFileUpload(e, "video")} accept="video/*" fileType="video" />
       </div>
       <PhotoUploaderImageGrid
-        previews={videos.map((video) => video.preview)}
+        items={videos}
         onRemoveFile={(index) => removeFile(index, "video")}
+        onRetryFile={(index) => retryFile(index, "video")}
       />
     </div>
   );

@@ -6,7 +6,9 @@ import toast from "react-hot-toast";
 import { atom, useAtom } from "jotai";
 import { editProductDataAtom, productDataAtom } from "@/atoms/super-admin/products";
 import type { FileType } from "@/components/Product/add/FileUploader/types";
+import type { UploadStatus } from "@/components/Product/add/UploadStatusBadge";
 import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
+import { generateStableId } from "@/utils/stableId";
 import {
   hasTypedMediaMime,
   reorderArrayWithGuards,
@@ -28,8 +30,11 @@ export const uploadingStateAtom = atom<UploadingState>({
 });
 
 export interface FileWithPreview {
+  id: string;
   file: File;
   preview: string;
+  uploadStatus: UploadStatus;
+  uploadError?: string | null;
 }
 
 interface UseUploadProps {
@@ -53,8 +58,11 @@ const cleanupObjectURLs = (items: FileWithPreview[]) => {
 
 const mapUrlsToFileWithPreview = (urls: string[], placeholderName: string) =>
   urls.map((url, index) => ({
+    id: generateStableId(`${placeholderName}-`),
     file: new File([], `${placeholderName}-${index}`),
     preview: url,
+    uploadStatus: "uploaded" as const,
+    uploadError: null,
   }));
 
 const resolveMediaRemovalIndex = (
@@ -79,7 +87,6 @@ export function useUpload({
   initialFiles,
   isEditMode = false,
 }: UseUploadProps = {}) {
-  // States for all file types
   const [images, setImages] = useAtom(imagesAtom);
   const [videos, setVideos] = useAtom(videosAtom);
   const [files, setFiles] = useAtom(filesAtom);
@@ -91,7 +98,6 @@ export function useUpload({
   const previousVideoKeyRef = useRef<string | null>(null);
   const previousFileKeyRef = useRef<string | null>(null);
 
-  // Synchronize global atoms with incoming initial values.
   useEffect(() => {
     if (initialImages === undefined) return;
     const normalizedImages = initialImages ?? [];
@@ -159,6 +165,97 @@ export function useUpload({
     }
   };
 
+  const updateItemById = (
+    type: FileType,
+    id: string,
+    patch: Partial<Pick<FileWithPreview, "uploadStatus" | "uploadError">>,
+  ) => {
+    const updater = (items: FileWithPreview[]) =>
+      items.map((item) => (item.id === id ? { ...item, ...patch } : item));
+
+    if (type === "image") {
+      setImages(updater);
+    } else if (type === "video") {
+      setVideos(updater);
+    } else {
+      setFiles(updater);
+    }
+  };
+
+  const addItem = (type: FileType, item: FileWithPreview) => {
+    if (type === "image") {
+      setImages((prevImages) => [...prevImages, item]);
+    } else if (type === "video") {
+      setVideos((prevVideos) => [...prevVideos, item]);
+    } else {
+      setFiles((prevFiles) => [...prevFiles, item]);
+    }
+  };
+
+  const getItemsByType = (type: FileType) => {
+    if (type === "image") return images;
+    if (type === "video") return videos;
+    return files;
+  };
+
+  const uploadedIndexBefore = (items: FileWithPreview[], index: number) =>
+    items.slice(0, index).filter((item) => item.uploadStatus === "uploaded").length;
+
+  const uploadVisibleFile = async (item: FileWithPreview, targetType: FileType) => {
+    const detectedFileType = getFileType(item.file);
+
+    if (targetType === "image" && detectedFileType !== "image") {
+      throw new Error("فقط بارگذاری تصاویر در این بخش مجاز است");
+    }
+
+    if (targetType === "video" && detectedFileType !== "video") {
+      throw new Error("فایل ویدیویی معتبر نیست");
+    }
+
+    let uploadSource: File = item.file;
+
+    if (detectedFileType === "image") {
+      const optimizedBlob = await optimizeImage(item.file);
+      uploadSource = new File([optimizedBlob], item.file.name, {
+        type: optimizedBlob.type,
+      });
+    }
+
+    const response = await uploadFile(uploadSource);
+    if (!response?.[0]) {
+      throw new Error("خطا در آپلود فایل");
+    }
+
+    if (process.env.NODE_ENV !== "production") {
+      logger.info("response", { response });
+    }
+
+    if (detectedFileType === "image" || detectedFileType === "video") {
+      setProductData((prev: any) => ({
+        // TODO: Replace `any` usage with ProductData type
+        ...prev,
+        Media: [
+          ...((prev as any).Media || []),
+          isEditMode ? { id: response[0].id, attributes: response[0] } : response[0].id.toString(),
+        ],
+      }));
+    } else {
+      setProductData((prev: any) => ({
+        // TODO: Replace `any` usage with ProductData type
+        ...prev,
+        Files: [
+          ...((prev as any).Files || []),
+          isEditMode ? { id: response[0].id, attributes: response[0] } : response[0].id.toString(),
+        ],
+      }));
+    }
+
+    updateItemById(targetType, item.id, {
+      uploadStatus: "uploaded",
+      uploadError: null,
+    });
+  };
+
   // TODO: Revoke object URLs on unmount to avoid memory leaks
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, fileType: FileType) => {
@@ -167,108 +264,32 @@ export function useUpload({
 
     setUploadingState((prev) => ({ ...prev, [fileType]: true }));
     const uploadErrors: string[] = [];
-    const successfulImages: FileWithPreview[] = [];
-    const successfulVideos: FileWithPreview[] = [];
-    const successfulFiles: FileWithPreview[] = [];
+    let totalSuccessful = 0;
 
     try {
       for (const file of newFiles) {
+        const fileWithPreview: FileWithPreview = {
+          id: generateStableId(`${fileType}-upload-`),
+          file,
+          preview: createPreview(file),
+          uploadStatus: "uploading",
+          uploadError: null,
+        };
+
+        addItem(fileType, fileWithPreview);
+
         try {
-          const detectedFileType = getFileType(file);
-
-          if (fileType === "image" && detectedFileType !== "image") {
-            uploadErrors.push(`${file.name}: فقط بارگذاری تصاویر در این بخش مجاز است`);
-            continue;
-          }
-
-          if (fileType === "video" && detectedFileType !== "video") {
-            uploadErrors.push(`${file.name}: فقط فایل ویدیویی معتبر است`);
-            continue;
-          }
-
-          const previewUrl = createPreview(file);
-          let uploadSource: File = file;
-
-          if (detectedFileType === "image") {
-            const optimizedBlob = await optimizeImage(file);
-            // Preserve original filename when uploading optimized images
-            uploadSource = new File([optimizedBlob], file.name, {
-              type: optimizedBlob.type,
-            });
-          }
-
-          const response = await uploadFile(uploadSource);
-
-          if (response) {
-            // Update Media or Files array in productData based on file type
-            if (process.env.NODE_ENV !== "production") {
-              logger.info("response", { response });
-            }
-
-            if (detectedFileType === "image" || detectedFileType === "video") {
-              setProductData((prev: any) => ({
-                // TODO: Replace `any` usage with ProductData type
-                ...prev,
-                Media: [
-                  ...((prev as any).Media || []),
-                  isEditMode
-                    ? { id: response[0].id, attributes: response[0] }
-                    : response[0].id.toString(),
-                ],
-              }));
-            } else {
-              setProductData((prev: any) => ({
-                // TODO: Replace `any` usage with ProductData type
-                ...prev,
-                Files: [
-                  ...((prev as any).Files || []),
-                  isEditMode
-                    ? { id: response[0].id, attributes: response[0] }
-                    : response[0].id.toString(),
-                ],
-              }));
-            }
-
-            const fileWithPreview = {
-              file,
-              preview: previewUrl,
-            };
-
-            // Sort files by type into appropriate arrays
-            switch (detectedFileType) {
-              case "image":
-                successfulImages.push(fileWithPreview);
-                break;
-              case "video":
-                successfulVideos.push(fileWithPreview);
-                break;
-              case "other":
-                successfulFiles.push(fileWithPreview);
-                break;
-            }
-          }
+          await uploadVisibleFile(fileWithPreview, fileType);
+          totalSuccessful += 1;
         } catch (error: any) {
-          // TODO: Narrow error type instead of using `any`
           const friendlyMessage = getUserFacingErrorMessage(error, "خطا در آپلود فایل‌ها");
+          updateItemById(fileType, fileWithPreview.id, {
+            uploadStatus: "failed",
+            uploadError: friendlyMessage,
+          });
           uploadErrors.push(`${file.name}: ${friendlyMessage}`);
         }
       }
-
-      // Update states with successful uploads
-      if (successfulImages.length > 0) {
-        setImages((prevImages) => [...prevImages, ...successfulImages]);
-      }
-
-      if (successfulVideos.length > 0) {
-        setVideos((prevVideos) => [...prevVideos, ...successfulVideos]);
-      }
-
-      if (successfulFiles.length > 0) {
-        setFiles((prevFiles) => [...prevFiles, ...successfulFiles]);
-      }
-
-      const totalSuccessful =
-        successfulImages.length + successfulVideos.length + successfulFiles.length;
 
       if (totalSuccessful > 0) {
         if (totalSuccessful === newFiles.length) {
@@ -280,18 +301,42 @@ export function useUpload({
         }
       }
 
-      // Show errors if any
       if (uploadErrors.length > 0) {
         uploadErrors.forEach((error) => {
           toast.error(error);
         });
       }
     } catch (error: any) {
-      // TODO: Provide a typed error object
       toast.error("خطا در آپلود فایل‌ها. لطفا دوباره تلاش کنید.");
       console.error("Error uploading files:", error);
     } finally {
       setUploadingState((prev) => ({ ...prev, [fileType]: false }));
+      e.target.value = "";
+    }
+  };
+
+  const retryFile = async (index: number, type: FileType) => {
+    const item = getItemsByType(type)[index];
+    if (!item || item.uploadStatus !== "failed") return;
+
+    updateItemById(type, item.id, {
+      uploadStatus: "uploading",
+      uploadError: null,
+    });
+    setUploadingState((prev) => ({ ...prev, [type]: true }));
+
+    try {
+      await uploadVisibleFile(item, type);
+      toast.success("فایل با موفقیت آپلود شد");
+    } catch (error: any) {
+      const friendlyMessage = getUserFacingErrorMessage(error, "خطا در آپلود فایل");
+      updateItemById(type, item.id, {
+        uploadStatus: "failed",
+        uploadError: friendlyMessage,
+      });
+      toast.error(`${item.file.name}: ${friendlyMessage}`);
+    } finally {
+      setUploadingState((prev) => ({ ...prev, [type]: false }));
     }
   };
 
@@ -303,10 +348,12 @@ export function useUpload({
         }
         setImages((prevImages) => prevImages.filter((_, i) => i !== index));
         if (productData) {
+          if (images[index]?.uploadStatus !== "uploaded") break;
           const media = ((productData as any).Media || []) as any[];
+          const uploadedIndex = uploadedIndexBefore(images, index);
           const removalIndex = isEditMode
-            ? resolveMediaRemovalIndex(media, index, "image/")
-            : index;
+            ? resolveMediaRemovalIndex(media, uploadedIndex, "image/")
+            : uploadedIndex;
           if (removalIndex !== null) {
             setProductData({
               ...(productData as any), // TODO: Strongly type productData
@@ -321,10 +368,12 @@ export function useUpload({
         }
         setVideos((prevVideos) => prevVideos.filter((_, i) => i !== index));
         if (productData) {
+          if (videos[index]?.uploadStatus !== "uploaded") break;
           const media = ((productData as any).Media || []) as any[];
+          const uploadedIndex = uploadedIndexBefore(videos, index);
           const removalIndex = isEditMode
-            ? resolveMediaRemovalIndex(media, index, "video/")
-            : index;
+            ? resolveMediaRemovalIndex(media, uploadedIndex, "video/")
+            : uploadedIndex;
           if (removalIndex !== null) {
             setProductData({
               ...(productData as any), // TODO: Strongly type productData
@@ -339,9 +388,13 @@ export function useUpload({
         }
         setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
         if (productData) {
+          if (files[index]?.uploadStatus !== "uploaded") break;
+          const uploadedIndex = uploadedIndexBefore(files, index);
           setProductData({
             ...(productData as any), // TODO: Strongly type productData
-            Files: ((productData as any).Files || []).filter((_: any, i: number) => i !== index),
+            Files: ((productData as any).Files || []).filter(
+              (_: any, i: number) => i !== uploadedIndex,
+            ),
           });
         }
         break;
@@ -360,6 +413,10 @@ export function useUpload({
         return prev;
       }
 
+      if (!images.every((image) => image.uploadStatus === "uploaded")) {
+        return prev;
+      }
+
       let nextMedia = media;
 
       // Edit mode media includes MIME metadata and can be reordered as an image subset.
@@ -368,8 +425,8 @@ export function useUpload({
       } else if (
         shouldReorderUntypedMediaAsImages({
           mediaLength: media.length,
-          imageCount: images.length,
-          videoCount: videos.length,
+          imageCount: images.filter((image) => image.uploadStatus === "uploaded").length,
+          videoCount: videos.filter((video) => video.uploadStatus === "uploaded").length,
         })
       ) {
         // Add mode fallback when every media entry is currently an image.
@@ -394,6 +451,7 @@ export function useUpload({
     uploadingState,
     handleFileUpload,
     removeFile,
+    retryFile,
     reorderImages,
   };
 }

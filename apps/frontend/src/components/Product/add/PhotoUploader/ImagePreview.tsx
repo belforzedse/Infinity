@@ -3,12 +3,18 @@ import Image from "next/image";
 import imageLoader from "@/utils/imageLoader";
 import DeleteIcon from "@/components/Kits/Icons/DeleteIcon";
 import { IMAGE_BASE_URL } from "@/constants/api";
+import UploadStatusBadge, { type UploadStatus } from "@/components/Product/add/UploadStatusBadge";
+import { RefreshCcw } from "lucide-react";
 import VideoPreviewModal from "../VideoPreviewModal";
 
 export interface ImagePreviewProps {
   preview: string;
   onRemove: () => void;
+  onRetry?: () => void;
   index: number;
+  mimeType?: string;
+  uploadStatus?: UploadStatus;
+  uploadError?: string | null;
 }
 
 const resolveSrc = (preview: string): string => {
@@ -33,10 +39,20 @@ const resolveSrc = (preview: string): string => {
   }
 };
 
-const PhotoUploaderImagePreview: React.FC<ImagePreviewProps> = ({ preview, onRemove, index }) => {
+const PhotoUploaderImagePreview: React.FC<ImagePreviewProps> = ({
+  preview,
+  onRemove,
+  onRetry,
+  index,
+  mimeType,
+  uploadStatus,
+  uploadError,
+}) => {
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
-  const isVideo = preview?.match(/\.(mp4|webm|ogg|mov)$/i) !== null || 
-                 (preview?.startsWith("blob:") && preview.includes("video"));
+  const isVideo =
+    mimeType?.startsWith("video/") ||
+    preview?.match(/\.(mp4|webm|ogg|mov)$/i) !== null ||
+    (preview?.startsWith("blob:") && preview.includes("video"));
 
   return (
     <>
@@ -80,6 +96,26 @@ const PhotoUploaderImagePreview: React.FC<ImagePreviewProps> = ({ preview, onRem
           loader={imageLoader}
         />
       )}
+
+    <div className="absolute bottom-2 left-2 z-10 flex flex-col items-start gap-1">
+      <UploadStatusBadge status={uploadStatus} />
+      {uploadStatus === "failed" && uploadError ? (
+        <span className="max-w-36 rounded-md bg-white/95 px-2 py-1 text-[10px] text-rose-700 shadow-sm">
+          {uploadError}
+        </span>
+      ) : null}
+    </div>
+
+    {uploadStatus === "failed" && onRetry ? (
+      <button
+        type="button"
+        onClick={onRetry}
+        className="absolute inset-x-4 top-1/2 z-10 flex -translate-y-1/2 items-center justify-center gap-2 rounded-lg bg-white/95 px-3 py-2 text-xs font-medium text-rose-600 shadow-sm transition hover:bg-white"
+      >
+        <RefreshCcw className="h-4 w-4" />
+        تلاش مجدد
+      </button>
+    ) : null}
 
     <button
       onClick={onRemove}
