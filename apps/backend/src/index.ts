@@ -263,6 +263,8 @@ const STORE_MANAGER_RESTRICTED_CONTROLLERS: RestrictedController[] = [
   { typeKey: "plugin::users-permissions", controller: "user" , allowActions: READ_ACTIONS},
   // Restrict admin activity - store managers cannot view admin activities
   { typeKey: "api::admin-activity", controller: "admin-activity", allowActions: [] },
+  // Restrict destructive maintenance actions to superadmin only
+  { typeKey: "api::commerce-maintenance", controller: "commerce-maintenance", allowActions: [] },
   // Restrict user activity - store managers cannot view other users' activities
   { typeKey: "api::user-activity", controller: "user-activity", allowActions: [] },
   // Restrict blog management - store managers can only read blog posts (like normal users)
