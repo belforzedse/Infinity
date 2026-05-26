@@ -10,6 +10,7 @@ interface PaginationProps {
   totalPages: number;
   onPageChange: (page: number) => void;
   className?: string;
+  disabled?: boolean;
 }
 
 export default function PLPPagination({
@@ -17,6 +18,7 @@ export default function PLPPagination({
   totalPages,
   onPageChange,
   className,
+  disabled = false,
 }: PaginationProps) {
   // Don't render if there's only one page or no pages
   if (totalPages <= 1) return null;
@@ -76,18 +78,21 @@ export default function PLPPagination({
   };
 
   const handlePrevious = () => {
-    if (currentPage > 1) {
+    if (!disabled && currentPage > 1) {
       onPageChange(currentPage - 1);
       scrollToTop();
     }
   };
 
   const handleNext = () => {
-    if (currentPage < totalPages) {
+    if (!disabled && currentPage < totalPages) {
       onPageChange(currentPage + 1);
       scrollToTop();
     }
   };
+
+  const previousDisabled = disabled || currentPage === 1;
+  const nextDisabled = disabled || currentPage === totalPages;
 
   return (
     <div className={cn("mt-8 flex items-center justify-center", className)}>
@@ -95,16 +100,16 @@ export default function PLPPagination({
         {/* Previous Button */}
         <button
           onClick={handlePrevious}
-          disabled={currentPage === 1}
+          disabled={previousDisabled}
           className={cn(
             "flex h-8 w-8 items-center justify-center rounded-md transition-colors",
-            currentPage === 1
-              ? "cursor-not-allowed  text-gray-400"
-              : " text-gray-700 hover:border-gray-400 hover:bg-gray-50",
+            previousDisabled
+              ? "cursor-not-allowed text-gray-400"
+              : "text-gray-700 hover:border-gray-400 hover:bg-gray-50",
           )}
           aria-label="صفحه قبلی"
         >
-          <ChevronRightIcon color={currentPage === 1 ? "#9CA3AF" : "#374151"} />
+          <ChevronRightIcon color={previousDisabled ? "#9CA3AF" : "#374151"} />
         </button>
 
         {/* Page Numbers */}
@@ -128,14 +133,17 @@ export default function PLPPagination({
               <button
                 key={pageNum}
                 onClick={() => {
+                  if (disabled) return;
                   onPageChange(pageNum);
                   scrollToTop();
                 }}
+                disabled={disabled}
                 className={cn(
-                  "text-sm flex h-8 w-8 items-center justify-center rounded-full font-medium transition-colors",
+                  "flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium transition-colors",
                   isActive
-                    ? "bg-pink-500  text-white"
-                    : " text-gray-700 hover:border-gray-400 hover:bg-gray-50",
+                    ? "bg-pink-500 text-white"
+                    : "text-gray-700 hover:border-gray-400 hover:bg-gray-50",
+                  disabled && "cursor-not-allowed opacity-60",
                 )}
                 aria-label={`صفحه ${pageNum}`}
                 aria-current={isActive ? "page" : undefined}
@@ -149,20 +157,16 @@ export default function PLPPagination({
         {/* Next Button */}
         <button
           onClick={handleNext}
-          disabled={currentPage === totalPages}
+          disabled={nextDisabled}
           className={cn(
-            "flex h-8 w-8 items-center justify-center rounded-md  transition-colors",
-            currentPage === totalPages
-              ? "cursor-not-allowed  text-gray-400"
-              : " text-gray-700  hover:bg-gray-50",
+            "flex h-8 w-8 items-center justify-center rounded-md transition-colors",
+            nextDisabled ? "cursor-not-allowed text-gray-400" : "text-gray-700 hover:bg-gray-50",
           )}
           aria-label="صفحه بعدی"
         >
-          <ChevronLeftIcon color={currentPage === totalPages ? "#9CA3AF" : "#374151"} />
+          <ChevronLeftIcon color={nextDisabled ? "#9CA3AF" : "#374151"} />
         </button>
       </div>
-
-
     </div>
   );
 }

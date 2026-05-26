@@ -11,7 +11,7 @@ import DiscountIcon from "./Icons/DiscountIcon";
 import SidebarSuggestions from "./List/SidebarSuggestions";
 import Pagination from "./Pagination";
 import { useQueryStates } from "nuqs";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SORT_LABELS } from "./sortOptions";
 import { hasAvailableStock, productTitleHasG } from "@/utils/product";
@@ -21,13 +21,10 @@ import PLPMobileList from "./List/PLPMobileList";
 import type { PLPProduct, PLPPagination } from "./types";
 import { plpQueryOptions, plpQueryParsers } from "./queryState";
 import { getPlpHref } from "@/utils/plpRoutes";
+import { ProductResultsSkeleton } from "@/components/Skeletons/ProductListSkeleton";
 
 const humanize = (value: string) =>
-  value
-    .toString()
-    .replace(/[-_]+/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
+  value.toString().replace(/[-_]+/g, " ").replace(/\s+/g, " ").trim();
 
 interface PLPListProps {
   products: PLPProduct[];
@@ -53,6 +50,7 @@ export default function PLPList({
   sidebarSlot,
 }: PLPListProps) {
   const [query, setQuery] = useQueryStates(plpQueryParsers, plpQueryOptions);
+  const [isPagePending, startPageTransition] = useTransition();
   const {
     available,
     minPrice,
@@ -83,8 +81,7 @@ export default function PLPList({
   // Helper function to check if product has an image
   const hasImage = (product: PLPProduct): boolean => {
     return !!(
-      product.attributes?.CoverImage?.data?.attributes?.url ||
-      product.attributes?.CoverImage?.data
+      product.attributes?.CoverImage?.data?.attributes?.url || product.attributes?.CoverImage?.data
     );
   };
 
@@ -94,9 +91,7 @@ export default function PLPList({
     [initialProducts],
   );
 
-  const [categoryOptions, setCategoryOptions] = useState<Array<{ id: string; title: string }>>(
-    [],
-  );
+  const [categoryOptions, setCategoryOptions] = useState<Array<{ id: string; title: string }>>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
 
   // When server passed allCategories (e.g. category PLP), use them for filter and skip client fetch.
@@ -133,8 +128,6 @@ export default function PLPList({
     };
     fetchCategories();
   }, [allCategoriesProp]);
-
-
 
   // Memoize expensive filtering operations
   const validProducts = useMemo(
@@ -259,134 +252,131 @@ export default function PLPList({
     return initialCategory.replace(/[-_]/g, " ");
   }, [initialCategory, categoryOptions, validProducts]);
 
-  const activeFilters = useMemo(
-    () => {
-      const filters: Array<{ key: string; label: string; onRemove: () => void }> = [];
+  const activeFilters = useMemo(() => {
+    const filters: Array<{ key: string; label: string; onRemove: () => void }> = [];
 
-      if (available === "true") {
-        filters.push({
-          key: "available",
-          label: "فقط کالاهای موجود",
-          onRemove: () => {
-            void setQuery({ available: null, page: 1 });
-          },
-        });
-      }
+    if (available === "true") {
+      filters.push({
+        key: "available",
+        label: "فقط کالاهای موجود",
+        onRemove: () => {
+          void setQuery({ available: null, page: 1 });
+        },
+      });
+    }
 
-      if (initialCategory) {
-        filters.push({
-          key: "category",
-          label: `دسته: ${selectedCategoryTitle || initialCategory}`,
-          onRemove: () => {
-            router.push(getPlpHref(searchParams));
-          },
-        });
-      }
+    if (initialCategory) {
+      filters.push({
+        key: "category",
+        label: `دسته: ${selectedCategoryTitle || initialCategory}`,
+        onRemove: () => {
+          router.push(getPlpHref(searchParams));
+        },
+      });
+    }
 
-      if (discountOnly === "true") {
-        filters.push({
-          key: "discount",
-          label: "فقط با تخفیف",
-          onRemove: () => {
-            void setQuery({ hasDiscount: null, page: 1 });
-          },
-        });
-      }
+    if (discountOnly === "true") {
+      filters.push({
+        key: "discount",
+        label: "فقط با تخفیف",
+        onRemove: () => {
+          void setQuery({ hasDiscount: null, page: 1 });
+        },
+      });
+    }
 
-      if (minPrice || maxPrice) {
-        const minLabel = minPrice ? `از ${faNum(Number(minPrice))}` : "";
-        const maxLabel = maxPrice ? `تا ${faNum(Number(maxPrice))}` : "";
-        filters.push({
-          key: "price",
-          label: `قیمت ${[minLabel, maxLabel].filter(Boolean).join(" ") || ""}`.trim(),
-          onRemove: () => {
-            void setQuery({ minPrice: null, maxPrice: null, page: 1 });
-          },
-        });
-      }
+    if (minPrice || maxPrice) {
+      const minLabel = minPrice ? `از ${faNum(Number(minPrice))}` : "";
+      const maxLabel = maxPrice ? `تا ${faNum(Number(maxPrice))}` : "";
+      filters.push({
+        key: "price",
+        label: `قیمت ${[minLabel, maxLabel].filter(Boolean).join(" ") || ""}`.trim(),
+        onRemove: () => {
+          void setQuery({ minPrice: null, maxPrice: null, page: 1 });
+        },
+      });
+    }
 
-      if (size) {
-        const numericSize = Number(size);
-        const sizeLabel = Number.isNaN(numericSize) ? size : faNum(numericSize);
-        filters.push({
-          key: "size",
-          label: `سایز ${sizeLabel}`,
-          onRemove: () => {
-            void setQuery({ size: null, page: 1 });
-          },
-        });
-      }
+    if (size) {
+      const numericSize = Number(size);
+      const sizeLabel = Number.isNaN(numericSize) ? size : faNum(numericSize);
+      filters.push({
+        key: "size",
+        label: `سایز ${sizeLabel}`,
+        onRemove: () => {
+          void setQuery({ size: null, page: 1 });
+        },
+      });
+    }
 
-      if (material) {
-        filters.push({
-          key: "material",
-          label: `جنس: ${humanize(material)}`,
-          onRemove: () => {
-            void setQuery({ material: null, page: 1 });
-          },
-        });
-      }
+    if (material) {
+      filters.push({
+        key: "material",
+        label: `جنس: ${humanize(material)}`,
+        onRemove: () => {
+          void setQuery({ material: null, page: 1 });
+        },
+      });
+    }
 
-      if (season) {
-        filters.push({
-          key: "season",
-          label: `فصل: ${humanize(season)}`,
-          onRemove: () => {
-            void setQuery({ season: null, page: 1 });
-          },
-        });
-      }
+    if (season) {
+      filters.push({
+        key: "season",
+        label: `فصل: ${humanize(season)}`,
+        onRemove: () => {
+          void setQuery({ season: null, page: 1 });
+        },
+      });
+    }
 
-      if (gender) {
-        filters.push({
-          key: "gender",
-          label: `جنسیت: ${humanize(gender)}`,
-          onRemove: () => {
-            void setQuery({ gender: null, page: 1 });
-          },
-        });
-      }
+    if (gender) {
+      filters.push({
+        key: "gender",
+        label: `جنسیت: ${humanize(gender)}`,
+        onRemove: () => {
+          void setQuery({ gender: null, page: 1 });
+        },
+      });
+    }
 
-      if (usage) {
-        filters.push({
-          key: "usage",
-          label: `کاربری: ${humanize(usage)}`,
-          onRemove: () => {
-            void setQuery({ usage: null, page: 1 });
-          },
-        });
-      }
+    if (usage) {
+      filters.push({
+        key: "usage",
+        label: `کاربری: ${humanize(usage)}`,
+        onRemove: () => {
+          void setQuery({ usage: null, page: 1 });
+        },
+      });
+    }
 
-      if (sort) {
-        filters.push({
-          key: "sort",
-          label: `مرتب‌سازی: ${SORT_LABELS[sort] || humanize(sort)}`,
-          onRemove: () => {
-            void setQuery({ sort: null, page: 1 });
-          },
-        });
-      }
+    if (sort) {
+      filters.push({
+        key: "sort",
+        label: `مرتب‌سازی: ${SORT_LABELS[sort] || humanize(sort)}`,
+        onRemove: () => {
+          void setQuery({ sort: null, page: 1 });
+        },
+      });
+    }
 
-      return filters;
-    },
-    [
-      available,
-      discountOnly,
-      gender,
-      initialCategory,
-      material,
-      maxPrice,
-      minPrice,
-      router,
-      season,
-      selectedCategoryTitle,
-      searchParams,
-      setQuery,
-      size,
-      sort,
-      usage,
-    ],
-  );
+    return filters;
+  }, [
+    available,
+    discountOnly,
+    gender,
+    initialCategory,
+    material,
+    maxPrice,
+    minPrice,
+    router,
+    season,
+    selectedCategoryTitle,
+    searchParams,
+    setQuery,
+    size,
+    sort,
+    usage,
+  ]);
 
   const clearAllFilters = () => {
     if (initialCategory) {
@@ -409,12 +399,18 @@ export default function PLPList({
     });
   };
 
+  const handlePageChange = (nextPage: number) => {
+    void setQuery(
+      { page: nextPage },
+      {
+        ...plpQueryOptions,
+        startTransition: startPageTransition,
+      },
+    );
+  };
+
   return (
-    <div
-      className="w-full"
-      data-plp-top
-      style={{ scrollMarginTop: "var(--header-offset, 88px)" }}
-    >
+    <div className="w-full" data-plp-top style={{ scrollMarginTop: "var(--header-offset, 88px)" }}>
       <div className="flex flex-col gap-4 md:flex-row">
         {/* Sidebar with filters - Desktop only */}
         <div className="hidden md:flex md:w-[280px]">
@@ -437,11 +433,11 @@ export default function PLPList({
         <div className="min-w-0 flex-1">
           {/* Mobile filter buttons */}
           <div className="mb-4 md:hidden">
-                <PLPListMobileFilter
-                  categories={categoryOptions}
-                  isLoadingCategories={isLoadingCategories}
-                  selectedCategory={initialCategory}
-                />
+            <PLPListMobileFilter
+              categories={categoryOptions}
+              isLoadingCategories={isLoadingCategories}
+              selectedCategory={initialCategory}
+            />
           </div>
 
           {/* Show search results title if search query exists */}
@@ -480,16 +476,21 @@ export default function PLPList({
             <NoData category={initialCategory} />
           ) : (
             <>
-              <PLPDesktopList products={displayProducts} includeMedia={isDesktop} />
-              <PLPMobileList products={displayProducts} />
+              {isPagePending ? (
+                <ProductResultsSkeleton />
+              ) : (
+                <>
+                  <PLPDesktopList products={displayProducts} includeMedia={isDesktop} />
+                  <PLPMobileList products={displayProducts} />
+                </>
+              )}
 
               {/* Pagination */}
               <Pagination
                 currentPage={page}
                 totalPages={initialPagination.pageCount}
-                onPageChange={(nextPage) => {
-                  void setQuery({ page: nextPage });
-                }}
+                onPageChange={handlePageChange}
+                disabled={isPagePending}
               />
             </>
           )}

@@ -71,22 +71,25 @@ const UserHeader: React.FC = () => {
       </header>
       <div className="mb-6 h-[4.5rem] lg:hidden" aria-hidden />
 
-      <header className="mb-8 hidden w-full items-center justify-between rounded-2xl bg-neutral-50 px-10 py-4 lg:flex">
-      {/* Right side: Back to Store */}
-      <div className="flex">
-        <BackButtonToStore />
-      </div>
+      <header
+        className="fixed left-1/2 top-5 z-50 hidden min-h-[4.5rem] w-[calc(100%-2.5rem)] max-w-[1280px] -translate-x-1/2 items-center justify-between rounded-2xl border border-white/60 bg-white/55 px-6 py-3 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-white/35 lg:flex"
+        dir="ltr"
+      >
+        <div className="relative z-10 flex w-48 items-center justify-start">
+          <ShoppingCartCounter />
+        </div>
 
-      {/* Center: Logo */}
-      <div className="relative h-10 w-28 flex-shrink-0 -translate-y-4 md:h-12 md:w-36">
-        <StorefrontLogo />
-      </div>
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <div className="pointer-events-auto">
+            <StorefrontLogo width={92} height={58} />
+          </div>
+        </div>
 
-      {/* Left side: Desktop Cart */}
-      <div className="flex items-center gap-3">
-        <ShoppingCartCounter />
-      </div>
-    </header>
+        <div className="relative z-10 flex w-48 items-center justify-end">
+          <BackButtonToStore />
+        </div>
+      </header>
+      <div className="mb-8 hidden h-[4.5rem] lg:block" aria-hidden />
     </>
   );
 };

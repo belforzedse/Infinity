@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { SuperAdminLogo } from "@repo/brand";
+import { StorefrontLogo } from "@repo/brand";
 import MenuIcon from "@/components/PLP/Icons/MenuIcon";
 import MobileBackButton from "@/components/MobileBackButton";
 import { useMe } from "@/hooks/api/useMe";
@@ -31,40 +31,45 @@ export default function SuperAdminLayoutHeader({ onMenuClick }: SuperAdminLayout
           dir="ltr"
         >
           <div className="relative z-10 flex w-28 items-center justify-start">
-            <MobileBackButton />
+            <div className="flex items-center gap-2 rounded-full border border-slate-200/70 bg-white/70 p-1 shadow-sm">
+              <div className="h-10 w-10 overflow-hidden rounded-full bg-neutral-100">
+                <Image
+                  src="https://img.icons8.com/ios/100/000000/user-male-circle.png"
+                  alt="No photo"
+                  width={40}
+                  height={40}
+                  className="object-cover"
+                  unoptimized
+                />
+              </div>
+            </div>
           </div>
 
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-            <div className="pointer-events-auto origin-center scale-75">
-              <SuperAdminLogo />
+            <div className="pointer-events-auto">
+              <StorefrontLogo href="/super-admin" width={92} height={58} />
             </div>
           </div>
 
           <div className="relative z-10 flex w-28 items-center justify-end gap-2">
+            <MobileBackButton />
             <button
               onClick={onMenuClick}
               className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white hover:bg-neutral-100"
             >
               <MenuIcon />
             </button>
-            <div className="h-10 w-10 overflow-hidden rounded-full bg-neutral-100">
-              <Image
-                src="https://img.icons8.com/ios/100/000000/user-male-circle.png"
-                alt="No photo"
-                width={40}
-                height={40}
-                className="object-cover"
-                unoptimized
-              />
-            </div>
           </div>
         </div>
       </header>
       <div className="h-[4.5rem] md:hidden" aria-hidden />
 
-      <header className="hidden h-[60px] w-full items-center justify-between rounded-2xl border-b border-neutral-100 bg-white px-4 md:flex lg:h-[76px] lg:px-6">
+      <header
+        className="sticky top-4 z-40 hidden min-h-[4.5rem] w-full items-center justify-between rounded-2xl border border-white/60 bg-white/55 px-4 py-3 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-white/35 md:flex lg:px-6"
+        dir="ltr"
+      >
         {/* Search Section */}
-        <div className="hidden max-w-[400px] flex-1 lg:block">
+        <div className="relative z-10 order-3 hidden w-48 flex-shrink-0 lg:block">
           {/* <div className="relative">
           <input
             type="text"
@@ -80,25 +85,31 @@ export default function SuperAdminLayoutHeader({ onMenuClick }: SuperAdminLayout
           </div> */}
         </div>
 
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <div className="pointer-events-auto">
+            <StorefrontLogo href="/super-admin" width={92} height={58} />
+          </div>
+        </div>
+
         {/* User Profile Section */}
-        <div className="flex items-center gap-2 lg:gap-6">
-          <div className="flex items-center gap-4">
-            <div className="flex cursor-pointer items-center gap-1 lg:gap-4">
-              <div className="h-9 w-9 overflow-hidden rounded-full bg-neutral-100">
+        <div className="relative z-10 order-1 flex min-w-0 flex-shrink-0 items-center justify-start gap-2 lg:w-64 lg:gap-4">
+          <div className="flex items-center gap-3 rounded-full border border-slate-200/70 bg-white/70 px-2 py-2 shadow-sm">
+            <div className="flex cursor-pointer items-center gap-2 lg:gap-3">
+              <div className="h-10 w-10 overflow-hidden rounded-full bg-neutral-100">
                 <Image
                   src="https://img.icons8.com/ios/100/000000/user-male-circle.png"
                   alt="No photo"
-                  width={36}
-                  height={36}
+                  width={40}
+                  height={40}
                   className="object-cover"
                   unoptimized
                 />
               </div>
-              <div className="hidden flex-col gap-1 lg:flex">
+              <div className="hidden min-w-0 flex-col gap-1 text-right lg:flex">
                 <span className="text-sm !leading-none text-neutral-600">
                   {me?.FirstName} {me?.LastName}
                 </span>
-                <span className="text-xs !leading-none text-neutral-600">{me?.Phone}</span>
+                <span className="text-xs !leading-none text-neutral-500">{me?.Phone}</span>
               </div>
               {/* <div className="w-[18px] h-[18px] border border-neutral-600 rounded-full flex justify-center items-center">
                 <SmallChevronDownIcon />

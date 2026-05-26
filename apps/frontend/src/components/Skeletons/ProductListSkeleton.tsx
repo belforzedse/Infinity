@@ -2,6 +2,55 @@ import React from "react";
 import { StorefrontGrid } from "@/components/storefront";
 import { SkeletonBlock, SkeletonMedia, SkeletonText } from "@repo/ui/skeleton";
 
+function DesktopProductResultsSkeleton() {
+  return (
+    <StorefrontGrid variant="plp">
+      {[...Array(8)].map((_, i) => (
+        <div key={i} className="space-y-3">
+          <SkeletonMedia aspect="250 / 270" />
+          <SkeletonText tone="light" className="h-4 w-3/4" />
+          <SkeletonText tone="light" className="h-4 w-1/2" />
+        </div>
+      ))}
+    </StorefrontGrid>
+  );
+}
+
+function MobileProductResultsSkeleton() {
+  return (
+    <div className="flex flex-col gap-3">
+      {[...Array(6)].map((_, i) => (
+        <div
+          key={i}
+          className="flex gap-3 rounded-2xl border border-zinc-100 bg-white p-3 shadow-sm"
+        >
+          <SkeletonBlock className="h-28 w-24 shrink-0 rounded-2xl" />
+          <div className="flex flex-1 flex-col justify-between py-1">
+            <div className="space-y-2">
+              <SkeletonText tone="light" className="h-4 w-3/4" />
+              <SkeletonText tone="light" className="h-4 w-1/2" />
+            </div>
+            <SkeletonBlock tone="light" className="h-8 w-28 rounded-full" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function ProductResultsSkeleton() {
+  return (
+    <>
+      <div className="hidden md:block">
+        <DesktopProductResultsSkeleton />
+      </div>
+      <div className="md:hidden">
+        <MobileProductResultsSkeleton />
+      </div>
+    </>
+  );
+}
+
 export default function ProductListSkeleton() {
   return (
     <>
@@ -22,32 +71,13 @@ export default function ProductListSkeleton() {
             <SkeletonText className="h-6 w-36" />
             <SkeletonBlock tone="light" className="h-9 w-40 rounded-full" />
           </div>
-          <StorefrontGrid variant="plp">
-            {[...Array(8)].map((_, i) => (
-              <div key={i} className="space-y-3">
-                <SkeletonMedia aspect="250 / 270" />
-                <SkeletonText tone="light" className="h-4 w-3/4" />
-                <SkeletonText tone="light" className="h-4 w-1/2" />
-              </div>
-            ))}
-          </StorefrontGrid>
+          <DesktopProductResultsSkeleton />
         </div>
       </div>
 
       {/* Mobile list skeleton */}
-      <div className="flex flex-col gap-3 md:hidden">
-        {[...Array(6)].map((_, i) => (
-          <div key={i} className="flex gap-3 rounded-2xl border border-zinc-100 bg-white p-3 shadow-sm">
-            <SkeletonBlock className="h-28 w-24 shrink-0 rounded-2xl" />
-            <div className="flex flex-1 flex-col justify-between py-1">
-              <div className="space-y-2">
-                <SkeletonText tone="light" className="h-4 w-3/4" />
-                <SkeletonText tone="light" className="h-4 w-1/2" />
-              </div>
-              <SkeletonBlock tone="light" className="h-8 w-28 rounded-full" />
-            </div>
-          </div>
-        ))}
+      <div className="md:hidden">
+        <MobileProductResultsSkeleton />
       </div>
     </>
   );

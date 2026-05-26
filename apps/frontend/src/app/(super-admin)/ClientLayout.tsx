@@ -282,7 +282,7 @@ function Tablet({ children }: { children: React.ReactNode }) {
           onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
         />
       </div>
-      <div className="flex w-full flex-1 flex-col gap-3 p-4 min-w-0 overflow-hidden">
+      <div className="flex w-full min-w-0 flex-1 flex-col gap-3 overflow-visible p-4">
         <div className="w-full max-w-screen-3xl space-y-3 mx-auto min-w-0">
           <Header onMenuClick={() => {}} />
           {children}
