@@ -36,5 +36,19 @@ describe("PLPPagination", () => {
 
     expect(onPageChange).toHaveBeenCalledWith(3);
     expect(scrollIntoViewWithOffset).toHaveBeenCalled();
+    expect((scrollIntoViewWithOffset as jest.Mock).mock.invocationCallOrder[0]).toBeLessThan(
+      onPageChange.mock.invocationCallOrder[0],
+    );
+  });
+
+  it("does not scroll or change page when clicking the current page", () => {
+    const onPageChange = jest.fn();
+
+    render(<PLPPagination currentPage={2} totalPages={4} onPageChange={onPageChange} />);
+
+    fireEvent.click(screen.getByText("2"));
+
+    expect(onPageChange).not.toHaveBeenCalled();
+    expect(scrollIntoViewWithOffset).not.toHaveBeenCalled();
   });
 });

@@ -79,15 +79,15 @@ export default function PLPPagination({
 
   const handlePrevious = () => {
     if (!disabled && currentPage > 1) {
-      onPageChange(currentPage - 1);
       scrollToTop();
+      onPageChange(currentPage - 1);
     }
   };
 
   const handleNext = () => {
     if (!disabled && currentPage < totalPages) {
-      onPageChange(currentPage + 1);
       scrollToTop();
+      onPageChange(currentPage + 1);
     }
   };
 
@@ -133,9 +133,9 @@ export default function PLPPagination({
               <button
                 key={pageNum}
                 onClick={() => {
-                  if (disabled) return;
-                  onPageChange(pageNum);
+                  if (disabled || isActive) return;
                   scrollToTop();
+                  onPageChange(pageNum);
                 }}
                 disabled={disabled}
                 className={cn(
