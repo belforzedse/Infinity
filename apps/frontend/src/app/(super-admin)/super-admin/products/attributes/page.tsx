@@ -26,10 +26,11 @@ export default function AttributesPage() {
 
   return (
     <ContentWrapper title="ویژگی‌ها" hasFilterButton hasPagination>
-      <SuperAdminTable columns={columns} data={demoData} />
-      <div className="mt-4 block md:hidden">
-        <MobileTable data={demoData} />
-      </div>
+      <SuperAdminTable
+        columns={columns}
+        data={demoData}
+        mobileTable={(rows) => <MobileTable data={rows} />}
+      />
     </ContentWrapper>
   );
 }

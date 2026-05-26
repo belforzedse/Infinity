@@ -1,7 +1,7 @@
 "use client";
 
 import { SuperAdminTable } from "@/components/SuperAdmin/Table";
-import type { Notification} from "./table";
+import type { Notification } from "./table";
 import { MobileTable, columns } from "./table";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
 import { useFreshDataOnPageLoad } from "@/hooks/useFreshDataOnPageLoad";
@@ -43,11 +43,7 @@ export default function Page() {
       addButtonText="ثبت اعلان جدید"
       addButtonPath="/super-admin/notifications/add"
     >
-      <SuperAdminTable columns={columns} data={data} />
-
-      <div className="block md:hidden">
-        <MobileTable data={data} />
-      </div>
+      <SuperAdminTable columns={columns} data={data} mobileTable={(rows) => <MobileTable data={rows ?? []} />} />
     </ContentWrapper>
   );
 }

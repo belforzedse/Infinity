@@ -54,30 +54,32 @@ const SuperAdminTableSelect = ({
   return (
     <div className={cn("relative rounded-lg border border-slate-100", className)}>
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "flex w-full items-center justify-between rounded-xl bg-white px-3 py-2",
+          "flex w-full min-w-0 items-center justify-between gap-2 rounded-xl bg-white px-3 py-2",
           buttonClassName,
         )}
       >
-        <span className="text-xs text-gray-800">{selectedOption.title}</span>
+        <span className="min-w-0 truncate text-xs text-gray-800">{selectedOption.title}</span>
         <ChevronDownIcon
-          className={cn("h-6 w-6 transition-transform", iconClassName, isOpen ? "rotate-180" : "")}
+          className={cn("h-6 w-6 shrink-0 transition-transform", iconClassName, isOpen ? "rotate-180" : "")}
         />
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-fit rounded-xl bg-white p-3">
-          <ul className="w-fit space-y-2">
+        <div className="absolute right-0 top-full z-50 mt-2 max-w-[calc(100vw-2rem)] rounded-xl bg-white p-3 shadow-lg">
+          <ul className="max-h-64 min-w-32 max-w-full space-y-2 overflow-y-auto">
             {filterOptions.map((option) => (
               <li key={option.id} className="w-full">
                 <button
+                  type="button"
                   onClick={() => handleOptionClick(option)}
-                  className={`text-xs w-full text-nowrap rounded-lg px-2 py-1.5 text-right transition-colors hover:bg-stone-50 ${
+                  className={`text-xs w-full min-w-0 rounded-lg px-2 py-1.5 text-right transition-colors hover:bg-stone-50 ${
                     selectedOption.id === option.id ? "text-primary bg-stone-50" : "text-gray-800"
                   }`}
                 >
-                  {option.title}
+                  <span className="block truncate">{option.title}</span>
                 </button>
               </li>
             ))}

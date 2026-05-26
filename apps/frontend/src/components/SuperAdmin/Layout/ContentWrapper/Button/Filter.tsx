@@ -78,7 +78,7 @@ export default function SuperAdminLayoutContentWrapperButtonFilter(props: Props)
       {isFilterOpen && (
         <div
           ref={dialogRef}
-          className="absolute left-0 top-full z-10 flex w-[368px] cursor-auto flex-col gap-3 rounded-lg border border-slate-100 bg-white p-3 shadow-lg"
+          className="fixed left-4 right-4 top-28 z-[1200] flex max-h-[calc(100dvh-8rem)] cursor-auto flex-col gap-3 overflow-y-auto rounded-2xl border border-slate-100 bg-white p-3 shadow-lg md:absolute md:left-0 md:right-auto md:top-full md:z-10 md:mt-2 md:max-h-none md:w-[368px] md:max-w-[calc(100vw-2rem)] md:overflow-visible md:rounded-lg"
           role="dialog"
           aria-label="فیلتر پیشرفته"
           tabIndex={-1}
@@ -107,8 +107,8 @@ export default function SuperAdminLayoutContentWrapperButtonFilter(props: Props)
             </div> */}
 
             {filter.map((item, index) => (
-              <div key={index} className="flex items-center gap-1.5">
-                <div className="flex-1">
+              <div key={index} className="flex flex-col gap-1.5 sm:flex-row sm:items-center">
+                <div className="min-w-0 flex-1">
                   <Input
                     placeholder="مقدار"
                     className="!text-xs h-8"
@@ -125,7 +125,7 @@ export default function SuperAdminLayoutContentWrapperButtonFilter(props: Props)
                     size="sm"
                   />
                 </div>
-                <div className="flex-1">
+                <div className="min-w-0 flex-1">
                   <SuperAdminTableSelect
                     buttonClassName="!p-1.5"
                     iconClassName="!w-5 !h-5"
@@ -152,7 +152,7 @@ export default function SuperAdminLayoutContentWrapperButtonFilter(props: Props)
                     }}
                   />
                 </div>
-                <div className="flex-1">
+                <div className="min-w-0 flex-1">
                   <SuperAdminTableSelect
                     buttonClassName="!p-1.5"
                     iconClassName="!w-5 !h-5"
@@ -175,7 +175,7 @@ export default function SuperAdminLayoutContentWrapperButtonFilter(props: Props)
                 </div>
 
                 <button
-                  className="flex h-5 w-5 items-center justify-center"
+                  className="flex h-8 w-full items-center justify-center rounded-lg bg-slate-50 sm:h-5 sm:w-5 sm:bg-transparent"
                   onClick={() => {
                     setFilter((prev) => prev.filter((_, i) => i !== index));
                   }}
@@ -186,9 +186,9 @@ export default function SuperAdminLayoutContentWrapperButtonFilter(props: Props)
             ))}
           </div>
 
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <button
-              className="flex items-center gap-0.5"
+              className="flex items-center justify-center gap-0.5 rounded-lg bg-slate-50 px-2 py-2 sm:justify-start sm:bg-transparent sm:p-0"
               onClick={() => {
                 setFilter([]);
               }}
@@ -199,7 +199,7 @@ export default function SuperAdminLayoutContentWrapperButtonFilter(props: Props)
             </button>
 
             <button
-              className="flex h-8 items-center justify-center gap-1 rounded-md bg-actions-primary px-2"
+              className="flex h-9 items-center justify-center gap-1 rounded-md bg-actions-primary px-2 sm:h-8"
               onClick={() => {
                 if ((filter.length && filter.at(-1)?.value) || !filter.length) {
                   setFilter((prev) => [

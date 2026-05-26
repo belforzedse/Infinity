@@ -17,6 +17,15 @@ import ConfirmDialog from "@/components/Kits/ConfirmDialog";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useEditorRedirect } from "@/hooks/useEditorRedirect";
 
+type ProductSort =
+  | "last-edited"
+  | "newest"
+  | "oldest"
+  | "stock-asc"
+  | "stock-desc"
+  | "sales-asc"
+  | "sales-desc";
+
 export default function ProductsPage() {
   useFreshDataOnPageLoad();
   const { isStoreManager } = useCurrentUser();
@@ -30,9 +39,7 @@ export default function ProductsPage() {
     actionId: string;
     selectedProducts: Product[];
   } | null>(null);
-  const [sort, setSort] = useState<
-    "last-edited" | "newest" | "oldest" | "stock-asc" | "stock-desc" | "sales-asc" | "sales-desc"
-  >("last-edited");
+  const [sort, setSort] = useState<ProductSort>("last-edited");
   const [page] = useQueryState("page", { defaultValue: "1" });
   const [pageSize] = useQueryState("pageSize", { defaultValue: "25" });
   const [, setTotalSize] = useQueryState<number>("totalSize", {
@@ -492,14 +499,14 @@ export default function ProductsPage() {
       setIsRecycleBinOpen={setIsRecycleBinOpen}
       apiUrl={"/products"}
     >
-      <div className="mb-3 space-y-3">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
+      <div className="mb-3 space-y-3 rounded-2xl bg-white/70 p-3 md:bg-transparent md:p-0">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+          <div className="flex w-full flex-col gap-1.5 sm:w-auto sm:flex-row sm:items-center sm:gap-2">
             <label className="text-sm text-neutral-600">مرتب‌سازی:</label>
             <select
-              className="text-sm rounded-lg border border-neutral-300 px-3 py-1"
+              className="text-sm h-10 w-full rounded-lg border border-neutral-300 px-3 py-1 sm:w-auto sm:min-w-48"
               value={sort}
-              onChange={(e) => setSort(e.target.value as any)}
+              onChange={(e) => setSort(e.target.value as ProductSort)}
             >
               <option value="last-edited">آخرین ویرایش</option>
               <option value="newest">جدیدترین</option>
@@ -510,16 +517,15 @@ export default function ProductsPage() {
               <option value="sales-asc">فروش: کمترین</option>
             </select>
           </div>
-
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex w-full flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2">
           <label className="text-sm text-neutral-600">جستجو:</label>
-          <div className="relative">
+          <div className="relative w-full sm:w-80">
             <input
               type="text"
               placeholder="جستجو در عنوان محصولات..."
-              className="text-sm w-64 rounded-lg border border-neutral-300 px-3 py-1 pr-8"
+              className="text-sm h-10 w-full rounded-lg border border-neutral-300 px-3 py-1 pr-8"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               inputMode="search"
@@ -540,13 +546,13 @@ export default function ProductsPage() {
                 setSearchQuery("");
                 setDebouncedSearchQuery("");
               }}
-              className="text-sm text-neutral-500 hover:text-neutral-700"
+              className="text-sm self-start text-neutral-500 hover:text-neutral-700 sm:self-auto"
             >
               پاک کردن
             </button>
           )}
           {debouncedSearchQuery && (
-            <span className="text-xs text-green-600">
+            <span className="text-xs break-words text-green-600">
               نتایج برای: &quot;{debouncedSearchQuery}&quot;
             </span>
           )}

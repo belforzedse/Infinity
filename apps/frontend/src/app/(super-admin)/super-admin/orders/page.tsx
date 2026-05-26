@@ -96,11 +96,11 @@ export default function OrdersPage() {
       hasFilterButton
       hasPagination
     >
-      <div className="mb-3 flex items-center gap-3">
-        <div className="flex items-center gap-2">
+      <div className="mb-3 flex flex-col gap-3 rounded-2xl bg-white/70 p-3 md:flex-row md:flex-wrap md:items-center md:bg-transparent md:p-0">
+        <div className="flex w-full flex-col gap-1.5 sm:w-auto sm:flex-row sm:items-center sm:gap-2">
           <label className="text-sm text-neutral-600">مرتب‌سازی:</label>
           <select
-            className="text-sm rounded-lg border border-neutral-300 px-3 py-1"
+            className="text-sm h-10 w-full rounded-lg border border-neutral-300 px-3 py-1 sm:w-auto sm:min-w-40"
             value={sort}
             onChange={(e) => setSort(e.target.value as "last-edited" | "newest" | "oldest")}
           >
@@ -109,37 +109,41 @@ export default function OrdersPage() {
             <option value="oldest">قدیمی‌ترین</option>
           </select>
         </div>
-        <label className="text-sm text-neutral-600">جستجوی شماره تراکنش:</label>
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="جستجو شماره تراکنش اسنپ! پی ..."
-            className="text-sm w-80 rounded-lg border border-neutral-300 px-3 py-1 pr-8"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          {searchQuery !== debouncedSearchQuery && (
-            <div className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2">
-              <div className="h-3 w-3 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></div>
-            </div>
+        <div className="flex min-w-0 flex-1 flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-2">
+          <label className="text-sm text-neutral-600">جستجوی شماره تراکنش:</label>
+          <div className="relative w-full sm:w-80">
+            <input
+              type="text"
+              placeholder="جستجو شماره تراکنش اسنپ! پی ..."
+              className="text-sm h-10 w-full rounded-lg border border-neutral-300 px-3 py-1 pr-8"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              inputMode="search"
+              enterKeyHint="search"
+            />
+            {searchQuery !== debouncedSearchQuery && (
+              <div className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2">
+                <div className="h-3 w-3 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"></div>
+              </div>
+            )}
+          </div>
+          {searchQuery && (
+            <button
+              onClick={() => {
+                setSearchQuery("");
+                setDebouncedSearchQuery("");
+              }}
+              className="text-sm self-start text-neutral-500 hover:text-neutral-700 sm:self-auto"
+            >
+              پاک کردن
+            </button>
+          )}
+          {debouncedSearchQuery && (
+            <span className="text-xs break-words text-green-600">
+              نتایج برای: &quot;{debouncedSearchQuery}&quot;
+            </span>
           )}
         </div>
-        {searchQuery && (
-          <button
-            onClick={() => {
-              setSearchQuery("");
-              setDebouncedSearchQuery("");
-            }}
-            className="text-sm text-neutral-500 hover:text-neutral-700"
-          >
-            پاک کردن
-          </button>
-        )}
-        {debouncedSearchQuery && (
-          <span className="text-xs text-green-600">
-            نتایج برای: &quot;{debouncedSearchQuery}&quot;
-          </span>
-        )}
       </div>
       <SuperAdminTable
         _removeActions

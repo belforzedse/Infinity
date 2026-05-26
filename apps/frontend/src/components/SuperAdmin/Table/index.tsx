@@ -614,9 +614,9 @@ export function SuperAdminTable<TData, TValue>({
       </div>
 
       {/* Mobile cards/table alternative */}
-      {mobileTable && (
-        <div className="block md:hidden">
-          {mobileTable(
+      <div className="block md:hidden">
+        {mobileTable ? (
+          mobileTable(
             tableData,
             enableSelection
               ? {
@@ -630,9 +630,91 @@ export function SuperAdminTable<TData, TValue>({
                   },
                 }
               : undefined,
-          )}
-        </div>
-      )}
+          )
+        ) : showSkeleton ? (
+          <div className="mt-3 flex flex-col gap-3">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div
+                key={index}
+                className="h-28 animate-pulse rounded-2xl border border-slate-100 bg-white"
+              />
+            ))}
+          </div>
+        ) : table.getRowModel().rows?.length ? (
+          <div className="mt-3 flex flex-col gap-3">
+            {table.getRowModel().rows.map((row) => {
+              const resolvedKey = resolveRowKey(row.original as TData);
+              const rowKey = resolvedKey || String(row.id);
+              const visibleCells = row.getVisibleCells();
+              const [headlineCell, ...detailCells] = visibleCells;
+
+              return (
+                <article
+                  key={rowKey}
+                  className="rounded-2xl border border-slate-100 bg-white p-3 shadow-sm"
+                >
+                  <div className="flex min-w-0 items-start gap-3">
+                    {enableSelection && (
+                      <input
+                        type="checkbox"
+                        className="mt-1 h-5 w-5 shrink-0"
+                        checked={selectedIds.has(rowKey)}
+                        onChange={(e) => {
+                          const next = new Set(selectedIds);
+                          if (e.target.checked) next.add(rowKey);
+                          else next.delete(rowKey);
+                          setSelectedIds(next);
+                        }}
+                        aria-label="انتخاب ردیف"
+                      />
+                    )}
+
+                    {draggable && (
+                      <div className="mt-1 shrink-0 cursor-move">
+                        <DragIcon />
+                      </div>
+                    )}
+
+                    <div className="min-w-0 flex-1 space-y-3">
+                      {headlineCell && (
+                        <div className="min-w-0 text-sm font-medium text-slate-900 [&_*]:max-w-full [&_*]:break-words">
+                          {flexRender(
+                            headlineCell.column.columnDef.cell,
+                            headlineCell.getContext(),
+                          )}
+                        </div>
+                      )}
+
+                      <dl className="grid grid-cols-1 gap-2">
+                        {detailCells.map((cell) => {
+                          const header = cell.column.columnDef.header;
+                          const label = typeof header === "string" ? header : cell.column.id;
+
+                          return (
+                            <div
+                              key={cell.id}
+                              className="flex min-w-0 items-start justify-between gap-3 rounded-xl bg-slate-50 px-3 py-2"
+                            >
+                              <dt className="shrink-0 text-xs text-slate-400">{label}</dt>
+                              <dd className="min-w-0 text-left text-xs text-slate-700 [&_*]:max-w-full [&_*]:break-words">
+                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                              </dd>
+                            </div>
+                          );
+                        })}
+                      </dl>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="mt-3 rounded-2xl border border-slate-100 bg-white p-6 text-center text-sm text-neutral-500">
+            داده‌ای برای نمایش وجود ندارد
+          </div>
+        )}
+      </div>
     </div>
   );
 }

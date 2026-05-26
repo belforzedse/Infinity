@@ -37,16 +37,16 @@ export const MobileTable = ({ data }: Props) => {
       {data?.map((row) => (
         <div
           key={row.id}
-          className="flex min-h-[76px] w-full items-center gap-2 rounded-lg bg-white p-3"
+          className="flex min-h-[76px] w-full items-center gap-2 overflow-hidden rounded-2xl bg-white p-3 shadow-sm"
         >
-          <div className="flex flex-1 flex-col gap-2">
-            <div className="flex w-full items-center justify-between">
-              <span className="text-sm text-neutral-800">{row.name}</span>
+          <div className="flex min-w-0 flex-1 flex-col gap-2">
+            <div className="flex w-full min-w-0 items-center justify-between">
+              <span className="min-w-0 break-words text-sm text-neutral-800">{row.name}</span>
             </div>
 
-            <div className="flex w-full items-center justify-between rounded-[4px] bg-stone-50 px-2 py-1">
-              <span className="text-xs text-neutral-400">{row.slug || "-"}</span>
-              <span className="text-xs text-neutral-400">
+            <div className="flex w-full min-w-0 flex-wrap items-center justify-between gap-2 rounded-lg bg-stone-50 px-2 py-2">
+              <span className="min-w-0 break-words text-xs text-neutral-400">{row.slug || "-"}</span>
+              <span className="shrink-0 text-xs text-neutral-400">
                 {row.createdAt ? new Date(row.createdAt).toLocaleDateString("fa-IR") : "-"}
               </span>
             </div>

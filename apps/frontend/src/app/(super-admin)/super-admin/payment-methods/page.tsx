@@ -1,7 +1,7 @@
 "use client";
 
 import { SuperAdminTable } from "@/components/SuperAdmin/Table";
-import type { PaymentMethods} from "./table";
+import type { PaymentMethods } from "./table";
 import { MobileTable, columns } from "./table";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
 import { useFreshDataOnPageLoad } from "@/hooks/useFreshDataOnPageLoad";
@@ -39,11 +39,12 @@ export default function PaymentMethodsPage() {
       hasFilterButton
       hasRecycleBin
     >
-      <SuperAdminTable columns={columns} data={data} draggable />
-
-      <div className="block md:hidden">
-        <MobileTable data={data} />
-      </div>
+      <SuperAdminTable
+        columns={columns}
+        data={data}
+        draggable
+        mobileTable={(rows) => <MobileTable data={rows ?? []} />}
+      />
     </ContentWrapper>
   );
 }

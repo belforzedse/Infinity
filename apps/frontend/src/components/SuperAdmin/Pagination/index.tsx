@@ -69,10 +69,10 @@ export default function SuperAdminPagination({
   };
 
   return (
-    <div className={cn("flex items-center justify-center", className)}>
-      <div className="flex items-center gap-2">
+    <div className={cn("flex max-w-full items-center justify-center overflow-x-auto", className)}>
+      <div className="flex min-w-max items-center gap-2">
         <button
-          className="rounded-3xl border border-slate-200 bg-white p-1 disabled:opacity-50"
+          className="shrink-0 rounded-3xl border border-slate-200 bg-white p-1 disabled:opacity-50"
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
         >
@@ -84,8 +84,8 @@ export default function SuperAdminPagination({
               return (
                 <span
                   key={`ellipsis-${idx}`}
-                  className={
-                    "text-xs flex h-8 w-8 select-none items-center justify-center rounded-3xl border border-slate-200 bg-white text-slate-400"
+                className={
+                    "text-xs flex h-8 w-8 shrink-0 select-none items-center justify-center rounded-3xl border border-slate-200 bg-white text-slate-400"
                   }
                 >
                   {item}
@@ -98,7 +98,7 @@ export default function SuperAdminPagination({
               <button
                 key={pageNumber}
                 className={cn(
-                  "text-xs flex h-8 w-8 items-center justify-center rounded-3xl border border-slate-200 bg-white text-slate-400",
+                  "text-xs flex h-8 w-8 shrink-0 items-center justify-center rounded-3xl border border-slate-200 bg-white text-slate-400",
                   currentPage === pageNumber
                     ? "bg-actions-primary text-white"
                     : "hover:bg-gray-100",
@@ -111,7 +111,7 @@ export default function SuperAdminPagination({
           })}
         </div>
         <button
-          className="rounded-3xl border border-slate-200 bg-white p-1 disabled:opacity-50"
+          className="shrink-0 rounded-3xl border border-slate-200 bg-white p-1 disabled:opacity-50"
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
         >

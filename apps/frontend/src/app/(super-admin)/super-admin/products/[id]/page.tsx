@@ -162,23 +162,23 @@ export default function EditProductsPage({ params }: { params: Promise<{ id: str
         </Tabs>
       </div>
 
-      <div className="pointer-events-none fixed inset-x-0 bottom-4 z-30 flex justify-end px-4">
-        <div className="pointer-events-auto ml-16 flex w-fit max-w-2xl items-center justify-end gap-2 rounded-3xl border border-slate-200  bg-white/10 px-4 py-2.5 shadow-lg backdrop-blur-lg">
+      <div className="pointer-events-none fixed inset-x-0 bottom-3 z-30 flex justify-center px-4 pb-[env(safe-area-inset-bottom)] md:bottom-4 md:justify-end">
+        <div className="pointer-events-auto grid w-full max-w-lg grid-cols-3 gap-2 rounded-3xl border border-slate-200 bg-white/85 px-4 py-2.5 shadow-lg backdrop-blur-lg md:ml-16 md:flex md:w-fit md:max-w-2xl md:items-center md:justify-end md:bg-white/10">
           <button
-            className="w-1/3 rounded-xl border-slate-300 hover:bg-slate-300/80 hover:text-slate-800 bg-slate-300/40 border-2 px-5 py-2 text-sm text-slate-500 lg:w-fit"
+            className="w-full rounded-xl border-2 border-slate-300 bg-slate-300/40 px-3 py-2 text-sm text-slate-500 hover:bg-slate-300/80 hover:text-slate-800 md:w-fit md:px-5"
             onClick={() => router.push("/super-admin/products")}
           >
             بیخیال شدن
           </button>
           <button
             onClick={handleDuplicateProduct}
-            className="w-1/3 rounded-xl bg-blue-500/10 hover:bg-blue-500/80 hover:text-white border-blue-200 border-2 px-5 py-2 text-sm text-blue-500 lg:w-fit"
+            className="w-full rounded-xl border-2 border-blue-200 bg-blue-500/10 px-3 py-2 text-sm text-blue-500 hover:bg-blue-500/80 hover:text-white md:w-fit md:px-5"
           >
             کپی محصول
           </button>
           <button
             onClick={handleUpdateProduct}
-            className="w-1/3 rounded-xl bg-pink-500/10 hover:bg-pink-500/80 hover:text-white px-5 py-2 text-sm text-pink-900 border-pink-200 border-2 lg:w-fit"
+            className="w-full rounded-xl border-2 border-pink-200 bg-pink-500/10 px-3 py-2 text-sm text-pink-900 hover:bg-pink-500/80 hover:text-white md:w-fit md:px-5"
           >
             ذخیره
           </button>

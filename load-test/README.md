@@ -10,13 +10,39 @@ scp -r load-test user@your-server:/path/to/Infinitycolor/
 
 Then on the server: `cd /path/to/Infinitycolor && k6 run --vus 7000 --duration 5m load-test/load-test.js` (install k6 on the server if needed).
 
-**Run (from repo root):**
+**Run (from repo root):** install the [k6 CLI](https://grafana.com/docs/k6/latest/set-up/install-k6/) (e.g. `winget install GrafanaLabs.k6` on Windows), then:
 
 ```bash
-npx k6 run load-test/load-test.js
+k6 run load-test/load-test.js
 ```
 
-Or install k6 then: `k6 run load-test/load-test.js`
+**7k VU storefront ramp** (~22 min default, long think time — use with Nginx `least_conn` during the test):
+
+```bash
+k6 run load-test/load-test-frontend-7k-gentle.js
+# slower: k6 run -e RAMP_PROFILE=slow load-test/load-test-frontend-7k-gentle.js
+# faster: k6 run -e RAMP_PROFILE=fast load-test/load-test-frontend-7k-gentle.js
+```
+
+**7k VUs held for 10 minutes** (~21 min total — harsh: 7000 *concurrent* workers on homepage SSR):
+
+```bash
+k6 run load-test/load-test-frontend-7k-10m.js
+```
+
+**~7k realistic shopper sessions in 10 minutes** (recommended — mixed pages, long think time, arrival-rate):
+
+```bash
+k6 run load-test/load-test-frontend-realistic-7k.js
+# k6 run -e TARGET_SESSIONS=7000 -e HOLD_MINUTES=10 load-test/load-test-frontend-realistic-7k.js
+```
+
+### VUs vs real users
+
+| Metric | Meaning |
+|--------|---------|
+| **7000 VUs** | Up to 7000 concurrent k6 loops; if responses are slow, many sit idle in-flight → timeouts ≠ 7000 successful page loads/sec |
+| **7000 sessions @ ~12/s** | ~7000 separate browse journeys over 10 min; peak concurrent users is much lower (typical e-commerce pattern) |
 
 **Heavier run (may hit rate limit from one IP):**
 

@@ -88,23 +88,23 @@ export const MobileTable = ({ data }: Props) => {
 function NotificationMobileRow({ row }: { row: Notification }) {
   const [isOpen, setIsOpen] = useState(false);
   return (
-    <div className="flex min-h-[76px] w-full items-center gap-2 rounded-lg bg-white p-3">
-      <div className="flex flex-1 flex-col gap-2">
-        <div className="flex w-full items-center justify-between">
-          <div className="flex items-center gap-2">
+    <div className="flex min-h-[76px] w-full items-center gap-2 overflow-hidden rounded-2xl bg-white p-3 shadow-sm">
+      <div className="flex min-w-0 flex-1 flex-col gap-2">
+        <div className="flex w-full min-w-0 items-start justify-between gap-2">
+          <div className="flex min-w-0 items-center gap-2">
             <input type="checkbox" className="h-5 w-5" />
-            <span className="text-sm text-neutral-800">{row.title}</span>
+            <span className="min-w-0 break-words text-sm text-neutral-800">{row.title}</span>
           </div>
           <button
-            className={`flex h-6 w-6 items-center justify-center rounded-full border border-neutral-600 ${isOpen ? "rotate-180" : ""}`}
+            className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-neutral-600 ${isOpen ? "rotate-180" : ""}`}
             onClick={() => setIsOpen((v) => !v)}
           >
             <ShowMoreIcon />
           </button>
         </div>
         {!isOpen ? (
-          <div className="flex w-full items-center justify-between rounded-[4px] bg-stone-50 px-2 py-1">
-            <div className="flex items-center gap-1">
+          <div className="flex w-full min-w-0 items-center justify-between rounded-lg bg-stone-50 px-2 py-2">
+            <div className="flex min-w-0 flex-wrap items-center gap-1">
               <span className="text-xs text-neutral-400">{row.type}</span>
               <span className="text-xs text-neutral-400">|</span>
               <span className="text-sm text-neutral-400">
@@ -119,10 +119,10 @@ function NotificationMobileRow({ row }: { row: Notification }) {
         ) : (
           columns.slice(0, columns.length - 1).map((column, index) => (
             <div
-              className="flex w-full items-center justify-between rounded-[4px] bg-stone-50 px-2 py-1"
+              className="flex w-full min-w-0 items-start justify-between gap-3 rounded-lg bg-stone-50 px-2 py-2"
               key={index}
             >
-              <span className="text-xs text-neutral-400">{column.header?.toString()}</span>
+              <span className="shrink-0 text-xs text-neutral-400">{column.header?.toString()}</span>
               {column?.cell ? (
                 (column?.cell as any)?.({
                   row: {
@@ -130,7 +130,7 @@ function NotificationMobileRow({ row }: { row: Notification }) {
                   },
                 })
               ) : (
-                <span className="text-xs text-foreground-primary md:text-base">
+                <span className="min-w-0 break-words text-left text-xs text-foreground-primary md:text-base">
                   {row[(column as any).accessorKey as keyof Notification] as string}
                 </span>
               )}

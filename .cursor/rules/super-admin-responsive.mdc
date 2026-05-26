@@ -93,7 +93,7 @@ Tablet/desktop shell uses `hidden md:flex` in `Sidebar/index.tsx`; mobile uses `
 
 Tables should adapt to different screen sizes:
 
-- **Mobile**: Card-like layouts or simplified tables
+- **Mobile**: Card-like layouts or simplified tables. `SuperAdminTable` now renders a generic mobile card fallback when a page does not pass `mobileTable`, so older pages still show row data below `md`.
 - **Tablet**: Full table with horizontal scroll wrapper, reduced padding
 - **Desktop**: Full table layout with all columns, comfortable padding
 
@@ -105,6 +105,23 @@ Table padding:
 Example implementation:
 - [src/components/SuperAdmin/Table/Mobile/Row/Box.tsx](mdc:src/components/SuperAdmin/Table/Mobile/Row/Box.tsx)
 - [src/components/SuperAdmin/Table/index.tsx](mdc:src/components/SuperAdmin/Table/index.tsx)
+
+Guidelines:
+- Prefer a page-specific `mobileTable` for dense commerce rows where summary cards need custom titles, thumbnails, statuses, or row actions.
+- If a page does not need a custom mobile card, rely on the generic `SuperAdminTable` fallback instead of adding a separate `block md:hidden` table next to the desktop table.
+- Do not render both a manual mobile table and a `SuperAdminTable` without `mobileTable`; the generic fallback will duplicate mobile rows.
+- Use `min-w-0`, `break-words`, `truncate`, and `flex-wrap` inside cards that contain user-generated titles, SKUs, URLs, transaction IDs, or prices.
+- Raw HTML tables used outside `SuperAdminTable` must be hidden on mobile with a dedicated card/list layout, or wrapped in `overflow-x-auto` with a clear minimum width on tablet/desktop.
+
+## Responsive Toolbars and Actions
+
+List controls should be mobile-first:
+
+- Stack filters, search inputs, and sort selects with `flex-col` on mobile, then switch to `sm:flex-row` or `md:flex-row` where space allows.
+- Avoid fixed mobile input widths like `w-64` or `w-80`; use `w-full` on mobile and `sm:w-*` only at wider breakpoints.
+- Add `min-w-0` to flex children that contain text or nested inputs so long Persian/Latin strings do not force horizontal overflow.
+- Advanced filter popovers must stay within the viewport. On mobile, use a fixed inset panel or a max width such as `max-w-[calc(100vw-2rem)]`; desktop can keep an anchored dropdown.
+- Fixed bottom action bars must include safe-area padding (`pb-[env(safe-area-inset-bottom)]`) and should use a full-width mobile grid, switching back to compact natural-width buttons on `md`/`lg`.
 
 ## Content Wrapper Spacing
 

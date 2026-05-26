@@ -362,7 +362,7 @@ export const MobileTable = ({ data, enableSelection, selectedIds, onSelectionCha
                 handleRowClick(row.id);
               }
             }}
-            className="flex min-h-[76px] w-full items-center gap-2 rounded-lg bg-white p-3"
+            className="flex min-h-[76px] w-full items-center gap-2 overflow-hidden rounded-2xl bg-white p-3 shadow-sm"
           >
             {enableSelection ? (
               <input
@@ -381,14 +381,14 @@ export const MobileTable = ({ data, enableSelection, selectedIds, onSelectionCha
                 <img
                   src={imageUrl}
                   alt={row?.attributes?.Title || "Product image"}
-                  className="h-12 w-12 rounded-lg object-cover"
+                  className="h-12 w-12 shrink-0 rounded-lg object-cover"
                   onError={(event) => {
                     event.currentTarget.style.display = "none";
                     const placeholder = event.currentTarget.nextElementSibling;
                     if (placeholder) placeholder.classList.remove("hidden");
                   }}
                 />
-                <div className="h-12 w-12 bg-gray-200 rounded-lg hidden items-center justify-center">
+                <div className="hidden h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-gray-200">
                   <svg className="h-6 w-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                     <path
                       fillRule="evenodd"
@@ -399,7 +399,7 @@ export const MobileTable = ({ data, enableSelection, selectedIds, onSelectionCha
                 </div>
               </>
             ) : (
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gray-200">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-gray-200">
                 <svg className="h-6 w-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                   <path
                     fillRule="evenodd"
@@ -410,15 +410,15 @@ export const MobileTable = ({ data, enableSelection, selectedIds, onSelectionCha
               </div>
             )}
 
-            <div className="flex flex-1 flex-col gap-2">
-              <div className="flex w-full items-center justify-between">
-                <span className="text-sm text-neutral-800">
+            <div className="flex min-w-0 flex-1 flex-col gap-2">
+              <div className="flex w-full min-w-0 items-start justify-between gap-2">
+                <span className="min-w-0 break-words text-sm leading-6 text-neutral-800">
                   {row?.attributes?.Title}
                   {sku}
                 </span>
 
                 <button
-                  className="flex h-6 w-6 items-center justify-center rounded-full border border-neutral-600"
+                  className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-neutral-600"
                   onClick={(event) => {
                     event.stopPropagation();
                     handleRowClick(row.id);
@@ -429,8 +429,8 @@ export const MobileTable = ({ data, enableSelection, selectedIds, onSelectionCha
                 </button>
               </div>
 
-              <div className="flex w-full items-center justify-between rounded-[4px] bg-stone-50 px-2 py-1">
-                <div className="flex gap-1 items-center">
+              <div className="flex w-full min-w-0 flex-col gap-2 rounded-lg bg-stone-50 px-2 py-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex min-w-0 flex-wrap items-center gap-1">
                   <span className="text-xs text-neutral-400">
                     {row?.attributes?.product_main_category?.data?.attributes?.Title}
                   </span>
@@ -445,7 +445,7 @@ export const MobileTable = ({ data, enableSelection, selectedIds, onSelectionCha
                   </span>
                 </div>
 
-                <div className="flex flex-col">
+                <div className="flex shrink-0 flex-col text-left">
                   {priceInfo?.minDiscount && (
                     <span className="text-xs font-medium text-pink-600">
                       {priceFormatter(priceInfo.minDiscount, " تومان")}
