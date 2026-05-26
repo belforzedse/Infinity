@@ -9,7 +9,9 @@ import CartIcon from "../../Icons/CartIcon";
 import MenuIcon from "../../Icons/MenuIcon";
 import { StorefrontLogo } from "@repo/brand";
 import { useCart } from "@/contexts/CartContext";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import MobileBackButton from "@/components/MobileBackButton";
+import { getMobileBackFallbackHref } from "@/utils/mobileBackNavigation";
 
 type Props = object;
 
@@ -19,6 +21,8 @@ export default function PLPMobileHeader({}: Props) {
   const { totalItems, openDrawer } = useCart();
   const [isStandalone, setIsStandalone] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
+  const backFallbackHref = getMobileBackFallbackHref(pathname);
 
   const openSearch = (event?: React.SyntheticEvent) => {
     if (event) {
@@ -56,7 +60,7 @@ export default function PLPMobileHeader({}: Props) {
       {/* Safe area white bar for standalone mode */}
       {isStandalone && (
         <div
-          className="fixed top-0 left-0 right-0 z-[60] bg-white lg:hidden"
+          className="fixed left-0 right-0 top-0 z-[60] bg-white lg:hidden"
           style={{ height: "env(safe-area-inset-top)" }}
         />
       )}
@@ -67,23 +71,32 @@ export default function PLPMobileHeader({}: Props) {
           marginTop: isStandalone ? "env(safe-area-inset-top)" : "0",
         }}
       >
-      <div className="flex flex-row-reverse items-center justify-between bg-transparent px-4 py-3">
-        <button
-          onClick={() => router.push("/orders")}
-          className="flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-2"
-          aria-label="پیگیری سفارش"
-        >
-          <span className="text-xs font-medium text-neutral-800">پیگیری سفارش</span>
-          <OrderTrackingIcon className="text-neutral-800" />
-        </button>
-
-        <StorefrontLogo />
+      <div className="relative flex items-center justify-between bg-transparent px-4 py-3" dir="ltr">
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <div className="pointer-events-auto">
+            <StorefrontLogo width={92} height={58} />
+          </div>
+        </div>
+        <div className="relative z-10 flex w-32 items-center justify-start">
+          {backFallbackHref ? (
+            <MobileBackButton fallbackHref={backFallbackHref} />
+          ) : (
+            <button
+              onClick={() => router.push("/orders")}
+              className="flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-2"
+              aria-label="پیگیری سفارش"
+            >
+              <span className="text-xs font-medium text-neutral-800">پیگیری سفارش</span>
+              <OrderTrackingIcon className="text-neutral-800" />
+            </button>
+          )}
+        </div>
 
         {/* Left Section */}
-        <div className="flex items-center gap-2">
+        <div className="relative z-10 flex w-32 items-center justify-end gap-2">
           <button
             onClick={openSearch}
-            className="hidden 440:flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white"
+            className="hidden h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white 440:flex"
             aria-label="جستجو"
           >
             <SearchIcon className="text-neutral-800" />

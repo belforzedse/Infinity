@@ -67,19 +67,27 @@ Components:
 
 The sidebar navigation has specific behavior based on screen size:
 
-- **Mobile**: Hidden by default, shown as overlay when toggled (280px width)
+- **Mobile**: Hidden by default; opens as a **Headless UI `Dialog` drawer** from the header hamburger (`z-[1200]`, backdrop blur, body scroll lock). Panel: `w-[280px] max-w-[85vw]`, full viewport height (`h-dvh`), **physical right** via `dir="ltr"` positioning shell + `fixed right-0` (do not use `justify-end` alone — document `dir="rtl"` flips flex end to the left). Panel content uses `dir="rtl"`. Dedicated drawer header (logo toward screen edge, close toward content); nav scrolls inside the panel. All `Link` / parent navigations call `onClose` so the drawer dismisses after routing.
 - **Tablet**: Collapsible sidebar, icon-only by default (80px collapsed, 280px expanded)
 - **Desktop**: Always visible and expanded (250px width)
+
+### Mobile drawer pattern
+
+Follow the same primitives as storefront mobile menus:
+
+- Reference: [src/components/PLP/Header/Mobile/MobileMenu.tsx](mdc:apps/frontend/src/components/PLP/Header/Mobile/MobileMenu.tsx)
+- Implementation: [src/components/SuperAdmin/Layout/Sidebar/index.tsx](mdc:apps/frontend/src/components/SuperAdmin/Layout/Sidebar/index.tsx) — `SuperAdminMobileSidebarDrawer` + shared `SidebarNav`
+- Toggle state lives in [src/app/(super-admin)/ClientLayout.tsx](mdc:apps/frontend/src/app/(super-admin)/ClientLayout.tsx) `Mobile` layout; `<Sidebar enableMobileDrawer />` is rendered after `{children}`. Tablet/desktop must **not** pass `enableMobileDrawer` (default `false`) — otherwise Headless UI `Dialog` stays `open` and blocks all page clicks even when hidden with CSS.
 
 ### Sidebar Collapse Behavior
 
 On tablets (md-lg breakpoint):
 - Default state: Collapsed (icon-only, 80px width)
 - Expanded state: Full labels visible (280px width)
-- Toggle button visible in top-left of sidebar
+- Toggle button visible on the sidebar edge
 - Submenus only show when expanded
 
-Implementation in [src/components/SuperAdmin/Layout/Sidebar/index.tsx](mdc:src/components/SuperAdmin/Layout/Sidebar/index.tsx)
+Tablet/desktop shell uses `hidden md:flex` in `Sidebar/index.tsx`; mobile uses `md:hidden` on the `Dialog` root only.
 
 ## Responsive Tables
 

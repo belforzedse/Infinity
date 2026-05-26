@@ -226,8 +226,12 @@ function Mobile({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-neutral-50 p-4">
       <div className="flex w-full flex-col gap-4">
         <Header onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} />
-        <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
         {children}
+        <Sidebar
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+          enableMobileDrawer
+        />
       </div>
     </div>
   );
