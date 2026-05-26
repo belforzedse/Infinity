@@ -412,11 +412,16 @@ export function SuperAdminTable<TData, TValue>({
 
   const isLoading = loading ?? internalLoading;
   const showSkeleton = isLoading && (isPageTransitioning || !hasLoadedOnce);
+  const useCardLayoutUntilDesktop = Boolean(mobileTable);
+  const cardLayoutClassName = useCardLayoutUntilDesktop ? "block lg:hidden" : "block md:hidden";
+  const tableLayoutClassName = useCardLayoutUntilDesktop
+    ? "hidden w-full overflow-x-auto overflow-y-clip lg:block"
+    : "hidden w-full overflow-x-auto overflow-y-clip md:block";
 
   return (
     <div className="w-full">
       {/* Mobile header controls */}
-      <div className="block md:hidden">
+      <div className={cardLayoutClassName}>
         <div className="flex flex-col gap-2">
           {enableSelection && (
             <div className="flex w-full items-center justify-between">
@@ -462,7 +467,7 @@ export function SuperAdminTable<TData, TValue>({
       </div>
 
       {/* Desktop table */}
-      <div className="hidden w-full overflow-x-auto overflow-y-clip md:block">
+      <div className={tableLayoutClassName}>
         <div className="relative">
           <table className={cn("w-full caption-bottom text-sm", className)}>
             <thead>
@@ -614,7 +619,7 @@ export function SuperAdminTable<TData, TValue>({
       </div>
 
       {/* Mobile cards/table alternative */}
-      <div className="block md:hidden">
+      <div className={cardLayoutClassName}>
         {mobileTable ? (
           mobileTable(
             tableData,
