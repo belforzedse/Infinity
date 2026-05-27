@@ -91,7 +91,7 @@ export default function PDPHeroGallery(props: Props) {
   if (!assets.length) {
     return (
       <div
-        className="flex min-w-0 flex-1 flex-col gap-2 xl:sticky md:min-w-[300px] tablet:min-w-[400px] xl:flex-row xl:items-start"
+        className="flex min-w-0 flex-1 flex-col gap-2 xl:sticky xl:self-start md:min-w-[300px] tablet:min-w-[400px] xl:flex-row xl:items-start"
         style={{ top: "calc(var(--header-offset, 88px) + 0.5rem)" }}
       >
         <div className="flex aspect-[4/5] w-full items-center justify-center rounded-lg bg-gray-200">
@@ -106,7 +106,7 @@ export default function PDPHeroGallery(props: Props) {
   return (
     <div
       ref={galleryRef}
-      className="flex min-w-0 flex-1 flex-col gap-2 xl:sticky md:min-w-[300px] tablet:min-w-[400px] xl:flex-row xl:items-start"
+      className="flex min-w-0 flex-1 flex-col gap-2 xl:sticky xl:self-start md:min-w-[300px] tablet:min-w-[400px] xl:flex-row xl:items-start"
       style={{ top: "calc(var(--header-offset, 88px) + 0.5rem)" }}
     >
       <div className="hidden xl:block">

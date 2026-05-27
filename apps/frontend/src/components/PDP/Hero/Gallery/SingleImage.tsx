@@ -327,10 +327,10 @@ export default function PDPHeroGallerySingleImage(props: Props) {
   };
 
   return (
-    <div className="w-full flex-1">
+    <div className="w-full flex-1 xl:self-start">
       <div
         ref={containerRef}
-        className="relative aspect-[4/5] w-full overflow-hidden rounded-3xl"
+        className="relative aspect-[4/5] w-full overflow-hidden rounded-3xl xl:max-h-[calc(100vh-var(--header-offset,88px)-1rem)]"
         onWheel={handleWheel}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
