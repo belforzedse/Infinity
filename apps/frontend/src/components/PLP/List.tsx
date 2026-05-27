@@ -11,7 +11,7 @@ import DiscountIcon from "./Icons/DiscountIcon";
 import SidebarSuggestions from "./List/SidebarSuggestions";
 import Pagination from "./Pagination";
 import { useQueryStates } from "nuqs";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SORT_LABELS } from "./sortOptions";
 import { hasAvailableStock, productTitleHasG } from "@/utils/product";
@@ -22,6 +22,7 @@ import type { PLPProduct, PLPPagination } from "./types";
 import { plpQueryOptions, plpQueryParsers } from "./queryState";
 import { getPlpHref } from "@/utils/plpRoutes";
 import { ProductResultsSkeleton } from "@/components/Skeletons/ProductListSkeleton";
+import { scrollIntoViewWithOffset } from "@/utils/scroll";
 
 const humanize = (value: string) =>
   value.toString().replace(/[-_]+/g, " ").replace(/\s+/g, " ").trim();
@@ -51,6 +52,7 @@ export default function PLPList({
 }: PLPListProps) {
   const [query, setQuery] = useQueryStates(plpQueryParsers, plpQueryOptions);
   const [isPagePending, startPageTransition] = useTransition();
+  const pendingPageScrollRef = useRef<number | null>(null);
   const {
     available,
     minPrice,
@@ -399,7 +401,24 @@ export default function PLPList({
     });
   };
 
+  const scrollToPLPTop = useCallback(() => {
+    if (typeof window === "undefined") return;
+    const anchor = document.querySelector<HTMLElement>("[data-plp-top]");
+    if (anchor) {
+      scrollIntoViewWithOffset(anchor);
+      return;
+    }
+
+    scrollIntoViewWithOffset(null, { fallbackTop: 0 });
+  }, []);
+
+  const scheduleScrollToPLPTop = useCallback(() => {
+    if (typeof window === "undefined") return;
+    window.requestAnimationFrame(scrollToPLPTop);
+  }, [scrollToPLPTop]);
+
   const handlePageChange = (nextPage: number) => {
+    pendingPageScrollRef.current = nextPage;
     void setQuery(
       { page: nextPage },
       {
@@ -407,7 +426,15 @@ export default function PLPList({
         startTransition: startPageTransition,
       },
     );
+    scheduleScrollToPLPTop();
   };
+
+  useEffect(() => {
+    if (isPagePending || pendingPageScrollRef.current !== page) return;
+
+    pendingPageScrollRef.current = null;
+    scheduleScrollToPLPTop();
+  }, [isPagePending, page, scheduleScrollToPLPTop]);
 
   return (
     <div className="w-full" data-plp-top style={{ scrollMarginTop: "var(--header-offset, 88px)" }}>
