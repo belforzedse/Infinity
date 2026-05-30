@@ -1,5 +1,5 @@
-# syntax=registry.cyandm.org/bel4/infinity/dockerfile:1.7
-FROM docker.arvancloud.ir/node:20-alpine AS builder
+# syntax=docker/dockerfile:1.7
+FROM node:20-alpine AS builder
 
 ARG STRAPI_DISABLE_SOURCEMAPS=true
 ARG STRAPI_TELEMETRY_DISABLED=true
@@ -38,7 +38,7 @@ RUN pnpm --filter @repo/backend deploy --legacy --prod /app \
     && npm_config_platform=linux npm_config_arch=x64 npm_config_libc=musl pnpm rebuild sharp --unsafe-perm \
     && node -e "const sharp=require('sharp'); console.log('sharp-ok', process.platform, process.arch, sharp.versions);"
 
-FROM docker.arvancloud.ir/node:20-alpine AS runner
+FROM node:20-alpine AS runner
 
 ARG STRAPI_DISABLE_SOURCEMAPS=true
 ARG STRAPI_TELEMETRY_DISABLED=true

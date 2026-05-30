@@ -1,34 +1,119 @@
 import type { Strapi } from "@strapi/strapi";
+import {
+  type BackgroundJobStats,
+  runBackgroundJob,
+} from "./backgroundJobRunner";
 
 const MAX_CONSECUTIVE_FAILURES = 5;
 let consecutiveFailures = 0;
-const ERROR_STACK_LIMIT = 2_000;
+const JOB_NAME = "expireReserveOrders";
+const DEFAULT_LOCK_TTL_MS = 10 * 60 * 1000;
 
-function formatError(error: unknown) {
-  const asRecord = (error && typeof error === "object" ? error : {}) as {
-    message?: unknown;
-    code?: unknown;
-    stack?: unknown;
+type ExpireReserveOrdersOptions = {
+  batchSize?: number;
+  now?: Date;
+  lockTtlMs?: number;
+};
+
+async function expireReserveOrdersBatch(
+  strapi: Strapi,
+  options: Required<Pick<ExpireReserveOrdersOptions, "batchSize" | "now">>
+): Promise<BackgroundJobStats> {
+  const groupRows = await strapi.db.connection.raw(
+    `SELECT reserve_group_id AS "reserveGroupId",
+            COUNT(*)::int AS "expiredOrderCount"
+     FROM orders
+     WHERE is_reserve_order = true
+       AND reserve_expires_at <= ?
+       AND reserve_group_id IS NOT NULL
+     GROUP BY reserve_group_id
+     ORDER BY MIN(reserve_expires_at) ASC
+     LIMIT ?`,
+    [options.now, options.batchSize]
+  );
+
+  let groupsProcessed = 0;
+  let ordersUpdated = 0;
+  let skipped = 0;
+  const groups = groupRows?.rows || [];
+
+  for (const group of groups) {
+    const groupId = String(group?.reserveGroupId || "").trim();
+    if (!groupId) {
+      skipped += 1;
+      continue;
+    }
+
+    const updated = await strapi.db.connection.raw(
+      `UPDATE orders
+       SET is_reserve_order = false,
+           reserve_expires_at = NULL,
+           updated_at = NOW()
+       WHERE reserve_group_id = ?
+         AND is_reserve_order = true
+         AND reserve_expires_at <= ?
+       RETURNING id`,
+      [groupId, options.now]
+    );
+
+    const updatedCount = updated?.rows?.length || 0;
+    if (updatedCount === 0) {
+      skipped += 1;
+      continue;
+    }
+
+    groupsProcessed += 1;
+    ordersUpdated += updatedCount;
+    strapi.log.info("Reserve order group expired", {
+      groupId,
+      orderCount: updatedCount,
+    });
+  }
+
+  return {
+    groupsFound: groups.length,
+    groupsProcessed,
+    ordersUpdated,
+    skipped,
+    cutoff: options.now.toISOString(),
   };
+}
 
-  const message =
-    typeof asRecord.message === "string"
-      ? asRecord.message
-      : error instanceof Error
-        ? error.message
-        : String(error);
+export async function runExpireReserveOrdersTick(
+  strapi: Strapi,
+  options: ExpireReserveOrdersOptions = {}
+) {
+  const batchSize = Math.max(
+    1,
+    Number(options.batchSize ?? process.env.RESERVE_ORDER_EXPIRY_BATCH_SIZE ?? 100) || 100
+  );
+  const lockTtlMs = Math.max(30_000, options.lockTtlMs ?? DEFAULT_LOCK_TTL_MS);
 
-  const code =
-    typeof asRecord.code === "string" || typeof asRecord.code === "number"
-      ? asRecord.code
-      : undefined;
+  const result = await runBackgroundJob({
+    strapi,
+    jobName: JOB_NAME,
+    lockTtlMs,
+    run: () =>
+      expireReserveOrdersBatch(strapi, {
+        batchSize,
+        now: options.now ?? new Date(),
+      }),
+  });
 
-  const stack =
-    typeof asRecord.stack === "string"
-      ? asRecord.stack.slice(0, ERROR_STACK_LIMIT)
-      : undefined;
+  if (result.status === "completed") {
+    consecutiveFailures = 0;
+  } else if (result.status === "failed") {
+    consecutiveFailures += 1;
+  }
 
-  return { message, code, stack };
+  if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
+    strapi.log.warn("expireReserveOrders consecutive failure threshold exceeded", {
+      consecutiveFailures,
+      threshold: MAX_CONSECUTIVE_FAILURES,
+    });
+  }
+
+  return result;
 }
 
 /**
@@ -43,60 +128,13 @@ export function startExpireReserveOrdersJob(strapi: Strapi) {
   const intervalMinutes = Number(process.env.RESERVE_ORDER_EXPIRY_JOB_INTERVAL_MINUTES || 5);
   const intervalMs = Math.max(1, Number.isFinite(intervalMinutes) ? intervalMinutes : 5) * 60 * 1000;
 
-  let running = false;
+  const batchSize = Math.max(
+    1,
+    Number(process.env.RESERVE_ORDER_EXPIRY_BATCH_SIZE || 100) || 100
+  );
 
   const tick = async () => {
-    if (running) return;
-    running = true;
-    try {
-      const now = new Date();
-      const expiredOrders = await strapi.db.query("api::order.order").findMany({
-        where: {
-          isReserveOrder: true,
-          reserveExpiresAt: { $lte: now.toISOString() },
-        },
-        select: ["id", "reserveGroupId"],
-      });
-
-      const groupIds = [
-        ...new Set(
-          (expiredOrders || [])
-            .map((o: { reserveGroupId?: string | null }) => o.reserveGroupId)
-            .filter((g): g is string => !!g)
-        ),
-      ];
-
-      for (const groupId of groupIds) {
-        const groupOrders = await strapi.db.query("api::order.order").findMany({
-          where: { reserveGroupId: groupId },
-          select: ["id"],
-        });
-        for (const o of groupOrders || []) {
-          await strapi.entityService.update("api::order.order", o.id, {
-            data: {
-              isReserveOrder: false,
-              reserveExpiresAt: null,
-            },
-          });
-        }
-        strapi.log.info("Reserve order group expired", { groupId, orderCount: groupOrders?.length ?? 0 });
-      }
-      consecutiveFailures = 0;
-    } catch (e) {
-      consecutiveFailures += 1;
-      strapi.log.error("expireReserveOrders job failed", {
-        ...formatError(e),
-        consecutiveFailures,
-      });
-      if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
-        strapi.log.warn("expireReserveOrders consecutive failure threshold exceeded", {
-          consecutiveFailures,
-          threshold: MAX_CONSECUTIVE_FAILURES,
-        });
-      }
-    } finally {
-      running = false;
-    }
+    await runExpireReserveOrdersTick(strapi, { batchSize });
   };
 
   setTimeout(() => tick().catch(() => {}), 30_000);

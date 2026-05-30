@@ -144,10 +144,29 @@ const transitionReservationStatus = async (
   orderId: number,
   next: ReservationTransition,
   trx?: any,
-  options?: { requireNotExpired?: boolean }
+  options?: {
+    requireNotExpired?: boolean;
+    requireOrderStatus?: "Paying";
+    expiresBefore?: Date;
+  }
 ): Promise<{ transitioned: boolean }> => {
   const requireNotExpired = options?.requireNotExpired === true;
-  const extraClause = requireNotExpired ? " AND reserved_until >= NOW()" : "";
+  const clauses: string[] = [];
+  const bindings: any[] = [next, orderId];
+
+  if (requireNotExpired) {
+    clauses.push("reserved_until >= NOW()");
+  }
+  if (options?.requireOrderStatus) {
+    clauses.push("status = ?");
+    bindings.push(options.requireOrderStatus);
+  }
+  if (options?.expiresBefore) {
+    clauses.push("reserved_until < ?");
+    bindings.push(options.expiresBefore);
+  }
+
+  const extraClause = clauses.length > 0 ? ` AND ${clauses.join(" AND ")}` : "";
 
   const res = await rawSql(
     strapi,
@@ -157,7 +176,7 @@ const transitionReservationStatus = async (
      WHERE id = ?
        AND reservation_status = 'Reserved'${extraClause}
      RETURNING id`,
-    [next, orderId],
+    bindings,
     trx
   );
 
@@ -170,7 +189,11 @@ export async function releaseOrderReservation(
   orderId: number,
   reason: "Released" | "Expired",
   trx?: any,
-  context?: { userId?: number | string }
+  context?: {
+    userId?: number | string;
+    requireOrderStatus?: "Paying";
+    expiresBefore?: Date;
+  }
 ): Promise<{ success: boolean; skipped?: boolean; error?: string }> {
   if (!trx) {
     return strapi.db.transaction(async ({ trx }) =>
@@ -183,7 +206,11 @@ export async function releaseOrderReservation(
       strapi,
       orderId,
       reason,
-      trx
+      trx,
+      {
+        requireOrderStatus: context?.requireOrderStatus,
+        expiresBefore: context?.expiresBefore,
+      }
     );
     if (!transitioned) return { success: true, skipped: true };
 

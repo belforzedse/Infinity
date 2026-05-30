@@ -1,5 +1,5 @@
-# syntax=docker.arvancloud.ir/docker/dockerfile:1.7
-FROM docker.arvancloud.ir/node:22-alpine AS builder
+# syntax=docker/dockerfile:1.7
+FROM node:22-alpine AS builder
 
 WORKDIR /repo
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -46,7 +46,7 @@ ENV GITHUB_SHA=${GITHUB_SHA}
 WORKDIR /repo/apps/frontend
 RUN NODE_ENV=production pnpm run build
 
-FROM docker.arvancloud.ir/node:22-alpine AS runner
+FROM node:22-alpine AS runner
 WORKDIR /app
 
 # Runtime env: STRAPI_INTERNAL_URL, FRONTEND_REDIS_URL (STRAPI_BUILD_TIME_URL is build-only).

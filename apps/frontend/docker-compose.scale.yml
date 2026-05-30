@@ -302,7 +302,7 @@ services:
 
   frontend-redis:
     container_name: frontend-redis
-    image: docker.arvancloud.ir/redis:7-alpine
+    image: ${REDIS_IMAGE:-redis:7-alpine}
     restart: unless-stopped
     command: >-
       redis-server
