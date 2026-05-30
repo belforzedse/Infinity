@@ -59,7 +59,15 @@ RUN sed -i 's|https://dl-cdn.alpinelinux.org/alpine|https://mirror.arvancloud.ir
     && apk add --no-cache …
 ```
 
-See `apps/backend/main.Dockerfile` and `ci/deploy-tools/Dockerfile`. If a new Alpine release is not mirrored yet, temporarily use an official mirror that your runner can reach, or pin the base image to an Alpine version present on the mirror.
+For application Dockerfiles, prefer the repo helper instead of hand-written `sed`:
+
+```dockerfile
+COPY .cursor/docker/fallback-apk.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/fallback-apk.sh
+RUN fallback-apk.sh …
+```
+
+The helper uses Arvan first, then restores Alpine's default repositories and retries once if the mirror is unavailable. See `apps/backend/main.Dockerfile` and `apps/backend/dev.Dockerfile`. If a new Alpine release is not mirrored yet and the default CDN is also unreachable, temporarily use another official mirror that your runner can reach, or pin the base image to an Alpine version present on the mirror.
 
 ## GitLab `.deploy_ssh` (Alpine job image)
 

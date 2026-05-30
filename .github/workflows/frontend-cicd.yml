@@ -123,6 +123,7 @@ jobs:
             NEXT_PUBLIC_SENTRY_DSN=${{ secrets.FRONTEND_SENTRY_DSN }}
             STRAPI_BUILD_TIME_URL=${{ secrets.FRONTEND_STRAPI_BUILD_TIME_URL }}
             NPM_REGISTRY_URL=${{ secrets.NPM_REGISTRY_URL || 'https://package-mirror.liara.ir/repository/npm/' }}
+            NPM_REGISTRY_FALLBACK_URL=${{ secrets.NPM_REGISTRY_FALLBACK_URL || 'https://registry.npmjs.org/' }}
             GITHUB_SHA=${{ github.sha }}
 
       - name: Upload docker-compose (prod)

@@ -125,6 +125,7 @@ backend:build:
         --build-arg STRAPI_TELEMETRY_DISABLED="$STRAPI_TELEMETRY_DISABLED" \
         --build-arg NODE_OPTIONS="$NODE_OPTIONS_ARG" \
         --build-arg NPM_REGISTRY_URL="${NPM_REGISTRY_URL:-https://package-mirror.liara.ir/repository/npm/}" \
+        --build-arg NPM_REGISTRY_FALLBACK_URL="${NPM_REGISTRY_FALLBACK_URL:-https://registry.npmjs.org/}" \
         --push \
         "$BUILD_CONTEXT"
 
@@ -254,6 +255,7 @@ frontend:build:
         --build-arg STRAPI_BUILD_TIME_URL="${STRAPI_BUILD_TIME_URL:-}" \
         --build-arg STRAPI_INTERNAL_URL="${STRAPI_INTERNAL_URL:-}" \
         --build-arg NPM_REGISTRY_URL="${NPM_REGISTRY_URL:-https://package-mirror.liara.ir/repository/npm/}" \
+        --build-arg NPM_REGISTRY_FALLBACK_URL="${NPM_REGISTRY_FALLBACK_URL:-https://registry.npmjs.org/}" \
         --build-arg GITHUB_SHA="$CI_COMMIT_SHA" \
         --file "$DOCKERFILE" \
         --tag "$IMAGE:$CI_COMMIT_SHA" \
@@ -355,6 +357,7 @@ social:build:
         --build-arg NEXT_PUBLIC_IMAGE_BASE_URL="https://api.infinitycolor.co" \
         --build-arg NEXT_PUBLIC_SITE_URL="https://infinitygram.co" \
         --build-arg NPM_REGISTRY_URL="${NPM_REGISTRY_URL:-https://package-mirror.liara.ir/repository/npm/}" \
+        --build-arg NPM_REGISTRY_FALLBACK_URL="${NPM_REGISTRY_FALLBACK_URL:-https://registry.npmjs.org/}" \
         --file "apps/social/main.Dockerfile" \
         --tag "$IMAGE:$CI_COMMIT_SHA" \
         --tag "$IMAGE:$RUNTIME_TAG" \

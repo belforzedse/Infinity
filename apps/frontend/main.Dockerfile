@@ -5,9 +5,10 @@ FROM docker.arvancloud.ir/node:22-alpine AS builder
 WORKDIR /repo
 ENV NEXT_TELEMETRY_DISABLED=1
 ARG NPM_REGISTRY_URL="https://package-mirror.liara.ir/repository/npm/"
-ENV COREPACK_NPM_REGISTRY=${NPM_REGISTRY_URL} \
-    npm_config_registry=${NPM_REGISTRY_URL} \
-    NPM_CONFIG_REGISTRY=${NPM_REGISTRY_URL}
+ARG NPM_REGISTRY_FALLBACK_URL="https://registry.npmjs.org/"
+
+COPY .cursor/docker/fallback-registry.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/fallback-registry.sh
 
 # Layer caching: workspace manifests first so code-only changes don't re-run install
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
@@ -15,10 +16,8 @@ COPY apps/frontend/package.json ./apps/frontend/package.json
 COPY packages ./packages
 RUN --mount=type=cache,target=/root/.npm \
     --mount=type=cache,target=/root/.cache/node/corepack \
-    corepack enable \
-    && corepack prepare pnpm@10.28.2 --activate \
-    && pnpm config set registry "${NPM_REGISTRY_URL}" \
-    && pnpm install --filter @repo/frontend... --frozen-lockfile
+    fallback-registry.sh "${NPM_REGISTRY_URL}" "${NPM_REGISTRY_FALLBACK_URL}" \
+    pnpm install --filter @repo/frontend... --frozen-lockfile
 
 COPY apps/frontend ./apps/frontend
 

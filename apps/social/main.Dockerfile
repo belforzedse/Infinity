@@ -3,20 +3,19 @@ FROM docker.arvancloud.ir/node:22-alpine AS builder
 
 WORKDIR /repo
 ENV NEXT_TELEMETRY_DISABLED=1
-ARG NPM_REGISTRY_URL="https://mirror.abrha.net/repository/npm/"
-ENV COREPACK_NPM_REGISTRY=${NPM_REGISTRY_URL} \
-    npm_config_registry=${NPM_REGISTRY_URL} \
-    NPM_CONFIG_REGISTRY=${NPM_REGISTRY_URL}
+ARG NPM_REGISTRY_URL="https://package-mirror.liara.ir/repository/npm/"
+ARG NPM_REGISTRY_FALLBACK_URL="https://registry.npmjs.org/"
+
+COPY .cursor/docker/fallback-registry.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/fallback-registry.sh
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
 COPY apps/social/package.json ./apps/social/package.json
 COPY packages ./packages
 RUN --mount=type=cache,target=/root/.npm \
     --mount=type=cache,target=/root/.cache/node/corepack \
-    corepack enable \
-    && corepack prepare pnpm@10.28.2 --activate \
-    && pnpm config set registry "${NPM_REGISTRY_URL}" \
-    && pnpm install --filter @repo/social... --frozen-lockfile
+    fallback-registry.sh "${NPM_REGISTRY_URL}" "${NPM_REGISTRY_FALLBACK_URL}" \
+    pnpm install --filter @repo/social... --frozen-lockfile
 
 COPY apps/social ./apps/social
 

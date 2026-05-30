@@ -11,20 +11,29 @@ globs: apps/frontend/*.Dockerfile, .github/workflows/frontend-cicd.yml
 
 `https://package-mirror.liara.ir/repository/npm/`
 
+They also define `NPM_REGISTRY_FALLBACK_URL` as:
+
+`https://registry.npmjs.org/`
+
+Dependency install runs through `.cursor/docker/fallback-registry.sh`: it activates Corepack/pnpm against `NPM_REGISTRY_URL`, runs `pnpm install`, and if that step fails, retries the same command against `NPM_REGISTRY_FALLBACK_URL`.
+
 Override at build time when needed:
 
 ```bash
-docker build --build-arg NPM_REGISTRY_URL="https://…" -f apps/frontend/main.Dockerfile .
+docker build \
+  --build-arg NPM_REGISTRY_URL="https://…" \
+  --build-arg NPM_REGISTRY_FALLBACK_URL="https://registry.npmjs.org/" \
+  -f apps/frontend/main.Dockerfile .
 ```
 
 `COREPACK_NPM_REGISTRY`, `npm_config_registry`, and `pnpm config set registry` all use this URL so Corepack can fetch `pnpm@10.28.2` and `pnpm install` uses the same mirror.
 
 ## CI defaults
 
-- **GitLab** (`build:frontend` in `.gitlab-ci.yml`): `--build-arg NPM_REGISTRY_URL="${NPM_REGISTRY_URL:-https://package-mirror.liara.ir/repository/npm/}"`
-- **GitHub Actions** (`frontend-cicd.yml`): same Liara URL as fallback when `secrets.NPM_REGISTRY_URL` is unset
+- **GitLab** (`build:frontend` in `.gitlab-ci.yml`): passes `NPM_REGISTRY_URL` and `NPM_REGISTRY_FALLBACK_URL`
+- **GitHub Actions** (`frontend-cicd.yml`): passes the same build args from secrets or repo defaults
 
-Set the `NPM_REGISTRY_URL` CI variable to override for all pipelines.
+Set the `NPM_REGISTRY_URL` CI variable to override the primary registry for all pipelines. Set `NPM_REGISTRY_FALLBACK_URL` only when the public npm registry is not reachable from the runner.
 
 ## Docker Hub / base images
 

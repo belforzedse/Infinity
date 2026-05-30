@@ -34,20 +34,36 @@ Strapi creates a `.strapi` directory (cache/CLI state) during `strapi build`. In
 
 `https://package-mirror.liara.ir/repository/npm/`
 
+They also define `NPM_REGISTRY_FALLBACK_URL` as:
+
+`https://registry.npmjs.org/`
+
+Dependency install runs through `.cursor/docker/fallback-registry.sh`: it activates Corepack/pnpm against `NPM_REGISTRY_URL`, runs `pnpm install`, and if that step fails, retries the same command against `NPM_REGISTRY_FALLBACK_URL`.
+
 Override at build time when needed:
 
 ```bash
-docker build --build-arg NPM_REGISTRY_URL="https://…" -f apps/backend/main.Dockerfile .
+docker build \
+  --build-arg NPM_REGISTRY_URL="https://…" \
+  --build-arg NPM_REGISTRY_FALLBACK_URL="https://registry.npmjs.org/" \
+  -f apps/backend/main.Dockerfile .
 ```
+
+## Alpine APK fallback
+
+The backend Dockerfiles install build/runtime native dependencies through `.cursor/docker/fallback-apk.sh`. The script first rewrites Alpine repositories to `https://mirror.arvancloud.ir/alpine`; if `apk add` fails, it restores the default Alpine repositories and retries once. This applies to:
+
+- Builder: `build-base`, `python3`, `vips-dev`, `fftw-dev`
+- Runner: `su-exec`, `vips`, `vips-dev` in `main.Dockerfile`; `vips`, `vips-dev` in `dev.Dockerfile`
 
 ## CI defaults
 
 Dockerfile defaults apply only when **no** `--build-arg NPM_REGISTRY_URL` is passed. Pipelines override them:
 
-- **GitLab** (`build:backend`): `--build-arg NPM_REGISTRY_URL="${NPM_REGISTRY_URL:-https://package-mirror.liara.ir/repository/npm/}"`
-- **GitHub Actions** (`backend-cicd.yml`): same Liara URL as fallback when `secrets.NPM_REGISTRY_URL` is unset
+- **GitLab** (`build:backend`): passes `NPM_REGISTRY_URL` and `NPM_REGISTRY_FALLBACK_URL`
+- **GitHub Actions** (`backend-cicd.yml`): passes the same build args from secrets or repo defaults
 
-If builds still hit another mirror, check the **`NPM_REGISTRY_URL`** CI/CD variable in GitLab/GitHub — it takes precedence over repo defaults.
+If builds still hit another mirror, check the **`NPM_REGISTRY_URL`** and **`NPM_REGISTRY_FALLBACK_URL`** CI/CD variables in GitLab/GitHub — they take precedence over repo defaults.
 
 ## Runtime
 

@@ -1,7 +1,9 @@
 .git
 .gitignore
 .github
-.cursor
+.cursor/*
+!.cursor/docker/
+!.cursor/docker/**
 .turbo
 
 node_modules
