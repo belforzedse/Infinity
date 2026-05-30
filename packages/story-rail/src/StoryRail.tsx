@@ -53,7 +53,12 @@ export function StoryRail<TStory extends StoryRailStory = StoryRailStory>({
   return (
     <>
       <section
-        className={joinClasses("flex w-full flex-col items-end gap-5 p-0", className, classNames?.root)}
+        className={joinClasses(
+          "flex w-full flex-col gap-5 p-0",
+          heading ? "items-end" : "items-stretch",
+          className,
+          classNames?.root,
+        )}
         dir={dir}
         aria-labelledby={heading ? headingId : undefined}
       >

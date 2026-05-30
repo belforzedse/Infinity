@@ -39,19 +39,19 @@ export const FOOTER_DATA: FooterData = {
   second: {
     header: "دسترسی سریع",
     links: [
-      { title: "خرید بافت", url: "/plp/category/پلیور-و-بافت" },
-      { title: "خرید پیراهن زنانه", url: "/plp/category/shirt" },
+      { title: "خرید بافت", url: "/plp" },
+      { title: "خرید پیراهن زنانه", url: "/plp/category/shirt-1384" },
       {
         title: "خرید شال و روسری",
-        url: "/plp/category/shawls-and-scarves",
+        url: "/plp/category/shawls-and-scarves-1392",
       },
       {
         title: "خرید شومیز",
-        url: "/plp/category/paperback-and-tonic",
+        url: "/plp",
       },
       {
         title: "خرید مانتو",
-        url: "/plp/category/coat-and-mantle",
+        url: "/plp",
       },
     ],
   },

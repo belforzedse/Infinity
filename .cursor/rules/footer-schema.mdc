@@ -57,6 +57,11 @@ Each column in the footer has:
   - `title`: Display text for the link
   - `url`: Target path for the link
 
+**Quick access (second column) category URLs** in `FOOTER_DATA.second.links`:
+- **خرید پیراهن زنانه** → `/plp/category/shirt-1384`
+- **خرید شال و روسری** → `/plp/category/shawls-and-scarves-1392`
+- **خرید بافت**, **خرید شومیز**, **خرید مانتو** → `/plp` (general PLP until dedicated category slugs exist)
+
 #### Contact Us Section
 
 Contains contact information:

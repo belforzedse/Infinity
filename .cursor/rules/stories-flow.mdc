@@ -120,6 +120,10 @@ Endpoints are registered in `apps/frontend/src/constants/api.ts` → `ENDPOINTS.
 - `<StoriesRail stories={activeStories} />` renders after hero, before `<HomeProductSections>`
 - Hidden when `activeStories.length === 0`
 
+`apps/frontend/src/components/Home/StoriesRail.tsx`:
+- Section header matches product carousels (`OffersListHomePage`): title + action link, `gap-3` layout
+- Title icon: [`InfinityGradientMark`](apps/frontend/src/components/Icons/InfinityGradientMark.tsx) — social app `Infinity.svg` paths with Instagram-style gradient (not `NewIcon`)
+
 ## Story Viewer Library
 
 Package: `react-instagram-stories`

@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, BookOpen } from "lucide-react";
+import NewIcon from "@/components/PDP/Icons/NewIcon";
 import BlogCard from "./BlogCard";
 import BlogCardMobile from "./BlogCardMobile";
 import BlogPagination from "./BlogPagination";
@@ -135,19 +136,20 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({
   }
 
   return (
-    <section className={`w-full ${className}`}>
+    <section className={`flex min-w-0 w-full flex-col gap-3 ${className}`}>
       {/* Header */}
-      <div className="flex items-center justify-between mb-3">
-        {/* Title */}
-        <div className="flex items-center gap-2">
-          {title === "اینفینیتی مگ" && (
-            <BookOpen className="h-5 w-5 md:h-6 md:w-6 text-pink-600" />
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-1">
+          {title === "اینفینیتی مگ" ? (
+            <BookOpen className="h-6 w-6 text-pink-600 md:h-7 md:w-7" aria-hidden="true" />
+          ) : (
+            <NewIcon />
           )}
-          <h2 className="text-xl md:text-2xl font-medium text-neutral-800 leading-[1.24]">{title}</h2>
+          <span className="text-2xl text-foreground-primary md:text-3xl">{title}</span>
         </div>
 
-        {/* Right Side - Navigation and View All */}
-        <div className="flex items-center gap-4">
+        {/* Navigation and View All */}
+        <div className="flex shrink-0 items-center gap-4">
           {/* Desktop Navigation - only show if more than one page */}
           {totalPages > 1 && (
             <div className="hidden md:block">
@@ -166,8 +168,8 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({
             href={getViewAllHref()}
             className="flex items-center gap-1 text-sm font-normal text-neutral-600 transition-colors hover:text-pink-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2"
           >
-            <ArrowLeft className="h-4 w-4 md:h-5 md:w-5" />
             <span>{viewAllText}</span>
+            <ArrowLeft className="h-4 w-4 md:h-5 md:w-5" aria-hidden="true" />
           </Link>
         </div>
       </div>

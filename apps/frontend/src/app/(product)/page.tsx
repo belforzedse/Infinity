@@ -81,7 +81,11 @@ function ProductSectionsFallback() {
 
 function StoriesRailFallback() {
   return (
-    <section>
+    <div className="flex min-w-0 flex-col gap-3">
+      <div className="flex items-center justify-between gap-4">
+        <SkeletonText tone="light" className="h-8 w-40 md:h-9" />
+        <SkeletonText tone="light" className="h-5 w-36" />
+      </div>
       <div className="flex gap-4 overflow-hidden">
         {[...Array(6)].map((_, index) => (
           <div key={index} className="flex shrink-0 flex-col items-center gap-2">
@@ -90,15 +94,15 @@ function StoriesRailFallback() {
           </div>
         ))}
       </div>
-    </section>
+    </div>
   );
 }
 
 function BlogSectionFallback() {
   return (
-    <section className="space-y-4">
-      <div className="flex items-center justify-between">
-        <SkeletonText className="h-7 w-40" />
+    <div className="flex min-w-0 flex-col gap-3">
+      <div className="flex items-center justify-between gap-4">
+        <SkeletonText className="h-8 w-40 md:h-9" />
         <SkeletonText tone="light" className="h-5 w-24" />
       </div>
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -110,7 +114,7 @@ function BlogSectionFallback() {
           </div>
         ))}
       </div>
-    </section>
+    </div>
   );
 }
 
@@ -119,11 +123,7 @@ async function StoriesSection() {
 
   if (activeStories.length === 0) return null;
 
-  return (
-    <section>
-      <StoriesRail stories={activeStories} />
-    </section>
-  );
+  return <StoriesRail stories={activeStories} />;
 }
 
 async function ProductSectionsBlock({
