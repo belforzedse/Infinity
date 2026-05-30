@@ -253,7 +253,7 @@ frontend:build:
         --build-arg NEXT_PUBLIC_SENTRY_DSN="${FRONTEND_SENTRY_DSN:-}" \
         --build-arg STRAPI_BUILD_TIME_URL="${STRAPI_BUILD_TIME_URL:-}" \
         --build-arg STRAPI_INTERNAL_URL="${STRAPI_INTERNAL_URL:-}" \
-        --build-arg NPM_REGISTRY_URL="${NPM_REGISTRY_URL:-https://mirror.abrha.net/repository/npm/}" \
+        --build-arg NPM_REGISTRY_URL="${NPM_REGISTRY_URL:-https://package-mirror.liara.ir/repository/npm/}" \
         --build-arg GITHUB_SHA="$CI_COMMIT_SHA" \
         --file "$DOCKERFILE" \
         --tag "$IMAGE:$CI_COMMIT_SHA" \

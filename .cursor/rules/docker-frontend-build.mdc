@@ -1,0 +1,35 @@
+---
+description: Frontend (Next.js) Docker image build; npm registry mirror aligned with backend
+globs: apps/frontend/*.Dockerfile, .github/workflows/frontend-cicd.yml
+---
+
+# Frontend Docker Build
+
+## NPM registry (build)
+
+`main.Dockerfile` and `dev.Dockerfile` default `NPM_REGISTRY_URL` to the **same Liara mirror as the backend**:
+
+`https://package-mirror.liara.ir/repository/npm/`
+
+Override at build time when needed:
+
+```bash
+docker build --build-arg NPM_REGISTRY_URL="https://…" -f apps/frontend/main.Dockerfile .
+```
+
+`COREPACK_NPM_REGISTRY`, `npm_config_registry`, and `pnpm config set registry` all use this URL so Corepack can fetch `pnpm@10.28.2` and `pnpm install` uses the same mirror.
+
+## CI defaults
+
+- **GitLab** (`build:frontend` in `.gitlab-ci.yml`): `--build-arg NPM_REGISTRY_URL="${NPM_REGISTRY_URL:-https://package-mirror.liara.ir/repository/npm/}"`
+- **GitHub Actions** (`frontend-cicd.yml`): same Liara URL as fallback when `secrets.NPM_REGISTRY_URL` is unset
+
+Set the `NPM_REGISTRY_URL` CI variable to override for all pipelines.
+
+## Docker Hub / base images
+
+Base images use the Arvan Docker mirror prefix (`docker.arvancloud.ir/node:22-alpine`). See [docker-hub-mirror-arvan.mdc](docker-hub-mirror-arvan.mdc).
+
+## Node version
+
+Frontend Dockerfiles use **Node 22** (`node:22-alpine`) for Next.js cache handler / Web Streams compatibility under load. Backend uses Node 20 for Strapi 4.x engine compatibility.

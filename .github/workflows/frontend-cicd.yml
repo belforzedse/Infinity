@@ -122,7 +122,7 @@ jobs:
             NEXT_PUBLIC_MATOMO_SITE_ID=${{ secrets.FRONTEND_MATOMO_SITE_ID }}
             NEXT_PUBLIC_SENTRY_DSN=${{ secrets.FRONTEND_SENTRY_DSN }}
             STRAPI_BUILD_TIME_URL=${{ secrets.FRONTEND_STRAPI_BUILD_TIME_URL }}
-            NPM_REGISTRY_URL=${{ secrets.NPM_REGISTRY_URL || 'https://mirror.abrha.net/repository/npm/' }}
+            NPM_REGISTRY_URL=${{ secrets.NPM_REGISTRY_URL || 'https://package-mirror.liara.ir/repository/npm/' }}
             GITHUB_SHA=${{ github.sha }}
 
       - name: Upload docker-compose (prod)

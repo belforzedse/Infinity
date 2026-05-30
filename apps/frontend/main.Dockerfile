@@ -4,7 +4,7 @@ FROM docker.arvancloud.ir/node:22-alpine AS builder
 
 WORKDIR /repo
 ENV NEXT_TELEMETRY_DISABLED=1
-ARG NPM_REGISTRY_URL="https://mirror.abrha.net/repository/npm/"
+ARG NPM_REGISTRY_URL="https://package-mirror.liara.ir/repository/npm/"
 ENV COREPACK_NPM_REGISTRY=${NPM_REGISTRY_URL} \
     npm_config_registry=${NPM_REGISTRY_URL} \
     NPM_CONFIG_REGISTRY=${NPM_REGISTRY_URL}
