@@ -73,10 +73,20 @@ import type {
   HeroSliderMeta,
   HeroSliderSanitizationResult,
   HeroContentAlignment,
+  HeroImageOverflow,
+  HeroOverflowEdge,
 } from "./hero-slider-types";
 
 const MAX_CUSTOM_ENTRIES = 20;
 const MAX_SLIDES = 50;
+const DEFAULT_IMAGE_OVERFLOW: HeroImageOverflow = {
+  enabled: false,
+  edge: "top",
+  amountPx: 0,
+  offsetXPercent: 50,
+  offsetYPercent: 50,
+  widthPercent: 100,
+};
 
 /** Stricter pattern: rgb/rgba allow only numbers, commas, spaces, optional alpha 0–1. */
 const RGB_RGBA_PATTERN =
@@ -95,6 +105,32 @@ function clampNumber(value: unknown, min: number, max: number, fallback: number)
   if (num < min) return min;
   if (num > max) return max;
   return num;
+}
+
+function sanitizeImageOverflow(value: unknown): HeroImageOverflow {
+  const raw = isRecord(value) ? value : {};
+  const edgeRaw = sanitizeString(raw.edge, 16);
+  const edge: HeroOverflowEdge =
+    edgeRaw === "right" || edgeRaw === "bottom" || edgeRaw === "left" ? edgeRaw : "top";
+
+  return {
+    enabled: typeof raw.enabled === "boolean" ? raw.enabled : DEFAULT_IMAGE_OVERFLOW.enabled,
+    edge,
+    amountPx: clampNumber(raw.amountPx, 0, 240, DEFAULT_IMAGE_OVERFLOW.amountPx),
+    offsetXPercent: clampNumber(
+      raw.offsetXPercent,
+      -100,
+      200,
+      DEFAULT_IMAGE_OVERFLOW.offsetXPercent,
+    ),
+    offsetYPercent: clampNumber(
+      raw.offsetYPercent,
+      -100,
+      200,
+      DEFAULT_IMAGE_OVERFLOW.offsetYPercent,
+    ),
+    widthPercent: clampNumber(raw.widthPercent, 20, 220, DEFAULT_IMAGE_OVERFLOW.widthPercent),
+  };
 }
 
 function sanitizeString(value: unknown, maxLength = MAX_TEXT_LENGTH): string {
@@ -485,6 +521,7 @@ function sanitizeMainVisualSlot(
     foregroundCustomWidth: sanitizeClassName(raw.foregroundCustomWidth ?? media.customWidth, 80),
     foregroundCustomHeight: sanitizeClassName(raw.foregroundCustomHeight ?? media.customHeight, 80),
     foregroundZoom: clampNumber(raw.foregroundZoom, 0.5, 2, 1),
+    foregroundOverflow: sanitizeImageOverflow(raw.foregroundOverflow ?? media.overflow),
     link: sanitizeLink(raw.link, errors, `${path}.link`),
     tracking: sanitizeTracking(raw.tracking),
   };
@@ -543,6 +580,7 @@ function sanitizeCardSlot(
       "",
     imageCustomWidth: sanitizeClassName(raw.imageCustomWidth ?? media.customWidth, 80),
     imageCustomHeight: sanitizeClassName(raw.imageCustomHeight ?? media.customHeight, 80),
+    imageOverflow: sanitizeImageOverflow(raw.imageOverflow ?? media.overflow),
     buttonLabel: sanitizeString(raw.buttonLabel ?? raw.label, 120),
     buttonHref: sanitizeButtonHref(raw.buttonHref ?? linkHref, errors, `${path}.buttonHref`),
     buttonClassName:
@@ -853,7 +891,7 @@ function sanitizeSlide(
 
 export function createDefaultHeroSliderPayload(): HeroSliderPayload {
   return {
-    version: 1,
+    version: 2,
     autoplayIntervalMs: DEFAULT_AUTOPLAY_INTERVAL_MS,
     slides: [],
   };
@@ -883,7 +921,7 @@ export function sanitizeHeroSliderPayload(input: unknown): HeroSliderSanitizatio
 
   return {
     value: {
-      version: 1,
+      version: 2,
       autoplayIntervalMs: clampNumber(
         input.autoplayIntervalMs,
         MIN_AUTOPLAY_INTERVAL_MS,
@@ -903,7 +941,7 @@ export function normalizeStoredHeroSliderPayload(input: unknown): HeroSliderPayl
 
 export function createHeroSliderMeta(publishedBy: number | null): HeroSliderMeta {
   return {
-    version: 1,
+    version: 2,
     publishedAt: new Date().toISOString(),
     publishedBy,
   };

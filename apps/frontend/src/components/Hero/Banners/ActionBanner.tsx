@@ -31,6 +31,30 @@ function getBackgroundPosition(pos?: string): React.CSSProperties {
   return positionStyles[posValue] ?? positionStyles['center'];
 }
 
+function getOverflowImageStyle(image: BannerImageSpec): React.CSSProperties | null {
+  const overflow = image.overflow;
+  if (!overflow?.enabled) return null;
+
+  const style: React.CSSProperties = {
+    width: `${overflow.widthPercent}%`,
+    height: "auto",
+    maxWidth: "none",
+    maxHeight: "none",
+  };
+
+  if (overflow.edge === "left" || overflow.edge === "right") {
+    style[overflow.edge] = -overflow.amountPx;
+    style.top = `${overflow.offsetYPercent}%`;
+    style.transform = "translateY(-50%)";
+  } else {
+    style[overflow.edge] = -overflow.amountPx;
+    style.left = `${overflow.offsetXPercent}%`;
+    style.transform = "translateX(-50%)";
+  }
+
+  return style;
+}
+
 interface BackgroundProps {
   background: BackgroundSpec;
   bgStyle: React.CSSProperties;
@@ -80,6 +104,11 @@ function ImageRenderer({
 }: ImageRendererProps) {
   if (!shouldRender) return null;
   const isLayered = variant === 'layered';
+  const overflowStyle = isLayered ? getOverflowImageStyle(image) : null;
+  const transform = [
+    overflowStyle?.transform,
+    zoom !== 1 ? `scale(${zoom})` : null,
+  ].filter(Boolean).join(" ") || undefined;
   return (
     <Image
       src={resolvedSrc}
@@ -97,12 +126,16 @@ function ImageRenderer({
           ? {
               objectPosition,
               objectFit,
-              transform: zoom !== 1 ? `scale(${zoom})` : undefined,
+              transform,
               zIndex: 10,
-              width: image.customWidth ?? '100%',
-              height: image.customHeight ?? '100%',
-              left: 0,
-              top: 0,
+              width: image.customWidth ?? overflowStyle?.width ?? '100%',
+              height: image.customHeight ?? overflowStyle?.height ?? '100%',
+              left: overflowStyle ? overflowStyle.left : 0,
+              right: overflowStyle?.right,
+              top: overflowStyle ? overflowStyle.top : 0,
+              bottom: overflowStyle?.bottom,
+              maxWidth: overflowStyle?.maxWidth,
+              maxHeight: overflowStyle?.maxHeight,
             }
           : {
               objectPosition: image.objectPosition || objectPosition || "center left",
@@ -257,7 +290,7 @@ export function ActionBanner({ spec }: ActionBannerProps) {
 
   if (background) {
     return (
-      <div dir="ltr" className={`relative w-full ${className}`}>
+      <div dir="ltr" className={`relative h-full min-h-[150px] w-full overflow-visible ${className}`}>
         <Background background={background} bgStyle={bgStyle} />
         <ImageRenderer
           image={image}
@@ -288,7 +321,7 @@ export function ActionBanner({ spec }: ActionBannerProps) {
   }
 
   return (
-    <div dir="ltr" className={`relative ${className}`} style={bgStyle}>
+    <div dir="ltr" className={`relative h-full min-h-[150px] overflow-visible ${className}`} style={bgStyle}>
       <div className="absolute inset-0 left-0 w-1/3">
         <ImageRenderer
           image={image}

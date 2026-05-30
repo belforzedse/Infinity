@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import {
   HERO_SCHEDULE_TIMEZONE,
@@ -92,8 +92,6 @@ export default function SchedulePanel({
   slotTracking,
   onSlotTrackingChange,
 }: Props) {
-  const [trackingCustomJson, setTrackingCustomJson] = useState("{}");
-  const [trackingJsonError, setTrackingJsonError] = useState<string | null>(null);
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const slotDisabled = isSlotDisabled(selectedSlotKey);
   const hideLinkInAdvanced =
@@ -101,11 +99,6 @@ export default function SchedulePanel({
   const selectedSlotLabel = selectedSlotKey
     ? SLOT_LABELS[selectedSlotKey] || selectedSlotKey
     : "بدون اسلات";
-
-  useEffect(() => {
-    setTrackingCustomJson(JSON.stringify(slotTracking.custom || {}, null, 2));
-    setTrackingJsonError(null);
-  }, [slotTracking.custom, selectedSlotKey]);
 
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-4">
@@ -347,41 +340,6 @@ export default function SchedulePanel({
             </label>
           </div>
 
-          <label className="text-xs text-slate-600">
-            رهگیری سفارشی (JSON)
-            <textarea
-              disabled={slotDisabled}
-              rows={4}
-              value={trackingCustomJson}
-              onChange={(event) => setTrackingCustomJson(event.target.value)}
-              onBlur={() => {
-                if (slotDisabled) return;
-                try {
-                  const parsed = JSON.parse(trackingCustomJson);
-                  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-                    throw new Error("Invalid");
-                  }
-
-                  const custom: Record<string, string> = {};
-                  Object.entries(parsed).forEach(([key, value]) => {
-                    if (typeof value === "string" && key.trim()) {
-                      custom[key.trim()] = value;
-                    }
-                  });
-
-                  onSlotTrackingChange({
-                    ...slotTracking,
-                    custom,
-                  });
-                  setTrackingJsonError(null);
-                } catch {
-                  setTrackingJsonError("ساختار JSON معتبر نیست");
-                }
-              }}
-              className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-mono disabled:bg-slate-100"
-            />
-          </label>
-          {trackingJsonError ? <p className="text-xs text-rose-600">{trackingJsonError}</p> : null}
         </div>
             </div>
           )}

@@ -15,6 +15,14 @@ export type BannerImageSpec = {
   focalY?: number;
   customWidth?: string; // e.g., "300px", "50%", "100%" - overrides width display
   customHeight?: string; // e.g., "300px", "50%", "100%" - overrides height display
+  overflow?: {
+    enabled: boolean;
+    edge: "top" | "right" | "bottom" | "left";
+    amountPx: number;
+    offsetXPercent: number;
+    offsetYPercent: number;
+    widthPercent: number;
+  };
 };
 
 export type ColorScheme = {

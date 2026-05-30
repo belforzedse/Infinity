@@ -24,7 +24,7 @@ export function DesktopCanvas({
     <div className="h-[480px] w-full max-w-[1358px] overflow-hidden mx-auto">
       <div className="relative h-full w-full">
         <div className="flex h-full items-stretch gap-0">
-          <div className="w-7/12 mt-[50px] flex-none overflow-hidden h-full">
+          <div className="mt-[50px] h-[430px] w-7/12 flex-none overflow-visible">
             <div className="flex flex-col h-full">
               <div>
                 <EditableSlot
@@ -44,8 +44,8 @@ export function DesktopCanvas({
                   />
                 </EditableSlot>
               </div>
-              <div className="flex-1 grid grid-cols-2 gap-3 items-end">
-                <div className="h-full overflow-hidden rounded-lg">
+              <div className="grid flex-1 grid-cols-2 items-end gap-3">
+                <div className="h-[180px] overflow-visible rounded-lg">
                   <EditableSlot
                     slotKey="bottomActionBannerLeft"
                     selected={selectedSlotKey === "bottomActionBannerLeft"}
@@ -57,7 +57,7 @@ export function DesktopCanvas({
                     <ActionBanner spec={layout.bottomActionBannerLeft} />
                   </EditableSlot>
                 </div>
-                <div className="h-full overflow-hidden rounded-lg">
+                <div className="h-[180px] overflow-visible rounded-lg">
                   <EditableSlot
                     slotKey="bottomActionBannerRight"
                     selected={selectedSlotKey === "bottomActionBannerRight"}

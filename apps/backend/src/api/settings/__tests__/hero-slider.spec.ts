@@ -34,7 +34,7 @@ describe("hero slider schema sanitizer", () => {
     });
 
     expect(errors).toEqual([]);
-    expect(value.version).toBe(1);
+    expect(value.version).toBe(2);
     expect(value.autoplayIntervalMs).toBe(8000);
     expect(value.slides).toHaveLength(1);
     expect(value.slides[0].devices.desktop.slots.topLeftTextBanner.title).toBe("Hello");
@@ -81,13 +81,70 @@ describe("hero slider schema sanitizer", () => {
     expect(errors.length).toBeGreaterThan(0);
     expect(errors.join(" ")).toContain("invalid range");
   });
+
+  it("clamps v2 image overflow settings", () => {
+    const { value, errors } = sanitizeHeroSliderPayload({
+      slides: [
+        {
+          id: "slide-1",
+          devices: {
+            desktop: {
+              slots: {
+                rightBanner: {
+                  foregroundOverflow: {
+                    enabled: true,
+                    edge: "left",
+                    amountPx: 999,
+                    offsetXPercent: -999,
+                    offsetYPercent: 999,
+                    widthPercent: 999,
+                  },
+                },
+                bottomActionBannerLeft: {
+                  imageOverflow: {
+                    enabled: true,
+                    edge: "bottom",
+                    amountPx: 24,
+                    offsetXPercent: 55,
+                    offsetYPercent: 45,
+                    widthPercent: 130,
+                  },
+                },
+              },
+            },
+          },
+        },
+      ],
+    });
+
+    const overflow =
+      value.slides[0].devices.desktop.slots.rightBanner.foregroundOverflow;
+    const cardOverflow =
+      value.slides[0].devices.desktop.slots.bottomActionBannerLeft.imageOverflow;
+
+    expect(errors).toEqual([]);
+    expect(overflow).toMatchObject({
+      enabled: true,
+      edge: "left",
+      amountPx: 240,
+      offsetXPercent: -100,
+      offsetYPercent: 200,
+      widthPercent: 220,
+    });
+    expect(cardOverflow).toMatchObject({
+      enabled: true,
+      edge: "bottom",
+      amountPx: 24,
+      widthPercent: 130,
+    });
+  });
 });
 
 describe("hero slider publish meta", () => {
   it("creates publish metadata", () => {
     const meta = createHeroSliderMeta(42);
 
-    expect(meta.version).toBe(1);
+    expect(meta.version).toBe(2);
     expect(meta.publishedBy).toBe(42);
     expect(typeof meta.publishedAt).toBe("string");
     expect(new Date(meta.publishedAt).toString()).not.toBe("Invalid Date");

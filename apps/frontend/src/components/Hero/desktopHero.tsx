@@ -124,7 +124,7 @@ export default function DesktopHero({ layout, slideKey }: Props) {
       >
         <div className="flex h-full items-stretch gap-2 lg:gap-0">
           {/* Left section (7/12): Text banner + action banners */}
-          <div className="w-7/12 mt-[50px] flex-none overflow-hidden h-full">
+          <div className="mt-[50px] h-[430px] w-7/12 flex-none overflow-visible">
             <div className="flex flex-col h-full">
               {/* Top: Text banner */}
               <div>
@@ -151,9 +151,9 @@ export default function DesktopHero({ layout, slideKey }: Props) {
               </div>
 
               {/* Bottom: Two action banners in grid */}
-              <div className="flex-1 grid grid-cols-2 gap-3 items-end">
+              <div className="grid flex-1 grid-cols-2 items-end gap-3">
                 {/* Left action banner */}
-                <div className="h-full overflow-hidden rounded-lg">
+                <div className="h-[180px] overflow-visible rounded-lg">
                   <AnimatePresence mode="wait" initial={false}>
                     <motion.div
                       key={`actionLeft-${slideKey}`}
@@ -169,7 +169,7 @@ export default function DesktopHero({ layout, slideKey }: Props) {
                 </div>
 
                 {/* Right action banner */}
-                <div className="h-full overflow-hidden rounded-lg">
+                <div className="h-[180px] overflow-visible rounded-lg">
                   <AnimatePresence mode="wait" initial={false}>
                     <motion.div
                       key={`actionRight-${slideKey}`}

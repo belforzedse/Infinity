@@ -373,8 +373,6 @@ NEXT_PUBLIC_STRAPI_TOKEN=your-token-here
 NEXT_PUBLIC_ENABLE_SNAPPAY=true
 NEXT_PUBLIC_ENABLE_MELLAT=true
 
-# Homepage hero: uses hardcoded slides by default. Set to false to use CMS hero slider when available.
-NEXT_PUBLIC_FORCE_HERO_FALLBACK=false
 ```
 
 ### Environment-Specific URLs

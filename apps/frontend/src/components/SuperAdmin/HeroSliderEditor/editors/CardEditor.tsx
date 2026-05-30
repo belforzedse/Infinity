@@ -7,8 +7,7 @@ import { type HeroCardSlot, type HeroSlotConfig } from "@/types/super-admin/hero
 import { resolveColorForInput } from "../utils";
 import { TextStyleEditor } from "./TextStyleEditor";
 import { SlotTextField } from "./SlotTextField";
-import { BackgroundSettings } from "./BackgroundSettings";
-import { ImageSettings } from "./ImageSettings";
+import { OverflowSettings } from "./OverflowSettings";
 
 type CardEditorProps = {
   slot: HeroCardSlot;
@@ -55,6 +54,11 @@ export function CardEditor({ slot, onChange }: CardEditorProps) {
       </div>
 
       <SlotTextField
+        label="متن جایگزین تصویر"
+        value={slot.imageAlt}
+        onChange={(value) => onChange({ ...slot, imageAlt: value })}
+      />
+      <SlotTextField
         label="عنوان کارت"
         value={slot.title}
         onChange={(value) => onChange({ ...slot, title: value })}
@@ -70,58 +74,43 @@ export function CardEditor({ slot, onChange }: CardEditorProps) {
         onChange={(value) => onChange({ ...slot, buttonLabel: value })}
       />
 
-      {slot.buttonLabel.trim() !== "" ? (
-        <div className="space-y-2 rounded-lg border border-slate-200 bg-slate-50/50 p-3">
-          <p className="text-xs font-medium text-slate-600">لینک دکمه</p>
-          <label className="text-xs text-slate-600">
-            نوع لینک
-            <select
-              value={slot.link?.type ?? "internal"}
-              onChange={(event) => {
-                const type = event.target.value === "external" ? "external" : "internal";
-                const href = slot.buttonHref || slot.link?.href || "/";
-                onChange({
-                  ...slot,
-                  buttonHref: href,
-                  link: href ? { type, href } : null,
-                });
-              }}
-              className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"
-            >
-              <option value="internal">داخلی</option>
-              <option value="external">خارجی</option>
-            </select>
-          </label>
-          <SlotTextField
-            label="آدرس لینک"
-            value={slot.buttonHref || slot.link?.href || ""}
-            onChange={(value) => {
-              const href = value.trim();
-              const type = slot.link?.type ?? "internal";
+      <div className="space-y-2 rounded-lg border border-slate-200 bg-slate-50/50 p-3">
+        <p className="text-xs font-medium text-slate-600">لینک دکمه</p>
+        <label className="text-xs text-slate-600">
+          نوع لینک
+          <select
+            value={slot.link?.type ?? "internal"}
+            onChange={(event) => {
+              const type = event.target.value === "external" ? "external" : "internal";
+              const href = slot.buttonHref || slot.link?.href || "/";
               onChange({
                 ...slot,
                 buttonHref: href,
                 link: href ? { type, href } : null,
               });
             }}
-            placeholder="/route یا https://..."
-            inputClassName="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"
-          />
-          <button
-            type="button"
-            onClick={() =>
-              onChange({
-                ...slot,
-                buttonHref: "",
-                link: null,
-              })
-            }
-            className="text-xs text-slate-500 underline hover:text-slate-700"
+            className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"
           >
-            حذف لینک
-          </button>
-        </div>
-      ) : null}
+            <option value="internal">داخلی</option>
+            <option value="external">خارجی</option>
+          </select>
+        </label>
+        <SlotTextField
+          label="آدرس لینک"
+          value={slot.buttonHref || slot.link?.href || ""}
+          onChange={(value) => {
+            const href = value.trim();
+            const type = slot.link?.type ?? "internal";
+            onChange({
+              ...slot,
+              buttonHref: href,
+              link: href ? { type, href } : null,
+            });
+          }}
+          placeholder="/route یا https://..."
+          inputClassName="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"
+        />
+      </div>
 
       <SlotTextField
         label="رنگ پس‌زمینه"
@@ -130,6 +119,20 @@ export function CardEditor({ slot, onChange }: CardEditorProps) {
         type="color"
         inputClassName="mt-1 h-10 w-full rounded-lg border border-slate-200"
       />
+
+      <div>
+        <p className="mb-1 text-xs text-slate-600">تصویر پس‌زمینه کارت</p>
+        <ImageUploadField
+          value={slot.backgroundImageUrl}
+          onChange={(value) =>
+            onChange({
+              ...slot,
+              backgroundImageUrl: value,
+              backgroundType: value ? "image" : slot.backgroundType,
+            })
+          }
+        />
+      </div>
 
       <TextStyleEditor
         label="استایل عنوان"
@@ -149,26 +152,11 @@ export function CardEditor({ slot, onChange }: CardEditorProps) {
           onClick={() => setAdvancedOpen((prev) => !prev)}
           className="text-xs text-slate-600 underline"
         >
-          {advancedOpen ? "بستن تنظیمات پیشرفته" : "تنظیمات پیشرفته کلاس و چیدمان"}
+          {advancedOpen ? "بستن تنظیمات تصویر و چیدمان" : "تنظیمات تصویر و چیدمان"}
         </button>
 
         {advancedOpen ? (
-          <div className="mt-2 grid grid-cols-1 gap-2">
-            <SlotTextField
-              label="کلاس کارت"
-              value={slot.className}
-              onChange={(value) => onChange({ ...slot, className: value })}
-            />
-            <SlotTextField
-              label="کلاس عنوان"
-              value={slot.titleClassName}
-              onChange={(value) => onChange({ ...slot, titleClassName: value })}
-            />
-            <SlotTextField
-              label="کلاس زیرعنوان"
-              value={slot.subtitleClassName}
-              onChange={(value) => onChange({ ...slot, subtitleClassName: value })}
-            />
+          <div className="mt-2 grid grid-cols-1 gap-3">
             <label className="text-xs text-slate-600">
               چیدمان محتوا
               <select
@@ -184,24 +172,33 @@ export function CardEditor({ slot, onChange }: CardEditorProps) {
                           : "center",
                   })
                 }
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"
               >
                 <option value="top">بالا</option>
                 <option value="center">وسط</option>
                 <option value="bottom">پایین</option>
               </select>
             </label>
-            <SlotTextField
-              label="کلاس فاصله داخلی"
-              value={slot.paddingClassName}
-              onChange={(value) => onChange({ ...slot, paddingClassName: value })}
-            />
-            <ImageSettings slot={slot} onChange={onChange} />
-            <BackgroundSettings slot={slot} onChange={onChange} />
-            <SlotTextField
-              label="کلاس دکمه"
-              value={slot.buttonClassName}
-              onChange={(value) => onChange({ ...slot, buttonClassName: value })}
+            <label className="text-xs text-slate-600">
+              نوع پس‌زمینه
+              <select
+                value={slot.backgroundType}
+                onChange={(event) =>
+                  onChange({
+                    ...slot,
+                    backgroundType: event.target.value === "image" ? "image" : "color",
+                  })
+                }
+                className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"
+              >
+                <option value="color">رنگ</option>
+                <option value="image">تصویر</option>
+              </select>
+            </label>
+            <OverflowSettings
+              label="خروج تصویر از کارت"
+              value={slot.imageOverflow}
+              onChange={(imageOverflow) => onChange({ ...slot, imageOverflow })}
             />
             <label className="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700">
               <span>نمایش فلش دکمه</span>
@@ -212,11 +209,6 @@ export function CardEditor({ slot, onChange }: CardEditorProps) {
                 className="h-4 w-4"
               />
             </label>
-            <SlotTextField
-              label="کلاس فلش دکمه"
-              value={slot.buttonArrowClassName}
-              onChange={(value) => onChange({ ...slot, buttonArrowClassName: value })}
-            />
           </div>
         ) : null}
       </div>

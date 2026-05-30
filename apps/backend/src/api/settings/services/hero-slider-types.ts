@@ -32,6 +32,16 @@ export type HeroSlotLink = {
 };
 export type HeroContentAlignment = "top" | "center" | "bottom";
 export type HeroBackgroundType = "color" | "image";
+export type HeroOverflowEdge = "top" | "right" | "bottom" | "left";
+
+export type HeroImageOverflow = {
+  enabled: boolean;
+  edge: HeroOverflowEdge;
+  amountPx: number;
+  offsetXPercent: number;
+  offsetYPercent: number;
+  widthPercent: number;
+};
 
 export type HeroTracking = {
   campaign: string;
@@ -83,6 +93,7 @@ export type HeroMainVisualSlot = {
   foregroundCustomHeight: string;
   /** Foreground image zoom (0.5–2). Default 1. */
   foregroundZoom?: number;
+  foregroundOverflow: HeroImageOverflow;
   link: HeroSlotLink | null;
   tracking: HeroTracking;
 };
@@ -98,6 +109,7 @@ export type HeroCardSlot = {
   imageObjectPosition: string;
   imageCustomWidth: string;
   imageCustomHeight: string;
+  imageOverflow: HeroImageOverflow;
   buttonLabel: string;
   buttonHref: string;
   buttonClassName: string;
@@ -166,13 +178,13 @@ export type HeroSlideConfig = {
 };
 
 export type HeroSliderPayload = {
-  version: 1;
+  version: 2;
   autoplayIntervalMs: number;
   slides: HeroSlideConfig[];
 };
 
 export type HeroSliderMeta = {
-  version: 1;
+  version: 2;
   publishedAt: string;
   publishedBy: number | null;
 };

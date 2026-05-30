@@ -267,11 +267,7 @@ export function useHeroSliderEditor() {
   const handleSaveDraft = async () => {
     try {
       setIsSavingDraft(true);
-      const syncedDraft: HeroSliderPayload = {
-        ...draft,
-        slides: draft.slides.map(syncTabletAndMobileFromDesktop),
-      };
-      const savedDraft = await updateHeroSliderDraft(syncedDraft);
+      const savedDraft = await updateHeroSliderDraft(draft);
       setDraft(savedDraft);
       toast.success("پیش‌نویس هیرو ذخیره شد");
     } catch (error) {
@@ -293,6 +289,8 @@ export function useHeroSliderEditor() {
   const handlePublish = async () => {
     try {
       setIsPublishing(true);
+      const savedDraft = await updateHeroSliderDraft(draft);
+      setDraft(savedDraft);
       const result = await publishHeroSliderDraft();
       setPublished(result.published);
       setMeta(result.meta);

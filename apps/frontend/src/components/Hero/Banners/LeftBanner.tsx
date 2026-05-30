@@ -30,6 +30,26 @@ export function LeftBanner({ spec, className = '' }: LeftBannerProps) {
       : (foregroundImage.objectPosition || "center");
   const objectFit = foregroundImage.objectFit || "contain";
   const zoom = typeof foregroundImage.zoom === "number" ? foregroundImage.zoom : 1;
+  const overflow = foregroundImage.overflow;
+  const overflowStyle: React.CSSProperties | null = overflow?.enabled
+    ? {
+        width: `${overflow.widthPercent}%`,
+        height: "auto",
+        maxWidth: "none",
+        maxHeight: "none",
+        ...(overflow.edge === "left" || overflow.edge === "right"
+          ? {
+              [overflow.edge]: -overflow.amountPx,
+              top: `${overflow.offsetYPercent}%`,
+              transform: "translateY(-50%)",
+            }
+          : {
+              [overflow.edge]: -overflow.amountPx,
+              left: `${overflow.offsetXPercent}%`,
+              transform: "translateX(-50%)",
+            }),
+      }
+    : null;
 
   // Determine background styling (resolve Strapi paths to absolute URL for image backgrounds)
   // When using an image, set a fallback backgroundColor so areas not covered by the image
@@ -67,7 +87,7 @@ export function LeftBanner({ spec, className = '' }: LeftBannerProps) {
 
   // Render foreground image
   const ForegroundContent = (
-    <div className={`relative h-full w-full ${className}`}>
+    <div className={`relative h-full w-full overflow-visible ${className}`}>
       {/* Background element */}
       <div
         className={`absolute  ${background.className || ""}`}
@@ -91,12 +111,22 @@ export function LeftBanner({ spec, className = '' }: LeftBannerProps) {
           priority={foregroundImage.priority}
           loading={foregroundImage.loading}
           onError={handleForegroundImageError}
-          className={`absolute inset-0 lg:h-full lg:w-full ${foregroundImage.className || "object-contain"}`}
+          className={`absolute ${overflowStyle ? "" : "inset-0 lg:h-full lg:w-full"} ${foregroundImage.className || "object-contain"}`}
           style={{
             objectPosition,
             objectFit,
-            transform: zoom !== 1 ? `scale(${zoom})` : undefined,
+            transform: [overflowStyle?.transform, zoom !== 1 ? `scale(${zoom})` : null]
+              .filter(Boolean)
+              .join(" ") || undefined,
             zIndex: 10,
+            width: foregroundImage.customWidth ?? overflowStyle?.width,
+            height: foregroundImage.customHeight ?? overflowStyle?.height,
+            left: overflowStyle?.left,
+            right: overflowStyle?.right,
+            top: overflowStyle?.top,
+            bottom: overflowStyle?.bottom,
+            maxWidth: overflowStyle?.maxWidth,
+            maxHeight: overflowStyle?.maxHeight,
           }}
         />
       ) : null}

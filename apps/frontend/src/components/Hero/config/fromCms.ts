@@ -143,6 +143,7 @@ function applyCardSlot(base: ActionBannerSpec, slot: HeroCardSlot): ActionBanner
       className: slot.imageClassName || base.image.className,
       customWidth: slot.imageCustomWidth || base.image.customWidth,
       customHeight: slot.imageCustomHeight || base.image.customHeight,
+      overflow: slot.imageOverflow,
       sizes: base.image.sizes ?? "(max-width: 1280px) 25vw, 400px",
     },
     colors: {
@@ -217,6 +218,7 @@ function applyMainVisualSlot(base: LeftBannerSpec, slot: HeroMainVisualSlot): Le
       objectPosition: slot.foregroundObjectPosition || base.foregroundImage.objectPosition,
       customWidth: slot.foregroundCustomWidth || base.foregroundImage.customWidth,
       customHeight: slot.foregroundCustomHeight || base.foregroundImage.customHeight,
+      overflow: slot.foregroundOverflow,
       sizes: base.foregroundImage.sizes ?? "100vw",
     },
   };

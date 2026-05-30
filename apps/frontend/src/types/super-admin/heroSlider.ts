@@ -1,4 +1,4 @@
-export const HERO_SLIDER_VERSION = 1 as const;
+export const HERO_SLIDER_VERSION = 2 as const;
 export const HERO_SCHEDULE_TIMEZONE = "Asia/Tehran" as const;
 
 export const HERO_DESKTOP_SLOT_KEYS = [
@@ -29,6 +29,16 @@ export type HeroMobileSlotKey = (typeof HERO_MOBILE_SLOT_KEYS)[number];
 export type HeroLinkType = "internal" | "external";
 export type HeroContentAlignment = "top" | "center" | "bottom";
 export type HeroBackgroundType = "color" | "image";
+export type HeroOverflowEdge = "top" | "right" | "bottom" | "left";
+
+export type HeroImageOverflow = {
+  enabled: boolean;
+  edge: HeroOverflowEdge;
+  amountPx: number;
+  offsetXPercent: number;
+  offsetYPercent: number;
+  widthPercent: number;
+};
 
 export const HERO_FONT_FAMILY_OPTIONS = [
   { value: "font-kaghaz", label: "کاغذ" },
@@ -187,6 +197,7 @@ export type HeroMainVisualSlot = {
   foregroundCustomHeight: string;
   /** Foreground image zoom (0.5–2). Default 1. */
   foregroundZoom?: number;
+  foregroundOverflow: HeroImageOverflow;
   link: HeroSlotLink | null;
   tracking: HeroTracking;
 };
@@ -223,6 +234,7 @@ export type HeroCardSlot = {
   imageObjectPosition: string;
   imageCustomWidth: string;
   imageCustomHeight: string;
+  imageOverflow: HeroImageOverflow;
   buttonLabel: string;
   buttonHref: string;
   buttonClassName: string;
@@ -315,6 +327,14 @@ const MIN_AUTOPLAY_INTERVAL_MS = 3000;
 const MAX_AUTOPLAY_INTERVAL_MS = 3600000;
 const MIN_HEADLINE_BOTTOM_MARGIN_PX = 0;
 const MAX_HEADLINE_BOTTOM_MARGIN_PX = 160;
+const DEFAULT_IMAGE_OVERFLOW: HeroImageOverflow = {
+  enabled: false,
+  edge: "top",
+  amountPx: 0,
+  offsetXPercent: 50,
+  offsetYPercent: 50,
+  widthPercent: 100,
+};
 
 const ALLOWED_LINK_TYPES = new Set<HeroLinkType>(["internal", "external"]);
 const ALLOWED_CONTENT_ALIGNMENTS = new Set<HeroContentAlignment>(["top", "center", "bottom"]);
@@ -460,6 +480,22 @@ function clamp(value: unknown, min: number, max: number, fallback: number): numb
   if (num < min) return min;
   if (num > max) return max;
   return num;
+}
+
+function normalizeImageOverflow(value: unknown): HeroImageOverflow {
+  const raw = isRecord(value) ? value : {};
+  const edgeRaw = sanitizeString(raw.edge, 16);
+  const edge: HeroOverflowEdge =
+    edgeRaw === "right" || edgeRaw === "bottom" || edgeRaw === "left" ? edgeRaw : "top";
+
+  return {
+    enabled: typeof raw.enabled === "boolean" ? raw.enabled : DEFAULT_IMAGE_OVERFLOW.enabled,
+    edge,
+    amountPx: clamp(raw.amountPx, 0, 240, DEFAULT_IMAGE_OVERFLOW.amountPx),
+    offsetXPercent: clamp(raw.offsetXPercent, -100, 200, DEFAULT_IMAGE_OVERFLOW.offsetXPercent),
+    offsetYPercent: clamp(raw.offsetYPercent, -100, 200, DEFAULT_IMAGE_OVERFLOW.offsetYPercent),
+    widthPercent: clamp(raw.widthPercent, 20, 220, DEFAULT_IMAGE_OVERFLOW.widthPercent),
+  };
 }
 
 function sanitizeImageUrl(value: unknown): string {
@@ -720,6 +756,7 @@ function normalizeMainVisualSlot(
       typeof raw.foregroundZoom === "number" && Number.isFinite(raw.foregroundZoom)
         ? Math.min(2, Math.max(0.5, raw.foregroundZoom))
         : undefined,
+    foregroundOverflow: normalizeImageOverflow(raw.foregroundOverflow ?? media.overflow),
     link: sanitizeSlotLink(raw.link),
     tracking: normalizeHeroTracking(raw.tracking),
   };
@@ -774,6 +811,7 @@ function normalizeCardSlot(
       "",
     imageCustomWidth: sanitizeClassName(raw.imageCustomWidth ?? media.customWidth, 80),
     imageCustomHeight: sanitizeClassName(raw.imageCustomHeight ?? media.customHeight, 80),
+    imageOverflow: normalizeImageOverflow(raw.imageOverflow ?? media.overflow),
     buttonLabel: sanitizeString(raw.buttonLabel ?? raw.label, 120),
     buttonHref: sanitizeHref(raw.buttonHref ?? link?.href),
     buttonClassName:

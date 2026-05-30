@@ -15,6 +15,39 @@ jest.mock("@/components/SuperAdmin/Layout/ContentWrapper", () => ({
   default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
+jest.mock("@/components/SuperAdmin/HeroSliderEditor/PublishBar", () => ({
+  __esModule: true,
+  default: ({
+    draft,
+    published,
+    onAddSlide,
+    onSaveDraft,
+    onPublish,
+  }: {
+    draft: HeroSliderPayload;
+    published: HeroSliderPayload;
+    onAddSlide: () => void;
+    onSaveDraft: () => void;
+    onPublish: () => void;
+  }) => (
+    <section>
+      <p>
+        تعداد اسلاید پیش‌نویس: {draft.slides.length} | تعداد اسلاید منتشرشده:{" "}
+        {published.slides.length}
+      </p>
+      <button type="button" onClick={onAddSlide}>
+        افزودن اسلاید
+      </button>
+      <button type="button" onClick={onSaveDraft}>
+        ذخیره پیش‌نویس
+      </button>
+      <button type="button" onClick={onPublish}>
+        انتشار
+      </button>
+    </section>
+  ),
+}));
+
 jest.mock("react-hot-toast", () => ({
   __esModule: true,
   default: {
@@ -34,6 +67,16 @@ jest.mock("@/services/super-admin/settings/hero-slider", () => ({
 const getHeroSliderDraftAndPublishedMock = getHeroSliderDraftAndPublished as jest.Mock;
 const updateHeroSliderDraftMock = updateHeroSliderDraft as jest.Mock;
 const publishHeroSliderDraftMock = publishHeroSliderDraft as jest.Mock;
+
+beforeAll(() => {
+  class ResizeObserverMock {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
+
+  global.ResizeObserver = ResizeObserverMock as typeof ResizeObserver;
+});
 
 function createHeroState() {
   const draft = normalizeHeroSliderPayload({
@@ -75,7 +118,7 @@ describe("Hero slider editor", () => {
         slides: [{ id: "published-slide", order: 0, isActive: true, autoplayEligible: true }],
       }),
       meta: {
-        version: 1,
+        version: 2,
         publishedAt: "2026-02-10T10:00:00.000Z",
         publishedBy: 1,
       },
@@ -91,12 +134,12 @@ describe("Hero slider editor", () => {
 
     await waitFor(() => {
       expect(screen.getByText(/در حال ویرایش:/)).toBeInTheDocument();
-      expect(screen.getByText("تیتر")).toBeInTheDocument();
+      expect(screen.getAllByText("تیتر").length).toBeGreaterThan(0);
     });
 
     fireEvent.click(screen.getByRole("button", { name: /ویرایش تصویر اصلی/i }));
 
-    expect(screen.getByText("تصویر اصلی")).toBeInTheDocument();
+    expect(screen.getAllByText("تصویر اصلی").length).toBeGreaterThan(0);
   });
 
   it("reorders slides when move controls are used", () => {

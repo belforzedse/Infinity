@@ -1,9 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import {
-  HERO_HEADLINE_STYLE_PRESETS,
-} from "@/types/super-admin/heroSliderPackages";
+import { HERO_HEADLINE_STYLE_PRESETS } from "@/types/super-admin/heroSliderPackages";
 import type { HeroHeadlineSlot, HeroSlotConfig } from "@/types/super-admin/heroSlider";
 import { resolveColorForInput } from "../utils";
 import { TextStyleEditor } from "./TextStyleEditor";
@@ -14,8 +11,6 @@ type HeadlineEditorProps = {
 };
 
 export function HeadlineEditor({ slot, onChange }: HeadlineEditorProps) {
-  const [advancedOpen, setAdvancedOpen] = useState(false);
-
   return (
     <div className="space-y-3">
       <label className="text-xs text-slate-600">
@@ -92,48 +87,6 @@ export function HeadlineEditor({ slot, onChange }: HeadlineEditorProps) {
           className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
         />
       </label>
-
-      <div className="rounded-lg border border-slate-200 bg-slate-50 p-2">
-        <button
-          type="button"
-          onClick={() => setAdvancedOpen((prev) => !prev)}
-          className="text-xs text-slate-600 underline"
-        >
-          {advancedOpen ? "بستن تنظیمات کلاس" : "تنظیمات کلاس و چیدمان"}
-        </button>
-
-        {advancedOpen ? (
-          <div className="mt-2 grid grid-cols-1 gap-2">
-            <label className="text-xs text-slate-600">
-              کلاس کانتینر
-              <input
-                type="text"
-                value={slot.className}
-                onChange={(event) => onChange({ ...slot, className: event.target.value })}
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-              />
-            </label>
-            <label className="text-xs text-slate-600">
-              کلاس تیتر
-              <input
-                type="text"
-                value={slot.titleClassName}
-                onChange={(event) => onChange({ ...slot, titleClassName: event.target.value })}
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-              />
-            </label>
-            <label className="text-xs text-slate-600">
-              کلاس زیرتیتر
-              <input
-                type="text"
-                value={slot.subtitleClassName}
-                onChange={(event) => onChange({ ...slot, subtitleClassName: event.target.value })}
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-              />
-            </label>
-          </div>
-        ) : null}
-      </div>
 
       <TextStyleEditor
         label="استایل تیتر"

@@ -9,6 +9,7 @@ import {
   type HeroSlotConfig,
 } from "@/types/super-admin/heroSlider";
 import { resolveColorForInput } from "../utils";
+import { OverflowSettings } from "./OverflowSettings";
 
 type MainVisualEditorProps = {
   slot: HeroMainVisualSlot;
@@ -34,7 +35,13 @@ export function MainVisualEditor({ slot, onChange }: MainVisualEditorProps) {
         <p className="mb-1 text-xs text-slate-600">تصویر پس‌زمینه</p>
         <ImageUploadField
           value={slot.backgroundImageUrl}
-          onChange={(value) => onChange({ ...slot, backgroundImageUrl: value })}
+          onChange={(value) =>
+            onChange({
+              ...slot,
+              backgroundImageUrl: value,
+              backgroundType: value ? "image" : slot.backgroundType,
+            })
+          }
         />
       </div>
 
@@ -57,7 +64,7 @@ export function MainVisualEditor({ slot, onChange }: MainVisualEditorProps) {
       </label>
 
       <label className="text-xs text-slate-600">
-        بزرگنمایی تصویر اصلی (۰.۵ تا ۲)
+        بزرگنمایی تصویر اصلی
         <input
           type="range"
           min={0.5}
@@ -129,11 +136,11 @@ export function MainVisualEditor({ slot, onChange }: MainVisualEditorProps) {
           onClick={() => setAdvancedOpen((prev) => !prev)}
           className="text-xs text-slate-600 underline"
         >
-          {advancedOpen ? "بستن تنظیمات پیشرفته" : "تنظیمات پیشرفته تصویر و بک‌گراند"}
+          {advancedOpen ? "بستن تنظیمات تصویر" : "تنظیمات تصویر"}
         </button>
 
         {advancedOpen ? (
-          <div className="mt-2 grid grid-cols-1 gap-2">
+          <div className="mt-2 grid grid-cols-1 gap-3">
             <label className="text-xs text-slate-600">
               نوع پس‌زمینه
               <select
@@ -144,95 +151,17 @@ export function MainVisualEditor({ slot, onChange }: MainVisualEditorProps) {
                     backgroundType: event.target.value === "image" ? "image" : "color",
                   })
                 }
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+                className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"
               >
                 <option value="color">رنگ</option>
                 <option value="image">تصویر</option>
               </select>
             </label>
-            <label className="text-xs text-slate-600">
-              عرض پس‌زمینه
-              <input
-                type="text"
-                value={slot.backgroundWidth}
-                onChange={(event) => onChange({ ...slot, backgroundWidth: event.target.value })}
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-              />
-            </label>
-            <label className="text-xs text-slate-600">
-              ارتفاع پس‌زمینه
-              <input
-                type="text"
-                value={slot.backgroundHeight}
-                onChange={(event) => onChange({ ...slot, backgroundHeight: event.target.value })}
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-              />
-            </label>
-            <label className="text-xs text-slate-600">
-              موقعیت پس‌زمینه
-              <input
-                type="text"
-                value={slot.backgroundPosition}
-                onChange={(event) => onChange({ ...slot, backgroundPosition: event.target.value })}
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-              />
-            </label>
-            <label className="text-xs text-slate-600">
-              اندازه پس‌زمینه
-              <input
-                type="text"
-                value={slot.backgroundSize}
-                onChange={(event) => onChange({ ...slot, backgroundSize: event.target.value })}
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-              />
-            </label>
-            <label className="text-xs text-slate-600">
-              کلاس پس‌زمینه
-              <input
-                type="text"
-                value={slot.backgroundClassName}
-                onChange={(event) => onChange({ ...slot, backgroundClassName: event.target.value })}
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-              />
-            </label>
-            <label className="text-xs text-slate-600">
-              کلاس تصویر اصلی
-              <input
-                type="text"
-                value={slot.foregroundClassName}
-                onChange={(event) => onChange({ ...slot, foregroundClassName: event.target.value })}
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-              />
-            </label>
-            <label className="text-xs text-slate-600">
-              موقعیت تصویر اصلی
-              <input
-                type="text"
-                value={slot.foregroundObjectPosition}
-                onChange={(event) =>
-                  onChange({ ...slot, foregroundObjectPosition: event.target.value })
-                }
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-              />
-            </label>
-            <label className="text-xs text-slate-600">
-              عرض تصویر اصلی
-              <input
-                type="text"
-                value={slot.foregroundCustomWidth}
-                onChange={(event) => onChange({ ...slot, foregroundCustomWidth: event.target.value })}
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-              />
-            </label>
-            <label className="text-xs text-slate-600">
-              ارتفاع تصویر اصلی
-              <input
-                type="text"
-                value={slot.foregroundCustomHeight}
-                onChange={(event) => onChange({ ...slot, foregroundCustomHeight: event.target.value })}
-                className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-              />
-            </label>
+            <OverflowSettings
+              label="خروج تصویر اصلی از بنر"
+              value={slot.foregroundOverflow}
+              onChange={(foregroundOverflow) => onChange({ ...slot, foregroundOverflow })}
+            />
           </div>
         ) : null}
       </div>
