@@ -100,22 +100,31 @@ async function expireStockReservationsBatch(
           return;
         }
 
-        await strapi.db.query("api::order.order").update({
-          where: { id: orderId, Status: "Paying", ReservationStatus: "Expired" },
-          data: { Status: "Cancelled" },
-          ...(trx ? { transacting: trx } : {}),
-        });
+        const orderCancelResult = await trx.raw(
+          `UPDATE orders
+           SET status = 'Cancelled'
+           WHERE id = ?
+             AND status = 'Paying'
+             AND reservation_status = 'Expired'
+           RETURNING id`,
+          [orderId]
+        );
+        if ((orderCancelResult?.rows || []).length === 0) {
+          skipped += 1;
+          return;
+        }
 
         const contractId =
           typeof order?.contract === "object" && order.contract
             ? Number(order.contract.id)
             : Number(order?.contract);
         if (Number.isFinite(contractId)) {
-          await strapi.db.query("api::contract.contract").update({
-            where: { id: contractId },
-            data: { Status: "Cancelled" },
-            ...(trx ? { transacting: trx } : {}),
-          });
+          await trx.raw(
+            `UPDATE contracts
+             SET status = 'Cancelled'
+             WHERE id = ?`,
+            [contractId]
+          );
         }
 
         processed += 1;

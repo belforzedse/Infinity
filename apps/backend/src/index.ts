@@ -17,6 +17,7 @@ import { ensureIranLocations } from "./jobs/ensureLocations";
 import { startExpireStockReservationsJob } from "./jobs/expireStockReservations";
 import { startExpireReserveOrdersJob } from "./jobs/expireReserveOrders";
 import { startFlushViewCountersJob } from "./jobs/flushViewCounters";
+import { registerAppLifecycles } from "./lifecycles/registerAppLifecycles";
 
 type ControllerActions = Record<string, ReadonlyArray<string> | "*">;
 type FullAccessSpec = { mode: "all" };
@@ -525,6 +526,7 @@ export default {
    * run jobs, or perform some special logic.
    */
   bootstrap({ strapi }) {
+    registerAppLifecycles(strapi);
     strapi.db.lifecycles.subscribe(productLifeCycles);
     strapi.db.lifecycles.subscribe(productVariationLifeCycles);
 

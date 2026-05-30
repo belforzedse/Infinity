@@ -24,6 +24,10 @@ function createMockStrapi() {
     create: jest.fn(),
   };
 
+  const trx = {
+    raw: jest.fn(),
+  };
+
   const strapi = {
     log: {
       info: jest.fn(),
@@ -38,7 +42,7 @@ function createMockStrapi() {
       connection: {
         raw: jest.fn(),
       },
-      transaction: jest.fn(async (callback: any) => callback({ trx: { raw: jest.fn() } })),
+      transaction: jest.fn(async (callback: any) => callback({ trx })),
       query: jest.fn((uid: string) => {
         if (uid === "api::order.order") return orderQuery;
         if (uid === "api::contract.contract") return contractQuery;
@@ -80,7 +84,10 @@ describe("expiry jobs", () => {
     const now = new Date("2026-05-30T12:00:00.000Z");
     strapi.entityService.findMany.mockResolvedValue([{ id: 10 }]);
     orderQuery.findOne.mockResolvedValue({ id: 10, contract: { id: 55 } });
-    orderQuery.update.mockResolvedValue({ id: 10 });
+    strapi.db.transaction.mockImplementationOnce(async (callback: any) => {
+      const trx = { raw: jest.fn().mockResolvedValue({ rows: [{ id: 10 }] }) };
+      return callback({ trx });
+    });
     contractQuery.update.mockResolvedValue({ id: 55 });
     orderLogQuery.create.mockResolvedValue({ id: 1 });
     mockedReleaseOrderReservation.mockResolvedValue({ success: true });
@@ -113,6 +120,9 @@ describe("expiry jobs", () => {
         expiresBefore: new Date("2026-05-30T11:59:00.000Z"),
       })
     );
+    expect(orderQuery.update).not.toHaveBeenCalled();
+    expect(contractQuery.update).not.toHaveBeenCalled();
+    expect(orderLogQuery.create).toHaveBeenCalledTimes(1);
 
     (global as any).strapi = previousGlobalStrapi;
   });
