@@ -124,7 +124,7 @@ jobs:
             --build-arg STRAPI_DISABLE_SOURCEMAPS="${STRAPI_DISABLE_SOURCEMAPS}" \
             --build-arg STRAPI_TELEMETRY_DISABLED="${STRAPI_TELEMETRY_DISABLED}" \
             --build-arg NODE_OPTIONS="${NODE_OPTIONS_ARG}" \
-            --build-arg NPM_REGISTRY_URL="${{ secrets.NPM_REGISTRY_URL || 'https://mirror.abrha.net/repository/npm/' }}" \
+            --build-arg NPM_REGISTRY_URL="${{ secrets.NPM_REGISTRY_URL || 'https://package-mirror.liara.ir/repository/npm/' }}" \
             --push \
             "$BUILD_CONTEXT"
           echo "duration=${SECONDS}" >> "$GITHUB_OUTPUT"

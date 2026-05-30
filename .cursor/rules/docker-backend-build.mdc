@@ -40,7 +40,14 @@ Override at build time when needed:
 docker build --build-arg NPM_REGISTRY_URL="https://…" -f apps/backend/main.Dockerfile .
 ```
 
-`COREPACK_NPM_REGISTRY`, `npm_config_registry`, and `pnpm config set registry` all use this URL so Corepack can fetch `pnpm@10.28.2` and `pnpm install` uses the same mirror.
+## CI defaults
+
+Dockerfile defaults apply only when **no** `--build-arg NPM_REGISTRY_URL` is passed. Pipelines override them:
+
+- **GitLab** (`build:backend`): `--build-arg NPM_REGISTRY_URL="${NPM_REGISTRY_URL:-https://package-mirror.liara.ir/repository/npm/}"`
+- **GitHub Actions** (`backend-cicd.yml`): same Liara URL as fallback when `secrets.NPM_REGISTRY_URL` is unset
+
+If builds still hit another mirror, check the **`NPM_REGISTRY_URL`** CI/CD variable in GitLab/GitHub — it takes precedence over repo defaults.
 
 ## Runtime
 
