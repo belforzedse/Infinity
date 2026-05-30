@@ -22,7 +22,7 @@ export function MobileCanvas({
 
   return (
     <div className="h-auto w-full max-w-full overflow-hidden" dir="rtl">
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2">
         <div className="overflow-hidden rounded-3xl">
           <EditableSlot
             slotKey="primaryBanner"
@@ -42,39 +42,39 @@ export function MobileCanvas({
             />
           </EditableSlot>
         </div>
-        <div className="relative h-[360px] w-full overflow-hidden rounded-3xl">
+        <div className="relative aspect-[361/245] w-full overflow-hidden rounded-[20px]">
           <EditableSlot
             slotKey="heroBanner"
             selected={selectedSlotKey === "heroBanner"}
             onSelect={(anchorEl) => onSelectSlot("heroBanner", anchorEl)}
-            className="h-full w-full overflow-hidden block"
+            className="block h-full w-full overflow-hidden"
           >
             <LeftBanner spec={layout.heroBanner} className="h-full w-full" />
           </EditableSlot>
         </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div className="relative overflow-visible rounded-xl">
+        <div className="grid grid-cols-2 gap-2">
+          <div className="relative aspect-[176/118] overflow-hidden rounded-[20px]">
             <EditableSlot
               slotKey="bottomActionBannerLeft"
               selected={selectedSlotKey === "bottomActionBannerLeft"}
               onSelect={(anchorEl) =>
                 onSelectSlot("bottomActionBannerLeft", anchorEl)
               }
-              className="h-full w-full block"
+              className="block h-full w-full"
             >
-              <ActionBanner spec={layout.bottomActionBannerLeft} />
+              <ActionBanner spec={layout.bottomActionBannerLeft} variant="compact" />
             </EditableSlot>
           </div>
-          <div className="relative overflow-visible rounded-xl">
+          <div className="relative aspect-[176/118] overflow-hidden rounded-[20px]">
             <EditableSlot
               slotKey="bottomActionBannerRight"
               selected={selectedSlotKey === "bottomActionBannerRight"}
               onSelect={(anchorEl) =>
                 onSelectSlot("bottomActionBannerRight", anchorEl)
               }
-              className="h-full w-full block"
+              className="block h-full w-full"
             >
-              <ActionBanner spec={layout.bottomActionBannerRight} />
+              <ActionBanner spec={layout.bottomActionBannerRight} variant="compact" />
             </EditableSlot>
           </div>
         </div>

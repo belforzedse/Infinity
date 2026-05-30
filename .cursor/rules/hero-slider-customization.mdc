@@ -26,10 +26,18 @@ alwaysApply: false
 
 ## Auto-Sync: Desktop to Tablet and Mobile
 
-When desktop slides are done, tablet and mobile slides are auto-generated from desktop content:
+When desktop slides are done, tablet and mobile slides can be synced from desktop content:
 
-1. **On save draft**: Tablet and mobile slots are automatically synced from desktop before saving. Content (title, subtitle, images, links, tracking) is copied; styling uses device-specific defaults (not desktop styling).
-2. **Manual sync button**: "همگام‌سازی تبلت و موبایل از دسکتاپ" in the PublishBar runs the sync immediately (in-memory, without saving).
+1. **Manual sync button**: "همگام‌سازی تبلت و موبایل از دسکتاپ" in the PublishBar runs the sync immediately (in-memory, without saving).
+2. **Re-save draft**: Backend sanitizers apply updated left-aligned image position defaults for new/empty slots.
+
+**What sync copies from desktop:**
+- Content: title, subtitle, images, links, tracking
+- Colors: headline/card background colors, title/subtitle/button text colors
+- Image positions: card `imageObjectPosition`, main visual `foregroundObjectPosition`
+
+**What sync keeps device-specific (not copied from desktop):**
+- Layout: font sizes, class names, image scale/transform classes, content alignment, padding
 
 **Slot mapping** (desktop → tablet/mobile):
 | Desktop | Tablet | Mobile |
@@ -39,7 +47,30 @@ When desktop slides are done, tablet and mobile slides are auto-generated from d
 | `bottomActionBannerLeft` | `bottomActionBannerLeft` | `bottomActionBannerLeft` |
 | `bottomActionBannerRight` | `bottomActionBannerRight` | `bottomActionBannerRight` |
 
-**Implementation**: `syncTabletAndMobileFromDesktop` in [apps/apps/frontend/src/types/super-admin/heroSlider.ts](apps/apps/frontend/src/types/super-admin/heroSlider.ts) extracts content from desktop slots and passes it through `normalizeHeadlineSlot`, `normalizeCardSlot`, `normalizeMainVisualSlot` with device-specific defaults.
+**Implementation**: `syncTabletAndMobileFromDesktop` in [apps/frontend/src/types/super-admin/heroSlider.ts](apps/frontend/src/types/super-admin/heroSlider.ts) extracts content and colors from desktop slots, copies image positions, and passes values through `normalizeHeadlineSlot`, `normalizeCardSlot`, `normalizeMainVisualSlot` with device-specific layout defaults.
+
+**Image positioning defaults**: Card images default to `left bottom` on tablet/mobile compact cards; main visual foreground defaults to `bottom center`. Avoid `scale-*` transforms on tablet/mobile — images use `object-contain` inside clipped containers.
+
+## Tablet / Mobile Compact Cards
+
+Storefront and super-admin preview render category cards in **compact** mode on tablet and mobile (`ActionBanner variant="compact"` from `mobileHero.tsx` / `tabletHero.tsx`).
+
+**Layout ratios (approximate, not fixed px):**
+- Column gap: `gap-2` (8px scale)
+- Headline: `rounded-3xl`
+- Main visual: `aspect-[361/245]`, `rounded-[20px]`, foreground contained inside card
+- Bottom cards: two columns, `aspect-[176/118]`, `rounded-[20px]`, `overflow-hidden`
+
+**Compact card behavior:**
+- Card **title is the only CTA** (arrow + title in one link row); separate subtitle/button stack is hidden
+- Link href comes from `buttonHref` / `button.href` / `image.href`
+- Background panel sits lower in the card (`top: 22%`, height ~78%) with `rounded-[20px]`
+- Product image anchored left-bottom, scaled to fit (~52% card width)
+- Default CTA typography: `text-lg font-normal text-neutral-800` (`DEFAULT_COMPACT_CARD_BUTTON_CLASSNAME`)
+
+**Defaults** live in [apps/frontend/src/types/super-admin/heroSlider.ts](apps/frontend/src/types/super-admin/heroSlider.ts) and [apps/backend/src/api/settings/services/hero-slider-default-styles.ts](apps/backend/src/api/settings/services/hero-slider-default-styles.ts). Re-save draft or run desktop→tablet/mobile sync after default changes; existing CMS payloads may retain old `scale-*` class names until re-normalized.
+
+**Editor parity:** [MobileCanvas.tsx](apps/frontend/src/components/SuperAdmin/HeroSliderEditor/canvases/MobileCanvas.tsx) and [TabletCanvas.tsx](apps/frontend/src/components/SuperAdmin/HeroSliderEditor/canvases/TabletCanvas.tsx) mirror the same aspect ratios and `variant="compact"` as storefront.
 
 ## CMS Mapping
 

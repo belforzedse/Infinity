@@ -58,7 +58,7 @@ export default function TabletHero({ layout, slideKey = 0 }: Props) {
 
   return (
     <div className="h-auto w-full max-w-full overflow-hidden">
-      <div className="grid grid-cols-1 gap-6">
+      <div className="grid grid-cols-1 gap-4">
         {/* Full-width primary text banner */}
         <div className="overflow-hidden rounded-3xl">
           <AnimatePresence mode="wait" initial={false}>
@@ -84,10 +84,10 @@ export default function TabletHero({ layout, slideKey = 0 }: Props) {
         </div>
 
         {/* Bottom grid: two actions on the left, hero square on the right */}
-        <div className="grid gap-6 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:[direction:ltr]">
+        <div className="grid gap-4 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:[direction:ltr]">
           {/* Action banners stacked on the left */}
-          <div className="flex flex-col gap-6 md:h-full md:justify-end" dir="rtl">
-            <div className="relative rounded-lg overflow-visible [backface-visibility:hidden] [transform:translateZ(0)]">
+          <div className="flex flex-col gap-4 md:h-full md:justify-end" dir="rtl">
+            <div className="relative aspect-[176/118] overflow-hidden rounded-[20px] [backface-visibility:hidden] [transform:translateZ(0)] md:aspect-auto md:min-h-[118px]">
               <AnimatePresence mode="wait" initial={false}>
                 <motion.div
                   key={`left-action-${slideKey}`}
@@ -98,12 +98,12 @@ export default function TabletHero({ layout, slideKey = 0 }: Props) {
                   className="h-full w-full"
                   style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden" }}
                 >
-                  <ActionBanner spec={layout.bottomActionBannerLeft} />
+                  <ActionBanner spec={layout.bottomActionBannerLeft} variant="compact" />
                 </motion.div>
               </AnimatePresence>
             </div>
 
-            <div className="relative rounded-lg overflow-visible [backface-visibility:hidden] [transform:translateZ(0)]">
+            <div className="relative aspect-[176/118] overflow-hidden rounded-[20px] [backface-visibility:hidden] [transform:translateZ(0)] md:aspect-auto md:min-h-[118px]">
               <AnimatePresence mode="wait" initial={false}>
                 <motion.div
                   key={`right-action-${slideKey}`}
@@ -114,7 +114,7 @@ export default function TabletHero({ layout, slideKey = 0 }: Props) {
                   className="h-full w-full"
                   style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden" }}
                 >
-                  <ActionBanner spec={layout.bottomActionBannerRight} />
+                  <ActionBanner spec={layout.bottomActionBannerRight} variant="compact" />
                 </motion.div>
               </AnimatePresence>
             </div>
@@ -122,7 +122,7 @@ export default function TabletHero({ layout, slideKey = 0 }: Props) {
 
           {/* Hero banner square on the right */}
           <div
-            className="relative aspect-square overflow-hidden rounded-lg [backface-visibility:hidden] [transform:translateZ(0)] [will-change:transform]"
+            className="relative aspect-square overflow-hidden rounded-[20px] [backface-visibility:hidden] [transform:translateZ(0)] [will-change:transform]"
             dir="rtl"
           >
             <AnimatePresence mode="wait" initial={false}>

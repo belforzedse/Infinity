@@ -1,21 +1,42 @@
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import MobileHero from "../mobileHero";
 import type { MobileLayout } from "../types";
 
 jest.mock("framer-motion", () => ({
   AnimatePresence: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   motion: {
-    div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
+    div: ({ children, className, ...props }: React.ComponentProps<"div">) => (
+      <div className={className} {...props}>
+        {children}
+      </div>
+    ),
   },
+  useReducedMotion: () => false,
 }));
 
-jest.mock("../Banners/BannerImage", () => ({
-  __esModule: true,
-  default: ({ src, alt }: { src: string; alt: string }) => (
-    <div data-testid="banner-image" data-src={src}>
-      {alt}
+jest.mock("../Banners/LeftBanner", () => ({
+  LeftBanner: ({ spec }: { spec: { foregroundImage: { alt: string } } }) => (
+    <div data-testid="left-banner">{spec.foregroundImage.alt}</div>
+  ),
+}));
+
+jest.mock("../Banners/ActionBanner", () => ({
+  ActionBanner: ({
+    spec,
+    variant,
+  }: {
+    spec: { title: string };
+    variant?: string;
+  }) => (
+    <div data-testid="action-banner" data-variant={variant ?? "default"}>
+      {spec.title}
     </div>
   ),
+}));
+
+jest.mock("../Banners/TextBanner", () => ({
+  __esModule: true,
+  default: ({ title }: { title: string }) => <h1 data-testid="text-banner">{title}</h1>,
 }));
 
 jest.mock("../animations", () => ({
@@ -28,99 +49,66 @@ jest.mock("../animations", () => ({
 
 describe("MobileHero", () => {
   const mockLayout: MobileLayout = {
-    heroDesktop: {
-      src: "/hero-desktop.jpg",
-      alt: "Hero Desktop",
-      width: 1200,
-      height: 600,
+    primaryBanner: {
+      title: "تیتر موبایل",
+      subtitle: "زیرتیتر",
+      className: "rounded-3xl",
     },
-    heroMobile: {
-      src: "/hero-mobile.jpg",
-      alt: "Hero Mobile",
-      width: 600,
-      height: 400,
+    heroBanner: {
+      background: { type: "color", value: "#f8fafc" },
+      foregroundImage: {
+        src: "/hero-mobile.webp",
+        alt: "Hero Mobile",
+        width: 600,
+        height: 600,
+      },
     },
-    secondaryPrimary: {
-      src: "/secondary-primary.jpg",
-      alt: "Secondary Primary",
-      width: 800,
-      height: 400,
+    bottomActionBannerLeft: {
+      title: "پلیورها",
+      image: {
+        src: "/card-left.webp",
+        alt: "Left card",
+        width: 400,
+        height: 500,
+      },
+      button: { label: "", href: "/plp", showArrow: true },
     },
-    secondaryTop: {
-      src: "/secondary-top.jpg",
-      alt: "Secondary Top",
-      width: 400,
-      height: 200,
-    },
-    secondaryBottom: {
-      src: "/secondary-bottom.jpg",
-      alt: "Secondary Bottom",
-      width: 400,
-      height: 200,
+    bottomActionBannerRight: {
+      title: "دامن ها",
+      image: {
+        src: "/card-right.webp",
+        alt: "Right card",
+        width: 400,
+        height: 500,
+      },
+      button: { label: "", href: "/plp", showArrow: true },
     },
   };
 
-  it("should render all banner images", () => {
-    const { getAllByTestId } = render(<MobileHero layout={mockLayout} />);
+  it("renders headline, hero, and compact action cards", () => {
+    render(<MobileHero layout={mockLayout} slideKey={0} />);
 
-    const banners = getAllByTestId("banner-image");
-    // Each banner appears twice: once visible, once invisible for spacing
-    expect(banners.length).toBeGreaterThanOrEqual(5);
+    expect(screen.getByTestId("text-banner")).toHaveTextContent("تیتر موبایل");
+    expect(screen.getByTestId("left-banner")).toHaveTextContent("Hero Mobile");
+    expect(screen.getAllByTestId("action-banner")).toHaveLength(2);
+    expect(screen.getByText("پلیورها")).toBeInTheDocument();
+    expect(screen.getByText("دامن ها")).toBeInTheDocument();
   });
 
-  it("should render hero desktop and mobile versions", () => {
-    const { getAllByTestId } = render(<MobileHero layout={mockLayout} />);
+  it("uses compact variant for bottom action banners", () => {
+    render(<MobileHero layout={mockLayout} />);
 
-    const banners = getAllByTestId("banner-image");
-    const heroDesktop = banners.find((b) => b.getAttribute("data-src") === "/hero-desktop.jpg");
-    const heroMobile = banners.find((b) => b.getAttribute("data-src") === "/hero-mobile.jpg");
-
-    expect(heroDesktop).toBeInTheDocument();
-    expect(heroMobile).toBeInTheDocument();
+    const cards = screen.getAllByTestId("action-banner");
+    cards.forEach((card) => {
+      expect(card).toHaveAttribute("data-variant", "compact");
+    });
   });
 
-  it("should render secondary banners", () => {
-    const { getAllByTestId } = render(<MobileHero layout={mockLayout} />);
-
-    const banners = getAllByTestId("banner-image");
-    const primary = banners.find((b) => b.getAttribute("data-src") === "/secondary-primary.jpg");
-    const top = banners.find((b) => b.getAttribute("data-src") === "/secondary-top.jpg");
-    const bottom = banners.find((b) => b.getAttribute("data-src") === "/secondary-bottom.jpg");
-
-    expect(primary).toBeInTheDocument();
-    expect(top).toBeInTheDocument();
-    expect(bottom).toBeInTheDocument();
-  });
-
-  it("should use playKey for animation keys", () => {
-    const { container } = render(<MobileHero layout={mockLayout} playKey={5} />);
-
-    expect(container.querySelector('[data-key="hero-5"]')).toBeDefined();
-  });
-
-  it("should have proper responsive structure", () => {
+  it("uses Figma-ratio layout structure", () => {
     const { container } = render(<MobileHero layout={mockLayout} />);
 
-    // Check for mobile/desktop responsive classes
-    const desktopElements = container.querySelectorAll(".hidden.md\\:block");
-    const mobileElements = container.querySelectorAll(".md\\:hidden");
-
-    expect(desktopElements.length).toBeGreaterThan(0);
-    expect(mobileElements.length).toBeGreaterThan(0);
-  });
-
-  it("should render secondary section with correct layout", () => {
-    const { container } = render(<MobileHero layout={mockLayout} />);
-
-    const secondarySection = container.querySelector(".mt-4");
-    expect(secondarySection).toBeInTheDocument();
-    expect(secondarySection).toHaveClass("flex");
-    expect(secondarySection).toHaveClass("flex-col");
-  });
-
-  it("should handle missing playKey with default value", () => {
-    const { container } = render(<MobileHero layout={mockLayout} />);
-
-    expect(container).toBeInTheDocument();
+    expect(container.querySelector(".aspect-\\[361\\/245\\]")).toBeInTheDocument();
+    expect(container.querySelectorAll(".aspect-\\[176\\/118\\]")).toHaveLength(2);
+    expect(container.querySelector(".gap-2")).toBeInTheDocument();
   });
 });

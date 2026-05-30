@@ -58,7 +58,7 @@ export default function MobileHero({ layout, slideKey = 0 }: Props) {
 
   return (
     <div className="h-auto w-full max-w-full overflow-hidden" dir="rtl">
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2">
         <div className="overflow-hidden rounded-3xl">
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
@@ -82,7 +82,7 @@ export default function MobileHero({ layout, slideKey = 0 }: Props) {
           </AnimatePresence>
         </div>
 
-        <div className="relative aspect-[746/462] w-full overflow-hidden rounded-3xl [backface-visibility:hidden] [transform:translateZ(0)] [will-change:transform]">
+        <div className="relative aspect-[361/245] w-full overflow-hidden rounded-[20px] [backface-visibility:hidden] [transform:translateZ(0)] [will-change:transform]">
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={`hero-${slideKey}`}
@@ -98,8 +98,8 @@ export default function MobileHero({ layout, slideKey = 0 }: Props) {
           </AnimatePresence>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <div className="relative aspect-[364/190] overflow-visible rounded-xl [backface-visibility:hidden] [transform:translateZ(0)]">
+        <div className="grid grid-cols-2 gap-2">
+          <div className="relative aspect-[176/118] overflow-hidden rounded-[20px] [backface-visibility:hidden] [transform:translateZ(0)]">
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
                 key={`leftCard-${slideKey}`}
@@ -110,12 +110,12 @@ export default function MobileHero({ layout, slideKey = 0 }: Props) {
                 className="h-full w-full"
                 style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden" }}
               >
-                <ActionBanner spec={layout.bottomActionBannerLeft} />
+                <ActionBanner spec={layout.bottomActionBannerLeft} variant="compact" />
               </motion.div>
             </AnimatePresence>
           </div>
 
-          <div className="relative aspect-[364/190] overflow-visible rounded-xl [backface-visibility:hidden] [transform:translateZ(0)]">
+          <div className="relative aspect-[176/118] overflow-hidden rounded-[20px] [backface-visibility:hidden] [transform:translateZ(0)]">
             <AnimatePresence mode="wait" initial={false}>
               <motion.div
                 key={`rightCard-${slideKey}`}
@@ -126,7 +126,7 @@ export default function MobileHero({ layout, slideKey = 0 }: Props) {
                 className="h-full w-full"
                 style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden" }}
               >
-                <ActionBanner spec={layout.bottomActionBannerRight} />
+                <ActionBanner spec={layout.bottomActionBannerRight} variant="compact" />
               </motion.div>
             </AnimatePresence>
           </div>

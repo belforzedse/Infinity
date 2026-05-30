@@ -1,27 +1,25 @@
 /**
- * Mobile Slide 1
- * Advanced hero square + premium text banner + action banners
+ * Mobile Slide 2 — Figma-ratio layout (headline, main visual, compact cards)
  */
 import { MobileSlideBuilder } from "../../slideFactory";
 
 export const slide2 = new MobileSlideBuilder()
-  // Hero banner (square with background + foreground)
   .primaryBanner({
     title: "بزار استـــــــــایـــــــلت حرف بزنه",
     subtitle: "پوشاک کاربردی، طراحی هوشمند.",
-    className: "w-full gap-[8px] rounded-3xl px-[24px] pb-[24px] pt-[20px]",
+    className: "w-full gap-2 rounded-3xl px-4 pb-4 pt-5",
     colors: {
-      background: "bg-slate-50",
+      background: "bg-stone-50",
       titleColor: "text-[#A28471]",
       subtitleColor: "text-gray-600",
     },
     typography: {
       titleFont: "font-kaghaz",
-      titleSize: "text-[30px] ",
+      titleSize: "text-2xl",
       titleWeight: "font-bold",
       titleTracking: "tracking-tight",
-      subtitleSize: "text-lg",
-      subtitleWeight: "font-semibold",
+      subtitleSize: "text-base",
+      subtitleWeight: "font-normal",
       titleLeading: "leading-tight",
       subtitleLeading: "leading-relaxed",
     },
@@ -32,10 +30,10 @@ export const slide2 = new MobileSlideBuilder()
       value: "/images/HeroSlider/Square/Slide2Background.png",
       alt: "Background",
       width: "100%",
-      height: "80%",
+      height: "100%",
       position: "bottom center",
       backgroundSize: "cover",
-      className: "rounded-lg",
+      className: "rounded-[20px]",
     },
     foregroundImage: {
       src: "/images/HeroSlider/Square/Slide2Foreground.png",
@@ -45,13 +43,12 @@ export const slide2 = new MobileSlideBuilder()
       sizes: "100vw",
       priority: true,
       loading: "eager",
-      className: "object-contain w-[99%] scale-125 h-[99%] translate-y-8",
+      className: "object-contain object-bottom h-full w-full max-h-full max-w-full",
       objectPosition: "bottom center",
     },
   })
-  // Bottom left action banner
   .bottomActionBannerLeft({
-    title: "پلیورها ",
+    title: "پلیورها",
     subtitle: "",
     image: {
       src: "/images/HeroSlider/ActionBannerRight/Slide2.webp",
@@ -60,41 +57,37 @@ export const slide2 = new MobileSlideBuilder()
       height: 500,
       sizes: "(max-width: 768px) 50vw, 350px",
       href: "/plp",
-      className: "h-full w-full rounded-lg mb-2 scale-125 -translate-y-6 object-contain",
-      objectPosition: "bottom left",
+      className: "object-contain object-left-bottom",
+      objectPosition: "left bottom",
     },
-    className: "rounded-lg",
-    paddingClassName: "px-3 py-4 pr-3",
+    className: "h-full rounded-[20px]",
+    paddingClassName: "px-3 py-3 pl-2",
+    contentAlignment: "center",
     background: {
       type: "color",
-      value: "#A28D71",
+      value: "#FFFBEB",
       width: "100%",
-      height: "100%",
-      position: "center",
+      height: "78%",
+      position: "bottom center",
       backgroundSize: "cover",
-      className: "rounded-lg",
+      className: "rounded-[20px]",
     },
     colors: {
-      titleColor: "text-white",
+      titleColor: "text-neutral-800",
       subtitleColor: "text-gray-600",
-      background: "bg-[#A28D71]",
+      background: "bg-amber-50",
     },
     typography: {
-      titleSize: "text-lg sm:text-2xl",
-      titleWeight: "font-medium",
-      subtitleSize: "text-xs sm:text-sm",
-      subtitleWeight: "font-semibold",
-      subtitleLeading: "leading-relaxed",
-      subtitleTracking: "tracking-normal",
+      titleSize: "text-lg",
+      titleWeight: "font-normal",
     },
     button: {
-      label: "بافتنی ها",
+      label: "",
       href: "/plp",
-      className: "text-white text-sm font-normal rounded-lg",
+      className: "text-neutral-800 text-lg font-normal",
       showArrow: true,
     },
   })
-  // Bottom right action banner
   .bottomActionBannerRight({
     title: "کت ها",
     subtitle: "",
@@ -105,37 +98,34 @@ export const slide2 = new MobileSlideBuilder()
       height: 500,
       sizes: "(max-width: 768px) 50vw, 350px",
       href: "/plp",
-      className: "h-full w-full rounded-lg scale-110 -translate-y-2 pl-2 object-contain",
-      objectPosition: "left",
+      className: "object-contain object-left-bottom",
+      objectPosition: "left bottom",
     },
-    className: "rounded-lg ",
-    paddingClassName: "px-3 py-4 pr-3",
+    className: "h-full rounded-[20px]",
+    paddingClassName: "px-3 py-3 pl-2",
+    contentAlignment: "center",
     background: {
       type: "color",
-      value: "#374C5F",
+      value: "#ECFDF5",
       width: "100%",
-      height: "100%",
-      position: "center",
+      height: "78%",
+      position: "bottom center",
       backgroundSize: "cover",
-      className: "rounded-lg",
+      className: "rounded-[20px]",
     },
     colors: {
-      titleColor: "text-white",
+      titleColor: "text-neutral-800",
       subtitleColor: "text-gray-600",
-      background: "bg-[#374C5F]",
+      background: "bg-emerald-50",
     },
     typography: {
-      titleSize: "text-lg sm:text-2xl",
-      titleWeight: "font-medium",
-      subtitleSize: "text-xs sm:text-sm",
-      subtitleWeight: "font-semibold",
-      subtitleLeading: "leading-relaxed",
-      subtitleTracking: "tracking-normal",
+      titleSize: "text-lg",
+      titleWeight: "font-normal",
     },
     button: {
-      label: "مانتو",
+      label: "",
       href: "/plp",
-      className: "text-white text-sm font-normal rounded-lg",
+      className: "text-neutral-800 text-lg font-normal",
       showArrow: true,
     },
   })

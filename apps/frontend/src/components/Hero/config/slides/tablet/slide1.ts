@@ -1,11 +1,9 @@
 /**
- * Tablet Slide 1
- * Premium layout with hero square + styled text banner + rich action banners
+ * Tablet Slide 1 — Figma-ratio layout with compact category cards
  */
 import { TabletSlideBuilder } from "../../slideFactory";
 
 export const slide1 = new TabletSlideBuilder()
-  // Hero banner (square with background + foreground)
   .primaryBanner({
     title: "لباســـی که خودت را توش پیدا می‌کنی",
     subtitle: "جزئیات کوچک، تأثیر بزرگ.",
@@ -32,10 +30,10 @@ export const slide1 = new TabletSlideBuilder()
       value: "/images/HeroSlider/Square/Desktop1Background.webp",
       alt: "Background",
       width: "100%",
-      height: "80%",
+      height: "100%",
       position: "bottom center",
       backgroundSize: "cover",
-      className: "rounded-lg",
+      className: "rounded-[20px]",
     },
     foregroundImage: {
       src: "/images/HeroSlider/Square/Desktop1Foreground.webp",
@@ -45,13 +43,12 @@ export const slide1 = new TabletSlideBuilder()
       sizes: "100vw",
       priority: true,
       loading: "eager",
-      className: "object-contain w-[99%] scale-125 h-[99%] translate-y-8",
+      className: "object-contain object-bottom h-full w-full max-h-full max-w-full",
       objectPosition: "bottom center",
     },
   })
-  // Bottom left action banner
   .bottomActionBannerLeft({
-    title: "پلیور ها",
+    title: "پلیورها",
     subtitle: "",
     image: {
       src: "/images/HeroSlider/ActionBannerLeft/Slide1.webp",
@@ -60,42 +57,37 @@ export const slide1 = new TabletSlideBuilder()
       height: 500,
       sizes: "(max-width: 768px) 50vw, 350px",
       href: "/plp",
-      className:
-        "h-full w-full rounded-lg mb-2 scale-150 translate-x-4 -translate-y-4 object-contain",
-      objectPosition: " ",
+      className: "object-contain object-left-bottom",
+      objectPosition: "left bottom",
     },
-    className: "min-h-[120px] tablet:min-h-[140px] sl:min-h-[150px] rounded-xl",
+    className: "h-full rounded-[20px]",
     contentAlignment: "center",
+    paddingClassName: "px-3 py-3 pl-2",
     background: {
       type: "color",
-      value: "#CFB99C",
+      value: "#FFFBEB",
       width: "100%",
-      height: "100%",
-      position: "center",
+      height: "78%",
+      position: "bottom center",
       backgroundSize: "cover",
-      className: "rounded-xl",
+      className: "rounded-[20px]",
     },
     colors: {
-      titleColor: "text-white",
+      titleColor: "text-neutral-800",
       subtitleColor: "text-gray-600",
-      background: "bg-[#CFB99C]",
+      background: "bg-amber-50",
     },
     typography: {
-      titleSize: "text-lg sm:text-2xl",
-      titleWeight: "font-medium",
-      subtitleSize: "text-xs sm:text-sm",
-      subtitleWeight: "font-semibold",
-      subtitleLeading: "leading-relaxed",
-      subtitleTracking: "tracking-normal",
+      titleSize: "text-lg",
+      titleWeight: "font-normal",
     },
     button: {
-      label: "بافت ها",
+      label: "",
       href: "/plp",
-      className: "text-white text-sm font-normal rounded-lg",
+      className: "text-neutral-800 text-lg font-normal",
       showArrow: true,
     },
   })
-  // Bottom right action banner
   .bottomActionBannerRight({
     title: "دامن ها",
     subtitle: "",
@@ -106,37 +98,34 @@ export const slide1 = new TabletSlideBuilder()
       height: 500,
       sizes: "(max-width: 768px) 50vw, 350px",
       href: "/plp",
-      className: "h-full w-full rounded-lg scale-125 -translate-y-4 pl-5 object-contain",
-      objectPosition: "left",
+      className: "object-contain object-left-bottom",
+      objectPosition: "left bottom",
     },
-    className: "min-h-[120px] tablet:min-h-[140px] sl:min-h-[150px]  rounded-xl",
-    contentAlignment: "bottom",
+    className: "h-full rounded-[20px]",
+    contentAlignment: "center",
+    paddingClassName: "px-3 py-3 pl-2",
     background: {
       type: "color",
-      value: "#A6C2DB",
+      value: "#ECFDF5",
       width: "100%",
-      height: "100%",
-      position: "center",
+      height: "78%",
+      position: "bottom center",
       backgroundSize: "cover",
-      className: "rounded-xl",
+      className: "rounded-[20px]",
     },
     colors: {
-      titleColor: "text-white",
+      titleColor: "text-neutral-800",
       subtitleColor: "text-gray-600",
-      background: "bg-[#A6C2DB]",
+      background: "bg-emerald-50",
     },
     typography: {
-      titleSize: "text-lg sm:text-2xl",
-      titleWeight: "font-medium",
-      subtitleSize: "text-xs sm:text-sm",
-      subtitleWeight: "font-semibold",
-      subtitleLeading: "leading-relaxed",
-      subtitleTracking: "tracking-normal",
+      titleSize: "text-lg",
+      titleWeight: "font-normal",
     },
     button: {
-      label: "دامن های پاییزه ",
+      label: "",
       href: "/plp",
-      className: "text-white text-sm font-normal rounded-lg",
+      className: "text-neutral-800 text-lg font-normal",
       showArrow: true,
     },
   })

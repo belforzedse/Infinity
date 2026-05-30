@@ -47,7 +47,7 @@ export default function SuperAdminLayoutHeader({ onMenuClick }: SuperAdminLayout
 
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
             <div className="pointer-events-auto">
-              <StorefrontLogo href="/super-admin" width={92} height={58} />
+              <StorefrontLogo href="/" width={92} height={58} />
             </div>
           </div>
 
@@ -87,7 +87,7 @@ export default function SuperAdminLayoutHeader({ onMenuClick }: SuperAdminLayout
 
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <div className="pointer-events-auto">
-            <StorefrontLogo href="/super-admin" width={92} height={58} />
+            <StorefrontLogo href="/" width={92} height={58} />
           </div>
         </div>
 

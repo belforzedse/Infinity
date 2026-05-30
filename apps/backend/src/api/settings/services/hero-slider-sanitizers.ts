@@ -59,6 +59,8 @@ import {
   DEFAULT_MOBILE_CARD_LEFT_IMAGE_CLASSNAME,
   DEFAULT_MOBILE_CARD_RIGHT_IMAGE_CLASSNAME,
   DEFAULT_MOBILE_CARD_PADDING_CLASSNAME,
+  DEFAULT_COMPACT_CARD_BUTTON_CLASSNAME,
+  DEFAULT_COMPACT_CARD_BACKGROUND_CLASSNAME,
 } from "./hero-slider-default-styles";
 import type {
   HeroSlotLink,
@@ -798,8 +800,11 @@ function sanitizeSlide(
             {
               className: DEFAULT_TABLET_CARD_LEFT_CLASSNAME,
               imageClassName: DEFAULT_TABLET_CARD_LEFT_IMAGE_CLASSNAME,
-              imageObjectPosition: "",
+              imageObjectPosition: "left bottom",
               contentAlignment: "center",
+              buttonClassName: DEFAULT_COMPACT_CARD_BUTTON_CLASSNAME,
+              backgroundClassName: DEFAULT_COMPACT_CARD_BACKGROUND_CLASSNAME,
+              buttonShowArrow: true,
             },
           ),
           bottomActionBannerRight: sanitizeCardSlot(
@@ -809,8 +814,11 @@ function sanitizeSlide(
             {
               className: DEFAULT_TABLET_CARD_RIGHT_CLASSNAME,
               imageClassName: DEFAULT_TABLET_CARD_RIGHT_IMAGE_CLASSNAME,
-              imageObjectPosition: "left",
-              contentAlignment: "bottom",
+              imageObjectPosition: "left bottom",
+              contentAlignment: "center",
+              buttonClassName: DEFAULT_COMPACT_CARD_BUTTON_CLASSNAME,
+              backgroundClassName: DEFAULT_COMPACT_CARD_BACKGROUND_CLASSNAME,
+              buttonShowArrow: true,
             },
           ),
           heroBanner: sanitizeMainVisualSlot(
@@ -852,9 +860,12 @@ function sanitizeSlide(
             {
               className: DEFAULT_MOBILE_CARD_LEFT_CLASSNAME,
               imageClassName: DEFAULT_MOBILE_CARD_LEFT_IMAGE_CLASSNAME,
-              imageObjectPosition: "bottom left",
+              imageObjectPosition: "left bottom",
               contentAlignment: "center",
               paddingClassName: DEFAULT_MOBILE_CARD_PADDING_CLASSNAME,
+              buttonClassName: DEFAULT_COMPACT_CARD_BUTTON_CLASSNAME,
+              backgroundClassName: DEFAULT_COMPACT_CARD_BACKGROUND_CLASSNAME,
+              buttonShowArrow: true,
             },
           ),
           bottomActionBannerRight: sanitizeCardSlot(
@@ -864,9 +875,12 @@ function sanitizeSlide(
             {
               className: DEFAULT_MOBILE_CARD_RIGHT_CLASSNAME,
               imageClassName: DEFAULT_MOBILE_CARD_RIGHT_IMAGE_CLASSNAME,
-              imageObjectPosition: "left",
+              imageObjectPosition: "left bottom",
               contentAlignment: "center",
               paddingClassName: DEFAULT_MOBILE_CARD_PADDING_CLASSNAME,
+              buttonClassName: DEFAULT_COMPACT_CARD_BUTTON_CLASSNAME,
+              backgroundClassName: DEFAULT_COMPACT_CARD_BACKGROUND_CLASSNAME,
+              buttonShowArrow: true,
             },
           ),
           heroBanner: sanitizeMainVisualSlot(

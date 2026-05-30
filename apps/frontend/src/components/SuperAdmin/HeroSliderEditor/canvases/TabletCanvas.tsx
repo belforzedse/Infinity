@@ -22,7 +22,7 @@ export function TabletCanvas({
 
   return (
     <div className="h-auto w-full max-w-full overflow-hidden">
-      <div className="grid grid-cols-1 gap-6">
+      <div className="grid grid-cols-1 gap-4">
         <div className="overflow-hidden rounded-3xl">
           <EditableSlot
             slotKey="primaryBanner"
@@ -42,42 +42,42 @@ export function TabletCanvas({
             />
           </EditableSlot>
         </div>
-        <div className="grid gap-6 grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] [direction:ltr]">
-          <div className="flex flex-col gap-6 h-full justify-end" dir="rtl">
-            <div className="relative rounded-lg overflow-visible">
+        <div className="grid gap-4 grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] [direction:ltr]">
+          <div className="flex flex-col gap-4 h-full justify-end" dir="rtl">
+            <div className="relative aspect-[176/118] overflow-hidden rounded-[20px] md:aspect-auto md:min-h-[118px]">
               <EditableSlot
                 slotKey="bottomActionBannerLeft"
                 selected={selectedSlotKey === "bottomActionBannerLeft"}
                 onSelect={(anchorEl) =>
                   onSelectSlot("bottomActionBannerLeft", anchorEl)
                 }
-                className="h-full w-full block"
+                className="block h-full w-full"
               >
-                <ActionBanner spec={layout.bottomActionBannerLeft} />
+                <ActionBanner spec={layout.bottomActionBannerLeft} variant="compact" />
               </EditableSlot>
             </div>
-            <div className="relative rounded-lg overflow-visible">
+            <div className="relative aspect-[176/118] overflow-hidden rounded-[20px] md:aspect-auto md:min-h-[118px]">
               <EditableSlot
                 slotKey="bottomActionBannerRight"
                 selected={selectedSlotKey === "bottomActionBannerRight"}
                 onSelect={(anchorEl) =>
                   onSelectSlot("bottomActionBannerRight", anchorEl)
                 }
-                className="h-full w-full block"
+                className="block h-full w-full"
               >
-                <ActionBanner spec={layout.bottomActionBannerRight} />
+                <ActionBanner spec={layout.bottomActionBannerRight} variant="compact" />
               </EditableSlot>
             </div>
           </div>
           <div
-            className="relative aspect-square overflow-hidden rounded-lg"
+            className="relative aspect-square overflow-hidden rounded-[20px]"
             dir="rtl"
           >
             <EditableSlot
               slotKey="heroBanner"
               selected={selectedSlotKey === "heroBanner"}
               onSelect={(anchorEl) => onSelectSlot("heroBanner", anchorEl)}
-              className="h-full w-full block"
+              className="block h-full w-full"
             >
               <LeftBanner spec={layout.heroBanner} className="h-full w-full" />
             </EditableSlot>

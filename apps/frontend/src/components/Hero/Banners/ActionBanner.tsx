@@ -1,16 +1,22 @@
 'use client';
 
-import { useEffect, useState } from "react";
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-import { ActionBannerSpec, type BannerImageSpec, type BackgroundSpec, type ActionBannerButtonSpec } from '../types';
+import {
+  ActionBannerSpec,
+  type ActionBannerVariant,
+  type BannerImageSpec,
+  type BackgroundSpec,
+  type ActionBannerButtonSpec,
+} from '../types';
 import imageLoader from "@/utils/imageLoader";
 import resolveAssetUrl from "@/utils/resolveAssetUrl";
 import { useResolvedImage } from "@/hooks/useResolvedImage";
 
 interface ActionBannerProps {
   spec: ActionBannerSpec;
+  variant?: ActionBannerVariant;
 }
 
 const DEFAULT_BG_COLOR = '#f8fafc';
@@ -29,6 +35,19 @@ function getBackgroundPosition(pos?: string): React.CSSProperties {
     'center right': { right: 0, top: '50%', transform: 'translateY(-50%)' },
   };
   return positionStyles[posValue] ?? positionStyles['center'];
+}
+
+function getCompactBackgroundPosition(background?: BackgroundSpec): React.CSSProperties {
+  if (!background) {
+    return { left: 0, right: 0, bottom: 0, top: '22%' };
+  }
+
+  const pos = background.position || 'center';
+  if (pos.includes('bottom')) {
+    return { left: 0, right: 0, bottom: 0, top: '22%' };
+  }
+
+  return getBackgroundPosition(pos);
 }
 
 function getOverflowImageStyle(image: BannerImageSpec): React.CSSProperties | null {
@@ -59,9 +78,10 @@ interface BackgroundProps {
   background: BackgroundSpec;
   bgStyle: React.CSSProperties;
   className?: string;
+  positionStyle?: React.CSSProperties;
 }
 
-function Background({ background, bgStyle, className }: BackgroundProps) {
+function Background({ background, bgStyle, className, positionStyle }: BackgroundProps) {
   const backgroundWidth = background?.width
     ? (typeof background.width === 'number' ? `${background.width}px` : background.width)
     : '100%';
@@ -70,12 +90,12 @@ function Background({ background, bgStyle, className }: BackgroundProps) {
     : '100%';
   return (
     <div
-      className={`absolute ${background.className || ''}`}
+      className={`absolute ${background.className || ''} ${className || ''}`}
       style={{
         ...bgStyle,
         width: backgroundWidth,
         height: backgroundHeight,
-        ...getBackgroundPosition(background.position),
+        ...(positionStyle ?? getBackgroundPosition(background.position)),
       }}
     />
   );
@@ -89,7 +109,7 @@ interface ImageRendererProps {
   objectPosition: string;
   objectFit: "cover" | "contain";
   zoom: number;
-  variant: 'layered' | 'default';
+  variant: 'layered' | 'default' | 'compact';
 }
 
 function ImageRenderer({
@@ -103,12 +123,18 @@ function ImageRenderer({
   variant,
 }: ImageRendererProps) {
   if (!shouldRender) return null;
-  const isLayered = variant === 'layered';
+  const isLayered = variant === 'layered' || variant === 'compact';
   const overflowStyle = isLayered ? getOverflowImageStyle(image) : null;
   const transform = [
     overflowStyle?.transform,
     zoom !== 1 ? `scale(${zoom})` : null,
   ].filter(Boolean).join(" ") || undefined;
+
+  const compactImageClass =
+    variant === 'compact'
+      ? `absolute left-0 top-0 z-10 h-[88%] w-[52%] max-w-[52%] ${image.className || "object-contain object-left-bottom"}`
+      : `absolute ${image.className || "object-contain"}`;
+
   return (
     <Image
       src={resolvedSrc}
@@ -120,7 +146,11 @@ function ImageRenderer({
       priority={image.priority}
       loading={image.loading}
       onError={onError}
-      className={isLayered ? `absolute ${image.className || "object-contain"}` : `h-full w-full ${image.className || "object-contain"}`}
+      className={
+        variant === 'default'
+          ? `h-full w-full ${image.className || "object-contain"}`
+          : compactImageClass
+      }
       style={
         isLayered
           ? {
@@ -128,11 +158,15 @@ function ImageRenderer({
               objectFit,
               transform,
               zIndex: 10,
-              width: image.customWidth ?? overflowStyle?.width ?? '100%',
-              height: image.customHeight ?? overflowStyle?.height ?? '100%',
-              left: overflowStyle ? overflowStyle.left : 0,
+              width: variant === 'compact'
+                ? undefined
+                : image.customWidth ?? overflowStyle?.width ?? '100%',
+              height: variant === 'compact'
+                ? undefined
+                : image.customHeight ?? overflowStyle?.height ?? '100%',
+              left: variant === 'compact' ? 0 : overflowStyle ? overflowStyle.left : 0,
               right: overflowStyle?.right,
-              top: overflowStyle ? overflowStyle.top : 0,
+              top: variant === 'compact' ? 0 : overflowStyle ? overflowStyle.top : 0,
               bottom: overflowStyle?.bottom,
               maxWidth: overflowStyle?.maxWidth,
               maxHeight: overflowStyle?.maxHeight,
@@ -161,6 +195,8 @@ interface ContentSectionProps {
   titleColor?: string;
   subtitleColor?: string;
   contentClassName?: string;
+  variant?: ActionBannerVariant;
+  ctaHref?: string;
 }
 
 function ContentSection({
@@ -177,10 +213,57 @@ function ContentSection({
   titleColor,
   subtitleColor,
   contentClassName = '',
+  variant = 'default',
+  ctaHref,
 }: ContentSectionProps) {
+  const isCompact = variant === 'compact';
+  const ctaLabel = title.trim() || button?.label || '';
+  const href = ctaHref || button?.href || '#';
+  const showSeparateButton = !isCompact && button && button.label;
+  const titleStyle = hasInlineTitleColor && titleColor ? { color: titleColor } : undefined;
+  const buttonStyle = button?.style;
+
+  if (isCompact && ctaLabel && href !== '#') {
+    return (
+      <div
+        className={`absolute inset-y-0 right-0 z-20 flex w-[48%] flex-col ${alignmentClass} px-3 ${contentClassName}`}
+      >
+        <Link
+          href={href}
+          className={`group flex w-full flex-row items-center justify-end gap-2 text-right ${buttonClasses}`}
+          style={buttonStyle ?? titleStyle}
+        >
+          {(button?.showArrow ?? true) && (
+            <ArrowLeft
+              className={`h-5 w-5 shrink-0 transition-transform duration-200 group-hover:-translate-x-1 ${button?.arrowClassName || ''}`}
+            />
+          )}
+          <span className={titleClasses} style={titleStyle}>
+            {ctaLabel}
+          </span>
+        </Link>
+      </div>
+    );
+  }
+
+  if (isCompact && ctaLabel) {
+    return (
+      <div
+        className={`absolute inset-y-0 right-0 z-20 flex w-[48%] flex-col ${alignmentClass} px-3 ${contentClassName}`}
+      >
+        <span className={`flex w-full flex-row items-center justify-end gap-2 text-right ${buttonClasses}`} style={titleStyle}>
+          {(button?.showArrow ?? true) && (
+            <ArrowLeft className={`h-5 w-5 shrink-0 ${button?.arrowClassName || ''}`} />
+          )}
+          <span className={titleClasses}>{ctaLabel}</span>
+        </span>
+      </div>
+    );
+  }
+
   return (
     <div className={`relative z-20 flex h-full flex-col ${alignmentClass} ${spacingClass} text-right ${contentClassName}`}>
-      <h2 className={titleClasses} style={hasInlineTitleColor && titleColor ? { color: titleColor } : undefined}>
+      <h2 className={titleClasses} style={titleStyle}>
         {title}
       </h2>
       {subtitle && (
@@ -191,12 +274,12 @@ function ContentSection({
           {subtitle}
         </p>
       )}
-      {button && (
+      {showSeparateButton && (
         <div className="mt-2">
           <Link
             href={button.href}
             className={`group ${buttonClasses}`}
-            style={button.style}
+            style={buttonStyle}
           >
             {button.showArrow && (
               <ArrowLeft className={`inline-block mr-2 h-4 w-4 transition-transform duration-200 group-hover:-translate-x-1 ${button.arrowClassName || ''}`} />
@@ -209,7 +292,7 @@ function ContentSection({
   );
 }
 
-export function ActionBanner({ spec }: ActionBannerProps) {
+export function ActionBanner({ spec, variant = 'default' }: ActionBannerProps) {
   const {
     title,
     subtitle,
@@ -224,6 +307,8 @@ export function ActionBanner({ spec }: ActionBannerProps) {
     contentAlignment,
   } = spec;
 
+  const isCompact = variant === 'compact';
+
   const { resolvedSrc, shouldRender: shouldRenderImage, handleError: handleImageError } =
     useResolvedImage(image.src);
 
@@ -233,11 +318,13 @@ export function ActionBanner({ spec }: ActionBannerProps) {
       : contentAlignment === "bottom"
         ? "justify-end"
         : "justify-center";
-  const spacingClass = spec.paddingClassName ?? "px-4 py-4 pr-8";
+  const spacingClass = isCompact
+    ? (spec.paddingClassName ?? "px-3 py-3 pl-2")
+    : (spec.paddingClassName ?? "px-4 py-4 pr-8");
   const objectPosition =
     (typeof image.focalX === "number" && typeof image.focalY === "number")
       ? `${image.focalX}% ${image.focalY}%`
-      : (image.objectPosition || "center");
+      : (image.objectPosition || "left bottom");
   const objectFit = image.objectFit || "contain";
   const zoom = typeof image.zoom === "number" ? image.zoom : 1;
   const hasInlineTitleColor =
@@ -265,9 +352,9 @@ export function ActionBanner({ spec }: ActionBannerProps) {
   const titleClasses = [
     titleClassName,
     hasInlineTitleColor ? '' : (colors?.titleColor || 'text-gray-900'),
-    typography?.titleFont || 'font-bold',
-    typography?.titleSize || 'text-lg',
-    typography?.titleWeight || 'font-bold',
+    typography?.titleFont || (isCompact ? 'font-peyda-fanum' : 'font-bold'),
+    typography?.titleSize || (isCompact ? 'text-lg' : 'text-lg'),
+    typography?.titleWeight || (isCompact ? 'font-normal' : 'font-bold'),
     typography?.titleLeading || 'leading-tight',
     typography?.titleTracking || 'tracking-normal',
   ]
@@ -286,12 +373,32 @@ export function ActionBanner({ spec }: ActionBannerProps) {
     .filter(Boolean)
     .join(' ');
 
-  const buttonClasses = button?.className || 'px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600';
+  const buttonClasses = button?.className || (isCompact
+    ? 'text-neutral-800 text-lg font-normal'
+    : 'px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600');
+
+  const ctaHref = button?.href || image.href;
+  const rootDir = 'ltr';
+  const rootOverflow = isCompact ? 'overflow-hidden' : 'overflow-visible';
+  const rootMinH = isCompact ? 'min-h-0' : 'min-h-[150px]';
 
   if (background) {
+    const compactBgPosition = isCompact ? getCompactBackgroundPosition(background) : undefined;
+    const compactBgHeight = isCompact ? '78%' : undefined;
+    const compactBgWidth = isCompact ? '100%' : undefined;
+
     return (
-      <div dir="ltr" className={`relative h-full min-h-[150px] w-full overflow-visible ${className}`}>
-        <Background background={background} bgStyle={bgStyle} />
+      <div dir={rootDir} className={`relative h-full w-full ${rootMinH} ${rootOverflow} ${className}`}>
+        <Background
+          background={{
+            ...background,
+            width: compactBgWidth ?? background.width,
+            height: compactBgHeight ?? background.height,
+          }}
+          bgStyle={bgStyle}
+          className={isCompact ? 'rounded-[20px]' : undefined}
+          positionStyle={compactBgPosition}
+        />
         <ImageRenderer
           image={image}
           resolvedSrc={resolvedSrc}
@@ -300,11 +407,11 @@ export function ActionBanner({ spec }: ActionBannerProps) {
           objectPosition={objectPosition}
           objectFit={objectFit}
           zoom={zoom}
-          variant="layered"
+          variant={isCompact ? 'compact' : 'layered'}
         />
         <ContentSection
           title={title}
-          subtitle={subtitle}
+          subtitle={isCompact ? undefined : subtitle}
           button={button}
           alignmentClass={alignmentClass}
           spacingClass={spacingClass}
@@ -315,14 +422,16 @@ export function ActionBanner({ spec }: ActionBannerProps) {
           hasInlineSubtitleColor={hasInlineSubtitleColor}
           titleColor={colors?.titleColor}
           subtitleColor={colors?.subtitleColor}
+          variant={variant}
+          ctaHref={ctaHref}
         />
       </div>
     );
   }
 
   return (
-    <div dir="ltr" className={`relative h-full min-h-[150px] overflow-visible ${className}`} style={bgStyle}>
-      <div className="absolute inset-0 left-0 w-1/3">
+    <div dir={rootDir} className={`relative h-full ${rootMinH} ${rootOverflow} ${className}`} style={bgStyle}>
+      <div className={isCompact ? "absolute inset-y-0 left-0 w-[52%]" : "absolute inset-0 left-0 w-1/3"}>
         <ImageRenderer
           image={image}
           resolvedSrc={resolvedSrc}
@@ -331,12 +440,12 @@ export function ActionBanner({ spec }: ActionBannerProps) {
           objectPosition={objectPosition}
           objectFit={objectFit}
           zoom={zoom}
-          variant="default"
+          variant={isCompact ? 'compact' : 'default'}
         />
       </div>
       <ContentSection
         title={title}
-        subtitle={subtitle}
+        subtitle={isCompact ? undefined : subtitle}
         button={button}
         alignmentClass={alignmentClass}
         spacingClass={spacingClass}
@@ -348,6 +457,8 @@ export function ActionBanner({ spec }: ActionBannerProps) {
         titleColor={colors?.titleColor}
         subtitleColor={colors?.subtitleColor}
         contentClassName="z-10"
+        variant={variant}
+        ctaHref={ctaHref}
       />
     </div>
   );

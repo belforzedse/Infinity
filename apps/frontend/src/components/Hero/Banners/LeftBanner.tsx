@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from "react";
 import Image from 'next/image';
 import Link from 'next/link';
 import { LeftBannerSpec } from '../types';
@@ -27,7 +26,7 @@ export function LeftBanner({ spec, className = '' }: LeftBannerProps) {
   const objectPosition =
     (typeof foregroundImage.focalX === "number" && typeof foregroundImage.focalY === "number")
       ? `${foregroundImage.focalX}% ${foregroundImage.focalY}%`
-      : (foregroundImage.objectPosition || "center");
+      : (foregroundImage.objectPosition || "bottom left");
   const objectFit = foregroundImage.objectFit || "contain";
   const zoom = typeof foregroundImage.zoom === "number" ? foregroundImage.zoom : 1;
   const overflow = foregroundImage.overflow;
@@ -87,7 +86,7 @@ export function LeftBanner({ spec, className = '' }: LeftBannerProps) {
 
   // Render foreground image
   const ForegroundContent = (
-    <div className={`relative h-full w-full overflow-visible ${className}`}>
+    <div className={`relative h-full w-full overflow-hidden ${className}`}>
       {/* Background element */}
       <div
         className={`absolute  ${background.className || ""}`}
@@ -111,7 +110,7 @@ export function LeftBanner({ spec, className = '' }: LeftBannerProps) {
           priority={foregroundImage.priority}
           loading={foregroundImage.loading}
           onError={handleForegroundImageError}
-          className={`absolute ${overflowStyle ? "" : "inset-0 lg:h-full lg:w-full"} ${foregroundImage.className || "object-contain"}`}
+          className={`absolute ${overflowStyle ? "" : "inset-0 h-full w-full"} ${foregroundImage.className || "object-contain"}`}
           style={{
             objectPosition,
             objectFit,

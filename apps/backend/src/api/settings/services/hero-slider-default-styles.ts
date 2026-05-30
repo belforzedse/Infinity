@@ -37,19 +37,19 @@ export const DEFAULT_PRIMARY_SUBTITLE_STYLE: HeroTextStyle = {
 };
 
 export const DEFAULT_CARD_TITLE_STYLE: HeroTextStyle = {
-  color: "text-gray-900",
+  color: "text-neutral-800",
   fontFamily: "font-peyda-fanum",
   fontSize: "text-lg",
-  fontWeight: "font-bold",
+  fontWeight: "font-normal",
   lineHeight: "leading-tight",
   letterSpacing: "tracking-normal",
 };
 
 export const DEFAULT_CARD_BUTTON_STYLE: HeroTextStyle = {
-  color: "text-white",
+  color: "text-neutral-800",
   fontFamily: "font-peyda-fanum",
-  fontSize: "text-sm",
-  fontWeight: "font-medium",
+  fontSize: "text-lg",
+  fontWeight: "font-normal",
   lineHeight: "leading-normal",
   letterSpacing: "tracking-normal",
 };
@@ -59,7 +59,7 @@ export const DEFAULT_DESKTOP_HEADLINE_CLASSNAME =
 export const DEFAULT_TABLET_HEADLINE_CLASSNAME =
   "w-full gap-[8px] rounded-3xl px-[24px] pb-[40px] pt-[20px]";
 export const DEFAULT_MOBILE_HEADLINE_CLASSNAME =
-  "w-full gap-[8px] rounded-3xl px-[24px] pb-[24px] pt-[20px]";
+  "w-full gap-2 rounded-3xl px-4 pb-4 pt-5";
 
 export const DEFAULT_DESKTOP_CARD_LEFT_CLASSNAME = "h-[80%]";
 export const DEFAULT_DESKTOP_CARD_RIGHT_CLASSNAME = "h-[80%]";
@@ -81,33 +81,33 @@ export const DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_WIDTH = "100%";
 export const DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_HEIGHT = "80%";
 export const DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_POSITION = "bottom center";
 export const DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_SIZE = "cover";
-export const DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_CLASSNAME = "rounded-lg";
+export const DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_CLASSNAME = "rounded-[20px]";
 export const DEFAULT_TABLET_MAIN_VISUAL_FOREGROUND_CLASSNAME =
-  "object-contain w-[99%] scale-125 h-[99%] translate-y-8";
+  "object-contain object-bottom h-full w-full max-h-full max-w-full";
 export const DEFAULT_TABLET_MAIN_VISUAL_FOREGROUND_POSITION = "bottom center";
 
 export const DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_WIDTH = "100%";
-export const DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_HEIGHT = "80%";
+export const DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_HEIGHT = "100%";
 export const DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_POSITION = "bottom center";
 export const DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_SIZE = "cover";
-export const DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_CLASSNAME = "rounded-lg";
+export const DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_CLASSNAME = "rounded-[20px]";
 export const DEFAULT_MOBILE_MAIN_VISUAL_FOREGROUND_CLASSNAME =
-  "object-contain w-[99%] scale-125 h-[99%] translate-y-8";
+  "object-contain object-bottom h-full w-full max-h-full max-w-full";
 export const DEFAULT_MOBILE_MAIN_VISUAL_FOREGROUND_POSITION = "bottom center";
 
-export const DEFAULT_TABLET_CARD_LEFT_CLASSNAME =
-  "min-h-[120px] tablet:min-h-[140px] sl:min-h-[150px] rounded-xl";
-export const DEFAULT_TABLET_CARD_RIGHT_CLASSNAME =
-  "min-h-[120px] tablet:min-h-[140px] sl:min-h-[150px] rounded-xl";
+export const DEFAULT_TABLET_CARD_LEFT_CLASSNAME = "h-full rounded-[20px]";
+export const DEFAULT_TABLET_CARD_RIGHT_CLASSNAME = "h-full rounded-[20px]";
 export const DEFAULT_TABLET_CARD_LEFT_IMAGE_CLASSNAME =
-  "h-full w-full rounded-lg mb-2 scale-150 translate-x-4 -translate-y-4 object-contain";
+  "h-full w-full object-contain object-left-bottom";
 export const DEFAULT_TABLET_CARD_RIGHT_IMAGE_CLASSNAME =
-  "h-full w-full rounded-lg scale-125 -translate-y-4 pl-5 object-contain";
+  "h-full w-full object-contain object-left-bottom";
 
-export const DEFAULT_MOBILE_CARD_LEFT_CLASSNAME = "rounded-lg";
-export const DEFAULT_MOBILE_CARD_RIGHT_CLASSNAME = "rounded-lg";
+export const DEFAULT_MOBILE_CARD_LEFT_CLASSNAME = "h-full rounded-[20px]";
+export const DEFAULT_MOBILE_CARD_RIGHT_CLASSNAME = "h-full rounded-[20px]";
 export const DEFAULT_MOBILE_CARD_LEFT_IMAGE_CLASSNAME =
-  "h-full w-full rounded-lg mb-2 scale-150 -translate-y-4 object-contain";
+  "h-full w-full object-contain object-left-bottom";
 export const DEFAULT_MOBILE_CARD_RIGHT_IMAGE_CLASSNAME =
-  "h-full w-full rounded-lg scale-125 pl-2 object-contain";
-export const DEFAULT_MOBILE_CARD_PADDING_CLASSNAME = "px-3 py-4 pr-3";
+  "h-full w-full object-contain object-left-bottom";
+export const DEFAULT_MOBILE_CARD_PADDING_CLASSNAME = "px-3 py-3 pl-2";
+export const DEFAULT_COMPACT_CARD_BUTTON_CLASSNAME = "text-neutral-800 text-lg font-normal";
+export const DEFAULT_COMPACT_CARD_BACKGROUND_CLASSNAME = "rounded-[20px]";

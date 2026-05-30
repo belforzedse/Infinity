@@ -128,6 +128,8 @@ export type ActionBannerButtonSpec = {
   style?: Record<string, string | number>;
 };
 
+export type ActionBannerVariant = "default" | "compact";
+
 export type ActionBannerSpec = {
   title: string;
   subtitle?: string;

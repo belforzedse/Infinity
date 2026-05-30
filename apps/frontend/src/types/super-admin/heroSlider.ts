@@ -392,19 +392,19 @@ const DEFAULT_PRIMARY_SUBTITLE_STYLE: HeroTextStyle = {
 };
 
 const DEFAULT_CARD_TITLE_STYLE: HeroTextStyle = {
-  color: "text-gray-900",
+  color: "text-neutral-800",
   fontFamily: "font-peyda-fanum",
   fontSize: "text-lg",
-  fontWeight: "font-bold",
+  fontWeight: "font-normal",
   lineHeight: "leading-tight",
   letterSpacing: "tracking-normal",
 };
 
 const DEFAULT_CARD_BUTTON_STYLE: HeroTextStyle = {
-  color: "text-white",
+  color: "text-neutral-800",
   fontFamily: "font-peyda-fanum",
-  fontSize: "text-sm",
-  fontWeight: "font-medium",
+  fontSize: "text-lg",
+  fontWeight: "font-normal",
   lineHeight: "leading-normal",
   letterSpacing: "tracking-normal",
 };
@@ -414,7 +414,7 @@ const DEFAULT_DESKTOP_HEADLINE_CLASSNAME =
 const DEFAULT_TABLET_HEADLINE_CLASSNAME =
   "w-full gap-[8px] rounded-3xl px-[24px] pb-[40px] pt-[20px]";
 const DEFAULT_MOBILE_HEADLINE_CLASSNAME =
-  "w-full gap-[8px] rounded-3xl px-[24px] pb-[24px] pt-[20px]";
+  "w-full gap-2 rounded-3xl px-4 pb-4 pt-5";
 
 const DEFAULT_DESKTOP_CARD_LEFT_CLASSNAME = "h-[80%]";
 const DEFAULT_DESKTOP_CARD_RIGHT_CLASSNAME = "h-[80%]";
@@ -436,34 +436,36 @@ const DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_WIDTH = "100%";
 const DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_HEIGHT = "80%";
 const DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_POSITION = "bottom center";
 const DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_SIZE = "cover";
-const DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_CLASSNAME = "rounded-lg";
+const DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_CLASSNAME = "rounded-[20px]";
 const DEFAULT_TABLET_MAIN_VISUAL_FOREGROUND_CLASSNAME =
-  "object-contain w-[99%] scale-125 h-[99%] translate-y-8";
+  "object-contain object-bottom h-full w-full max-h-full max-w-full";
 const DEFAULT_TABLET_MAIN_VISUAL_FOREGROUND_POSITION = "bottom center";
 
 const DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_WIDTH = "100%";
-const DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_HEIGHT = "80%";
+const DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_HEIGHT = "100%";
 const DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_POSITION = "bottom center";
 const DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_SIZE = "cover";
-const DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_CLASSNAME = "rounded-lg";
+const DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_CLASSNAME = "rounded-[20px]";
 const DEFAULT_MOBILE_MAIN_VISUAL_FOREGROUND_CLASSNAME =
-  "object-contain w-[99%] scale-125 h-[99%] translate-y-8";
+  "object-contain object-bottom h-full w-full max-h-full max-w-full";
 const DEFAULT_MOBILE_MAIN_VISUAL_FOREGROUND_POSITION = "bottom center";
 
-const DEFAULT_TABLET_CARD_LEFT_CLASSNAME = "min-h-[120px] tablet:min-h-[140px] sl:min-h-[150px] rounded-xl";
-const DEFAULT_TABLET_CARD_RIGHT_CLASSNAME = "min-h-[120px] tablet:min-h-[140px] sl:min-h-[150px] rounded-xl";
+const DEFAULT_TABLET_CARD_LEFT_CLASSNAME = "h-full rounded-[20px]";
+const DEFAULT_TABLET_CARD_RIGHT_CLASSNAME = "h-full rounded-[20px]";
 const DEFAULT_TABLET_CARD_LEFT_IMAGE_CLASSNAME =
-  "h-full w-full rounded-lg mb-2 scale-150 translate-x-4 -translate-y-4 object-contain";
+  "h-full w-full object-contain object-left-bottom";
 const DEFAULT_TABLET_CARD_RIGHT_IMAGE_CLASSNAME =
-  "h-full w-full rounded-lg scale-125 -translate-y-4 pl-5 object-contain";
+  "h-full w-full object-contain object-left-bottom";
 
-const DEFAULT_MOBILE_CARD_LEFT_CLASSNAME = "rounded-lg";
-const DEFAULT_MOBILE_CARD_RIGHT_CLASSNAME = "rounded-lg";
+const DEFAULT_MOBILE_CARD_LEFT_CLASSNAME = "h-full rounded-[20px]";
+const DEFAULT_MOBILE_CARD_RIGHT_CLASSNAME = "h-full rounded-[20px]";
 const DEFAULT_MOBILE_CARD_LEFT_IMAGE_CLASSNAME =
-  "h-full w-full rounded-lg mb-2 scale-150 -translate-y-4 object-contain";
+  "h-full w-full object-contain object-left-bottom";
 const DEFAULT_MOBILE_CARD_RIGHT_IMAGE_CLASSNAME =
-  "h-full w-full rounded-lg scale-125 pl-2 object-contain";
-const DEFAULT_MOBILE_CARD_PADDING_CLASSNAME = "px-3 py-4 pr-3";
+  "h-full w-full object-contain object-left-bottom";
+const DEFAULT_MOBILE_CARD_PADDING_CLASSNAME = "px-3 py-3 pl-2";
+const DEFAULT_COMPACT_CARD_BUTTON_CLASSNAME = "text-neutral-800 text-lg font-normal";
+const DEFAULT_COMPACT_CARD_BACKGROUND_CLASSNAME = "rounded-[20px]";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -959,14 +961,20 @@ function normalizeTabletSlots(rawSlots: unknown): HeroTabletSlots {
     bottomActionBannerLeft: normalizeCardSlot(slots.bottomActionBannerLeft, {
       className: DEFAULT_TABLET_CARD_LEFT_CLASSNAME,
       imageClassName: DEFAULT_TABLET_CARD_LEFT_IMAGE_CLASSNAME,
-      imageObjectPosition: "",
+      imageObjectPosition: "left bottom",
       contentAlignment: "center",
+      buttonClassName: DEFAULT_COMPACT_CARD_BUTTON_CLASSNAME,
+      backgroundClassName: DEFAULT_COMPACT_CARD_BACKGROUND_CLASSNAME,
+      buttonShowArrow: true,
     }),
     bottomActionBannerRight: normalizeCardSlot(slots.bottomActionBannerRight, {
       className: DEFAULT_TABLET_CARD_RIGHT_CLASSNAME,
       imageClassName: DEFAULT_TABLET_CARD_RIGHT_IMAGE_CLASSNAME,
-      imageObjectPosition: "left",
-      contentAlignment: "bottom",
+      imageObjectPosition: "left bottom",
+      contentAlignment: "center",
+      buttonClassName: DEFAULT_COMPACT_CARD_BUTTON_CLASSNAME,
+      backgroundClassName: DEFAULT_COMPACT_CARD_BACKGROUND_CLASSNAME,
+      buttonShowArrow: true,
     }),
     heroBanner: normalizeMainVisualSlot(slots.heroBanner, {
       backgroundWidth: DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_WIDTH,
@@ -996,16 +1004,22 @@ function normalizeMobileSlots(rawSlots: unknown): HeroMobileSlots {
     bottomActionBannerLeft: normalizeCardSlot(slots.bottomActionBannerLeft, {
       className: DEFAULT_MOBILE_CARD_LEFT_CLASSNAME,
       imageClassName: DEFAULT_MOBILE_CARD_LEFT_IMAGE_CLASSNAME,
-      imageObjectPosition: "bottom left",
+      imageObjectPosition: "left bottom",
       contentAlignment: "center",
       paddingClassName: DEFAULT_MOBILE_CARD_PADDING_CLASSNAME,
+      buttonClassName: DEFAULT_COMPACT_CARD_BUTTON_CLASSNAME,
+      backgroundClassName: DEFAULT_COMPACT_CARD_BACKGROUND_CLASSNAME,
+      buttonShowArrow: true,
     }),
     bottomActionBannerRight: normalizeCardSlot(slots.bottomActionBannerRight, {
       className: DEFAULT_MOBILE_CARD_RIGHT_CLASSNAME,
       imageClassName: DEFAULT_MOBILE_CARD_RIGHT_IMAGE_CLASSNAME,
-      imageObjectPosition: "left",
+      imageObjectPosition: "left bottom",
       contentAlignment: "center",
       paddingClassName: DEFAULT_MOBILE_CARD_PADDING_CLASSNAME,
+      buttonClassName: DEFAULT_COMPACT_CARD_BUTTON_CLASSNAME,
+      backgroundClassName: DEFAULT_COMPACT_CARD_BACKGROUND_CLASSNAME,
+      buttonShowArrow: true,
     }),
     heroBanner: normalizeMainVisualSlot(slots.heroBanner, {
       backgroundWidth: DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_WIDTH,
@@ -1059,8 +1073,8 @@ function normalizeSlide(value: unknown, index: number): HeroSlideConfig {
 
 /**
  * Syncs tablet and mobile slots from desktop content. Copies content (title, subtitle,
- * images, links, tracking) from desktop slots and applies device-specific default
- * styling for tablet and mobile.
+ * images, links, tracking, colors, image positions) from desktop slots and applies
+ * device-specific layout styling for tablet and mobile.
  */
 export function syncTabletAndMobileFromDesktop(slide: HeroSlideConfig): HeroSlideConfig {
   const d = slide.devices.desktop.slots;
@@ -1070,6 +1084,7 @@ export function syncTabletAndMobileFromDesktop(slide: HeroSlideConfig): HeroSlid
     subtitle: d.topLeftTextBanner.subtitle,
     link: d.topLeftTextBanner.link,
     tracking: d.topLeftTextBanner.tracking,
+    backgroundColor: d.topLeftTextBanner.backgroundColor,
   };
 
   const mainVisualContent = {
@@ -1112,6 +1127,14 @@ export function syncTabletAndMobileFromDesktop(slide: HeroSlideConfig): HeroSlid
     backgroundType: d.bottomActionBannerRight.backgroundType,
   };
 
+  const desktopCardLeftImagePosition =
+    d.bottomActionBannerLeft.imageObjectPosition.trim() || "top left";
+  const desktopCardRightImagePosition =
+    d.bottomActionBannerRight.imageObjectPosition.trim() || "left";
+  const desktopMainVisualForegroundPosition =
+    d.rightBanner.foregroundObjectPosition.trim() ||
+    DEFAULT_TABLET_MAIN_VISUAL_FOREGROUND_POSITION;
+
   return {
     ...slide,
     devices: {
@@ -1121,13 +1144,15 @@ export function syncTabletAndMobileFromDesktop(slide: HeroSlideConfig): HeroSlid
           primaryBanner: normalizeHeadlineSlot(headlineContent, {
             titleStyle: {
               ...DEFAULT_PRIMARY_TITLE_STYLE,
+              color: d.topLeftTextBanner.titleStyle.color || DEFAULT_PRIMARY_TITLE_STYLE.color,
               fontSize: "lg:text-[40px] 2xl:text-[48px]",
             },
             subtitleStyle: {
               ...DEFAULT_PRIMARY_SUBTITLE_STYLE,
+              color: d.topLeftTextBanner.subtitleStyle.color || DEFAULT_PRIMARY_SUBTITLE_STYLE.color,
               fontSize: "lg:text-[24px] 2xl:text-[28px]",
             },
-            backgroundColor: "bg-stone-50",
+            backgroundColor: d.topLeftTextBanner.backgroundColor || "bg-stone-50",
             bottomMarginPx: 0,
             className: DEFAULT_TABLET_HEADLINE_CLASSNAME,
             titleClassName: "",
@@ -1136,14 +1161,36 @@ export function syncTabletAndMobileFromDesktop(slide: HeroSlideConfig): HeroSlid
           bottomActionBannerLeft: normalizeCardSlot(cardLeftContent, {
             className: DEFAULT_TABLET_CARD_LEFT_CLASSNAME,
             imageClassName: DEFAULT_TABLET_CARD_LEFT_IMAGE_CLASSNAME,
-            imageObjectPosition: "",
+            imageObjectPosition: desktopCardLeftImagePosition,
             contentAlignment: "center",
+            buttonClassName: DEFAULT_COMPACT_CARD_BUTTON_CLASSNAME,
+            backgroundClassName: DEFAULT_COMPACT_CARD_BACKGROUND_CLASSNAME,
+            buttonShowArrow: true,
+            titleStyle: {
+              ...DEFAULT_CARD_TITLE_STYLE,
+              color: d.bottomActionBannerLeft.titleStyle.color || DEFAULT_CARD_TITLE_STYLE.color,
+            },
+            buttonStyle: {
+              ...DEFAULT_CARD_BUTTON_STYLE,
+              color: d.bottomActionBannerLeft.buttonStyle.color || DEFAULT_CARD_BUTTON_STYLE.color,
+            },
           }),
           bottomActionBannerRight: normalizeCardSlot(cardRightContent, {
             className: DEFAULT_TABLET_CARD_RIGHT_CLASSNAME,
             imageClassName: DEFAULT_TABLET_CARD_RIGHT_IMAGE_CLASSNAME,
-            imageObjectPosition: "left",
-            contentAlignment: "bottom",
+            imageObjectPosition: desktopCardRightImagePosition,
+            contentAlignment: "center",
+            buttonClassName: DEFAULT_COMPACT_CARD_BUTTON_CLASSNAME,
+            backgroundClassName: DEFAULT_COMPACT_CARD_BACKGROUND_CLASSNAME,
+            buttonShowArrow: true,
+            titleStyle: {
+              ...DEFAULT_CARD_TITLE_STYLE,
+              color: d.bottomActionBannerRight.titleStyle.color || DEFAULT_CARD_TITLE_STYLE.color,
+            },
+            buttonStyle: {
+              ...DEFAULT_CARD_BUTTON_STYLE,
+              color: d.bottomActionBannerRight.buttonStyle.color || DEFAULT_CARD_BUTTON_STYLE.color,
+            },
           }),
           heroBanner: normalizeMainVisualSlot(mainVisualContent, {
             backgroundWidth: DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_WIDTH,
@@ -1152,16 +1199,22 @@ export function syncTabletAndMobileFromDesktop(slide: HeroSlideConfig): HeroSlid
             backgroundSize: DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_SIZE,
             backgroundClassName: DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_CLASSNAME,
             foregroundClassName: DEFAULT_TABLET_MAIN_VISUAL_FOREGROUND_CLASSNAME,
-            foregroundObjectPosition: DEFAULT_TABLET_MAIN_VISUAL_FOREGROUND_POSITION,
+            foregroundObjectPosition: desktopMainVisualForegroundPosition,
           }),
         },
       },
       mobile: {
         slots: {
           primaryBanner: normalizeHeadlineSlot(headlineContent, {
-            titleStyle: DEFAULT_PRIMARY_TITLE_STYLE,
-            subtitleStyle: DEFAULT_PRIMARY_SUBTITLE_STYLE,
-            backgroundColor: "bg-stone-50",
+            titleStyle: {
+              ...DEFAULT_PRIMARY_TITLE_STYLE,
+              color: d.topLeftTextBanner.titleStyle.color || DEFAULT_PRIMARY_TITLE_STYLE.color,
+            },
+            subtitleStyle: {
+              ...DEFAULT_PRIMARY_SUBTITLE_STYLE,
+              color: d.topLeftTextBanner.subtitleStyle.color || DEFAULT_PRIMARY_SUBTITLE_STYLE.color,
+            },
+            backgroundColor: d.topLeftTextBanner.backgroundColor || "bg-stone-50",
             bottomMarginPx: 0,
             className: DEFAULT_MOBILE_HEADLINE_CLASSNAME,
             titleClassName: "",
@@ -1170,16 +1223,38 @@ export function syncTabletAndMobileFromDesktop(slide: HeroSlideConfig): HeroSlid
           bottomActionBannerLeft: normalizeCardSlot(cardLeftContent, {
             className: DEFAULT_MOBILE_CARD_LEFT_CLASSNAME,
             imageClassName: DEFAULT_MOBILE_CARD_LEFT_IMAGE_CLASSNAME,
-            imageObjectPosition: "bottom left",
+            imageObjectPosition: desktopCardLeftImagePosition,
             contentAlignment: "center",
             paddingClassName: DEFAULT_MOBILE_CARD_PADDING_CLASSNAME,
+            buttonClassName: DEFAULT_COMPACT_CARD_BUTTON_CLASSNAME,
+            backgroundClassName: DEFAULT_COMPACT_CARD_BACKGROUND_CLASSNAME,
+            buttonShowArrow: true,
+            titleStyle: {
+              ...DEFAULT_CARD_TITLE_STYLE,
+              color: d.bottomActionBannerLeft.titleStyle.color || DEFAULT_CARD_TITLE_STYLE.color,
+            },
+            buttonStyle: {
+              ...DEFAULT_CARD_BUTTON_STYLE,
+              color: d.bottomActionBannerLeft.buttonStyle.color || DEFAULT_CARD_BUTTON_STYLE.color,
+            },
           }),
           bottomActionBannerRight: normalizeCardSlot(cardRightContent, {
             className: DEFAULT_MOBILE_CARD_RIGHT_CLASSNAME,
             imageClassName: DEFAULT_MOBILE_CARD_RIGHT_IMAGE_CLASSNAME,
-            imageObjectPosition: "left",
+            imageObjectPosition: desktopCardRightImagePosition,
             contentAlignment: "center",
             paddingClassName: DEFAULT_MOBILE_CARD_PADDING_CLASSNAME,
+            buttonClassName: DEFAULT_COMPACT_CARD_BUTTON_CLASSNAME,
+            backgroundClassName: DEFAULT_COMPACT_CARD_BACKGROUND_CLASSNAME,
+            buttonShowArrow: true,
+            titleStyle: {
+              ...DEFAULT_CARD_TITLE_STYLE,
+              color: d.bottomActionBannerRight.titleStyle.color || DEFAULT_CARD_TITLE_STYLE.color,
+            },
+            buttonStyle: {
+              ...DEFAULT_CARD_BUTTON_STYLE,
+              color: d.bottomActionBannerRight.buttonStyle.color || DEFAULT_CARD_BUTTON_STYLE.color,
+            },
           }),
           heroBanner: normalizeMainVisualSlot(mainVisualContent, {
             backgroundWidth: DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_WIDTH,
@@ -1188,7 +1263,7 @@ export function syncTabletAndMobileFromDesktop(slide: HeroSlideConfig): HeroSlid
             backgroundSize: DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_SIZE,
             backgroundClassName: DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_CLASSNAME,
             foregroundClassName: DEFAULT_MOBILE_MAIN_VISUAL_FOREGROUND_CLASSNAME,
-            foregroundObjectPosition: DEFAULT_MOBILE_MAIN_VISUAL_FOREGROUND_POSITION,
+            foregroundObjectPosition: desktopMainVisualForegroundPosition,
           }),
         },
       },
