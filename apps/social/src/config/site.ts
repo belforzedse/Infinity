@@ -1,2 +1,2 @@
 export const SITE_URL = "https://infinitygram.co";
-export const SITE_NAME = "اینفینیتی‌گرام";
+export const SITE_NAME = "اینفینیتی گرام";

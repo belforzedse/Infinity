@@ -3,6 +3,7 @@
 import { Download, Share2, X } from "lucide-react";
 import { useState } from "react";
 import Modal from "@/components/Kits/Modal";
+import { SITE_NAME } from "@/config/site";
 import { useInstallPrompt } from "@/hooks/use-install-prompt";
 
 const DISMISS_KEY = "social-pwa-install-dismissed-at";
@@ -41,7 +42,7 @@ export function PWAInstallPrompt() {
           id="social-pwa-install-title"
           className="mt-4 font-peyda text-base font-semibold text-[#424242]"
         >
-          {isIos ? "افزودن به صفحه اصلی" : "نصب اینفینیتی‌گرام"}
+          {isIos ? "افزودن به صفحه اصلی" : `نصب ${SITE_NAME}`}
         </h2>
         <p className="mt-2 font-peyda text-sm leading-6 text-[#7B8498]">
           {isIos
