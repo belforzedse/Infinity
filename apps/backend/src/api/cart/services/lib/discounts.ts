@@ -92,7 +92,7 @@ export const computeCouponDiscount = async (
     ) {
       discountAmount = coupon.LimitAmount;
     }
-    console.log("DEBUG: Coupon discount calculation", {
+    strapi.log.debug("Coupon discount calculation", {
       code,
       couponType: coupon.Type,
       couponAmount: coupon.Amount,
@@ -105,7 +105,7 @@ export const computeCouponDiscount = async (
     return discountAmount;
   }
 
-  console.log("DEBUG: Fixed amount coupon", {
+  strapi.log.debug("Fixed amount coupon", {
     code,
     couponType: coupon.Type,
     couponAmount: Number(coupon.Amount || 0),

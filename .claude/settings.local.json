@@ -24,7 +24,8 @@
       "Bash(npx next lint:*)",
       "Bash(pnpm --filter social lint)",
       "Bash(pnpm --filter social check-types)",
-      "Bash(pnpm check-types *)"
+      "Bash(pnpm check-types *)",
+      "Bash(pnpm run *)"
     ],
     "deny": [],
     "ask": []

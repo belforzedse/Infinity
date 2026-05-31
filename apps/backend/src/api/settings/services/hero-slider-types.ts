@@ -60,6 +60,13 @@ export type HeroTextStyle = {
   letterSpacing: HeroLetterSpacingToken;
 };
 
+export type HeroInnerBorder = {
+  enabled: boolean;
+  color: string;
+  widthPx: number;
+  offsetPx: number;
+};
+
 export type HeroHeadlineSlot = {
   kind: "headline";
   title: string;
@@ -97,6 +104,7 @@ export type HeroMainVisualSlot = {
   /** Foreground image zoom (0.5–2). Default 1. */
   foregroundZoom?: number;
   foregroundOverflow: HeroImageOverflow;
+  innerBorder: HeroInnerBorder;
   link: HeroSlotLink | null;
   tracking: HeroTracking;
 };
@@ -133,6 +141,7 @@ export type HeroCardSlot = {
   paddingClassName: string;
   titleStyle: HeroTextStyle;
   buttonStyle: HeroTextStyle;
+  innerBorder: HeroInnerBorder;
   link: HeroSlotLink | null;
   tracking: HeroTracking;
 };

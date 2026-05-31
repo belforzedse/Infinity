@@ -11,6 +11,11 @@ import {
   HERO_FOREGROUND_OFFSET_MAX_PX,
   HERO_FOREGROUND_ZOOM_MIN,
   HERO_FOREGROUND_ZOOM_MAX,
+  HERO_INNER_BORDER_WIDTH_MIN_PX,
+  HERO_INNER_BORDER_WIDTH_MAX_PX,
+  HERO_INNER_BORDER_OFFSET_MIN_PX,
+  HERO_INNER_BORDER_OFFSET_MAX_PX,
+  DEFAULT_HERO_INNER_BORDER,
   MAX_TEXT_LENGTH,
   ALLOWED_LINK_TYPES,
   ALLOWED_CONTENT_ALIGNMENTS,
@@ -83,6 +88,7 @@ import type {
   HeroSliderSanitizationResult,
   HeroContentAlignment,
   HeroImageOverflow,
+  HeroInnerBorder,
   HeroOverflowEdge,
 } from "./hero-slider-types";
 
@@ -139,6 +145,35 @@ function sanitizeImageOverflow(value: unknown): HeroImageOverflow {
       DEFAULT_IMAGE_OVERFLOW.offsetYPercent,
     ),
     widthPercent: clampNumber(raw.widthPercent, 20, 220, DEFAULT_IMAGE_OVERFLOW.widthPercent),
+  };
+}
+
+function sanitizeHeroInnerBorder(value: unknown): HeroInnerBorder {
+  const raw = isRecord(value) ? value : {};
+  const style = isRecord(raw.style) ? raw.style : {};
+
+  return {
+    enabled:
+      typeof raw.enabled === "boolean"
+        ? raw.enabled
+        : typeof style.enabled === "boolean"
+          ? style.enabled
+          : DEFAULT_HERO_INNER_BORDER.enabled,
+    color:
+      sanitizeColorOrClass(raw.color ?? style.color) ||
+      DEFAULT_HERO_INNER_BORDER.color,
+    widthPx: clampNumber(
+      raw.widthPx ?? style.widthPx,
+      HERO_INNER_BORDER_WIDTH_MIN_PX,
+      HERO_INNER_BORDER_WIDTH_MAX_PX,
+      DEFAULT_HERO_INNER_BORDER.widthPx,
+    ),
+    offsetPx: clampNumber(
+      raw.offsetPx ?? style.offsetPx,
+      HERO_INNER_BORDER_OFFSET_MIN_PX,
+      HERO_INNER_BORDER_OFFSET_MAX_PX,
+      DEFAULT_HERO_INNER_BORDER.offsetPx,
+    ),
   };
 }
 
@@ -566,6 +601,7 @@ function sanitizeMainVisualSlot(
     ),
     foregroundZoom: clampNumber(raw.foregroundZoom, HERO_FOREGROUND_ZOOM_MIN, HERO_FOREGROUND_ZOOM_MAX, 1),
     foregroundOverflow: sanitizeImageOverflow(raw.foregroundOverflow ?? media.overflow),
+    innerBorder: sanitizeHeroInnerBorder(raw.innerBorder ?? style.innerBorder),
     link: sanitizeLink(raw.link, errors, `${path}.link`),
     tracking: sanitizeTracking(raw.tracking),
   };
@@ -706,6 +742,7 @@ function sanitizeCardSlot(
       errors,
       `${path}.buttonStyle`,
     ),
+    innerBorder: sanitizeHeroInnerBorder(raw.innerBorder ?? style.innerBorder),
     link: sanitizeLink(raw.link, errors, `${path}.link`),
     tracking: sanitizeTracking(raw.tracking),
   };

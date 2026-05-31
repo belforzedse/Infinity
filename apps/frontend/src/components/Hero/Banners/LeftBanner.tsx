@@ -13,6 +13,22 @@ interface LeftBannerProps {
   className?: string;
 }
 
+function getBackgroundPosition(pos?: string): React.CSSProperties {
+  const posValue = pos || 'center';
+  const positionStyles: Record<string, React.CSSProperties> = {
+    'center': { left: '50%', top: '50%', transform: 'translate(-50%, -50%)' },
+    'bottom center': { left: '50%', bottom: 0, transform: 'translateX(-50%)' },
+    'bottom left': { left: 0, bottom: 0, transform: 'none' },
+    'bottom right': { right: 0, bottom: 0, transform: 'none' },
+    'top center': { left: '50%', top: 0, transform: 'translateX(-50%)' },
+    'top left': { left: 0, top: 0, transform: 'none' },
+    'top right': { right: 0, top: 0, transform: 'none' },
+    'center left': { left: 0, top: '50%', transform: 'translateY(-50%)' },
+    'center right': { right: 0, top: '50%', transform: 'translateY(-50%)' },
+  };
+  return positionStyles[posValue] || positionStyles['center'];
+}
+
 export function LeftBanner({ spec, className = '' }: LeftBannerProps) {
   const { background, foregroundImage } = spec;
   const hasForegroundSrc = Boolean(foregroundImage.src?.trim());
@@ -53,46 +69,23 @@ export function LeftBanner({ spec, className = '' }: LeftBannerProps) {
     objectFit,
   });
 
-  // Determine background styling (resolve Strapi paths to absolute URL for image backgrounds)
-  // When using an image, set a fallback backgroundColor so areas not covered by the image
-  // (e.g. top when position is "bottom" and size is "contain") are not transparent and don't show a band.
   const backgroundStyle =
     !shouldUseImageBackground
       ? { backgroundColor: resolvedBackgroundValue || "#f8fafc" }
       : {
           backgroundImage: backgroundImageUrl ? `url(${backgroundImageUrl})` : undefined,
-          backgroundColor: backgroundImageUrl ? "#f5f2ef" : "#f8fafc", // fallback for uncovered areas (e.g. beige-tinted neutral)
+          backgroundColor: backgroundImageUrl ? "#f5f2ef" : "#f8fafc",
           backgroundSize: background.backgroundSize || 'cover',
           backgroundPosition: background.position || 'center'
         };
 
-  // Background dimensions
   const backgroundWidth = background.width ? (typeof background.width === 'number' ? `${background.width}px` : background.width) : '100%';
   const backgroundHeight = background.height ? (typeof background.height === 'number' ? `${background.height}px` : background.height) : '100%';
   const innerBorder = background.type === "color" ? background.innerBorder : undefined;
   const shouldRenderInnerBorder = Boolean(innerBorder?.enabled && innerBorder.widthPx > 0);
 
-  // Calculate background position based on position value
-  const getBackgroundPosition = (pos?: string) => {
-    const posValue = pos || 'center';
-    const positionStyles: Record<string, React.CSSProperties> = {
-      'center': { left: '50%', top: '50%', transform: 'translate(-50%, -50%)' },
-      'bottom center': { left: '50%', bottom: 0, transform: 'translateX(-50%)' },
-      'bottom left': { left: 0, bottom: 0, transform: 'none' },
-      'bottom right': { right: 0, bottom: 0, transform: 'none' },
-      'top center': { left: '50%', top: 0, transform: 'translateX(-50%)' },
-      'top left': { left: 0, top: 0, transform: 'none' },
-      'top right': { right: 0, top: 0, transform: 'none' },
-      'center left': { left: 0, top: '50%', transform: 'translateY(-50%)' },
-      'center right': { right: 0, top: '50%', transform: 'translateY(-50%)' },
-    };
-    return positionStyles[posValue] || positionStyles['center'];
-  };
-
-  // Render foreground image
   const ForegroundContent = (
     <div className={`relative h-full w-full overflow-hidden ${className}`}>
-      {/* Background element */}
       <div
         className={`absolute  ${background.className || ""}`}
         style={{
@@ -116,7 +109,6 @@ export function LeftBanner({ spec, className = '' }: LeftBannerProps) {
           />
         ) : null}
       </div>
-      {/* Foreground image - can overlap background */}
       {shouldRenderForegroundImage ? (
         <Image
           src={resolvedSrc}
@@ -135,7 +127,6 @@ export function LeftBanner({ spec, className = '' }: LeftBannerProps) {
     </div>
   );
 
-  // Wrap with link if href is provided
   if (foregroundImage.href) {
     return (
       <Link href={foregroundImage.href} className="block w-full h-full">

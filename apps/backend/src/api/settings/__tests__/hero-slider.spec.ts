@@ -138,6 +138,60 @@ describe("hero slider schema sanitizer", () => {
       widthPercent: 130,
     });
   });
+
+  it("preserves and clamps inner border settings on card and main visual slots", () => {
+    const { value, errors } = sanitizeHeroSliderPayload({
+      slides: [
+        {
+          id: "slide-1",
+          devices: {
+            desktop: {
+              slots: {
+                rightBanner: {
+                  innerBorder: {
+                    enabled: true,
+                    color: "#eeeeee",
+                    widthPx: 99,
+                    offsetPx: -4,
+                  },
+                },
+                bottomActionBannerLeft: {
+                  innerBorder: {
+                    enabled: true,
+                    color: "#ffffff",
+                    widthPx: 4,
+                    offsetPx: 24,
+                  },
+                },
+              },
+            },
+          },
+        },
+      ],
+    });
+
+    const slots = value.slides[0].devices.desktop.slots;
+
+    expect(errors).toEqual([]);
+    expect(slots.rightBanner.innerBorder).toEqual({
+      enabled: true,
+      color: "#eeeeee",
+      widthPx: 12,
+      offsetPx: 0,
+    });
+    expect(slots.bottomActionBannerLeft.innerBorder).toEqual({
+      enabled: true,
+      color: "#ffffff",
+      widthPx: 4,
+      offsetPx: 24,
+    });
+    expect(slots.bottomActionBannerRight.innerBorder).toEqual({
+      enabled: false,
+      color: "#ffffff",
+      widthPx: 1,
+      offsetPx: 12,
+    });
+  });
 });
 
 describe("hero slider publish meta", () => {

@@ -37,7 +37,7 @@ export default function CartPageClient() {
       const run = async () => {
         try {
           setLoadingRandom(true);
-          const items = await getRandomProducts(60, 12);
+          const items = await getRandomProducts(24, 12);
           if (mounted) setRandomProducts(items);
         } finally {
           if (mounted) setLoadingRandom(false);

@@ -140,6 +140,15 @@ Helpers: `objectPositionToPercents`, `percentsToObjectPosition`, `objectPosition
 
 Shared UI: [SizeRangeControl.tsx](apps/frontend/src/components/SuperAdmin/HeroSliderEditor/editors/SizeRangeControl.tsx)
 
+## Inner border (کادر داخلی)
+
+Main visual and card slots support an inset decorative border (`innerBorder`: enabled, color, width 0–12px, offset 0–48px).
+
+- Edited in **کادر داخلی** sections of [MainVisualEditor.tsx](apps/frontend/src/components/SuperAdmin/HeroSliderEditor/editors/MainVisualEditor.tsx) and [CardEditor.tsx](apps/frontend/src/components/SuperAdmin/HeroSliderEditor/editors/CardEditor.tsx).
+- Rendered **inside the background panel, under the foreground/product image** (color backgrounds only).
+- Persisted through the backend sanitizer in [hero-slider-sanitizers.ts](apps/backend/src/api/settings/services/hero-slider-sanitizers.ts) (`sanitizeHeroInnerBorder`).
+- Desktop inner borders sync to tablet/mobile on desktop→device sync ([heroSlider.ts](apps/frontend/src/types/super-admin/heroSlider.ts)).
+
 ## Key Files
 
 - [apps/apps/frontend/src/app/(super-admin)/super-admin/settings/customization/hero-slider/page.tsx](apps/apps/frontend/src/app/(super-admin)/super-admin/settings/customization/hero-slider/page.tsx) — Page

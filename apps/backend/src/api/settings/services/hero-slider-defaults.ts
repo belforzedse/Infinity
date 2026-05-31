@@ -10,6 +10,16 @@ export const HERO_FOREGROUND_OFFSET_MIN_PX = -600;
 export const HERO_FOREGROUND_OFFSET_MAX_PX = 600;
 export const HERO_FOREGROUND_ZOOM_MIN = 0.25;
 export const HERO_FOREGROUND_ZOOM_MAX = 3;
+export const HERO_INNER_BORDER_WIDTH_MIN_PX = 0;
+export const HERO_INNER_BORDER_WIDTH_MAX_PX = 12;
+export const HERO_INNER_BORDER_OFFSET_MIN_PX = 0;
+export const HERO_INNER_BORDER_OFFSET_MAX_PX = 48;
+export const DEFAULT_HERO_INNER_BORDER = {
+  enabled: false,
+  color: "#ffffff",
+  widthPx: 1,
+  offsetPx: 12,
+} as const;
 export const MAX_TEXT_LENGTH = 280;
 
 export const DESKTOP_SLOT_KEYS = [
