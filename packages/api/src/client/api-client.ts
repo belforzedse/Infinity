@@ -14,6 +14,9 @@ import type { ApiCache } from "../cache/api-cache";
 interface ErrorResponse {
   message?: string;
   errors?: Record<string, string[]>;
+  error?: {
+    message?: string;
+  };
 }
 
 class NotModifiedError extends Error {
@@ -170,10 +173,35 @@ export class ApiClient {
 
   private handleError(status: number, data: ErrorResponse): ApiError {
     return {
-      message: data.message || this.errorMessages.DEFAULT,
+      message: data.error?.message || data.message || this.errorMessages.DEFAULT,
       status,
       errors: data.errors,
     };
+  }
+
+  private async parseResponseData(response: Response): Promise<unknown> {
+    if (response.status === 204 || response.status === 205) {
+      return {};
+    }
+
+    if (typeof response.text === "function") {
+      const text = await response.text();
+      if (!text.trim()) {
+        return {};
+      }
+
+      try {
+        return JSON.parse(text);
+      } catch {
+        return { message: text };
+      }
+    }
+
+    if (typeof response.json === "function") {
+      return response.json();
+    }
+
+    return {};
   }
 
   private async request<T>(
@@ -332,7 +360,7 @@ export class ApiClient {
         throw new NotModifiedError();
       }
 
-      const responseData: unknown = await response.json();
+      const responseData = await this.parseResponseData(response);
 
       if (!response.ok) {
         if (response.status === 400) {

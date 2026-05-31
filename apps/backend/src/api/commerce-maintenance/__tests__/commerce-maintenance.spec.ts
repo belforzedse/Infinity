@@ -4,24 +4,65 @@ import serviceFactory, {
 } from "../services/commerce-maintenance";
 import routeConfig from "../routes/commerce-maintenance";
 
-const createKnexMock = (options?: { hasMediaTable?: boolean; mediaCount?: number; deletedMediaRows?: number }) => {
+const createKnexMock = (options?: {
+  hasMediaTable?: boolean;
+  mediaCount?: number;
+  deletedMediaRows?: number;
+  mediaFileIds?: number[];
+  remainingMediaFileIds?: number[];
+}) => {
   const del = jest.fn().mockResolvedValue(options?.deletedMediaRows ?? 0);
   const count = jest.fn().mockResolvedValue([{ count: options?.mediaCount ?? 0 }]);
-  const whereIn = jest.fn(() => ({ del, count }));
+  const select = jest.fn(async (columnName: string) => {
+    const fileIds = options?.mediaFileIds ?? [];
+    return fileIds.map((fileId) => ({ [columnName]: fileId }));
+  });
+  const remainingSelect = jest.fn(async (columnName: string) => {
+    const fileIds = options?.remainingMediaFileIds ?? [];
+    return fileIds.map((fileId) => ({ [columnName]: fileId }));
+  });
+  const whereNotIn = jest.fn(() => ({ select: remainingSelect }));
+  const whereIn = jest.fn((columnName: string) => {
+    if (columnName === "file_id" || columnName === "upload_file_id") {
+      return { select: remainingSelect, whereNotIn };
+    }
+
+    return { del, count, select };
+  });
   const knex: any = jest.fn(() => ({ whereIn }));
   knex.schema = {
     hasTable: jest.fn(async (tableName: string) =>
       tableName === "files_related_morphs" ? !!options?.hasMediaTable : false
     ),
+    hasColumn: jest.fn(async (tableName: string, columnName: string) =>
+      tableName === "files_related_morphs" && columnName === "file_id"
+    ),
   };
-  knex._calls = { del, count, whereIn };
+  knex._calls = { del, count, select, remainingSelect, whereIn, whereNotIn };
   return knex;
 };
 
-const createServiceHarness = (options?: { hasMediaTable?: boolean; mediaCount?: number; deletedMediaRows?: number }) => {
+const createServiceHarness = (options?: {
+  hasMediaTable?: boolean;
+  mediaCount?: number;
+  deletedMediaRows?: number;
+  mediaFileIds?: number[];
+  remainingMediaFileIds?: number[];
+}) => {
   const deleteOrder: string[] = [];
   const deleteMany = jest.fn(async () => ({ count: 1 }));
   const count = jest.fn(async () => 2);
+  const uploadFindOne = jest.fn(async (fileId: number) => ({
+    id: fileId,
+    provider: "local",
+    hash: `commerce-media-${fileId}`,
+    ext: ".jpg",
+  }));
+  const uploadRemove = jest.fn(async () => ({}));
+  const uploadService = {
+    findOne: uploadFindOne,
+    remove: uploadRemove,
+  };
   const query = jest.fn((uid: string) => ({
     count,
     deleteMany: jest.fn(async (...args: any[]) => {
@@ -46,10 +87,23 @@ const createServiceHarness = (options?: { hasMediaTable?: boolean; mediaCount?: 
       create: jest.fn(),
       findOne: jest.fn(),
     },
+    plugin: jest.fn(() => ({
+      service: jest.fn(() => uploadService),
+    })),
   };
 
   const service = serviceFactory({ strapi });
-  return { strapi, service, deleteOrder, deleteMany, count, connection, transaction };
+  return {
+    strapi,
+    service,
+    deleteOrder,
+    deleteMany,
+    count,
+    connection,
+    transaction,
+    uploadFindOne,
+    uploadRemove,
+  };
 };
 
 describe("commerce-maintenance purge service", () => {
@@ -57,6 +111,8 @@ describe("commerce-maintenance purge service", () => {
     const { service, transaction, deleteMany } = createServiceHarness({
       hasMediaTable: true,
       mediaCount: 3,
+      mediaFileIds: [10, 11, 12],
+      remainingMediaFileIds: [12],
     });
 
     const result = await service.purgeCommerceData({ dryRun: true });
@@ -65,7 +121,7 @@ describe("commerce-maintenance purge service", () => {
     expect(result.summary["api::product.product"]).toBe(2);
     expect(result.mediaRelations).toEqual({
       relationRowsDeleted: 3,
-      physicalFilesDeleted: 0,
+      physicalFilesDeleted: 2,
     });
     expect(transaction).not.toHaveBeenCalled();
     expect(deleteMany).not.toHaveBeenCalled();
@@ -95,12 +151,13 @@ describe("commerce-maintenance purge service", () => {
     expect(result.summary["api::order.order"]).toBe(1);
   });
 
-  it("cleans only media relation rows and never invokes upload file deletion", async () => {
-    const { service, strapi, connection } = createServiceHarness({
+  it("deletes only orphaned commerce upload files after relation cleanup", async () => {
+    const { service, strapi, connection, uploadFindOne, uploadRemove } = createServiceHarness({
       hasMediaTable: true,
       deletedMediaRows: 5,
+      mediaFileIds: [10, 11, 12],
+      remainingMediaFileIds: [12],
     });
-    strapi.plugin = jest.fn();
 
     const result = await service.purgeCommerceData({
       dryRun: false,
@@ -109,13 +166,16 @@ describe("commerce-maintenance purge service", () => {
 
     expect(result.mediaRelations).toEqual({
       relationRowsDeleted: 5,
-      physicalFilesDeleted: 0,
+      physicalFilesDeleted: 2,
     });
     expect(connection._calls.whereIn).toHaveBeenCalledWith(
       "related_type",
       COMMERCE_DELETE_TARGETS.map((target) => target.uid)
     );
-    expect(strapi.plugin).not.toHaveBeenCalled();
+    expect(uploadFindOne).toHaveBeenCalledTimes(2);
+    expect(uploadFindOne).toHaveBeenCalledWith(10);
+    expect(uploadFindOne).toHaveBeenCalledWith(11);
+    expect(uploadRemove).toHaveBeenCalledTimes(2);
   });
 });
 

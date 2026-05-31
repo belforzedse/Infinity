@@ -56,6 +56,15 @@ describe("ApiClient", () => {
       expect(result).toEqual(mockData);
     });
 
+    it("handles empty successful responses", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 204,
+      });
+
+      await expect(apiClient.delete("/test")).resolves.toEqual({});
+    });
+
     it("includes authorization header when token exists", async () => {
       localStorageMock.getItem.mockReturnValue("test-token");
       mockFetch.mockResolvedValueOnce({
@@ -151,6 +160,21 @@ describe("ApiClient", () => {
           status: 400,
           message: "Validation failed",
           error: errorResponse.error,
+        }),
+      );
+    });
+
+    it("preserves text error messages from non-JSON responses", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: false,
+        status: 502,
+        text: async () => "Bad gateway",
+      });
+
+      await expect(apiClient.get("/test", { retries: 0 })).rejects.toEqual(
+        expect.objectContaining({
+          status: 502,
+          message: "Bad gateway",
         }),
       );
     });

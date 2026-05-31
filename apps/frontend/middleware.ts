@@ -1,6 +1,28 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+const PRIVATE_ROUTE_PREFIXES = [
+  '/account',
+  '/addresses',
+  '/cart',
+  '/checkout',
+  '/favorites',
+  '/orders',
+  '/password',
+  '/payment',
+  '/privileges',
+  '/super-admin',
+  '/wallet',
+];
+
+const PDP_REDIRECT_TIMEOUT_MS = 1500;
+
+function isPrivateRoute(pathname: string) {
+  return PRIVATE_ROUTE_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
+  );
+}
+
 export default async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -18,6 +40,10 @@ export default async function middleware(request: NextRequest) {
     'Permissions-Policy',
     'camera=(), microphone=(), geolocation=(), interest-cohort=()'
   );
+
+  if (isPrivateRoute(pathname)) {
+    response.headers.set('Cache-Control', 'no-store, max-age=0');
+  }
 
   // Cache control for static assets
   // Note: /_next/static and /api/ are excluded by matcher, so cache-control for those paths is handled by Next.js
@@ -65,6 +91,8 @@ export default async function middleware(request: NextRequest) {
         // Use internal URL for server-side middleware calls to avoid hairpin routing
         const apiBaseUrl = process.env.STRAPI_INTERNAL_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.infinitycolor.co/api';
         const apiUrl = `${apiBaseUrl}/products/${productId}?fields[0]=Slug`;
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), PDP_REDIRECT_TIMEOUT_MS);
 
         const apiResponse = await fetch(apiUrl, {
           headers: {
@@ -73,7 +101,8 @@ export default async function middleware(request: NextRequest) {
             'Accept-Encoding': 'gzip',
           },
           next: { revalidate: 86400 }, // Cache for 24 hours
-        });
+          signal: controller.signal,
+        }).finally(() => clearTimeout(timeoutId));
 
         if (apiResponse.ok) {
           const data = await apiResponse.json();

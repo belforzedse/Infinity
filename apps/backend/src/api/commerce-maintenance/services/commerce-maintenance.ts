@@ -79,6 +79,19 @@ export const COMMERCE_NEEDS_CONFIRMATION_TARGETS = [
 ] as const;
 
 const MEDIA_RELATION_TABLES = ["files_related_morphs", "upload_file_morph"] as const;
+const MEDIA_FILE_ID_COLUMNS = ["file_id", "upload_file_id"] as const;
+const PRODUCT_MEDIA_DELETE_UIDS = [
+  "api::product.product",
+  "api::product-category-content.product-category-content",
+  "api::product-category.product-category",
+  "api::product-tag.product-tag",
+  "api::product-faq.product-faq",
+  "api::product-size-helper.product-size-helper",
+  "api::product-variation.product-variation",
+  "api::product-variation-color.product-variation-color",
+  "api::product-variation-size.product-variation-size",
+  "api::product-variation-model.product-variation-model",
+] as const;
 
 type PurgeOptions = {
   dryRun: boolean;
@@ -135,6 +148,40 @@ const hasTable = async (knexOrTrx: any, tableName: string): Promise<boolean> => 
   }
 };
 
+const getMediaFileIdColumn = async (
+  knexOrTrx: any,
+  tableName: string,
+): Promise<(typeof MEDIA_FILE_ID_COLUMNS)[number] | null> => {
+  if (typeof knexOrTrx.schema?.hasColumn !== "function") {
+    return tableName === "upload_file_morph" ? "upload_file_id" : "file_id";
+  }
+
+  for (const columnName of MEDIA_FILE_ID_COLUMNS) {
+    try {
+      if (await knexOrTrx.schema.hasColumn(tableName, columnName)) {
+        return columnName;
+      }
+    } catch {
+      return tableName === "upload_file_morph" ? "upload_file_id" : "file_id";
+    }
+  }
+
+  return null;
+};
+
+const uniqueNumericIds = (ids: Iterable<unknown>): number[] => {
+  const uniqueIds = new Set<number>();
+
+  for (const id of ids) {
+    const numericId = Number(id);
+    if (Number.isInteger(numericId) && numericId > 0) {
+      uniqueIds.add(numericId);
+    }
+  }
+
+  return [...uniqueIds];
+};
+
 const countMediaRelations = async (strapi: Strapi): Promise<number> => {
   let total = 0;
   const knex = strapi.db.connection;
@@ -151,6 +198,73 @@ const countMediaRelations = async (strapi: Strapi): Promise<number> => {
   return total;
 };
 
+const collectCommerceMediaFileIds = async (
+  strapi: Strapi,
+  knexOrTrx: any = strapi.db.connection,
+): Promise<number[]> => {
+  const mediaFileIds: unknown[] = [];
+
+  for (const tableName of MEDIA_RELATION_TABLES) {
+    if (!(await hasTable(knexOrTrx, tableName))) continue;
+
+    const fileIdColumn = await getMediaFileIdColumn(knexOrTrx, tableName);
+    if (!fileIdColumn) continue;
+
+    const rows = await knexOrTrx(tableName)
+      .whereIn("related_type", PRODUCT_MEDIA_DELETE_UIDS)
+      .select(fileIdColumn);
+
+    for (const row of rows || []) {
+      mediaFileIds.push((row as Record<string, unknown>)[fileIdColumn]);
+    }
+  }
+
+  return uniqueNumericIds(mediaFileIds);
+};
+
+const collectReferencedMediaFileIds = async (
+  strapi: Strapi,
+  mediaFileIds: number[],
+  options?: { excludeCommerceRelations?: boolean },
+): Promise<number[]> => {
+  if (!mediaFileIds.length) return [];
+
+  const referencedFileIds: unknown[] = [];
+  const knex = strapi.db.connection;
+
+  for (const tableName of MEDIA_RELATION_TABLES) {
+    if (!(await hasTable(knex, tableName))) continue;
+
+    const fileIdColumn = await getMediaFileIdColumn(knex, tableName);
+    if (!fileIdColumn) continue;
+
+    let query = knex(tableName).whereIn(fileIdColumn, mediaFileIds);
+    if (options?.excludeCommerceRelations) {
+      query = query.whereNotIn("related_type", deleteUids);
+    }
+
+    const rows = await query.select(fileIdColumn);
+
+    for (const row of rows || []) {
+      referencedFileIds.push((row as Record<string, unknown>)[fileIdColumn]);
+    }
+  }
+
+  return uniqueNumericIds(referencedFileIds);
+};
+
+const getOrphanedMediaFileIds = async (
+  strapi: Strapi,
+  mediaFileIds: number[],
+  options?: { excludeCommerceRelations?: boolean },
+): Promise<number[]> => {
+  const referencedFileIds = new Set(
+    await collectReferencedMediaFileIds(strapi, mediaFileIds, options),
+  );
+
+  return mediaFileIds.filter((fileId) => !referencedFileIds.has(fileId));
+};
+
 const deleteMediaRelations = async (strapi: Strapi, trx: any): Promise<number> => {
   let total = 0;
   const knex = trx || strapi.db.connection;
@@ -165,6 +279,30 @@ const deleteMediaRelations = async (strapi: Strapi, trx: any): Promise<number> =
   }
 
   return total;
+};
+
+const deleteUploadFiles = async (strapi: Strapi, mediaFileIds: number[]): Promise<number> => {
+  if (!mediaFileIds.length) return 0;
+
+  const uploadService = strapi.plugin("upload").service("upload");
+  let deletedCount = 0;
+
+  for (const fileId of mediaFileIds) {
+    try {
+      const file = await uploadService.findOne(fileId);
+      if (!file) continue;
+
+      await uploadService.remove(file);
+      deletedCount += 1;
+    } catch (error) {
+      strapi.log.error("Commerce purge failed to delete upload media file", {
+        fileId,
+        error,
+      });
+    }
+  }
+
+  return deletedCount;
 };
 
 const countTargets = async (strapi: Strapi): Promise<Record<string, number>> => {
@@ -208,10 +346,15 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     if (dryRun) {
       const summary = await countTargets(strapi);
       const relationRows = await countMediaRelations(strapi);
+      const mediaFileIds = await collectCommerceMediaFileIds(strapi);
+      const orphanedMediaFileIds = await getOrphanedMediaFileIds(strapi, mediaFileIds, {
+        excludeCommerceRelations: true,
+      });
 
       strapi.log.info("Commerce purge dry-run completed", {
         summary,
         mediaRelationRows: relationRows,
+        physicalFilesToDelete: orphanedMediaFileIds.length,
       });
 
       return {
@@ -221,30 +364,34 @@ export default ({ strapi }: { strapi: Strapi }) => ({
         labels,
         mediaRelations: {
           relationRowsDeleted: relationRows,
-          physicalFilesDeleted: 0,
+          physicalFilesDeleted: orphanedMediaFileIds.length,
         },
         kept: COMMERCE_KEEP_TARGETS,
         needsConfirmation: COMMERCE_NEEDS_CONFIRMATION_TARGETS,
       };
     }
 
-    const { summary, mediaRelationRows } = await strapi.db.transaction(
+    const { summary, mediaRelationRows, commerceMediaFileIds } = await strapi.db.transaction(
       async ({ trx }) => {
+        const fileIds = await collectCommerceMediaFileIds(strapi, trx);
         const deletionSummary = await deleteTargets(strapi, trx);
         const relationRowsDeleted = await deleteMediaRelations(strapi, trx);
 
         return {
           summary: deletionSummary,
           mediaRelationRows: relationRowsDeleted,
+          commerceMediaFileIds: fileIds,
         };
       },
     );
+    const orphanedMediaFileIds = await getOrphanedMediaFileIds(strapi, commerceMediaFileIds);
+    const physicalFilesDeleted = await deleteUploadFiles(strapi, orphanedMediaFileIds);
 
     strapi.log.warn("Commerce data purge completed", {
       performedBy: options.performedBy?.id,
       summary,
       mediaRelationRows,
-      physicalFilesDeleted: 0,
+      physicalFilesDeleted,
     });
 
     await logManualActivity(strapi, {
@@ -254,12 +401,12 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       message: "Commerce data purge completed by superadmin.",
       messageEn: "Commerce data purge completed by superadmin.",
       severity: "warning",
-      description: "Deleted commerce records while preserving users, social data, shipping, settings, gateways, and uploads.",
+      description: "Deleted commerce records and orphaned product media while preserving users, social data, shipping, settings, gateways, and unrelated uploads.",
       metadata: {
         summary,
         mediaRelations: {
           relationRowsDeleted: mediaRelationRows,
-          physicalFilesDeleted: 0,
+          physicalFilesDeleted,
         },
         kept: COMMERCE_KEEP_TARGETS,
       },
@@ -275,7 +422,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       labels,
       mediaRelations: {
         relationRowsDeleted: mediaRelationRows,
-        physicalFilesDeleted: 0,
+        physicalFilesDeleted,
       },
       kept: COMMERCE_KEEP_TARGETS,
       needsConfirmation: COMMERCE_NEEDS_CONFIRMATION_TARGETS,
