@@ -40,6 +40,14 @@ command: ["--registry-mirror=https://docker.arvancloud.ir"]
 
 `docker.arvancloud.ir/docker/dockerfile:1.7`
 
+**خط `# syntax=` در Dockerfile:** BuildKit (به‌خصوص با `docker-container` driver در GitLab) این ایمیج را **مستقیم از Docker Hub** می‌کشد؛ `registry-mirror` روی dind روی این pull اثر ندارد. همیشه از پیشوند آروان استفاده کنید:
+
+```dockerfile
+# syntax=docker.arvancloud.ir/docker/dockerfile:1.7
+```
+
+نه `# syntax=docker/dockerfile:1.7` — در CI خطای `TLS handshake timeout` به `registry-1.docker.io` می‌دهد.
+
 ## اگر pull با نام کوتاه خطا داد
 
 برخی کلاینت‌ها/نسخه‌ها برای ایمیج‌های رسمی مسیر داخلی `library/` را می‌خواهند؛ در آن صورت امتحان کنید: `docker.arvancloud.ir/library/node:20-alpine`.

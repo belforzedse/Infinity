@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.7
+# syntax=docker.arvancloud.ir/docker/dockerfile:1.7
 # Node 22: avoids "controller[kState].transformAlgorithm is not a function" when cache handler handles streams under load
 FROM node:22-alpine AS builder
 
