@@ -66,7 +66,7 @@ The PLP is structured to display product listings with filtering capabilities:
 - Main column uses `min-w-0 flex-1` in [`PLP/List.tsx`](apps/frontend/src/components/PLP/List.tsx) so grids do not overflow beside the sidebar
 
 ### Fluid product cards (grids)
-- [`ProductCard`](apps/frontend/src/components/Product/Card.tsx): `w-full min-w-0` in grid cells; image area `aspect-[250/270]` (no fixed `md:w-[258px]`)
+- [`ProductCard`](apps/frontend/src/components/Product/Card.tsx): `w-full min-w-0` in grid cells; image area `aspect-[3/4]` on mobile, `aspect-[250/270]` from `md+` (no fixed `md:w-[258px]`)
 - [`ImageSlider`](apps/frontend/src/components/Product/ImageSlider.tsx): fills the aspect-ratio box (`h-full w-full`)
 
 ### PLP grid breakpoints (with 280px sidebar)

@@ -13,7 +13,7 @@ interface ProductInfoProps {
 
 export const ProductInfo: FC<ProductInfoProps> = ({ category, title, seenCount }) => {
   return (
-    <div className="flex-grow px-1 py-3 md:py-3">
+    <div className="flex-grow px-1 py-2 md:py-3">
       <div className="flex items-center justify-end">
         <div className="flex items-center gap-1">
           <span className="text-xs text-neutral-400">{category}</span>

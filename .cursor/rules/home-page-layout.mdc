@@ -40,10 +40,10 @@ The Home Page is structured as follows:
 ## Responsive Design Guidelines
 - Mobile-first approach with responsive classes
 - Different image sources for mobile vs desktop
-- Storefront shell: [`StorefrontContainer`](apps/frontend/src/components/storefront/StorefrontContainer.tsx) (`max-w-[1280px]`, `px-5 sm:px-6 lg:px-[60px]`)
+- Storefront shell: [`StorefrontContainer`](apps/frontend/src/components/storefront/StorefrontContainer.tsx) (`max-w-[1280px]`, `px-1 sm:px-5 lg:px-[60px]`)
 
 ### Homepage product sections (`OffersListHomePage`)
-- Mobile (&lt;768): horizontal scroll; each card wrapper `w-[calc((100vw-2.5rem)/2)]` (≈2 visible)
+- Mobile (&lt;768): horizontal scroll; each card wrapper `w-[calc(50%-0.1875rem)]` with `gap-1.5` (≈2 visible, no `max-w` cap)
 - Desktop: [`StorefrontGrid` variant `products`](apps/frontend/src/components/storefront/StorefrontGrid.tsx)
 - Pagination `productsPerPage` matches grid columns: 2 (md), 3 (lg), 4 (xl)
 
@@ -54,7 +54,7 @@ The Home Page is structured as follows:
 | xl (1280+) | 4 |
 
 ### Fluid product cards
-- [`ProductCard`](apps/frontend/src/components/Product/Card.tsx): `w-full min-w-0`; image `aspect-[250/270]` — scales inside grid cells (same pattern as social `PostCard` fluid mode)
+- [`ProductCard`](apps/frontend/src/components/Product/Card.tsx): `w-full min-w-0`; image `aspect-[3/4]` on mobile, `aspect-[250/270]` from `md+` — scales inside grid cells
 
 ### Category carousel
 - [`CategoryCarousel`](apps/frontend/src/components/Categories/CategoryCarousel.tsx): desktop tiles step `3 → 4 → 5 → 6` columns at `md`, `min-[900px]`, `xl` (not 6 columns immediately at `lg`)

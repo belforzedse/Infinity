@@ -57,12 +57,13 @@ export default function OffersListHomePage(props: Props) {
     const isMobile = window.innerWidth < 768;
 
     if (isMobile) {
-      // Mobile: Original scroll behavior
       if (scrollRef.current) {
-        const cardSize = 279; // Card width (259px) + gap (20px)
-        const scrollAmount = cardSize * 5;
-        scrollRef.current.scrollBy({
-          left: scrollAmount,
+        const container = scrollRef.current;
+        const firstCard = container.querySelector<HTMLElement>("[data-product-card-slide]");
+        const cardGap = 6;
+        const cardStep = firstCard ? firstCard.offsetWidth + cardGap : container.clientWidth;
+        container.scrollBy({
+          left: cardStep * 2,
           behavior: "smooth",
         });
       }
@@ -83,12 +84,13 @@ export default function OffersListHomePage(props: Props) {
     const isMobile = window.innerWidth < 768;
 
     if (isMobile) {
-      // Mobile: Original scroll behavior
       if (scrollRef.current) {
-        const cardSize = 279; // Card width (259px) + gap (20px)
-        const scrollAmount = cardSize * 5;
-        scrollRef.current.scrollBy({
-          left: -scrollAmount,
+        const container = scrollRef.current;
+        const firstCard = container.querySelector<HTMLElement>("[data-product-card-slide]");
+        const cardGap = 6;
+        const cardStep = firstCard ? firstCard.offsetWidth + cardGap : container.clientWidth;
+        container.scrollBy({
+          left: -cardStep * 2,
           behavior: "smooth",
         });
       }
@@ -203,7 +205,7 @@ export default function OffersListHomePage(props: Props) {
         <div className="w-full overflow-hidden md:hidden">
           <div
             ref={scrollRef}
-            className="scrollbar-hide smooth-scroll flex snap-x snap-mandatory gap-2 overflow-x-auto scroll-smooth transition-transform duration-300 ease-out"
+            className="scrollbar-hide smooth-scroll flex snap-x snap-mandatory gap-1.5 overflow-x-auto scroll-smooth transition-transform duration-300 ease-out"
             style={{
               WebkitOverflowScrolling: "touch",
               scrollbarWidth: "none",
@@ -215,7 +217,8 @@ export default function OffersListHomePage(props: Props) {
             {products.map((product, index) => (
               <div
                 key={product.id}
-                className="w-[calc((100vw-2.5rem)/2)] max-w-[200px] min-w-[140px] flex-shrink-0 transform snap-start transition-all duration-200 ease-out hover:scale-[1.02]"
+                data-product-card-slide
+                className="w-[calc(50%-0.1875rem)] shrink-0 snap-start transition-transform duration-200 ease-out"
                 style={{
                   animationDelay: `${index * 60}ms`,
                   animation: `fadeInUp 0.3s ease-out forwards ${index * 60}ms`,
