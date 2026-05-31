@@ -22,11 +22,22 @@ Strapi creates a `.strapi` directory (cache/CLI state) during `strapi build`. In
    So local Strapi artifacts are never sent as build context.
 
 2. **Dockerfile (main.Dockerfile, dev.Dockerfile)**  
-   After `npm run build`, remove the directory so it is not copied into the runner stage:
+   After `strapi build`, remove Strapi cache dirs so they are not snapshotted into the layer or copied into the runner stage:
    ```dockerfile
-   RUN npm run build && rm -rf .strapi
+   RUN pnpm run build \
+       && rm -rf .strapi .cache .tmp
    ```
-   Do not remove it only in a separate `RUN` if that would leave it in an earlier layer that is still extracted.
+   Do not remove them only in a separate `RUN` if that would leave them in an earlier layer that is still extracted.
+
+## “Stuck” after `✔ Building admin panel`
+
+That message is the **last line Strapi prints**. The build is usually **not hung inside Strapi**.
+
+After it, step `#24` (`pnpm run build && rm -rf …`) still has to finish, then BuildKit snapshots a **very large layer** (full `node_modules` + `dist` + `build/` admin bundle). That snapshot, and `--cache-to type=registry,mode=max` exporting it to GitLab, can take **many minutes with no new log lines**.
+
+The **next** Dockerfile step (`pnpm deploy --legacy --prod /app`) is also slow and mostly silent: it copies/prunes the whole backend dependency tree and then **rebuilds sharp** from source (~1 minute). Expect 10–30+ minutes on a slow runner between Strapi’s last log line and `#24 DONE` / deploy progress.
+
+Echo markers in the Dockerfiles (`strapi build finished…`, `starting pnpm deploy…`) make it obvious which phase is running. Liara **HTTP 429** on Corepack during install is separate; fallback to `registry.npmjs.org` already recovered in your log.
 
 ## NPM registry (build)
 

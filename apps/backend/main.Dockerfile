@@ -37,15 +37,21 @@ COPY apps/backend ./apps/backend
 WORKDIR /repo/apps/backend
 RUN --mount=type=cache,target=/root/.cache/node/corepack \
     fallback-registry.sh "${NPM_REGISTRY_URL}" "${NPM_REGISTRY_FALLBACK_URL}" \
-    pnpm run build && rm -rf .strapi
+    pnpm run build \
+    && echo "strapi build finished, removing build artifacts..." \
+    && rm -rf .strapi .cache .tmp \
+    && echo "strapi build step complete"
 WORKDIR /repo
 RUN --mount=type=cache,target=/root/.cache/node/corepack \
-    fallback-registry.sh "${NPM_REGISTRY_URL}" "${NPM_REGISTRY_FALLBACK_URL}" \
+    echo "starting pnpm deploy..." \
+    && fallback-registry.sh "${NPM_REGISTRY_URL}" "${NPM_REGISTRY_FALLBACK_URL}" \
     pnpm --filter @repo/backend deploy --legacy --prod /app \
+    && echo "pnpm deploy finished, copying build output..." \
     && mkdir -p /app/dist /app/build \
     && cp -a /repo/apps/backend/dist/. /app/dist/ \
     && if [ -d /repo/apps/backend/build ]; then cp -a /repo/apps/backend/build/. /app/build/; fi \
     && cd /app \
+    && echo "rebuilding sharp for musl runtime..." \
     && npm_config_platform=linux npm_config_arch=x64 npm_config_libc=musl pnpm rebuild sharp --unsafe-perm \
     && node -e "const sharp=require('sharp'); console.log('sharp-ok', process.platform, process.arch, sharp.versions);"
 
