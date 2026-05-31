@@ -2,20 +2,22 @@
 
 import { useState } from "react";
 import {
-  getFontSizeDisplayLabel,
   HERO_FONT_FAMILY_OPTIONS,
-  HERO_FONT_SIZE_OPTIONS,
+  HERO_FONT_SIZE_PX_MAX,
+  HERO_FONT_SIZE_PX_MIN,
   HERO_FONT_WEIGHT_OPTIONS,
   HERO_LETTER_SPACING_OPTIONS,
   HERO_LINE_HEIGHT_OPTIONS,
+  fontSizeTokenToPx,
+  pxToFontSizeToken,
   type HeroFontFamilyToken,
-  type HeroFontSizeToken,
   type HeroFontWeightToken,
   type HeroLetterSpacingToken,
   type HeroLineHeightToken,
   type HeroTextStyle,
 } from "@/types/super-admin/heroSlider";
 import { resolveColorForInput } from "@/components/SuperAdmin/HeroSliderEditor/utils";
+import { SizeRangeControl } from "./SizeRangeControl";
 
 type TextStyleEditorProps = {
   label: string;
@@ -70,25 +72,20 @@ export function TextStyleEditor({ label, value, onChange }: TextStyleEditorProps
           </select>
         </label>
 
-        <label className="text-xs text-slate-600">
-          اندازه
-          <select
-            value={value.fontSize}
-            onChange={(event) =>
-              onChange({
-                ...value,
-                fontSize: event.target.value as HeroFontSizeToken,
-              })
-            }
-            className="mt-1 w-full rounded-md border border-slate-200 px-2 py-2 text-xs"
-          >
-            {HERO_FONT_SIZE_OPTIONS.map((item) => (
-              <option key={item.value} value={item.value}>
-                {getFontSizeDisplayLabel(item.value)}
-              </option>
-            ))}
-          </select>
-        </label>
+        <SizeRangeControl
+          label="اندازه متن"
+          value={fontSizeTokenToPx(value.fontSize)}
+          min={HERO_FONT_SIZE_PX_MIN}
+          max={HERO_FONT_SIZE_PX_MAX}
+          step={1}
+          unit="px"
+          onChange={(px) =>
+            onChange({
+              ...value,
+              fontSize: pxToFontSizeToken(px),
+            })
+          }
+        />
       </div>
 
       {advancedOpen ? (

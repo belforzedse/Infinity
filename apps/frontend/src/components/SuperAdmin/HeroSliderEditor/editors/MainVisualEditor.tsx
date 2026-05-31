@@ -1,15 +1,36 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import ImageUploadField from "@/components/SuperAdmin/UpsertPage/ContentWrapper/Fields/ImageUploadField";
 import {
   HERO_BACKGROUND_POSITION_PRESETS,
-  HERO_BACKGROUND_SIZE_PRESETS,
+  HERO_BACKGROUND_SCALE_MAX,
+  HERO_BACKGROUND_SCALE_MIN,
+  HERO_FOREGROUND_HEIGHT_PERCENT_MAX,
+  HERO_FOREGROUND_HEIGHT_PERCENT_MIN,
+  HERO_FOREGROUND_OFFSET_MAX_PX,
+  HERO_FOREGROUND_OFFSET_MIN_PX,
+  HERO_FOREGROUND_WIDTH_PERCENT_MAX,
+  HERO_FOREGROUND_WIDTH_PERCENT_MIN,
+  HERO_FOREGROUND_ZOOM_MAX,
+  HERO_FOREGROUND_ZOOM_MIN,
+  HERO_OBJECT_POSITION_MAX,
+  HERO_OBJECT_POSITION_MIN,
+  backgroundSizeToPercent,
+  foregroundCustomHeightToPercent,
+  foregroundCustomWidthToPercent,
+  objectPositionPresetValue,
+  objectPositionToPercents,
+  percentToBackgroundSize,
+  percentToForegroundCustomHeight,
+  percentToForegroundCustomWidth,
+  percentsToObjectPosition,
   type HeroMainVisualSlot,
   type HeroSlotConfig,
 } from "@/types/super-admin/heroSlider";
 import { resolveColorForInput } from "../utils";
 import { OverflowSettings } from "./OverflowSettings";
+import { SizeRangeControl } from "./SizeRangeControl";
 
 type MainVisualEditorProps = {
   slot: HeroMainVisualSlot;
@@ -18,6 +39,8 @@ type MainVisualEditorProps = {
 
 export function MainVisualEditor({ slot, onChange }: MainVisualEditorProps) {
   const [advancedOpen, setAdvancedOpen] = useState(false);
+  const foregroundPosition = objectPositionToPercents(slot.foregroundObjectPosition);
+  const foregroundPreset = objectPositionPresetValue(slot.foregroundObjectPosition);
 
   return (
     <div className="space-y-3">
@@ -63,49 +86,136 @@ export function MainVisualEditor({ slot, onChange }: MainVisualEditorProps) {
         />
       </label>
 
-      <label className="text-xs text-slate-600">
-        بزرگنمایی تصویر اصلی
-        <input
-          type="range"
-          min={0.5}
-          max={2}
-          step={0.1}
-          value={slot.foregroundZoom ?? 1}
-          onChange={(event) =>
-            onChange({
-              ...slot,
-              foregroundZoom: Math.min(2, Math.max(0.5, Number(event.target.value) || 1)),
-            })
-          }
-          className="mt-1 w-full"
-        />
-        <span className="text-[11px] text-slate-500">
-          {(slot.foregroundZoom ?? 1).toFixed(1)}
-        </span>
-      </label>
+      <SizeRangeControl
+        label="بزرگنمایی تصویر اصلی"
+        value={slot.foregroundZoom ?? 1}
+        min={HERO_FOREGROUND_ZOOM_MIN}
+        max={HERO_FOREGROUND_ZOOM_MAX}
+        step={0.05}
+        unit="×"
+        onChange={(next) =>
+          onChange({
+            ...slot,
+            foregroundZoom: Math.min(HERO_FOREGROUND_ZOOM_MAX, Math.max(HERO_FOREGROUND_ZOOM_MIN, next)),
+          })
+        }
+      />
+
+      <SizeRangeControl
+        label="مقیاس پس‌زمینه"
+        value={backgroundSizeToPercent(slot.backgroundSize)}
+        min={HERO_BACKGROUND_SCALE_MIN}
+        max={HERO_BACKGROUND_SCALE_MAX}
+        step={1}
+        unit="%"
+        onChange={(percent) =>
+          onChange({
+            ...slot,
+            backgroundSize: percentToBackgroundSize(percent),
+          })
+        }
+      />
+
+      <SizeRangeControl
+        label="عرض تصویر اصلی"
+        value={foregroundCustomWidthToPercent(slot.foregroundCustomWidth)}
+        min={HERO_FOREGROUND_WIDTH_PERCENT_MIN}
+        max={HERO_FOREGROUND_WIDTH_PERCENT_MAX}
+        step={1}
+        unit="%"
+        onChange={(percent) =>
+          onChange({
+            ...slot,
+            foregroundCustomWidth: percentToForegroundCustomWidth(percent),
+          })
+        }
+      />
+
+      <SizeRangeControl
+        label="ارتفاع تصویر اصلی"
+        value={foregroundCustomHeightToPercent(slot.foregroundCustomHeight)}
+        min={HERO_FOREGROUND_HEIGHT_PERCENT_MIN}
+        max={HERO_FOREGROUND_HEIGHT_PERCENT_MAX}
+        step={1}
+        unit="%"
+        onChange={(percent) =>
+          onChange({
+            ...slot,
+            foregroundCustomHeight: percentToForegroundCustomHeight(percent),
+          })
+        }
+      />
 
       <label className="text-xs text-slate-600">
-        اندازه پس‌زمینه
+        موقعیت تصویر اصلی
         <select
-          value={
-            HERO_BACKGROUND_SIZE_PRESETS.some((p) => p.value === slot.backgroundSize)
-              ? slot.backgroundSize
-              : ""
-          }
+          value={foregroundPreset || "custom"}
           onChange={(event) => {
-            const v = event.target.value;
-            if (v) onChange({ ...slot, backgroundSize: v });
+            const value = event.target.value;
+            if (value !== "custom") {
+              onChange({ ...slot, foregroundObjectPosition: value });
+            }
           }}
           className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
         >
-          <option value="">سفارشی</option>
-          {HERO_BACKGROUND_SIZE_PRESETS.map((p) => (
-            <option key={p.value} value={p.value}>
-              {p.label}
+          <option value="custom">سفارشی (اسلایدر)</option>
+          {HERO_BACKGROUND_POSITION_PRESETS.map((preset) => (
+            <option key={preset.value} value={preset.value}>
+              {preset.label}
             </option>
           ))}
         </select>
       </label>
+
+      <SizeRangeControl
+        label="موقعیت افقی تصویر اصلی"
+        value={foregroundPosition.x}
+        min={HERO_OBJECT_POSITION_MIN}
+        max={HERO_OBJECT_POSITION_MAX}
+        step={1}
+        unit="%"
+        onChange={(x) =>
+          onChange({
+            ...slot,
+            foregroundObjectPosition: percentsToObjectPosition(x, foregroundPosition.y),
+          })
+        }
+      />
+
+      <SizeRangeControl
+        label="موقعیت عمودی تصویر اصلی"
+        value={foregroundPosition.y}
+        min={HERO_OBJECT_POSITION_MIN}
+        max={HERO_OBJECT_POSITION_MAX}
+        step={1}
+        unit="%"
+        onChange={(y) =>
+          onChange({
+            ...slot,
+            foregroundObjectPosition: percentsToObjectPosition(foregroundPosition.x, y),
+          })
+        }
+      />
+
+      <SizeRangeControl
+        label="جابجایی افقی (پیکسل)"
+        value={slot.foregroundOffsetXPx ?? 0}
+        min={HERO_FOREGROUND_OFFSET_MIN_PX}
+        max={HERO_FOREGROUND_OFFSET_MAX_PX}
+        step={5}
+        unit="px"
+        onChange={(foregroundOffsetXPx) => onChange({ ...slot, foregroundOffsetXPx })}
+      />
+
+      <SizeRangeControl
+        label="جابجایی عمودی (پیکسل)"
+        value={slot.foregroundOffsetYPx ?? 0}
+        min={HERO_FOREGROUND_OFFSET_MIN_PX}
+        max={HERO_FOREGROUND_OFFSET_MAX_PX}
+        step={5}
+        unit="px"
+        onChange={(foregroundOffsetYPx) => onChange({ ...slot, foregroundOffsetYPx })}
+      />
 
       <label className="text-xs text-slate-600">
         موقعیت پس‌زمینه

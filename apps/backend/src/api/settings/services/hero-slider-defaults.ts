@@ -3,6 +3,13 @@ export const MIN_AUTOPLAY_INTERVAL_MS = 3000;
 export const MAX_AUTOPLAY_INTERVAL_MS = 3600000;
 export const MIN_HEADLINE_BOTTOM_MARGIN_PX = 0;
 export const MAX_HEADLINE_BOTTOM_MARGIN_PX = 160;
+export const MIN_TITLE_SUBTITLE_GAP_PX = 0;
+export const MAX_TITLE_SUBTITLE_GAP_PX = 64;
+export const DEFAULT_TITLE_SUBTITLE_GAP_PX = 8;
+export const HERO_FOREGROUND_OFFSET_MIN_PX = -600;
+export const HERO_FOREGROUND_OFFSET_MAX_PX = 600;
+export const HERO_FOREGROUND_ZOOM_MIN = 0.25;
+export const HERO_FOREGROUND_ZOOM_MAX = 3;
 export const MAX_TEXT_LENGTH = 280;
 
 export const DESKTOP_SLOT_KEYS = [
@@ -59,6 +66,17 @@ export const ALLOWED_FONT_SIZES = new Set([
   "text-[30px]",
   "text-[20px]",
 ] as const);
+
+const FONT_SIZE_PX_TOKEN_PATTERN = /^text-\[(\d+)px\]$/;
+
+export function isAllowedFontSizeToken(token: string): boolean {
+  if (!token) return false;
+  if (ALLOWED_FONT_SIZES.has(token as (typeof ALLOWED_FONT_SIZES extends Set<infer T> ? T : never))) {
+    return true;
+  }
+  return FONT_SIZE_PX_TOKEN_PATTERN.test(token);
+}
+
 export const ALLOWED_FONT_WEIGHTS = new Set([
   "font-normal",
   "font-medium",

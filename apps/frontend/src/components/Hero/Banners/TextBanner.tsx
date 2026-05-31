@@ -1,10 +1,15 @@
 import React from "react";
 import type { ColorScheme, Typography } from "../types";
+import {
+  fontSizeClassFromToken,
+  fontSizeTokenToInlineStyle,
+} from "@/types/super-admin/heroSlider";
 
 type TextBannerProps = {
   title: string;
   subtitle?: string;
   marginBottomPx?: number;
+  titleSubtitleGapPx?: number;
   className?: string;
   titleClassName?: string;
   subtitleClassName?: string;
@@ -16,6 +21,7 @@ export default function TextBanner({
   title,
   subtitle,
   marginBottomPx,
+  titleSubtitleGapPx,
   className = "",
   titleClassName = "",
   subtitleClassName = "",
@@ -38,21 +44,37 @@ export default function TextBanner({
     titleClassName,
     hasInlineTitleColor ? "" : colors?.titleColor,
     typography?.titleFont,
-    typography?.titleSize,
+    fontSizeClassFromToken(typography?.titleSize),
     typography?.titleWeight,
     typography?.titleLeading,
     typography?.titleTracking,
-  ].filter(Boolean).join(" ").trim();
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
 
   const subtitleClass = [
     subtitleClassName,
     hasInlineSubtitleColor ? "" : colors?.subtitleColor,
     typography?.subtitleFont,
-    typography?.subtitleSize,
+    fontSizeClassFromToken(typography?.subtitleSize),
     typography?.subtitleWeight,
     typography?.subtitleLeading,
     typography?.subtitleTracking,
-  ].filter(Boolean).join(" ").trim();
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
+
+  const titleStyle: React.CSSProperties = {
+    ...(hasInlineTitleColor ? { color: colors?.titleColor } : {}),
+    ...fontSizeTokenToInlineStyle(typography?.titleSize),
+  };
+
+  const subtitleStyle: React.CSSProperties = {
+    ...(hasInlineSubtitleColor ? { color: colors?.subtitleColor } : {}),
+    ...fontSizeTokenToInlineStyle(typography?.subtitleSize),
+  };
 
   const containerStyle: React.CSSProperties = {};
   if (hasInlineBackground) {
@@ -61,17 +83,19 @@ export default function TextBanner({
   if (typeof marginBottomPx === "number" && Number.isFinite(marginBottomPx) && marginBottomPx > 0) {
     containerStyle.marginBottom = `${marginBottomPx}px`;
   }
+  if (typeof titleSubtitleGapPx === "number" && Number.isFinite(titleSubtitleGapPx)) {
+    containerStyle.display = "flex";
+    containerStyle.flexDirection = "column";
+    containerStyle.gap = `${Math.max(0, titleSubtitleGapPx)}px`;
+  }
 
   return (
     <div className={containerClass} style={Object.keys(containerStyle).length ? containerStyle : undefined}>
-      <h1 className={titleClass} style={hasInlineTitleColor ? { color: colors?.titleColor } : undefined}>
+      <h1 className={titleClass} style={Object.keys(titleStyle).length ? titleStyle : undefined}>
         {title}
       </h1>
       {subtitle ? (
-        <p
-          className={subtitleClass}
-          style={hasInlineSubtitleColor ? { color: colors?.subtitleColor } : undefined}
-        >
+        <p className={subtitleClass} style={Object.keys(subtitleStyle).length ? subtitleStyle : undefined}>
           {subtitle}
         </p>
       ) : null}

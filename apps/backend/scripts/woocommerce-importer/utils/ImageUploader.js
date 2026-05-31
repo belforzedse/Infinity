@@ -1,29 +1,24 @@
-const axios = require('axios');
-const FormData = require('form-data');
-const fs = require('fs');
-const path = require('path');
-const sharp = require('sharp');
-const { promisify } = require('util');
-const { pipeline } = require('stream');
-const streamPipeline = promisify(pipeline);
+const axios = require("axios");
+const FormData = require("form-data");
+const fs = require("fs");
+const path = require("path");
+const sharp = require("sharp");
+const { detectMediaKind, isEmbedVideoUrl } = require("./mediaUtils");
 
 /**
- * ImageUploader - Handles downloading and uploading images from WooCommerce to Strapi
+ * ImageUploader - Handles downloading and uploading images and videos from WooCommerce to Strapi
  */
 class ImageUploader {
   constructor(config, logger) {
     this.config = config;
     this.logger = logger;
-    this.uploadCache = new Map(); // Cache uploaded images to avoid duplicates
-    this.downloadCache = new Map(); // Cache downloaded image data
+    this.uploadCache = new Map();
+    this.downloadCache = new Map();
     this.tempDir = path.join(__dirname, "../temp");
 
-    // Ensure retry config exists with defaults
-    if (!this.config.images) {
-      this.config.images = {};
-    }
-    if (!this.config.images.retry) {
-      this.config.images.retry = {
+    const imageConfig = this.getImageConfig();
+    if (!imageConfig.retry) {
+      imageConfig.retry = {
         coverImageDownloadRetries: 3,
         coverImageUploadRetries: 3,
         galleryImageDownloadRetries: 3,
@@ -34,32 +29,43 @@ class ImageUploader {
       };
     }
 
-    // Ensure temp directory exists
     this.ensureTempDir();
   }
 
-  /**
-   * Ensure temp directory exists for image processing
-   */
-  ensureTempDir() {
-    if (!fs.existsSync(this.tempDir)) {
-      fs.mkdirSync(this.tempDir, { recursive: true });
-      this.logger.debug(`📁 Created temp directory: ${this.tempDir}`);
-    }
+  getImageConfig() {
+    return this.config.import?.images || this.config.images || {};
+  }
+
+  getVideoConfig() {
+    return this.config.import?.videos || this.config.videos || {};
+  }
+
+  getStrapiConfig() {
+    return this.config.strapi || {};
   }
 
   /**
-   * Download and upload cover image for a product
-   * Uses higher retry counts for cover images since they're critical
+   * Download and upload cover image for a product (first image entry only — legacy/blog path)
    */
   async handleCoverImage(wcProduct, strapiProductId) {
     try {
-      // Get the first featured image or first image in gallery
       const coverImageData =
         wcProduct.images && wcProduct.images.length > 0 ? wcProduct.images[0] : null;
 
       if (!coverImageData || !coverImageData.src) {
         this.logger.warn(`📸 No cover image found for product: ${wcProduct.name}`);
+        return null;
+      }
+
+      const kind = detectMediaKind(
+        coverImageData.src,
+        undefined,
+        this.getVideoConfig().allowedTypes || ["mp4", "webm", "mov", "m4v"],
+      );
+      if (kind !== "image") {
+        this.logger.debug(
+          `📸 Skipping non-image cover entry for ${wcProduct.name} (use handleProductMedia for videos)`,
+        );
         return null;
       }
 
@@ -69,7 +75,7 @@ class ImageUploader {
         coverImageData.src,
         coverImageData.alt || wcProduct.name,
         `product-${wcProduct.id}-cover`,
-        true, // isCoverImage = true for higher retry counts
+        true,
       );
 
       if (uploadedImage) {
@@ -88,10 +94,7 @@ class ImageUploader {
   }
 
   /**
-   * Download and upload all gallery images for a product
-   * @param {Object} wcProduct - WooCommerce product
-   * @param {number} strapiProductId - Strapi product ID
-   * @param {number} maxImages - Maximum number of gallery images to upload (default: unlimited)
+   * Download and upload gallery images (skips first image — legacy path)
    */
   async handleGalleryImages(wcProduct, strapiProductId, maxImages = 999) {
     try {
@@ -110,12 +113,14 @@ class ImageUploader {
       );
 
       const uploadedImages = [];
+      const allowedVideoTypes = this.getVideoConfig().allowedTypes || ["mp4", "webm", "mov", "m4v"];
 
-      // Skip first image (already used as cover) and process the rest
       for (let i = 1; i < wcProduct.images.length && uploadedImages.length < maxImages; i++) {
         const imageData = wcProduct.images[i];
-
         if (!imageData.src) continue;
+
+        const kind = detectMediaKind(imageData.src, undefined, allowedVideoTypes);
+        if (kind !== "image") continue;
 
         const uploadedImage = await this.downloadAndUploadImage(
           imageData.src,
@@ -128,7 +133,6 @@ class ImageUploader {
           this.logger.debug(`✅ Gallery image ${i} uploaded: ${uploadedImage.name}`);
         }
 
-        // Add delay between uploads to avoid rate limiting
         await this.delay(100);
       }
 
@@ -144,37 +148,58 @@ class ImageUploader {
   }
 
   /**
-   * Download and upload a single image
-   * @param {string} imageUrl - URL of the image to download
-   * @param {string} altText - Alt text for the image
-   * @param {string} prefix - Filename prefix
-   * @param {boolean} isCoverImage - Whether this is a cover image (uses higher retry counts)
+   * Upload a single media URL (auto-detects image vs video)
    */
+  async downloadAndUploadMedia(mediaUrl, altText, prefix, isCover = false) {
+    const videoConfig = this.getVideoConfig();
+    const kind = detectMediaKind(mediaUrl, undefined, videoConfig.allowedTypes || ["mp4", "webm", "mov", "m4v"]);
+
+    if (kind === "embed") {
+      if (videoConfig.skipEmbedUrls !== false) {
+        this.logger.warn(
+          `⚠️ ویدیوی تعبیه‌شده (YouTube/Vimeo) پشتیبانی نمی‌شود — رد شد: ${mediaUrl}`,
+        );
+        return null;
+      }
+    }
+
+    if (kind === "video") {
+      if (videoConfig.enableUpload === false) {
+        this.logger.debug(`⏭️ Video upload disabled — skipping: ${mediaUrl}`);
+        return null;
+      }
+      return this.downloadAndUploadVideo(mediaUrl, altText, prefix, isCover);
+    }
+
+    if (kind === "image") {
+      return this.downloadAndUploadImage(mediaUrl, altText, prefix, isCover);
+    }
+
+    this.logger.warn(`⚠️ نوع فایل پشتیبانی نمی‌شود — رد شد: ${mediaUrl}`);
+    return null;
+  }
+
   async downloadAndUploadImage(imageUrl, altText, prefix, isCoverImage = false) {
     try {
-      // Check cache first
       if (this.uploadCache.has(imageUrl)) {
         this.logger.debug(`📸 Using cached image: ${imageUrl}`);
         return this.uploadCache.get(imageUrl);
       }
 
-      // Download image with retries (more retries for cover images)
-      const retryConfig = this.config.images?.retry || {};
+      const retryConfig = this.getImageConfig().retry || {};
       const downloadRetries = isCoverImage
         ? retryConfig.coverImageDownloadRetries || 3
         : retryConfig.galleryImageDownloadRetries || 3;
 
-      let imageBuffer = await this.downloadImageWithRetry(imageUrl, downloadRetries);
+      const imageBuffer = await this.downloadMediaWithRetry(imageUrl, downloadRetries, "image");
       if (!imageBuffer) return null;
 
-      // Convert WebP to JPG if necessary
       const { buffer: processedBuffer, fileName: processedFileName } = await this.processImage(
         imageBuffer,
         imageUrl,
         prefix,
       );
 
-      // Upload to Strapi with retries (more retries for cover images)
       const uploadRetries = isCoverImage
         ? retryConfig.coverImageUploadRetries || 3
         : retryConfig.galleryImageUploadRetries || 3;
@@ -184,10 +209,10 @@ class ImageUploader {
         processedFileName,
         altText,
         uploadRetries,
+        "image",
       );
 
       if (uploadedImage) {
-        // Cache the result
         this.uploadCache.set(imageUrl, uploadedImage);
       }
 
@@ -198,27 +223,94 @@ class ImageUploader {
     }
   }
 
-  /**
-   * Download image from URL with retry mechanism
-   * @param {string} imageUrl - URL of the image to download
-   * @param {number} maxRetries - Maximum number of retry attempts
-   */
-  async downloadImageWithRetry(imageUrl, maxRetries = 3) {
+  async downloadAndUploadVideo(videoUrl, altText, prefix, isCoverVideo = false) {
+    try {
+      if (isEmbedVideoUrl(videoUrl)) {
+        this.logger.warn(
+          `⚠️ ویدیوی تعبیه‌شده (YouTube/Vimeo) قابل دانلود نیست — رد شد: ${videoUrl}`,
+        );
+        return null;
+      }
+
+      if (this.uploadCache.has(videoUrl)) {
+        this.logger.debug(`🎬 Using cached video: ${videoUrl}`);
+        return this.uploadCache.get(videoUrl);
+      }
+
+      const videoConfig = this.getVideoConfig();
+      const retryConfig = this.getImageConfig().retry || {};
+      const downloadRetries = isCoverVideo
+        ? retryConfig.coverImageDownloadRetries || 3
+        : retryConfig.galleryImageDownloadRetries || 3;
+
+      const downloadResult = await this.downloadMediaWithRetry(videoUrl, downloadRetries, "video");
+      if (!downloadResult) return null;
+
+      const { buffer, contentType } = downloadResult;
+      const fileName = this.generateFileName(videoUrl, prefix, contentType);
+
+      if (!this.isValidVideoFile(fileName, contentType)) {
+        this.logger.error(
+          `❌ فرمت ویدیو نامعتبر است — فقط ${(videoConfig.allowedTypes || []).join(", ")} مجاز است: ${videoUrl}`,
+        );
+        return null;
+      }
+
+      const uploadRetries = isCoverVideo
+        ? retryConfig.coverImageUploadRetries || 3
+        : retryConfig.galleryImageUploadRetries || 3;
+
+      const uploadedVideo = await this.uploadToStrapiWithRetry(
+        buffer,
+        fileName,
+        altText,
+        uploadRetries,
+        "video",
+      );
+
+      if (uploadedVideo) {
+        this.uploadCache.set(videoUrl, uploadedVideo);
+        this.logger.success(`✅ Video uploaded: ${uploadedVideo.name}`);
+      }
+
+      return uploadedVideo;
+    } catch (error) {
+      this.logger.error(`❌ Failed to process video ${videoUrl}:`, error.message);
+      return null;
+    }
+  }
+
+  isValidVideoFile(fileName, contentType) {
+    const videoConfig = this.getVideoConfig();
+    const allowedTypes = videoConfig.allowedTypes || ["mp4", "webm", "mov", "m4v"];
+    const ext = path.extname(fileName).slice(1).toLowerCase();
+
+    if (contentType && contentType.startsWith("video/")) {
+      return allowedTypes.some((type) => contentType.includes(type) || ext === type);
+    }
+
+    return allowedTypes.includes(ext);
+  }
+
+  async downloadMediaWithRetry(mediaUrl, maxRetries = 3, mediaKind = "image") {
     let lastError;
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        const buffer = await this.downloadImage(imageUrl);
-        if (buffer) {
-          return buffer;
+        const result = await this.downloadMedia(mediaUrl, mediaKind);
+        if (result) {
+          return result;
         }
         throw new Error("Download returned null");
       } catch (error) {
         lastError = error;
 
-        // Don't retry on certain errors (e.g., file too large, invalid format)
-        if (error.message?.includes("too large") || error.message?.includes("HTTP 404")) {
-          this.logger.error(`❌ Non-retryable error for ${imageUrl}:`, error.message);
+        if (
+          error.message?.includes("too large") ||
+          error.message?.includes("HTTP 404") ||
+          error.message?.includes("نامعتبر")
+        ) {
+          this.logger.error(`❌ Non-retryable error for ${mediaUrl}:`, error.message);
           return null;
         }
 
@@ -226,15 +318,14 @@ class ImageUploader {
           break;
         }
 
-        // Calculate exponential backoff delay
-        const retryConfig = this.config.images?.retry || {};
+        const retryConfig = this.getImageConfig().retry || {};
         const initialDelay = retryConfig.initialRetryDelay || 1000;
         const multiplier = retryConfig.retryMultiplier || 2;
         const maxDelay = retryConfig.maxRetryDelay || 10000;
         const retryDelay = Math.min(initialDelay * Math.pow(multiplier, attempt - 1), maxDelay);
 
         this.logger.warn(
-          `🔄 Image download failed (attempt ${attempt}/${maxRetries}), retrying in ${retryDelay}ms: ${imageUrl}`,
+          `🔄 Media download failed (attempt ${attempt}/${maxRetries}), retrying in ${retryDelay}ms: ${mediaUrl}`,
           error.message,
         );
         await this.delay(retryDelay);
@@ -242,77 +333,84 @@ class ImageUploader {
     }
 
     this.logger.error(
-      `❌ Failed to download image after ${maxRetries} attempts: ${imageUrl}`,
+      `❌ Failed to download media after ${maxRetries} attempts: ${mediaUrl}`,
       lastError?.message,
     );
     return null;
   }
 
-  /**
-   * Download image from URL (single attempt - used by retry wrapper)
-   */
-  async downloadImage(imageUrl) {
-    try {
-      // Check download cache first
-      if (this.downloadCache.has(imageUrl)) {
-        this.logger.debug(`📥 Using cached download: ${imageUrl}`);
-        return this.downloadCache.get(imageUrl);
+  /** @returns {Buffer | { buffer: Buffer, contentType: string } | null} */
+  async downloadMedia(mediaUrl, mediaKind = "image") {
+    if (this.downloadCache.has(mediaUrl)) {
+      this.logger.debug(`📥 Using cached download: ${mediaUrl}`);
+      const cached = this.downloadCache.get(mediaUrl);
+      if (mediaKind === "video") {
+        return typeof cached === "object" && cached.buffer ? cached : { buffer: cached, contentType: "" };
       }
-
-      this.logger.debug(`📥 Downloading image: ${imageUrl}`);
-
-      const response = await axios({
-        method: "GET",
-        url: imageUrl,
-        responseType: "arraybuffer",
-        timeout: this.config.images.downloadTimeout,
-        headers: {
-          "User-Agent": "WooCommerce-Strapi-Importer/1.0.0",
-        },
-      });
-
-      if (response.status !== 200) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-
-      const buffer = Buffer.from(response.data);
-
-      // Validate image size
-      if (buffer.length > this.config.images.maxSize) {
-        throw new Error(
-          `Image too large: ${(buffer.length / 1024 / 1024).toFixed(2)}MB > ${(
-            this.config.images.maxSize /
-            1024 /
-            1024
-          ).toFixed(2)}MB`,
-        );
-      }
-
-      // Cache the download
-      this.downloadCache.set(imageUrl, buffer);
-
-      this.logger.debug(`✅ Downloaded ${(buffer.length / 1024).toFixed(2)}KB from: ${imageUrl}`);
-      return buffer;
-    } catch (error) {
-      // Re-throw to be handled by retry mechanism
-      throw error;
+      return typeof cached === "object" && cached.buffer ? cached.buffer : cached;
     }
+
+    const imageConfig = this.getImageConfig();
+    const videoConfig = this.getVideoConfig();
+    const timeout =
+      mediaKind === "video"
+        ? videoConfig.downloadTimeout || 120000
+        : imageConfig.downloadTimeout || 30000;
+    const maxSize =
+      mediaKind === "video" ? videoConfig.maxSize || 256 * 1024 * 1024 : imageConfig.maxSize || 10 * 1024 * 1024;
+
+    this.logger.debug(`📥 Downloading ${mediaKind}: ${mediaUrl}`);
+
+    const response = await axios({
+      method: "GET",
+      url: mediaUrl,
+      responseType: "arraybuffer",
+      timeout,
+      headers: {
+        "User-Agent": "WooCommerce-Strapi-Importer/1.0.0",
+      },
+    });
+
+    if (response.status !== 200) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const buffer = Buffer.from(response.data);
+    const contentType = (response.headers["content-type"] || "").toLowerCase().split(";")[0].trim();
+
+    if (mediaKind === "video" && contentType && !contentType.startsWith("video/")) {
+      throw new Error(`نوع MIME ویدیو نامعتبر است: ${contentType || "unknown"}`);
+    }
+
+    if (buffer.length > maxSize) {
+      throw new Error(
+        `${mediaKind === "video" ? "Video" : "Image"} too large: ${(buffer.length / 1024 / 1024).toFixed(2)}MB > ${(maxSize / 1024 / 1024).toFixed(2)}MB`,
+      );
+    }
+
+    const cacheEntry = mediaKind === "video" ? { buffer, contentType } : buffer;
+    this.downloadCache.set(mediaUrl, cacheEntry);
+
+    this.logger.debug(`✅ Downloaded ${(buffer.length / 1024).toFixed(2)}KB from: ${mediaUrl}`);
+    return cacheEntry;
   }
 
-  /**
-   * Process image: Convert all images to WebP format (except GIFs)
-   * Strategy:
-   * - JPEG, PNG, WebP: Convert to WebP with quality 85
-   * - GIFs: Keep as-is (preserves animation)
-   * - Result: Most images stored as .webp with optimal compression, GIFs untouched
-   */
+  /** @deprecated Use downloadMediaWithRetry */
+  async downloadImageWithRetry(imageUrl, maxRetries = 3) {
+    return this.downloadMediaWithRetry(imageUrl, maxRetries, "image");
+  }
+
+  /** @deprecated Use downloadMedia */
+  async downloadImage(imageUrl) {
+    return this.downloadMedia(imageUrl, "image");
+  }
+
   async processImage(imageBuffer, imageUrl, prefix) {
     try {
       const metadata = await sharp(imageBuffer).metadata();
       const originalFormat = metadata.format;
       const originalSizeKb = (imageBuffer.length / 1024).toFixed(2);
 
-      // Keep GIFs as-is (preserve animation)
       if (originalFormat === "gif") {
         this.logger.debug(`🎬 Keeping GIF as-is: ${this.generateFileName(imageUrl, prefix)}`);
         return {
@@ -321,14 +419,11 @@ class ImageUploader {
         };
       }
 
-      // Convert all other formats to WebP
       this.logger.debug(`🔧 Converting ${originalFormat?.toUpperCase() || "UNKNOWN"} to WebP...`);
 
       const processedBuffer = await sharp(imageBuffer).webp({ quality: 85 }).toBuffer();
 
-      // Generate filename with .webp extension
       let fileName = this.generateFileName(imageUrl, prefix);
-      // Replace original extension with .webp
       fileName = fileName.substring(0, fileName.lastIndexOf(".")) + ".webp";
 
       const newSizeKb = (processedBuffer.length / 1024).toFixed(2);
@@ -338,18 +433,15 @@ class ImageUploader {
       ).toFixed(1);
 
       this.logger.success(
-        `✅ Converted to WebP: ${
-          originalFormat?.toUpperCase() || "UNKNOWN"
-        } → ${fileName} (${originalSizeKb}KB → ${newSizeKb}KB, ${savings}% savings)`,
+        `✅ Converted to WebP: ${originalFormat?.toUpperCase() || "UNKNOWN"} → ${fileName} (${originalSizeKb}KB → ${newSizeKb}KB, ${savings}% savings)`,
       );
 
       return {
         buffer: processedBuffer,
-        fileName: fileName,
+        fileName,
       };
     } catch (error) {
       this.logger.error(`❌ Failed to convert image to WebP:`, error.message);
-      // Fallback to original
       return {
         buffer: imageBuffer,
         fileName: this.generateFileName(imageUrl, prefix),
@@ -357,19 +449,12 @@ class ImageUploader {
     }
   }
 
-  /**
-   * Upload image buffer to Strapi media library with retry mechanism
-   * @param {Buffer} imageBuffer - Image buffer to upload
-   * @param {string} fileName - Filename for the upload
-   * @param {string} altText - Alt text for the image
-   * @param {number} maxRetries - Maximum number of retry attempts
-   */
-  async uploadToStrapiWithRetry(imageBuffer, fileName, altText, maxRetries = 3) {
+  async uploadToStrapiWithRetry(fileBuffer, fileName, altText, maxRetries = 3, mediaKind = "image") {
     let lastError;
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        const uploadedFile = await this.uploadToStrapi(imageBuffer, fileName, altText);
+        const uploadedFile = await this.uploadToStrapi(fileBuffer, fileName, altText);
         if (uploadedFile) {
           return uploadedFile;
         }
@@ -377,13 +462,12 @@ class ImageUploader {
       } catch (error) {
         lastError = error;
 
-        // Don't retry on certain errors (e.g., authentication, validation errors)
         if (
           error.response?.status === 401 ||
           error.response?.status === 403 ||
           error.response?.status === 400
         ) {
-          this.logger.error(`❌ Non-retryable error for upload:`, error.message);
+          this.logger.error(`❌ Non-retryable error for ${mediaKind} upload:`, error.message);
           if (error.response?.data) {
             this.logger.error(`Strapi response:`, error.response.data);
           }
@@ -394,15 +478,14 @@ class ImageUploader {
           break;
         }
 
-        // Calculate exponential backoff delay
-        const retryConfig = this.config.images?.retry || {};
+        const retryConfig = this.getImageConfig().retry || {};
         const initialDelay = retryConfig.initialRetryDelay || 1000;
         const multiplier = retryConfig.retryMultiplier || 2;
         const maxDelay = retryConfig.maxRetryDelay || 10000;
         const retryDelay = Math.min(initialDelay * Math.pow(multiplier, attempt - 1), maxDelay);
 
         this.logger.warn(
-          `🔄 Image upload failed (attempt ${attempt}/${maxRetries}), retrying in ${retryDelay}ms: ${fileName}`,
+          `🔄 ${mediaKind} upload failed (attempt ${attempt}/${maxRetries}), retrying in ${retryDelay}ms: ${fileName}`,
           error.message,
         );
         await this.delay(retryDelay);
@@ -410,7 +493,7 @@ class ImageUploader {
     }
 
     this.logger.error(
-      `❌ Failed to upload image after ${maxRetries} attempts: ${fileName}`,
+      `❌ Failed to upload ${mediaKind} after ${maxRetries} attempts: ${fileName}`,
       lastError?.message,
     );
     if (lastError?.response?.data) {
@@ -419,63 +502,57 @@ class ImageUploader {
     return null;
   }
 
-  /**
-   * Upload image buffer to Strapi media library (single attempt - used by retry wrapper)
-   */
-  async uploadToStrapi(imageBuffer, fileName, altText) {
-    try {
-      const form = new FormData();
+  async uploadToStrapi(fileBuffer, fileName, altText) {
+    const form = new FormData();
 
-      // Add the image buffer as a stream
-      form.append("files", imageBuffer, {
-        filename: fileName,
-        contentType: this.getContentType(fileName),
-      });
+    form.append("files", fileBuffer, {
+      filename: fileName,
+      contentType: this.getContentType(fileName),
+    });
 
-      // Add metadata
-      const fileInfo = JSON.stringify({
+    form.append(
+      "fileInfo",
+      JSON.stringify({
         alternativeText: altText,
         caption: altText,
-      });
-      form.append("fileInfo", fileInfo);
+      }),
+    );
 
-      const uploadHeaders = { ...form.getHeaders() };
-      if (!this.config.strapi.usePublicAccess && this.config.strapi.auth?.token) {
-        uploadHeaders.Authorization = `Bearer ${this.config.strapi.auth.token}`;
-      }
-      const response = await axios.post(`${this.config.strapi.baseUrl}/upload`, form, {
-        headers: uploadHeaders,
-        timeout: this.config.images.uploadTimeout,
-        maxContentLength: Infinity,
-        maxBodyLength: Infinity,
-      });
-
-      if (response.data && response.data.length > 0) {
-        const uploadedFile = response.data[0];
-        this.logger.debug(`✅ Uploaded to Strapi: ${uploadedFile.name} (ID: ${uploadedFile.id})`);
-        this.logger.debug(
-          `🔍 DEBUG - Upload response object:`,
-          JSON.stringify(uploadedFile, null, 2),
-        );
-        return uploadedFile;
-      }
-
-      throw new Error("No file data returned from Strapi");
-    } catch (error) {
-      // Re-throw to be handled by retry mechanism
-      throw error;
+    const uploadHeaders = { ...form.getHeaders() };
+    const strapiConfig = this.getStrapiConfig();
+    if (!strapiConfig.usePublicAccess && strapiConfig.auth?.token) {
+      uploadHeaders.Authorization = `Bearer ${strapiConfig.auth.token}`;
     }
+
+    const imageConfig = this.getImageConfig();
+    const videoConfig = this.getVideoConfig();
+    const isVideo = this.getContentType(fileName).startsWith("video/");
+    const uploadTimeout = isVideo
+      ? videoConfig.uploadTimeout || 120000
+      : imageConfig.uploadTimeout || 60000;
+
+    const response = await axios.post(`${strapiConfig.baseUrl}/upload`, form, {
+      headers: uploadHeaders,
+      timeout: uploadTimeout,
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity,
+    });
+
+    if (response.data && response.data.length > 0) {
+      const uploadedFile = response.data[0];
+      this.logger.debug(`✅ Uploaded to Strapi: ${uploadedFile.name} (ID: ${uploadedFile.id})`);
+      return uploadedFile;
+    }
+
+    throw new Error("No file data returned from Strapi");
   }
 
-  /**
-   * Generate a clean filename for the image (preserves original extension)
-   */
-  generateFileName(imageUrl, prefix) {
+  generateFileName(mediaUrl, prefix, contentTypeHint = "") {
     const sanitizeSegment = (value, fallback) => {
       const cleaned = (value || "")
         .toString()
         .normalize("NFKD")
-        .replace(/[^\w-]+/g, "-") // keep alnum/underscore/hyphen
+        .replace(/[^\w-]+/g, "-")
         .replace(/-+/g, "-")
         .replace(/^[-_]+|[-_]+$/g, "")
         .toLowerCase()
@@ -483,10 +560,18 @@ class ImageUploader {
       return cleaned || fallback;
     };
 
+    const extFromMime = () => {
+      const mime = contentTypeHint.toLowerCase();
+      if (mime.includes("mp4")) return ".mp4";
+      if (mime.includes("webm")) return ".webm";
+      if (mime.includes("quicktime") || mime.includes("mov")) return ".mov";
+      return "";
+    };
+
     try {
-      const url = new URL(imageUrl);
+      const url = new URL(mediaUrl);
       const originalName = path.basename(url.pathname);
-      const ext = (path.extname(originalName) || ".jpg").toLowerCase();
+      let ext = (path.extname(originalName) || extFromMime() || ".jpg").toLowerCase();
 
       const safePrefix = sanitizeSegment(prefix, "blog-media");
       const timestamp = Date.now();
@@ -497,13 +582,11 @@ class ImageUploader {
       const timestamp = Date.now();
       const safePrefix = sanitizeSegment(prefix, "blog-media");
       const rand = Math.random().toString(36).slice(2, 8);
-      return `${safePrefix}-${timestamp}-${rand}.jpg`;
+      const ext = extFromMime() || ".jpg";
+      return `${safePrefix}-${timestamp}-${rand}${ext}`;
     }
   }
 
-  /**
-   * Get content type based on file extension
-   */
   getContentType(fileName) {
     const ext = path.extname(fileName).toLowerCase();
     const contentTypes = {
@@ -513,20 +596,27 @@ class ImageUploader {
       ".gif": "image/gif",
       ".webp": "image/webp",
       ".svg": "image/svg+xml",
+      ".mp4": "video/mp4",
+      ".webm": "video/webm",
+      ".mov": "video/quicktime",
+      ".m4v": "video/mp4",
+      ".ogv": "video/ogg",
     };
-    return contentTypes[ext] || "image/jpeg";
+    return contentTypes[ext] || "application/octet-stream";
   }
 
-  /**
-   * Clean up temp files and caches
-   */
+  ensureTempDir() {
+    if (!fs.existsSync(this.tempDir)) {
+      fs.mkdirSync(this.tempDir, { recursive: true });
+      this.logger.debug(`📁 Created temp directory: ${this.tempDir}`);
+    }
+  }
+
   cleanup() {
     try {
-      // Clear caches
       this.uploadCache.clear();
       this.downloadCache.clear();
 
-      // Clean temp directory (if exists)
       if (fs.existsSync(this.tempDir)) {
         const files = fs.readdirSync(this.tempDir);
         for (const file of files) {
@@ -537,15 +627,12 @@ class ImageUploader {
         }
       }
 
-      this.logger.debug("🧹 Image uploader cleanup completed");
+      this.logger.debug("🧹 Media uploader cleanup completed");
     } catch (error) {
       this.logger.error("❌ Error during cleanup:", error.message);
     }
   }
 
-  /**
-   * Get upload statistics
-   */
   getStats() {
     return {
       cacheSize: this.uploadCache.size,
@@ -553,9 +640,6 @@ class ImageUploader {
     };
   }
 
-  /**
-   * Utility delay function
-   */
   async delay(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }

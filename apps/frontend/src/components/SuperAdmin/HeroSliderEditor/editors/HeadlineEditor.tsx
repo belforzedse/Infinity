@@ -1,8 +1,16 @@
 "use client";
 
+import {
+  DEFAULT_TITLE_SUBTITLE_GAP_PX,
+  MAX_HEADLINE_BOTTOM_MARGIN_PX,
+  MAX_TITLE_SUBTITLE_GAP_PX,
+  MIN_HEADLINE_BOTTOM_MARGIN_PX,
+  MIN_TITLE_SUBTITLE_GAP_PX,
+} from "@/types/super-admin/heroSlider";
 import { HERO_HEADLINE_STYLE_PRESETS } from "@/types/super-admin/heroSliderPackages";
 import type { HeroHeadlineSlot, HeroSlotConfig } from "@/types/super-admin/heroSlider";
 import { resolveColorForInput } from "../utils";
+import { SizeRangeControl } from "./SizeRangeControl";
 import { TextStyleEditor } from "./TextStyleEditor";
 
 type HeadlineEditorProps = {
@@ -70,23 +78,25 @@ export function HeadlineEditor({ slot, onChange }: HeadlineEditorProps) {
         />
       </label>
 
-      <label className="text-xs text-slate-600">
-        فاصله پایین بلاک تیتر (px)
-        <input
-          type="number"
-          min={0}
-          max={160}
-          step={2}
-          value={slot.bottomMarginPx}
-          onChange={(event) =>
-            onChange({
-              ...slot,
-              bottomMarginPx: Math.min(160, Math.max(0, Number(event.target.value) || 0)),
-            })
-          }
-          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
-        />
-      </label>
+      <SizeRangeControl
+        label="فاصله بین تیتر و زیرتیتر"
+        value={slot.titleSubtitleGapPx ?? DEFAULT_TITLE_SUBTITLE_GAP_PX}
+        min={MIN_TITLE_SUBTITLE_GAP_PX}
+        max={MAX_TITLE_SUBTITLE_GAP_PX}
+        step={1}
+        unit="px"
+        onChange={(titleSubtitleGapPx) => onChange({ ...slot, titleSubtitleGapPx })}
+      />
+
+      <SizeRangeControl
+        label="فاصله پایین بلاک تیتر"
+        value={slot.bottomMarginPx}
+        min={MIN_HEADLINE_BOTTOM_MARGIN_PX}
+        max={MAX_HEADLINE_BOTTOM_MARGIN_PX}
+        step={2}
+        unit="px"
+        onChange={(bottomMarginPx) => onChange({ ...slot, bottomMarginPx })}
+      />
 
       <TextStyleEditor
         label="استایل تیتر"

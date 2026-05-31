@@ -83,7 +83,7 @@ export const DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_POSITION = "bottom center";
 export const DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_SIZE = "cover";
 export const DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_CLASSNAME = "rounded-[20px]";
 export const DEFAULT_TABLET_MAIN_VISUAL_FOREGROUND_CLASSNAME =
-  "object-contain object-bottom h-full w-full max-h-full max-w-full";
+  "object-contain max-h-full max-w-full";
 export const DEFAULT_TABLET_MAIN_VISUAL_FOREGROUND_POSITION = "bottom center";
 
 export const DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_WIDTH = "100%";
@@ -92,22 +92,22 @@ export const DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_POSITION = "bottom center";
 export const DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_SIZE = "cover";
 export const DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_CLASSNAME = "rounded-[20px]";
 export const DEFAULT_MOBILE_MAIN_VISUAL_FOREGROUND_CLASSNAME =
-  "object-contain object-bottom h-full w-full max-h-full max-w-full";
+  "object-contain max-h-full max-w-full";
 export const DEFAULT_MOBILE_MAIN_VISUAL_FOREGROUND_POSITION = "bottom center";
 
 export const DEFAULT_TABLET_CARD_LEFT_CLASSNAME = "h-full rounded-[20px]";
 export const DEFAULT_TABLET_CARD_RIGHT_CLASSNAME = "h-full rounded-[20px]";
 export const DEFAULT_TABLET_CARD_LEFT_IMAGE_CLASSNAME =
-  "h-full w-full object-contain object-left-bottom";
+  "h-full w-full object-contain";
 export const DEFAULT_TABLET_CARD_RIGHT_IMAGE_CLASSNAME =
-  "h-full w-full object-contain object-left-bottom";
+  "h-full w-full object-contain";
 
 export const DEFAULT_MOBILE_CARD_LEFT_CLASSNAME = "h-full rounded-[20px]";
 export const DEFAULT_MOBILE_CARD_RIGHT_CLASSNAME = "h-full rounded-[20px]";
 export const DEFAULT_MOBILE_CARD_LEFT_IMAGE_CLASSNAME =
-  "h-full w-full object-contain object-left-bottom";
+  "h-full w-full object-contain";
 export const DEFAULT_MOBILE_CARD_RIGHT_IMAGE_CLASSNAME =
-  "h-full w-full object-contain object-left-bottom";
+  "h-full w-full object-contain";
 export const DEFAULT_MOBILE_CARD_PADDING_CLASSNAME = "px-3 py-3 pl-2";
 export const DEFAULT_COMPACT_CARD_BUTTON_CLASSNAME = "text-neutral-800 text-lg font-normal";
 export const DEFAULT_COMPACT_CARD_BACKGROUND_CLASSNAME = "rounded-[20px]";

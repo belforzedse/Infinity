@@ -13,6 +13,11 @@ const corsOrigins = [
 
 const allowedOriginsSet = new Set(corsOrigins);
 
+/** Max multipart upload size (bytes). Override with STRAPI_MAX_UPLOAD_SIZE_MB (default 256). */
+const maxUploadBytes =
+  (Number.parseInt(process.env.STRAPI_MAX_UPLOAD_SIZE_MB ?? "256", 10) || 256) * 1024 * 1024;
+const maxUploadLabel = `${Math.round(maxUploadBytes / 1024 / 1024)}mb`;
+
 export default [
   "strapi::logger",
   "strapi::errors",
@@ -48,11 +53,11 @@ export default [
       // Reduced from 500MB to reasonable limits for security and memory safety
       // 500MB limits were a DoS vector and could cause memory pressure
       jsonLimit: "10mb",      // JSON API requests (was 500mb)
-      formLimit: "50mb",      // Form data (was 500mb)
+      formLimit: maxUploadLabel, // multipart forms — must fit max video upload
       textLimit: "10mb",      // Text payloads (was 500mb)
       multipart: true,
       formidable: {
-        maxFileSize: 50 * 1024 * 1024, // 50MB for file uploads (was 500MB)
+        maxFileSize: maxUploadBytes,
       },
     },
   },

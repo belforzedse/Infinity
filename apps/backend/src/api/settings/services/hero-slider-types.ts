@@ -66,6 +66,7 @@ export type HeroHeadlineSlot = {
   subtitle: string;
   backgroundColor: string;
   bottomMarginPx: number;
+  titleSubtitleGapPx: number;
   className: string;
   titleClassName: string;
   subtitleClassName: string;
@@ -91,6 +92,8 @@ export type HeroMainVisualSlot = {
   foregroundObjectPosition: string;
   foregroundCustomWidth: string;
   foregroundCustomHeight: string;
+  foregroundOffsetXPx?: number;
+  foregroundOffsetYPx?: number;
   /** Foreground image zoom (0.5–2). Default 1. */
   foregroundZoom?: number;
   foregroundOverflow: HeroImageOverflow;

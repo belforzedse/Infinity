@@ -22,6 +22,11 @@ import type {
 import {
   isHeroSlideVisible,
   normalizeHeroSliderPayload,
+  fontSizeClassFromToken,
+  fontSizeTokenToInlineStyle,
+  objectPositionToPercents,
+  HERO_FOREGROUND_ZOOM_MAX,
+  HERO_FOREGROUND_ZOOM_MIN,
 } from "@/types/super-admin/heroSlider";
 import resolveAssetUrl from "@/utils/resolveAssetUrl";
 
@@ -86,6 +91,7 @@ function applyHeadlineSlot(base: TextBannerSpec, slot: HeroHeadlineSlot): TextBa
     title: slot.title || base.title,
     subtitle: slot.subtitle || base.subtitle,
     marginBottomPx: slot.bottomMarginPx,
+    titleSubtitleGapPx: slot.titleSubtitleGapPx,
     className: slot.className || base.className,
     titleClassName: mergeClassNames(base.titleClassName, slot.titleClassName),
     subtitleClassName: mergeClassNames(base.subtitleClassName, slot.subtitleClassName),
@@ -109,7 +115,7 @@ function buildButtonClass(slot: HeroCardSlot, baseClassName?: string): string {
     baseClassName || "inline-flex items-center rounded-lg px-4 py-2 transition",
     colorClass,
     slot.buttonStyle.fontFamily,
-    slot.buttonStyle.fontSize,
+    fontSizeClassFromToken(slot.buttonStyle.fontSize),
     slot.buttonStyle.fontWeight,
     slot.buttonStyle.lineHeight,
     slot.buttonStyle.letterSpacing,
@@ -124,6 +130,7 @@ function applyCardSlot(base: ActionBannerSpec, slot: HeroCardSlot): ActionBanner
       ? resolveCmsImageUrl(slot.backgroundImageUrl)
       : "";
   const backgroundValue = backgroundImageResolved || slot.backgroundColor || "#f8fafc";
+  const imagePosition = objectPositionToPercents(slot.imageObjectPosition || base.image.objectPosition);
 
   return {
     ...base,
@@ -140,6 +147,8 @@ function applyCardSlot(base: ActionBannerSpec, slot: HeroCardSlot): ActionBanner
       objectFit: "contain",
       zoom: 1,
       objectPosition: slot.imageObjectPosition || base.image.objectPosition,
+      focalX: imagePosition.x,
+      focalY: imagePosition.y,
       className: slot.imageClassName || base.image.className,
       customWidth: slot.imageCustomWidth || base.image.customWidth,
       customHeight: slot.imageCustomHeight || base.image.customHeight,
@@ -177,9 +186,12 @@ function applyCardSlot(base: ActionBannerSpec, slot: HeroCardSlot): ActionBanner
           className: slot.buttonClassName || buildButtonClass(slot, base.button?.className),
           showArrow: slot.buttonShowArrow,
           arrowClassName: slot.buttonArrowClassName || base.button?.arrowClassName,
-          style: isInlineColor(slot.buttonStyle.color)
-            ? { color: slot.buttonStyle.color }
-            : undefined,
+          style: {
+            ...(isInlineColor(slot.buttonStyle.color)
+              ? { color: slot.buttonStyle.color }
+              : {}),
+            ...fontSizeTokenToInlineStyle(slot.buttonStyle.fontSize),
+          },
         }
       : undefined,
   };
@@ -190,6 +202,10 @@ function applyMainVisualSlot(base: LeftBannerSpec, slot: HeroMainVisualSlot): Le
     ? resolveCmsImageUrl(slot.backgroundImageUrl)
     : "";
   const hasBackgroundImage = Boolean(resolvedBgUrl);
+  const foregroundPosition = objectPositionToPercents(
+    slot.foregroundObjectPosition || base.foregroundImage.objectPosition,
+  );
+
   return {
     ...base,
     background: {
@@ -212,10 +228,14 @@ function applyMainVisualSlot(base: LeftBannerSpec, slot: HeroMainVisualSlot): Le
       objectFit: "contain",
       zoom:
         typeof slot.foregroundZoom === "number" && Number.isFinite(slot.foregroundZoom)
-          ? Math.min(2, Math.max(0.5, slot.foregroundZoom))
+          ? Math.min(HERO_FOREGROUND_ZOOM_MAX, Math.max(HERO_FOREGROUND_ZOOM_MIN, slot.foregroundZoom))
           : 1,
       className: slot.foregroundClassName || base.foregroundImage.className,
       objectPosition: slot.foregroundObjectPosition || base.foregroundImage.objectPosition,
+      focalX: foregroundPosition.x,
+      focalY: foregroundPosition.y,
+      offsetXPx: slot.foregroundOffsetXPx ?? 0,
+      offsetYPx: slot.foregroundOffsetYPx ?? 0,
       customWidth: slot.foregroundCustomWidth || base.foregroundImage.customWidth,
       customHeight: slot.foregroundCustomHeight || base.foregroundImage.customHeight,
       overflow: slot.foregroundOverflow,

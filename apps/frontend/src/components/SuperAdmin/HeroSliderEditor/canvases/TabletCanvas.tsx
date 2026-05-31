@@ -34,6 +34,7 @@ export function TabletCanvas({
               title={layout.primaryBanner.title}
               subtitle={layout.primaryBanner.subtitle}
               marginBottomPx={layout.primaryBanner.marginBottomPx}
+              titleSubtitleGapPx={layout.primaryBanner.titleSubtitleGapPx}
               className={layout.primaryBanner.className}
               titleClassName={layout.primaryBanner.titleClassName}
               subtitleClassName={layout.primaryBanner.subtitleClassName}

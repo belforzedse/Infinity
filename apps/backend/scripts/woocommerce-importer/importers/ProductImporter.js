@@ -1,6 +1,11 @@
 const { WooCommerceClient, StrapiClient } = require('../utils/ApiClient');
 const DuplicateTracker = require('../utils/DuplicateTracker');
 const ImageUploader = require('../utils/ImageUploader');
+const {
+  extractVideoUrlsFromMeta,
+  splitWcMediaItems,
+  isEmbedVideoUrl,
+} = require('../utils/mediaUtils');
 const VariationImporter = require('./VariationImporter');
 
 // Import the central Unicode slug utility to ensure consistent slug behavior
@@ -820,50 +825,49 @@ class ProductImporter {
       }
 
       if (productId) {
-        // Only handle images if enabled in config
-        if (this.config.import.images.enableUpload) {
-          // Always attempt to update images - no skip logic based on existing images
-          const imageResults = await this.handleProductImages(wcProduct, productId);
+        const mediaUploadEnabled =
+          this.config.import.images.enableUpload ||
+          this.config.import.videos?.enableUpload !== false;
 
-          if (imageResults.coverImageId || imageResults.galleryImageIds.length > 0) {
+        if (mediaUploadEnabled) {
+          const mediaResults = await this.handleProductMedia(wcProduct, productId);
+
+          const hasCover = Boolean(mediaResults.coverMediaId);
+          const hasGallery = mediaResults.galleryMediaIds.length > 0;
+
+          if (hasCover || hasGallery) {
             try {
               const updateData = {};
 
-              // When updating product with new images, explicitly clear old references
-              // This ensures dangling image references don't persist when images are replaced
-              if (imageResults.coverImageId) {
-                // Clear old cover image by setting new one
-                // Strapi will disconnect the old one automatically
-                updateData.CoverImage = imageResults.coverImageId;
+              if (hasCover) {
+                updateData.CoverImage = mediaResults.coverMediaId;
               } else if (mode === "update") {
-                // If no new cover image but this is an update, clear the old one
                 updateData.CoverImage = null;
               }
 
-              if (imageResults.galleryImageIds.length > 0) {
-                // Replace all gallery images with new ones
-                updateData.Media = imageResults.galleryImageIds;
+              if (hasGallery) {
+                updateData.Media = mediaResults.galleryMediaIds;
               } else if (mode === "update") {
-                // If no new gallery images but this is an update, clear old ones
                 updateData.Media = null;
               }
 
-              // Only update if we have data to update
               if (Object.keys(updateData).length > 0) {
                 this.logger.debug(
-                  `🔍 DEBUG: Attempting to update product ${productId} with image data:`,
+                  `🔍 DEBUG: Attempting to update product ${productId} with media data:`,
                   JSON.stringify(updateData, null, 2),
                 );
 
                 try {
-                  // Wait for Strapi to fully index uploaded images before linking them
                   await new Promise((resolve) => setTimeout(resolve, 100));
                   await this.strapiClient.updateProduct(productId, updateData);
-                  this.logger.success(`📂 Images synced for product: ${wcProduct.name}`);
+                  const videoNote =
+                    mediaResults.videosUploaded > 0
+                      ? ` (${mediaResults.videosUploaded} video(s))`
+                      : "";
+                  this.logger.success(`📂 Media synced for product: ${wcProduct.name}${videoNote}`);
                 } catch (apiError) {
-                  // Log detailed error info for debugging
                   this.logger.error(
-                    `❌ Image update API error for product ${productId}:`,
+                    `❌ Media update API error for product ${productId}:`,
                     apiError.message,
                   );
                   if (apiError.response) {
@@ -876,16 +880,14 @@ class ProductImporter {
                   throw apiError;
                 }
               }
-            } catch (imageUpdateError) {
-              // If image update fails, log warning but continue with next product
-              // The product itself was successfully created/updated
+            } catch (mediaUpdateError) {
               this.logger.warn(
-                `⚠️ Failed to sync images for product ${wcProduct.name}: ${imageUpdateError.message}`,
+                `⚠️ Failed to sync media for product ${wcProduct.name}: ${mediaUpdateError.message}`,
               );
             }
           }
         } else {
-          this.logger.debug(`⏭️ Image upload disabled - skipping images for: ${wcProduct.name}`);
+          this.logger.debug(`⏭️ Media upload disabled - skipping media for: ${wcProduct.name}`);
         }
 
         // Sync size guide helper per product
@@ -1167,36 +1169,182 @@ class ProductImporter {
   }
 
   /**
-   * Handle product images - download from WooCommerce and upload to Strapi
+   * Handle product media — images and videos from WooCommerce → Strapi CoverImage + Media
    */
-  async handleProductImages(wcProduct, strapiProductId) {
+  async handleProductMedia(wcProduct, strapiProductId) {
+    const emptyResult = {
+      coverMediaId: null,
+      galleryMediaIds: [],
+      videosUploaded: 0,
+      videosFailed: 0,
+    };
+
     try {
-      if (!wcProduct.images || wcProduct.images.length === 0) {
-        this.logger.debug(`📸 No images found for product: ${wcProduct.name}`);
-        return { coverImageId: null, galleryImageIds: [] };
+      const videoConfig = this.config.import.videos || {};
+      const allowedVideoTypes = videoConfig.allowedTypes || ["mp4", "webm", "mov", "m4v"];
+      const maxGalleryItems = this.config.import.images.maxImagesPerProduct;
+      const imagesEnabled = this.config.import.images.enableUpload !== false;
+      const videosEnabled = videoConfig.enableUpload !== false;
+
+      const split = splitWcMediaItems(wcProduct.images, allowedVideoTypes);
+
+      for (const item of split.unsupported) {
+        if (item.reason === "embed" && isEmbedVideoUrl(item.src)) {
+          this.logger.warn(
+            `⚠️ ویدیوی تعبیه‌شده برای محصول «${wcProduct.name}» قابل import نیست: ${item.src}`,
+          );
+        }
       }
 
-      this.logger.info(`📸 Processing ${wcProduct.images.length} images for: ${wcProduct.name}`);
+      const metaVideoUrls = videosEnabled
+        ? extractVideoUrlsFromMeta(wcProduct, videoConfig.metaKeys)
+        : [];
 
-      // Handle cover image (first image)
-      const coverImageId = await this.imageUploader.handleCoverImage(wcProduct, strapiProductId);
+      const hasAnyMedia =
+        split.images.length > 0 || split.videos.length > 0 || metaVideoUrls.length > 0;
 
-      // Handle gallery images (remaining images) with max limit
-      const maxGalleryImages = this.config.import.images.maxImagesPerProduct;
-      const galleryImageIds = await this.imageUploader.handleGalleryImages(
-        wcProduct,
-        strapiProductId,
-        maxGalleryImages,
+      if (!hasAnyMedia) {
+        this.logger.debug(`📸 No media found for product: ${wcProduct.name}`);
+        return emptyResult;
+      }
+
+      this.logger.info(
+        `📸 Processing media for: ${wcProduct.name} (${split.images.length} image(s), ${split.videos.length + metaVideoUrls.length} video candidate(s))`,
       );
 
+      let coverMediaId = null;
+      const galleryMediaIds = [];
+      let videosUploaded = 0;
+      let videosFailed = 0;
+
+      const uploadEntry = async (url, altText, prefix, isCover) => {
+        const uploaded = await this.imageUploader.downloadAndUploadMedia(url, altText, prefix, isCover);
+        if (!uploaded) {
+          return null;
+        }
+        if (uploaded.mime?.startsWith("video/")) {
+          videosUploaded++;
+        }
+        return uploaded.id;
+      };
+
+      // Cover: first image preferred; fallback to first video
+      if (imagesEnabled && split.images.length > 0) {
+        const cover = split.images[0];
+        coverMediaId = await uploadEntry(
+          cover.src,
+          cover.alt || wcProduct.name,
+          `product-${wcProduct.id}-cover`,
+          true,
+        );
+      } else if (videosEnabled && split.videos.length > 0) {
+        const coverVideo = split.videos[0];
+        coverMediaId = await uploadEntry(
+          coverVideo.src,
+          coverVideo.alt || wcProduct.name,
+          `product-${wcProduct.id}-cover-video`,
+          true,
+        );
+        if (!coverMediaId) {
+          videosFailed++;
+        }
+      }
+
+      // Gallery images (skip first if used as cover)
+      if (imagesEnabled) {
+        const galleryImages = split.images.slice(split.images.length > 0 && coverMediaId ? 1 : 0);
+        for (let i = 0; i < galleryImages.length && galleryMediaIds.length < maxGalleryItems; i++) {
+          const imageData = galleryImages[i];
+          const mediaId = await uploadEntry(
+            imageData.src,
+            imageData.alt || `${wcProduct.name} - Image ${i + 1}`,
+            `product-${wcProduct.id}-gallery-${i + 1}`,
+            false,
+          );
+          if (mediaId) {
+            galleryMediaIds.push(mediaId);
+          }
+          await this.imageUploader.delay(100);
+        }
+      }
+
+      // Videos from images array (excluding cover video)
+      if (videosEnabled) {
+        const galleryVideos = split.videos.slice(
+          coverMediaId && split.images.length === 0 ? 1 : 0,
+        );
+
+        for (let i = 0; i < galleryVideos.length; i++) {
+          if (galleryMediaIds.length >= maxGalleryItems) break;
+          const videoData = galleryVideos[i];
+          const mediaId = await uploadEntry(
+            videoData.src,
+            videoData.alt || `${wcProduct.name} - Video ${i + 1}`,
+            `product-${wcProduct.id}-video-${i + 1}`,
+            false,
+          );
+          if (mediaId) {
+            galleryMediaIds.push(mediaId);
+          } else {
+            videosFailed++;
+          }
+          await this.imageUploader.delay(100);
+        }
+
+        const seenUrls = new Set([
+          ...(wcProduct.images || []).map((item) => item?.src).filter(Boolean),
+        ]);
+
+        for (let i = 0; i < metaVideoUrls.length; i++) {
+          if (galleryMediaIds.length >= maxGalleryItems) break;
+          const videoUrl = metaVideoUrls[i];
+          if (seenUrls.has(videoUrl)) continue;
+          seenUrls.add(videoUrl);
+
+          if (isEmbedVideoUrl(videoUrl)) {
+            this.logger.warn(
+              `⚠️ ویدیوی تعبیه‌شده در meta برای «${wcProduct.name}» — رد شد: ${videoUrl}`,
+            );
+            videosFailed++;
+            continue;
+          }
+
+          const mediaId = await uploadEntry(
+            videoUrl,
+            `${wcProduct.name} - Video ${i + 1}`,
+            `product-${wcProduct.id}-meta-video-${i + 1}`,
+            false,
+          );
+          if (mediaId) {
+            galleryMediaIds.push(mediaId);
+          } else {
+            videosFailed++;
+          }
+          await this.imageUploader.delay(100);
+        }
+      }
+
       return {
-        coverImageId,
-        galleryImageIds,
+        coverMediaId,
+        galleryMediaIds,
+        videosUploaded,
+        videosFailed,
       };
     } catch (error) {
-      this.logger.error(`❌ Failed to handle images for product ${wcProduct.id}:`, error.message);
-      return { coverImageId: null, galleryImageIds: [] };
+      this.logger.error(`❌ Failed to handle media for product ${wcProduct.id}:`, error.message);
+      return emptyResult;
     }
+  }
+
+  /**
+   * @deprecated Use handleProductMedia
+   */
+  async handleProductImages(wcProduct, strapiProductId) {
+    const result = await this.handleProductMedia(wcProduct, strapiProductId);
+    return {
+      coverImageId: result.coverMediaId,
+      galleryImageIds: result.galleryMediaIds,
+    };
   }
 
   /**

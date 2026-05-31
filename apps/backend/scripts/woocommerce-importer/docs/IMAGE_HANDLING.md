@@ -1,119 +1,119 @@
-# Image Handling in WooCommerce Importer
+# Media Handling in WooCommerce Importer
 
 ## 🎯 Overview
 
-The WooCommerce importer includes comprehensive image handling that automatically downloads product images from WooCommerce and uploads them to your Strapi media library.
+The WooCommerce importer downloads product **images and videos** from WooCommerce and uploads them to the Strapi media library, then links them to `CoverImage` and `Media` on each product.
+
+## 🎬 Video Import
+
+### Sources
+
+1. **`images[]` array** — entries with `.mp4`, `.webm`, `.mov`, or `.m4v` URLs
+2. **`meta_data[]`** — plugin keys (configurable via `IMPORT_VIDEOS_META_KEYS`):
+   - `_product_video`, `product_video`, `_woo_product_video`, `product_video_gallery`, `_featured_video`, etc.
+
+Run discovery on your store:
+
+```bash
+node discover-product-videos.js --limit=50 --page=1
+```
+
+### Cover vs gallery
+
+- **CoverImage**: first **image** in `images[]`; if none, first **video**
+- **Media**: remaining images + all other videos (including meta URLs)
+- **Embed URLs** (YouTube/Vimeo): logged and skipped — not downloadable as Strapi files
+
+### Video configuration
+
+```javascript
+// config.js → import.videos
+videos: {
+  enableUpload: true,              // IMPORT_VIDEOS_ENABLE_UPLOAD=false to disable
+  maxSize: 256 * 1024 * 1024,       // 256MB default — set STRAPI_MAX_UPLOAD_SIZE_MB + IMPORT_VIDEOS_MAX_SIZE
+  allowedTypes: ['mp4', 'webm', 'mov', 'm4v'],
+  metaKeys: [/* see config.js defaults */],
+  skipEmbedUrls: true,
+  downloadTimeout: 120000,
+  uploadTimeout: 120000,
+}
+```
+
+### Validation
+
+- Extension + response `Content-Type` must indicate `video/*`
+- Oversized or invalid files log Persian warnings and are skipped (import continues)
+
+---
 
 ## 🖼️ How It Works
 
-### Image Processing Flow
+### Media Processing Flow
 
 ```
-WooCommerce Product Images → Download → Strapi Media Library → Link to Product
+WooCommerce Product Media → Download → Strapi Media Library → Link to Product
     ↓                          ↓              ↓                ↓
 1. Extract URLs           2. Download     3. Upload      4. Link Relations
-   from JSON                 Images         to Strapi      CoverImage & Media
+   (images + videos)         (WebP/images)   to Strapi      CoverImage & Media
+                             raw videos
 ```
 
-### Image Types Handled
+### Media Types Handled
 
-1. **Cover Image**: First image in the WooCommerce images array
+1. **Cover**: First image in WooCommerce `images[]` (or first video if no images)
    - Maps to: `CoverImage` field in Strapi Product
-   - Single image relationship
 
-2. **Gallery Images**: All remaining images from WooCommerce
-   - Maps to: `Media` field in Strapi Product  
-   - Multiple images relationship
+2. **Gallery**: Remaining images + videos from `images[]` and `meta_data`
+   - Maps to: `Media` field in Strapi Product
 
 ## 🔧 Technical Implementation
 
 ### ImageUploader Class
 
-The `ImageUploader` utility class handles:
+The `ImageUploader` utility class handles images **and videos**:
 
-- ✅ **Download Management**: Fetches images from WooCommerce URLs
-- ✅ **Upload Processing**: Uploads to Strapi media library
-- ✅ **Caching**: Prevents duplicate downloads/uploads
-- ✅ **Error Handling**: Robust retry and fallback mechanisms
-- ✅ **File Validation**: Size, type, and format checks
-- ✅ **Filename Generation**: Clean, Persian-friendly names
+- ✅ **Download Management**: Fetches media from WooCommerce URLs
+- ✅ **Image processing**: WebP conversion via `sharp` (images only)
+- ✅ **Video upload**: Raw buffer upload with correct MIME (no `sharp`)
+- ✅ **Caching**, **retries**, **validation**, **Persian-friendly filenames**
+
+See also: [`utils/mediaUtils.js`](../utils/mediaUtils.js) for URL/MIME detection.
 
 ### Key Features
-
-#### 🚀 **Performance Optimized**
-
-```javascript
-// Caching system prevents duplicate work
-uploadCache: Map<URL, UploadedFile>
-downloadCache: Map<URL, Buffer>
-
-// Rate limiting prevents API overload
-delayBetweenUploads: 500ms
-```
 
 #### 🛡️ **Validation & Safety**
 
 ```javascript
-// File size validation
+// Images
 maxSize: 10MB
-
-// Supported formats
 allowedTypes: ['jpg', 'jpeg', 'png', 'gif', 'webp']
 
-// Timeout protection
-downloadTimeout: 30s
-uploadTimeout: 60s
-```
-
-#### 🌍 **Persian/Farsi Support**
-
-```javascript
-// Unicode-friendly filename generation
-cleanBaseName = baseName.replace(
-  /[^a-zA-Z0-9\u0600-\u06FF\u0750-\u077F-_]/g, '-'
-);
+// Videos
+maxSize: 256MB
+allowedTypes: ['mp4', 'webm', 'mov', 'm4v']
 ```
 
 ## 📝 Configuration
 
-### Enable/Disable Image Upload
+### Enable/Disable Upload
 
 ```javascript
-// config.js
 import: {
-  images: {
-    enableUpload: true,    // Set to false to skip images
-    maxSize: 10 * 1024 * 1024,
-    allowedTypes: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
-    downloadTimeout: 30000,
-    uploadTimeout: 60000,
-    delayBetweenUploads: 500,
-    cacheImages: true
-  }
+  images: { enableUpload: true, /* ... */ },
+  videos: { enableUpload: true, /* ... */ },
 }
 ```
 
 ### Strapi Schema Requirements
 
 ```json
-// Product schema must have:
 {
-  "CoverImage": {
-    "type": "media",
-    "multiple": false,
-    "required": false,
-    "allowedTypes": ["images"]
-  },
-  "Media": {
-    "type": "media", 
-    "multiple": true,
-    "required": false,
-    "allowedTypes": ["images", "videos"]
-  }
+  "CoverImage": { "allowedTypes": ["images", "videos"] },
+  "Media": { "allowedTypes": ["images", "videos"] }
 }
 ```
 
-## 🔄 Import Process
+---
 
 ### 1. Product Creation
 

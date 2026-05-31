@@ -1,10 +1,6 @@
 #!/bin/sh
 set -eu
 
-primary_registry="${1:?primary registry is required}"
-fallback_registry="${2:?fallback registry is required}"
-shift 2
-
 run_with_registry() {
   registry="$1"
   shift
@@ -19,10 +15,45 @@ run_with_registry() {
     && "$@"
 }
 
-if run_with_registry "$primary_registry" "$@"; then
-  exit 0
+if [ "$#" -lt 2 ]; then
+  echo "usage: fallback-registry.sh <registry> [registry...] <command...>" >&2
+  exit 1
 fi
 
-echo "Primary npm registry failed: $primary_registry"
-echo "Retrying with fallback npm registry: $fallback_registry"
-run_with_registry "$fallback_registry" "$@"
+registries=""
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    http://*|https://*)
+      registries="$registries $1"
+      shift
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
+if [ -z "$registries" ] || [ "$#" -eq 0 ]; then
+  echo "usage: fallback-registry.sh <registry> [registry...] <command...>" >&2
+  exit 1
+fi
+
+attempt=0
+for registry in $registries; do
+  attempt=$((attempt + 1))
+  if [ "$attempt" -eq 1 ]; then
+    if run_with_registry "$registry" "$@"; then
+      exit 0
+    fi
+    echo "Primary npm registry failed: $registry"
+  else
+    echo "Retrying with fallback npm registry: $registry"
+    if run_with_registry "$registry" "$@"; then
+      exit 0
+    fi
+    echo "Fallback npm registry failed: $registry"
+  fi
+done
+
+echo "All npm registries failed"
+exit 1

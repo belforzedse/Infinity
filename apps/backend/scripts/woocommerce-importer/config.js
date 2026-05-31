@@ -201,6 +201,32 @@ module.exports = {
       },
     },
 
+    // Video handling settings (product gallery / featured video plugins)
+    videos: {
+      enableUpload: process.env.IMPORT_VIDEOS_ENABLE_UPLOAD !== "false",
+      maxSize: toNumber(process.env.IMPORT_VIDEOS_MAX_SIZE, 256 * 1024 * 1024), // 256MB default (match STRAPI_MAX_UPLOAD_SIZE_MB)
+      allowedTypes: toArray(process.env.IMPORT_VIDEOS_ALLOWED_TYPES, ["mp4", "webm", "mov", "m4v"]),
+      metaKeys: toArray(process.env.IMPORT_VIDEOS_META_KEYS, [
+        "_product_video",
+        "product_video",
+        "_woo_product_video",
+        "woo_product_video",
+        "_product_video_gallery",
+        "product_video_gallery",
+        "_featured_video",
+        "featured_video",
+        "_wc_product_video",
+        "wc_product_video",
+        "_video_url",
+        "video_url",
+        "_woo_gallery_video",
+        "woo_gallery_video",
+      ]),
+      skipEmbedUrls: process.env.IMPORT_VIDEOS_SKIP_EMBED !== "false",
+      downloadTimeout: toNumber(process.env.IMPORT_VIDEOS_DOWNLOAD_TIMEOUT, 120000),
+      uploadTimeout: toNumber(process.env.IMPORT_VIDEOS_UPLOAD_TIMEOUT, 120000),
+    },
+
     // Status mappings
     statusMappings: {
       product: {

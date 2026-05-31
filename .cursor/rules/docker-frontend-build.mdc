@@ -11,11 +11,15 @@ globs: apps/frontend/*.Dockerfile, .github/workflows/frontend-cicd.yml
 
 `https://package-mirror.liara.ir/repository/npm/`
 
-They also define `NPM_REGISTRY_FALLBACK_URL` as:
+They also define `NPM_REGISTRY_SECOND_FALLBACK_URL` as:
+
+`https://mirror-npm.runflare.com/`
+
+And `NPM_REGISTRY_FALLBACK_URL` as:
 
 `https://registry.npmjs.org/`
 
-Every builder-stage `pnpm` step (install **and** `pnpm run build`) runs through `.cursor/docker/fallback-registry.sh` with a Corepack cache mount. The script activates Corepack/pnpm against `NPM_REGISTRY_URL`, runs the command, and if that step fails, retries against `NPM_REGISTRY_FALLBACK_URL`.
+Every builder-stage `pnpm` step (install **and** `pnpm run build`) runs through `.cursor/docker/fallback-registry.sh` with a Corepack cache mount. The script tries registries in order — Liara, then Runflare, then npmjs.org — and stops at the first one that succeeds.
 
 Without this on the build step, Corepack re-downloads `pnpm@10.28.2` from `registry.npmjs.org` (default) in a new `RUN` layer where the install-time cache mount and registry env vars are gone — which fails on CI networks that only reach the Liara mirror.
 
@@ -24,6 +28,7 @@ Override at build time when needed:
 ```bash
 docker build \
   --build-arg NPM_REGISTRY_URL="https://…" \
+  --build-arg NPM_REGISTRY_SECOND_FALLBACK_URL="https://mirror-npm.runflare.com/" \
   --build-arg NPM_REGISTRY_FALLBACK_URL="https://registry.npmjs.org/" \
   -f apps/frontend/main.Dockerfile .
 ```
@@ -32,10 +37,10 @@ docker build \
 
 ## CI defaults
 
-- **GitLab** (`build:frontend` in `.gitlab-ci.yml`): passes `NPM_REGISTRY_URL` and `NPM_REGISTRY_FALLBACK_URL`
+- **GitLab** (`build:frontend` in `.gitlab-ci.yml`): passes `NPM_REGISTRY_URL`, `NPM_REGISTRY_SECOND_FALLBACK_URL`, and `NPM_REGISTRY_FALLBACK_URL`
 - **GitHub Actions** (`frontend-cicd.yml`): passes the same build args from secrets or repo defaults
 
-Set the `NPM_REGISTRY_URL` CI variable to override the primary registry for all pipelines. Set `NPM_REGISTRY_FALLBACK_URL` only when the public npm registry is not reachable from the runner.
+Set the `NPM_REGISTRY_URL` CI variable to override the primary registry for all pipelines. Override `NPM_REGISTRY_SECOND_FALLBACK_URL` or `NPM_REGISTRY_FALLBACK_URL` when needed.
 
 ## Docker Hub / base images
 

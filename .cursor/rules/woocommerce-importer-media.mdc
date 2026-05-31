@@ -1,0 +1,57 @@
+---
+description: WooCommerce importer media (images + videos) pipeline, config, and discovery. Use when changing ProductImporter media sync or ImageUploader.
+globs: apps/backend/scripts/woocommerce-importer/**/*
+alwaysApply: false
+---
+# WooCommerce Importer — Media (Images + Videos)
+
+## Pipeline
+
+`ProductImporter.handleProductMedia` → `ImageUploader.downloadAndUploadMedia` → Strapi `POST /upload` → link IDs to `CoverImage` / `Media`.
+
+## Video sources
+
+1. WooCommerce `images[]` with video file extensions (`.mp4`, `.webm`, `.mov`, `.m4v`)
+2. `meta_data[]` keys from `config.import.videos.metaKeys` (override: `IMPORT_VIDEOS_META_KEYS`)
+
+Discover keys on your store:
+
+```bash
+cd apps/backend/scripts/woocommerce-importer
+node discover-product-videos.js --limit=50
+```
+
+## Config (`config.js` → `import.videos`)
+
+| Env | Default |
+|-----|---------|
+| `IMPORT_VIDEOS_ENABLE_UPLOAD` | enabled |
+| `IMPORT_VIDEOS_MAX_SIZE` | 256MB (match `STRAPI_MAX_UPLOAD_SIZE_MB`) |
+| `IMPORT_VIDEOS_ALLOWED_TYPES` | mp4,webm,mov,m4v |
+| `IMPORT_VIDEOS_META_KEYS` | see config.js |
+
+Embed URLs (YouTube/Vimeo) are **skipped** with a log warning.
+
+## Cover vs gallery
+
+- Cover: first image; if no images, first video → `CoverImage`
+- Gallery: remaining images + videos → `Media` (merged array; do not clear when only videos exist)
+
+## Key files
+
+- [`utils/ImageUploader.js`](apps/backend/scripts/woocommerce-importer/utils/ImageUploader.js)
+- [`utils/mediaUtils.js`](apps/backend/scripts/woocommerce-importer/utils/mediaUtils.js)
+- [`importers/ProductImporter.js`](apps/backend/scripts/woocommerce-importer/importers/ProductImporter.js)
+- [`docs/IMAGE_HANDLING.md`](apps/backend/scripts/woocommerce-importer/docs/IMAGE_HANDLING.md)
+
+## Tests
+
+```bash
+node test-media-utils.js
+```
+
+## Limits
+
+- Strapi upload cap: **256MB** default via `STRAPI_MAX_UPLOAD_SIZE_MB` ([`config/middlewares.ts`](apps/backend/config/middlewares.ts), [`config/plugins.ts`](apps/backend/config/plugins.ts))
+- Importer video cap: `IMPORT_VIDEOS_MAX_SIZE` (default 256MB — keep in sync with Strapi)
+- Images still converted to WebP via `sharp`; videos uploaded raw

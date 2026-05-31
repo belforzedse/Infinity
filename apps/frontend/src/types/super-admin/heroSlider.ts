@@ -113,6 +113,238 @@ export function getFontSizeDisplayLabel(token: string): string {
   return HERO_FONT_SIZE_DISPLAY_LABELS[token] ?? token;
 }
 
+/** Font size slider range (px) */
+export const HERO_FONT_SIZE_PX_MIN = 12;
+export const HERO_FONT_SIZE_PX_MAX = 96;
+
+/** Background scale slider range (%) */
+export const HERO_BACKGROUND_SCALE_MIN = 50;
+export const HERO_BACKGROUND_SCALE_MAX = 200;
+
+/** Card image width slider range (%) */
+export const HERO_IMAGE_WIDTH_PERCENT_MIN = 20;
+export const HERO_IMAGE_WIDTH_PERCENT_MAX = 100;
+export const HERO_IMAGE_HEIGHT_PERCENT_MIN = 20;
+export const HERO_IMAGE_HEIGHT_PERCENT_MAX = 100;
+
+/** Main visual foreground — wider ranges for anchor layout */
+export const HERO_FOREGROUND_WIDTH_PERCENT_MIN = 10;
+export const HERO_FOREGROUND_WIDTH_PERCENT_MAX = 250;
+export const HERO_FOREGROUND_HEIGHT_PERCENT_MIN = 20;
+export const HERO_FOREGROUND_HEIGHT_PERCENT_MAX = 200;
+/** Slider value that maps to auto height (empty stored value) */
+export const HERO_FOREGROUND_HEIGHT_AUTO_SLIDER_VALUE = 100;
+export const HERO_FOREGROUND_OFFSET_MIN_PX = -600;
+export const HERO_FOREGROUND_OFFSET_MAX_PX = 600;
+export const HERO_FOREGROUND_ZOOM_MIN = 0.25;
+export const HERO_FOREGROUND_ZOOM_MAX = 3;
+
+const FONT_SIZE_PX_TOKEN_PATTERN = /^text-\[(\d+)px\]$/;
+const FONT_SIZE_ARBITRARY_PX_PATTERN = /\[(\d+)px\]/g;
+
+const TAILWIND_FONT_SIZE_PX: Record<string, number> = {
+  "text-xs": 12,
+  "text-sm": 14,
+  "text-base": 16,
+  "text-lg": 18,
+  "text-xl": 20,
+  "text-2xl": 24,
+  "text-3xl": 30,
+};
+
+function clampHeroNumber(value: number, min: number, max: number): number {
+  if (!Number.isFinite(value)) return min;
+  return Math.min(max, Math.max(min, Math.round(value)));
+}
+
+export function isAllowedFontSizeToken(token: string): boolean {
+  if (!token) return false;
+  if (HERO_FONT_SIZE_OPTIONS.some((item) => item.value === token)) return true;
+  return FONT_SIZE_PX_TOKEN_PATTERN.test(token);
+}
+
+export function fontSizeTokenToPx(token: string): number {
+  const pxMatch = token.match(FONT_SIZE_PX_TOKEN_PATTERN);
+  if (pxMatch) {
+    return clampHeroNumber(Number(pxMatch[1]), HERO_FONT_SIZE_PX_MIN, HERO_FONT_SIZE_PX_MAX);
+  }
+
+  const arbitraryMatches = [...token.matchAll(FONT_SIZE_ARBITRARY_PX_PATTERN)];
+  if (arbitraryMatches.length > 0) {
+    const values = arbitraryMatches
+      .map((match) => Number(match[1]))
+      .filter((value) => Number.isFinite(value));
+    if (values.length > 0) {
+      return clampHeroNumber(
+        Math.max(...values),
+        HERO_FONT_SIZE_PX_MIN,
+        HERO_FONT_SIZE_PX_MAX,
+      );
+    }
+  }
+
+  if (TAILWIND_FONT_SIZE_PX[token]) {
+    return TAILWIND_FONT_SIZE_PX[token];
+  }
+
+  const parts = token.split(/\s+/);
+  for (let i = parts.length - 1; i >= 0; i -= 1) {
+    if (TAILWIND_FONT_SIZE_PX[parts[i]]) {
+      return TAILWIND_FONT_SIZE_PX[parts[i]];
+    }
+  }
+
+  return 16;
+}
+
+export function pxToFontSizeToken(px: number): HeroFontSizeToken {
+  const clamped = clampHeroNumber(px, HERO_FONT_SIZE_PX_MIN, HERO_FONT_SIZE_PX_MAX);
+  return `text-[${clamped}px]` as HeroFontSizeToken;
+}
+
+export type FontSizeTokenResolution = {
+  className: string;
+  fontSizePx?: number;
+};
+
+/**
+ * Slider values use `text-[Npx]` tokens. Tailwind only emits CSS for classes
+ * scanned at build time, so px tokens must render via inline fontSize instead.
+ */
+export function resolveFontSizeToken(token?: string): FontSizeTokenResolution {
+  if (!token?.trim()) {
+    return { className: "" };
+  }
+
+  const trimmed = token.trim();
+  const pxMatch = trimmed.match(FONT_SIZE_PX_TOKEN_PATTERN);
+  if (pxMatch) {
+    return {
+      className: "",
+      fontSizePx: clampHeroNumber(Number(pxMatch[1]), HERO_FONT_SIZE_PX_MIN, HERO_FONT_SIZE_PX_MAX),
+    };
+  }
+
+  return { className: trimmed };
+}
+
+export function fontSizeTokenToInlineStyle(
+  token?: string,
+): { fontSize: string } | undefined {
+  const resolved = resolveFontSizeToken(token);
+  if (resolved.fontSizePx == null) {
+    return undefined;
+  }
+  return { fontSize: `${resolved.fontSizePx}px` };
+}
+
+export function fontSizeClassFromToken(token?: string): string {
+  return resolveFontSizeToken(token).className;
+}
+
+export function backgroundSizeToPercent(value: string): number {
+  const normalized = (value || "").trim().toLowerCase();
+  if (normalized === "cover" || normalized === "contain" || normalized === "auto") {
+    return 100;
+  }
+  if (normalized === "100% 100%") {
+    return 200;
+  }
+  const match = normalized.match(/^(\d+)%/);
+  if (match) {
+    return clampHeroNumber(Number(match[1]), HERO_BACKGROUND_SCALE_MIN, HERO_BACKGROUND_SCALE_MAX);
+  }
+  return 100;
+}
+
+export function percentToBackgroundSize(percent: number): string {
+  const clamped = clampHeroNumber(percent, HERO_BACKGROUND_SCALE_MIN, HERO_BACKGROUND_SCALE_MAX);
+  if (clamped === 100) {
+    return "cover";
+  }
+  return `${clamped}% auto`;
+}
+
+export function customWidthToPercent(value: string): number {
+  if (!value?.trim()) {
+    return 100;
+  }
+  const match = value.trim().match(/^(\d+)%$/);
+  if (match) {
+    return clampHeroNumber(Number(match[1]), HERO_IMAGE_WIDTH_PERCENT_MIN, HERO_IMAGE_WIDTH_PERCENT_MAX);
+  }
+  return 100;
+}
+
+export function percentToCustomWidth(percent: number): string {
+  return `${clampHeroNumber(percent, HERO_IMAGE_WIDTH_PERCENT_MIN, HERO_IMAGE_WIDTH_PERCENT_MAX)}%`;
+}
+
+export function foregroundCustomWidthToPercent(value: string): number {
+  if (!value?.trim()) {
+    return 100;
+  }
+  const match = value.trim().match(/^(\d+)%$/);
+  if (match) {
+    return clampHeroNumber(
+      Number(match[1]),
+      HERO_FOREGROUND_WIDTH_PERCENT_MIN,
+      HERO_FOREGROUND_WIDTH_PERCENT_MAX,
+    );
+  }
+  return 100;
+}
+
+export function percentToForegroundCustomWidth(percent: number): string {
+  return `${clampHeroNumber(percent, HERO_FOREGROUND_WIDTH_PERCENT_MIN, HERO_FOREGROUND_WIDTH_PERCENT_MAX)}%`;
+}
+
+export function customHeightToPercent(value: string): number {
+  if (!value?.trim()) {
+    return HERO_IMAGE_HEIGHT_PERCENT_MAX;
+  }
+  const match = value.trim().match(/^(\d+)%$/);
+  if (match) {
+    return clampHeroNumber(Number(match[1]), HERO_IMAGE_HEIGHT_PERCENT_MIN, HERO_IMAGE_HEIGHT_PERCENT_MAX);
+  }
+  return HERO_IMAGE_HEIGHT_PERCENT_MAX;
+}
+
+export function percentToCustomHeight(percent: number): string {
+  const clamped = clampHeroNumber(percent, HERO_IMAGE_HEIGHT_PERCENT_MIN, HERO_IMAGE_HEIGHT_PERCENT_MAX);
+  if (clamped >= HERO_IMAGE_HEIGHT_PERCENT_MAX) {
+    return "";
+  }
+  return `${clamped}%`;
+}
+
+export function foregroundCustomHeightToPercent(value: string): number {
+  if (!value?.trim()) {
+    return HERO_FOREGROUND_HEIGHT_AUTO_SLIDER_VALUE;
+  }
+  const match = value.trim().match(/^(\d+)%$/);
+  if (match) {
+    return clampHeroNumber(
+      Number(match[1]),
+      HERO_FOREGROUND_HEIGHT_PERCENT_MIN,
+      HERO_FOREGROUND_HEIGHT_PERCENT_MAX,
+    );
+  }
+  return HERO_FOREGROUND_HEIGHT_AUTO_SLIDER_VALUE;
+}
+
+export function percentToForegroundCustomHeight(percent: number): string {
+  const clamped = clampHeroNumber(
+    percent,
+    HERO_FOREGROUND_HEIGHT_PERCENT_MIN,
+    HERO_FOREGROUND_HEIGHT_PERCENT_MAX,
+  );
+  if (clamped === HERO_FOREGROUND_HEIGHT_AUTO_SLIDER_VALUE) {
+    return "";
+  }
+  return `${clamped}%`;
+}
+
 export const HERO_FONT_WEIGHT_OPTIONS = [
   { value: "font-normal", label: "معمولی" },
   { value: "font-medium", label: "متوسط" },
@@ -170,6 +402,8 @@ export type HeroHeadlineSlot = {
   subtitle: string;
   backgroundColor: string;
   bottomMarginPx: number;
+  /** Vertical gap between title and subtitle (px). Default 8. */
+  titleSubtitleGapPx: number;
   className: string;
   titleClassName: string;
   subtitleClassName: string;
@@ -195,6 +429,9 @@ export type HeroMainVisualSlot = {
   foregroundObjectPosition: string;
   foregroundCustomWidth: string;
   foregroundCustomHeight: string;
+  /** Fine-tune foreground position after anchor (px). */
+  foregroundOffsetXPx?: number;
+  foregroundOffsetYPx?: number;
   /** Foreground image zoom (0.5–2). Default 1. */
   foregroundZoom?: number;
   foregroundOverflow: HeroImageOverflow;
@@ -222,6 +459,104 @@ export const HERO_BACKGROUND_POSITION_PRESETS = [
   { value: "center left", label: "وسط چپ" },
   { value: "center right", label: "وسط راست" },
 ] as const;
+
+export const HERO_OBJECT_POSITION_MIN = -100;
+export const HERO_OBJECT_POSITION_MAX = 200;
+
+/** Card product image anchor range — narrower than main visual */
+export const HERO_CARD_OBJECT_POSITION_MIN = -50;
+export const HERO_CARD_OBJECT_POSITION_MAX = 150;
+
+const NAMED_OBJECT_POSITION_PERCENT: Record<string, { x: number; y: number }> = {
+  center: { x: 50, y: 50 },
+  "bottom center": { x: 50, y: 100 },
+  "top center": { x: 50, y: 0 },
+  "top left": { x: 0, y: 0 },
+  "top right": { x: 100, y: 0 },
+  "bottom left": { x: 0, y: 100 },
+  "bottom right": { x: 100, y: 100 },
+  "center left": { x: 0, y: 50 },
+  "center right": { x: 100, y: 50 },
+  left: { x: 0, y: 50 },
+  right: { x: 100, y: 50 },
+  top: { x: 50, y: 0 },
+  bottom: { x: 50, y: 100 },
+};
+
+export function objectPositionToPercents(value: string | undefined | null): { x: number; y: number } {
+  const normalized = (value || "").trim().toLowerCase().replace(/\s+/g, " ");
+  if (!normalized) {
+    return NAMED_OBJECT_POSITION_PERCENT["bottom left"];
+  }
+
+  if (NAMED_OBJECT_POSITION_PERCENT[normalized]) {
+    return NAMED_OBJECT_POSITION_PERCENT[normalized];
+  }
+
+  const percentMatch = normalized.match(/^(\d+(?:\.\d+)?)\s*%?\s+(\d+(?:\.\d+)?)\s*%?$/);
+  if (percentMatch) {
+    return {
+      x: clampHeroNumber(Number(percentMatch[1]), HERO_OBJECT_POSITION_MIN, HERO_OBJECT_POSITION_MAX),
+      y: clampHeroNumber(Number(percentMatch[2]), HERO_OBJECT_POSITION_MIN, HERO_OBJECT_POSITION_MAX),
+    };
+  }
+
+  return NAMED_OBJECT_POSITION_PERCENT["bottom left"];
+}
+
+export function percentsToObjectPosition(x: number, y: number): string {
+  const clampedX = clampHeroNumber(x, HERO_OBJECT_POSITION_MIN, HERO_OBJECT_POSITION_MAX);
+  const clampedY = clampHeroNumber(y, HERO_OBJECT_POSITION_MIN, HERO_OBJECT_POSITION_MAX);
+
+  for (const preset of HERO_BACKGROUND_POSITION_PRESETS) {
+    const percents = objectPositionToPercents(preset.value);
+    if (percents.x === clampedX && percents.y === clampedY) {
+      return preset.value;
+    }
+  }
+
+  return `${clampedX}% ${clampedY}%`;
+}
+
+export function objectPositionPresetValue(value: string | undefined | null): string {
+  const normalized = (value || "").trim().toLowerCase().replace(/\s+/g, " ");
+  const directPreset = HERO_BACKGROUND_POSITION_PRESETS.find((preset) => preset.value === normalized);
+  if (directPreset) {
+    return directPreset.value;
+  }
+
+  const percents = objectPositionToPercents(value);
+  for (const preset of HERO_BACKGROUND_POSITION_PRESETS) {
+    const presetPercents = objectPositionToPercents(preset.value);
+    if (presetPercents.x === percents.x && presetPercents.y === percents.y) {
+      return preset.value;
+    }
+  }
+
+  return "";
+}
+
+export function cardObjectPositionToPercents(value: string | undefined | null): { x: number; y: number } {
+  const percents = objectPositionToPercents(value);
+  return {
+    x: clampHeroNumber(percents.x, HERO_CARD_OBJECT_POSITION_MIN, HERO_CARD_OBJECT_POSITION_MAX),
+    y: clampHeroNumber(percents.y, HERO_CARD_OBJECT_POSITION_MIN, HERO_CARD_OBJECT_POSITION_MAX),
+  };
+}
+
+export function cardPercentsToObjectPosition(x: number, y: number): string {
+  const clampedX = clampHeroNumber(x, HERO_CARD_OBJECT_POSITION_MIN, HERO_CARD_OBJECT_POSITION_MAX);
+  const clampedY = clampHeroNumber(y, HERO_CARD_OBJECT_POSITION_MIN, HERO_CARD_OBJECT_POSITION_MAX);
+
+  for (const preset of HERO_BACKGROUND_POSITION_PRESETS) {
+    const percents = objectPositionToPercents(preset.value);
+    if (percents.x === clampedX && percents.y === clampedY) {
+      return preset.value;
+    }
+  }
+
+  return `${clampedX}% ${clampedY}%`;
+}
 
 export type HeroCardSlot = {
   kind: "card";
@@ -325,8 +660,11 @@ export type HeroSliderMeta = {
 const DEFAULT_AUTOPLAY_INTERVAL_MS = 600000;
 const MIN_AUTOPLAY_INTERVAL_MS = 3000;
 const MAX_AUTOPLAY_INTERVAL_MS = 3600000;
-const MIN_HEADLINE_BOTTOM_MARGIN_PX = 0;
-const MAX_HEADLINE_BOTTOM_MARGIN_PX = 160;
+export const MIN_HEADLINE_BOTTOM_MARGIN_PX = 0;
+export const MAX_HEADLINE_BOTTOM_MARGIN_PX = 160;
+export const MIN_TITLE_SUBTITLE_GAP_PX = 0;
+export const MAX_TITLE_SUBTITLE_GAP_PX = 64;
+export const DEFAULT_TITLE_SUBTITLE_GAP_PX = 8;
 const DEFAULT_IMAGE_OVERFLOW: HeroImageOverflow = {
   enabled: false,
   edge: "top",
@@ -438,7 +776,7 @@ const DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_POSITION = "bottom center";
 const DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_SIZE = "cover";
 const DEFAULT_TABLET_MAIN_VISUAL_BACKGROUND_CLASSNAME = "rounded-[20px]";
 const DEFAULT_TABLET_MAIN_VISUAL_FOREGROUND_CLASSNAME =
-  "object-contain object-bottom h-full w-full max-h-full max-w-full";
+  "object-contain max-h-full max-w-full";
 const DEFAULT_TABLET_MAIN_VISUAL_FOREGROUND_POSITION = "bottom center";
 
 const DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_WIDTH = "100%";
@@ -447,22 +785,22 @@ const DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_POSITION = "bottom center";
 const DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_SIZE = "cover";
 const DEFAULT_MOBILE_MAIN_VISUAL_BACKGROUND_CLASSNAME = "rounded-[20px]";
 const DEFAULT_MOBILE_MAIN_VISUAL_FOREGROUND_CLASSNAME =
-  "object-contain object-bottom h-full w-full max-h-full max-w-full";
+  "object-contain max-h-full max-w-full";
 const DEFAULT_MOBILE_MAIN_VISUAL_FOREGROUND_POSITION = "bottom center";
 
 const DEFAULT_TABLET_CARD_LEFT_CLASSNAME = "h-full rounded-[20px]";
 const DEFAULT_TABLET_CARD_RIGHT_CLASSNAME = "h-full rounded-[20px]";
 const DEFAULT_TABLET_CARD_LEFT_IMAGE_CLASSNAME =
-  "h-full w-full object-contain object-left-bottom";
+  "h-full w-full object-contain";
 const DEFAULT_TABLET_CARD_RIGHT_IMAGE_CLASSNAME =
-  "h-full w-full object-contain object-left-bottom";
+  "h-full w-full object-contain";
 
 const DEFAULT_MOBILE_CARD_LEFT_CLASSNAME = "h-full rounded-[20px]";
 const DEFAULT_MOBILE_CARD_RIGHT_CLASSNAME = "h-full rounded-[20px]";
 const DEFAULT_MOBILE_CARD_LEFT_IMAGE_CLASSNAME =
-  "h-full w-full object-contain object-left-bottom";
+  "h-full w-full object-contain";
 const DEFAULT_MOBILE_CARD_RIGHT_IMAGE_CLASSNAME =
-  "h-full w-full object-contain object-left-bottom";
+  "h-full w-full object-contain";
 const DEFAULT_MOBILE_CARD_PADDING_CLASSNAME = "px-3 py-3 pl-2";
 const DEFAULT_COMPACT_CARD_BUTTON_CLASSNAME = "text-neutral-800 text-lg font-normal";
 const DEFAULT_COMPACT_CARD_BACKGROUND_CLASSNAME = "rounded-[20px]";
@@ -628,7 +966,13 @@ function sanitizeTextStyle(
   return {
     color: sanitizeColorOrClass(raw.color ?? legacyColor) || defaults.color,
     fontFamily: sanitizeToken(raw.fontFamily ?? legacyFont, ALLOWED_FONT_FAMILIES, defaults.fontFamily),
-    fontSize: sanitizeToken(raw.fontSize ?? legacySize, ALLOWED_FONT_SIZES, defaults.fontSize),
+    fontSize: (() => {
+      const rawSize = sanitizeString(raw.fontSize ?? legacySize, 120);
+      if (rawSize && isAllowedFontSizeToken(rawSize)) {
+        return rawSize as HeroFontSizeToken;
+      }
+      return defaults.fontSize;
+    })(),
     fontWeight: sanitizeToken(raw.fontWeight ?? legacyWeight, ALLOWED_FONT_WEIGHTS, defaults.fontWeight),
     lineHeight: sanitizeToken(raw.lineHeight ?? legacyLineHeight, ALLOWED_LINE_HEIGHTS, defaults.lineHeight),
     letterSpacing: sanitizeToken(
@@ -646,6 +990,7 @@ function normalizeHeadlineSlot(
     subtitleStyle: HeroTextStyle;
     backgroundColor: string;
     bottomMarginPx: number;
+    titleSubtitleGapPx: number;
     className: string;
     titleClassName: string;
     subtitleClassName: string;
@@ -668,6 +1013,12 @@ function normalizeHeadlineSlot(
       MIN_HEADLINE_BOTTOM_MARGIN_PX,
       MAX_HEADLINE_BOTTOM_MARGIN_PX,
       defaults.bottomMarginPx,
+    ),
+    titleSubtitleGapPx: clamp(
+      raw.titleSubtitleGapPx ?? style.titleSubtitleGapPx,
+      MIN_TITLE_SUBTITLE_GAP_PX,
+      MAX_TITLE_SUBTITLE_GAP_PX,
+      defaults.titleSubtitleGapPx,
     ),
     className: sanitizeClassName(raw.className ?? style.className) || defaults.className,
     titleClassName: sanitizeClassName(raw.titleClassName ?? style.titleClassName) || defaults.titleClassName,
@@ -754,9 +1105,21 @@ function normalizeMainVisualSlot(
       "",
     foregroundCustomWidth: sanitizeClassName(raw.foregroundCustomWidth ?? media.customWidth, 80),
     foregroundCustomHeight: sanitizeClassName(raw.foregroundCustomHeight ?? media.customHeight, 80),
+    foregroundOffsetXPx: clamp(
+      raw.foregroundOffsetXPx ?? style.foregroundOffsetXPx,
+      HERO_FOREGROUND_OFFSET_MIN_PX,
+      HERO_FOREGROUND_OFFSET_MAX_PX,
+      0,
+    ),
+    foregroundOffsetYPx: clamp(
+      raw.foregroundOffsetYPx ?? style.foregroundOffsetYPx,
+      HERO_FOREGROUND_OFFSET_MIN_PX,
+      HERO_FOREGROUND_OFFSET_MAX_PX,
+      0,
+    ),
     foregroundZoom:
       typeof raw.foregroundZoom === "number" && Number.isFinite(raw.foregroundZoom)
-        ? Math.min(2, Math.max(0.5, raw.foregroundZoom))
+        ? Math.min(HERO_FOREGROUND_ZOOM_MAX, Math.max(HERO_FOREGROUND_ZOOM_MIN, raw.foregroundZoom))
         : undefined,
     foregroundOverflow: normalizeImageOverflow(raw.foregroundOverflow ?? media.overflow),
     link: sanitizeSlotLink(raw.link),
@@ -894,6 +1257,7 @@ function normalizeDesktopSlots(rawSlots: unknown): HeroDesktopSlots {
       subtitleStyle: DEFAULT_TOP_HEADLINE_SUBTITLE_STYLE,
       backgroundColor: "bg-stone-50",
       bottomMarginPx: 0,
+      titleSubtitleGapPx: DEFAULT_TITLE_SUBTITLE_GAP_PX,
       className: DEFAULT_DESKTOP_HEADLINE_CLASSNAME,
       titleClassName: "",
       subtitleClassName: "",
@@ -954,6 +1318,7 @@ function normalizeTabletSlots(rawSlots: unknown): HeroTabletSlots {
       },
       backgroundColor: "bg-stone-50",
       bottomMarginPx: 0,
+      titleSubtitleGapPx: DEFAULT_TITLE_SUBTITLE_GAP_PX,
       className: DEFAULT_TABLET_HEADLINE_CLASSNAME,
       titleClassName: "",
       subtitleClassName: "",
@@ -997,6 +1362,7 @@ function normalizeMobileSlots(rawSlots: unknown): HeroMobileSlots {
       subtitleStyle: DEFAULT_PRIMARY_SUBTITLE_STYLE,
       backgroundColor: "bg-stone-50",
       bottomMarginPx: 0,
+      titleSubtitleGapPx: DEFAULT_TITLE_SUBTITLE_GAP_PX,
       className: DEFAULT_MOBILE_HEADLINE_CLASSNAME,
       titleClassName: "",
       subtitleClassName: "",
@@ -1154,6 +1520,7 @@ export function syncTabletAndMobileFromDesktop(slide: HeroSlideConfig): HeroSlid
             },
             backgroundColor: d.topLeftTextBanner.backgroundColor || "bg-stone-50",
             bottomMarginPx: 0,
+            titleSubtitleGapPx: DEFAULT_TITLE_SUBTITLE_GAP_PX,
             className: DEFAULT_TABLET_HEADLINE_CLASSNAME,
             titleClassName: "",
             subtitleClassName: "",
@@ -1216,6 +1583,7 @@ export function syncTabletAndMobileFromDesktop(slide: HeroSlideConfig): HeroSlid
             },
             backgroundColor: d.topLeftTextBanner.backgroundColor || "bg-stone-50",
             bottomMarginPx: 0,
+            titleSubtitleGapPx: DEFAULT_TITLE_SUBTITLE_GAP_PX,
             className: DEFAULT_MOBILE_HEADLINE_CLASSNAME,
             titleClassName: "",
             subtitleClassName: "",

@@ -36,6 +36,7 @@ export function DesktopCanvas({
                     title={layout.topLeftTextBanner.title}
                     subtitle={layout.topLeftTextBanner.subtitle}
                     marginBottomPx={layout.topLeftTextBanner.marginBottomPx}
+                    titleSubtitleGapPx={layout.topLeftTextBanner.titleSubtitleGapPx}
                     className={layout.topLeftTextBanner.className}
                     titleClassName={layout.topLeftTextBanner.titleClassName}
                     subtitleClassName={layout.topLeftTextBanner.subtitleClassName}

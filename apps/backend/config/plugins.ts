@@ -117,6 +117,8 @@ export default ({ env }) => {
     },
     upload: {
       config: {
+        sizeLimit:
+          (Number.parseInt(env("STRAPI_MAX_UPLOAD_SIZE_MB", "256"), 10) || 256) * 1024 * 1024,
         providerOptions: {
           local: {
             sizeLimit: 0,

@@ -72,6 +72,7 @@ export default function MobileHero({ layout, slideKey = 0 }: Props) {
                 title={layout.primaryBanner.title}
                 subtitle={layout.primaryBanner.subtitle}
                 marginBottomPx={layout.primaryBanner.marginBottomPx}
+                titleSubtitleGapPx={layout.primaryBanner.titleSubtitleGapPx}
                 className={layout.primaryBanner.className}
                 titleClassName={layout.primaryBanner.titleClassName}
                 subtitleClassName={layout.primaryBanner.subtitleClassName}

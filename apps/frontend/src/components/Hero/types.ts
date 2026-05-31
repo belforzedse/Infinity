@@ -13,6 +13,8 @@ export type BannerImageSpec = {
   zoom?: number;
   focalX?: number;
   focalY?: number;
+  offsetXPx?: number;
+  offsetYPx?: number;
   customWidth?: string; // e.g., "300px", "50%", "100%" - overrides width display
   customHeight?: string; // e.g., "300px", "50%", "100%" - overrides height display
   overflow?: {
@@ -48,6 +50,7 @@ export type TextBannerSpec = {
   title: string;
   subtitle?: string;
   marginBottomPx?: number;
+  titleSubtitleGapPx?: number;
   className?: string;
   titleClassName?: string;
   subtitleClassName?: string;

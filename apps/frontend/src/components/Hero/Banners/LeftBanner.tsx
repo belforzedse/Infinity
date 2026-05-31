@@ -6,6 +6,7 @@ import { LeftBannerSpec } from '../types';
 import imageLoader from "@/utils/imageLoader";
 import resolveAssetUrl from "@/utils/resolveAssetUrl";
 import { useResolvedImage } from "@/hooks/useResolvedImage";
+import { buildForegroundAnchorStyle } from "../utils/foregroundImageLayout";
 
 interface LeftBannerProps {
   spec: LeftBannerSpec;
@@ -23,10 +24,6 @@ export function LeftBanner({ spec, className = '' }: LeftBannerProps) {
     typeof background.value === "string" ? background.value.trim() : "";
   const shouldUseImageBackground = background.type === "image" && Boolean(resolvedBackgroundValue);
   const backgroundImageUrl = shouldUseImageBackground ? resolveAssetUrl(resolvedBackgroundValue) : "";
-  const objectPosition =
-    (typeof foregroundImage.focalX === "number" && typeof foregroundImage.focalY === "number")
-      ? `${foregroundImage.focalX}% ${foregroundImage.focalY}%`
-      : (foregroundImage.objectPosition || "bottom left");
   const objectFit = foregroundImage.objectFit || "contain";
   const zoom = typeof foregroundImage.zoom === "number" ? foregroundImage.zoom : 1;
   const overflow = foregroundImage.overflow;
@@ -49,6 +46,12 @@ export function LeftBanner({ spec, className = '' }: LeftBannerProps) {
             }),
       }
     : null;
+
+  const foregroundLayout = buildForegroundAnchorStyle(foregroundImage, {
+    zoom,
+    overflowStyle,
+    objectFit,
+  });
 
   // Determine background styling (resolve Strapi paths to absolute URL for image backgrounds)
   // When using an image, set a fallback backgroundColor so areas not covered by the image
@@ -110,23 +113,8 @@ export function LeftBanner({ spec, className = '' }: LeftBannerProps) {
           priority={foregroundImage.priority}
           loading={foregroundImage.loading}
           onError={handleForegroundImageError}
-          className={`absolute ${overflowStyle ? "" : "inset-0 h-full w-full"} ${foregroundImage.className || "object-contain"}`}
-          style={{
-            objectPosition,
-            objectFit,
-            transform: [overflowStyle?.transform, zoom !== 1 ? `scale(${zoom})` : null]
-              .filter(Boolean)
-              .join(" ") || undefined,
-            zIndex: 10,
-            width: foregroundImage.customWidth ?? overflowStyle?.width,
-            height: foregroundImage.customHeight ?? overflowStyle?.height,
-            left: overflowStyle?.left,
-            right: overflowStyle?.right,
-            top: overflowStyle?.top,
-            bottom: overflowStyle?.bottom,
-            maxWidth: overflowStyle?.maxWidth,
-            maxHeight: overflowStyle?.maxHeight,
-          }}
+          className={foregroundLayout.className}
+          style={foregroundLayout.style}
         />
       ) : null}
     </div>

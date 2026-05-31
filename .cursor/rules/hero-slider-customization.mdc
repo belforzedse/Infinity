@@ -113,7 +113,32 @@ Headline and card slots support **پکیج استایل** (Apply preset). Preset
 
 ## Font Size Labels (xl, 2xl, 3xl)
 
-Font size dropdowns show human-friendly labels via `getFontSizeDisplayLabel()` and [HERO_FONT_SIZE_DISPLAY_LABELS](apps/apps/frontend/src/types/super-admin/heroSlider.ts) (e.g. xs, sm, md, lg, xl, 2xl, 3xl). Stored values remain Tailwind tokens; only the UI labels changed.
+Font size is controlled via a **px range slider** (12–96px) in `TextStyleEditor`. Values are stored as Tailwind arbitrary tokens (`text-[32px]`) internally — admins never see raw class names in the UI.
+
+Legacy preset tokens from style packages remain valid; the slider reads them via `fontSizeTokenToPx()` and writes `pxToFontSizeToken()` on change.
+
+**Rendering:** px slider values (`text-[Npx]`) are applied as inline `fontSize` in `TextBanner` / `ActionBanner` because Tailwind only emits CSS for classes present at build time — not for arbitrary runtime px values.
+
+Helpers: `fontSizeTokenToPx`, `pxToFontSizeToken`, `resolveFontSizeToken`, `fontSizeTokenToInlineStyle` in [heroSlider.ts](apps/frontend/src/types/super-admin/heroSlider.ts).
+
+## Background & image scale sliders
+
+- **Main visual / card background scale**: 50–200% slider → `backgroundSize` (`cover` at 100%, else `${n}% auto`)
+- **Card product image width**: 20–100% → `imageCustomWidth`
+- **Card product image position**: preset + horizontal/vertical **−50% to 150%** → `imageObjectPosition` (anchor layout in `ActionBanner`)
+- **Main visual foreground width**: 20–100% → `foregroundCustomWidth`
+- **Foreground zoom**: 0.5–2 (unchanged)
+- **Headline title–subtitle gap**: 0–64px → `titleSubtitleGapPx` (inline flex `gap` on `TextBanner`)
+- **Headline block bottom margin**: 0–160px slider → `bottomMarginPx`
+- **Main visual foreground position**: preset + horizontal/vertical **−100% to 200%** anchor sliders
+- **Main visual foreground nudge**: **±600px** offset sliders
+- **Main visual foreground width**: **10–250%**
+- **Main visual foreground height**: **20–200%** (100% = auto)
+- **Foreground zoom**: **0.25×–3×**
+
+Helpers: `objectPositionToPercents`, `percentsToObjectPosition`, `objectPositionPresetValue` in [heroSlider.ts](apps/frontend/src/types/super-admin/heroSlider.ts).
+
+Shared UI: [SizeRangeControl.tsx](apps/frontend/src/components/SuperAdmin/HeroSliderEditor/editors/SizeRangeControl.tsx)
 
 ## Key Files
 

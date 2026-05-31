@@ -4,12 +4,19 @@ import {
   MAX_AUTOPLAY_INTERVAL_MS,
   MIN_HEADLINE_BOTTOM_MARGIN_PX,
   MAX_HEADLINE_BOTTOM_MARGIN_PX,
+  MIN_TITLE_SUBTITLE_GAP_PX,
+  MAX_TITLE_SUBTITLE_GAP_PX,
+  DEFAULT_TITLE_SUBTITLE_GAP_PX,
+  HERO_FOREGROUND_OFFSET_MIN_PX,
+  HERO_FOREGROUND_OFFSET_MAX_PX,
+  HERO_FOREGROUND_ZOOM_MIN,
+  HERO_FOREGROUND_ZOOM_MAX,
   MAX_TEXT_LENGTH,
   ALLOWED_LINK_TYPES,
   ALLOWED_CONTENT_ALIGNMENTS,
   ALLOWED_BACKGROUND_TYPES,
   ALLOWED_FONT_FAMILIES,
-  ALLOWED_FONT_SIZES,
+  isAllowedFontSizeToken,
   ALLOWED_FONT_WEIGHTS,
   ALLOWED_LINE_HEIGHTS,
   ALLOWED_LETTER_SPACINGS,
@@ -368,9 +375,8 @@ function sanitizeTextStyle(
       errors,
       `${path}.fontFamily`,
     ),
-    fontSize: sanitizeToken(
+    fontSize: sanitizeFontSizeToken(
       raw.fontSize ?? legacySize,
-      ALLOWED_FONT_SIZES,
       defaults.fontSize,
       errors,
       `${path}.fontSize`,
@@ -399,6 +405,23 @@ function sanitizeTextStyle(
   };
 }
 
+function sanitizeFontSizeToken(
+  value: unknown,
+  fallback: HeroTextStyle["fontSize"],
+  errors: string[],
+  path: string,
+): HeroTextStyle["fontSize"] {
+  const normalized = sanitizeString(value, 120);
+  if (!normalized) {
+    return fallback;
+  }
+  if (isAllowedFontSizeToken(normalized)) {
+    return normalized as HeroTextStyle["fontSize"];
+  }
+  errors.push(`${path} has invalid fontSize token: '${normalized}'`);
+  return fallback;
+}
+
 function sanitizeHeadlineSlot(
   value: unknown,
   errors: string[],
@@ -408,6 +431,7 @@ function sanitizeHeadlineSlot(
     subtitleStyle: HeroTextStyle;
     backgroundColor: string;
     bottomMarginPx: number;
+    titleSubtitleGapPx: number;
     className: string;
     titleClassName: string;
     subtitleClassName: string;
@@ -430,6 +454,12 @@ function sanitizeHeadlineSlot(
       MIN_HEADLINE_BOTTOM_MARGIN_PX,
       MAX_HEADLINE_BOTTOM_MARGIN_PX,
       defaults.bottomMarginPx,
+    ),
+    titleSubtitleGapPx: clampNumber(
+      raw.titleSubtitleGapPx ?? style.titleSubtitleGapPx,
+      MIN_TITLE_SUBTITLE_GAP_PX,
+      MAX_TITLE_SUBTITLE_GAP_PX,
+      defaults.titleSubtitleGapPx,
     ),
     className: sanitizeClassName(raw.className ?? style.className) || defaults.className,
     titleClassName: sanitizeClassName(raw.titleClassName ?? style.titleClassName) || defaults.titleClassName,
@@ -522,7 +552,19 @@ function sanitizeMainVisualSlot(
       "",
     foregroundCustomWidth: sanitizeClassName(raw.foregroundCustomWidth ?? media.customWidth, 80),
     foregroundCustomHeight: sanitizeClassName(raw.foregroundCustomHeight ?? media.customHeight, 80),
-    foregroundZoom: clampNumber(raw.foregroundZoom, 0.5, 2, 1),
+    foregroundOffsetXPx: clampNumber(
+      raw.foregroundOffsetXPx ?? style.foregroundOffsetXPx,
+      HERO_FOREGROUND_OFFSET_MIN_PX,
+      HERO_FOREGROUND_OFFSET_MAX_PX,
+      0,
+    ),
+    foregroundOffsetYPx: clampNumber(
+      raw.foregroundOffsetYPx ?? style.foregroundOffsetYPx,
+      HERO_FOREGROUND_OFFSET_MIN_PX,
+      HERO_FOREGROUND_OFFSET_MAX_PX,
+      0,
+    ),
+    foregroundZoom: clampNumber(raw.foregroundZoom, HERO_FOREGROUND_ZOOM_MIN, HERO_FOREGROUND_ZOOM_MAX, 1),
     foregroundOverflow: sanitizeImageOverflow(raw.foregroundOverflow ?? media.overflow),
     link: sanitizeLink(raw.link, errors, `${path}.link`),
     tracking: sanitizeTracking(raw.tracking),
@@ -711,6 +753,7 @@ function sanitizeSlide(
               subtitleStyle: DEFAULT_TOP_HEADLINE_SUBTITLE_STYLE,
               backgroundColor: "bg-stone-50",
               bottomMarginPx: 10,
+              titleSubtitleGapPx: DEFAULT_TITLE_SUBTITLE_GAP_PX,
               className: DEFAULT_DESKTOP_HEADLINE_CLASSNAME,
               titleClassName: "",
               subtitleClassName: "",
@@ -788,6 +831,7 @@ function sanitizeSlide(
               },
               backgroundColor: "bg-stone-50",
               bottomMarginPx: 0,
+              titleSubtitleGapPx: DEFAULT_TITLE_SUBTITLE_GAP_PX,
               className: DEFAULT_TABLET_HEADLINE_CLASSNAME,
               titleClassName: "",
               subtitleClassName: "",
@@ -848,6 +892,7 @@ function sanitizeSlide(
               subtitleStyle: DEFAULT_PRIMARY_SUBTITLE_STYLE,
               backgroundColor: "bg-stone-50",
               bottomMarginPx: 0,
+              titleSubtitleGapPx: DEFAULT_TITLE_SUBTITLE_GAP_PX,
               className: DEFAULT_MOBILE_HEADLINE_CLASSNAME,
               titleClassName: "",
               subtitleClassName: "",

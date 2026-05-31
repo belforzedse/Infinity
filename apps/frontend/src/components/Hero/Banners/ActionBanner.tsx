@@ -13,6 +13,11 @@ import {
 import imageLoader from "@/utils/imageLoader";
 import resolveAssetUrl from "@/utils/resolveAssetUrl";
 import { useResolvedImage } from "@/hooks/useResolvedImage";
+import {
+  fontSizeClassFromToken,
+  fontSizeTokenToInlineStyle,
+} from "@/types/super-admin/heroSlider";
+import { buildForegroundAnchorStyle } from "../utils/foregroundImageLayout";
 
 interface ActionBannerProps {
   spec: ActionBannerSpec;
@@ -125,6 +130,40 @@ function ImageRenderer({
   if (!shouldRender) return null;
   const isLayered = variant === 'layered' || variant === 'compact';
   const overflowStyle = isLayered ? getOverflowImageStyle(image) : null;
+
+  if (isLayered && !overflowStyle) {
+    const anchorLayout = buildForegroundAnchorStyle(image, {
+      zoom,
+      overflowStyle: null,
+      objectFit,
+    });
+    const compactSizeStyle =
+      variant === "compact"
+        ? {
+            width: image.customWidth?.trim() || "52%",
+            height: image.customHeight?.trim() || "88%",
+            maxWidth: image.customWidth?.trim() ? undefined : "52%",
+            maxHeight: image.customHeight?.trim() ? undefined : "88%",
+          }
+        : {};
+
+    return (
+      <Image
+        src={resolvedSrc}
+        loader={imageLoader}
+        alt={image.alt || "تصویر بنر"}
+        width={image.width}
+        height={image.height}
+        sizes={image.sizes}
+        priority={image.priority}
+        loading={image.loading}
+        onError={onError}
+        className={anchorLayout.className}
+        style={{ ...anchorLayout.style, ...compactSizeStyle }}
+      />
+    );
+  }
+
   const transform = [
     overflowStyle?.transform,
     zoom !== 1 ? `scale(${zoom})` : null,
@@ -190,6 +229,8 @@ interface ContentSectionProps {
   titleClasses: string;
   subtitleClasses: string;
   buttonClasses: string;
+  titleFontStyle?: React.CSSProperties;
+  subtitleFontStyle?: React.CSSProperties;
   hasInlineTitleColor: boolean;
   hasInlineSubtitleColor: boolean;
   titleColor?: string;
@@ -208,6 +249,8 @@ function ContentSection({
   titleClasses,
   subtitleClasses,
   buttonClasses,
+  titleFontStyle,
+  subtitleFontStyle,
   hasInlineTitleColor,
   hasInlineSubtitleColor,
   titleColor,
@@ -220,8 +263,15 @@ function ContentSection({
   const ctaLabel = title.trim() || button?.label || '';
   const href = ctaHref || button?.href || '#';
   const showSeparateButton = !isCompact && button && button.label;
-  const titleStyle = hasInlineTitleColor && titleColor ? { color: titleColor } : undefined;
-  const buttonStyle = button?.style;
+  const titleStyle = {
+    ...(hasInlineTitleColor && titleColor ? { color: titleColor } : {}),
+    ...titleFontStyle,
+  };
+  const subtitleStyle = {
+    ...(hasInlineSubtitleColor && subtitleColor ? { color: subtitleColor } : {}),
+    ...subtitleFontStyle,
+  };
+  const buttonLinkStyle = button?.style;
 
   if (isCompact && ctaLabel && href !== '#') {
     return (
@@ -231,14 +281,18 @@ function ContentSection({
         <Link
           href={href}
           className={`group flex w-full flex-row items-center justify-end gap-2 text-right ${buttonClasses}`}
-          style={buttonStyle ?? titleStyle}
+          style={
+            Object.keys({ ...buttonLinkStyle, ...titleStyle }).length
+              ? { ...buttonLinkStyle, ...titleStyle }
+              : undefined
+          }
         >
           {(button?.showArrow ?? true) && (
             <ArrowLeft
               className={`h-5 w-5 shrink-0 transition-transform duration-200 group-hover:-translate-x-1 ${button?.arrowClassName || ''}`}
             />
           )}
-          <span className={titleClasses} style={titleStyle}>
+          <span className={titleClasses} style={Object.keys(titleStyle).length ? titleStyle : undefined}>
             {ctaLabel}
           </span>
         </Link>
@@ -251,7 +305,10 @@ function ContentSection({
       <div
         className={`absolute inset-y-0 right-0 z-20 flex w-[48%] flex-col ${alignmentClass} px-3 ${contentClassName}`}
       >
-        <span className={`flex w-full flex-row items-center justify-end gap-2 text-right ${buttonClasses}`} style={titleStyle}>
+        <span
+          className={`flex w-full flex-row items-center justify-end gap-2 text-right ${buttonClasses}`}
+          style={Object.keys(titleStyle).length ? titleStyle : undefined}
+        >
           {(button?.showArrow ?? true) && (
             <ArrowLeft className={`h-5 w-5 shrink-0 ${button?.arrowClassName || ''}`} />
           )}
@@ -263,13 +320,13 @@ function ContentSection({
 
   return (
     <div className={`relative z-20 flex h-full flex-col ${alignmentClass} ${spacingClass} text-right ${contentClassName}`}>
-      <h2 className={titleClasses} style={titleStyle}>
+      <h2 className={titleClasses} style={Object.keys(titleStyle).length ? titleStyle : undefined}>
         {title}
       </h2>
       {subtitle && (
         <p
           className={`${subtitleClasses} mt-2`}
-          style={hasInlineSubtitleColor && subtitleColor ? { color: subtitleColor } : undefined}
+          style={Object.keys(subtitleStyle).length ? subtitleStyle : undefined}
         >
           {subtitle}
         </p>
@@ -279,7 +336,7 @@ function ContentSection({
           <Link
             href={button.href}
             className={`group ${buttonClasses}`}
-            style={buttonStyle}
+            style={buttonLinkStyle}
           >
             {button.showArrow && (
               <ArrowLeft className={`inline-block mr-2 h-4 w-4 transition-transform duration-200 group-hover:-translate-x-1 ${button.arrowClassName || ''}`} />
@@ -349,11 +406,16 @@ export function ActionBanner({ spec, variant = 'default' }: ActionBannerProps) {
         }
     : { backgroundColor: colors?.background || DEFAULT_BG_COLOR };
 
+  const titleSizeToken = typography?.titleSize;
+  const subtitleSizeToken = typography?.subtitleSize;
+  const titleFontStyle = fontSizeTokenToInlineStyle(titleSizeToken);
+  const subtitleFontStyle = fontSizeTokenToInlineStyle(subtitleSizeToken);
+
   const titleClasses = [
     titleClassName,
     hasInlineTitleColor ? '' : (colors?.titleColor || 'text-gray-900'),
     typography?.titleFont || (isCompact ? 'font-peyda-fanum' : 'font-bold'),
-    typography?.titleSize || (isCompact ? 'text-lg' : 'text-lg'),
+    titleSizeToken ? fontSizeClassFromToken(titleSizeToken) : isCompact ? 'text-lg' : 'text-lg',
     typography?.titleWeight || (isCompact ? 'font-normal' : 'font-bold'),
     typography?.titleLeading || 'leading-tight',
     typography?.titleTracking || 'tracking-normal',
@@ -365,7 +427,7 @@ export function ActionBanner({ spec, variant = 'default' }: ActionBannerProps) {
     subtitleClassName,
     hasInlineSubtitleColor ? '' : (colors?.subtitleColor || 'text-gray-600'),
     typography?.subtitleFont || 'font-normal',
-    typography?.subtitleSize || 'text-sm',
+    subtitleSizeToken ? fontSizeClassFromToken(subtitleSizeToken) : 'text-sm',
     typography?.subtitleWeight || 'font-semibold',
     typography?.subtitleLeading || 'leading-relaxed',
     typography?.subtitleTracking || 'tracking-normal',
@@ -418,6 +480,8 @@ export function ActionBanner({ spec, variant = 'default' }: ActionBannerProps) {
           titleClasses={titleClasses}
           subtitleClasses={subtitleClasses}
           buttonClasses={buttonClasses}
+          titleFontStyle={titleFontStyle}
+          subtitleFontStyle={subtitleFontStyle}
           hasInlineTitleColor={hasInlineTitleColor}
           hasInlineSubtitleColor={hasInlineSubtitleColor}
           titleColor={colors?.titleColor}
@@ -452,6 +516,8 @@ export function ActionBanner({ spec, variant = 'default' }: ActionBannerProps) {
         titleClasses={titleClasses}
         subtitleClasses={subtitleClasses}
         buttonClasses={buttonClasses}
+        titleFontStyle={titleFontStyle}
+        subtitleFontStyle={subtitleFontStyle}
         hasInlineTitleColor={hasInlineTitleColor}
         hasInlineSubtitleColor={hasInlineSubtitleColor}
         titleColor={colors?.titleColor}

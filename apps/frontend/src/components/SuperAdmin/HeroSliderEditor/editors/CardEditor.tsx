@@ -3,11 +3,29 @@
 import { useState } from "react";
 import ImageUploadField from "@/components/SuperAdmin/UpsertPage/ContentWrapper/Fields/ImageUploadField";
 import { HERO_CARD_STYLE_PRESETS } from "@/types/super-admin/heroSliderPackages";
-import { type HeroCardSlot, type HeroSlotConfig } from "@/types/super-admin/heroSlider";
+import {
+  HERO_BACKGROUND_POSITION_PRESETS,
+  HERO_BACKGROUND_SCALE_MAX,
+  HERO_BACKGROUND_SCALE_MIN,
+  HERO_CARD_OBJECT_POSITION_MAX,
+  HERO_CARD_OBJECT_POSITION_MIN,
+  HERO_IMAGE_WIDTH_PERCENT_MAX,
+  HERO_IMAGE_WIDTH_PERCENT_MIN,
+  backgroundSizeToPercent,
+  cardObjectPositionToPercents,
+  cardPercentsToObjectPosition,
+  customWidthToPercent,
+  objectPositionPresetValue,
+  percentToBackgroundSize,
+  percentToCustomWidth,
+  type HeroCardSlot,
+  type HeroSlotConfig,
+} from "@/types/super-admin/heroSlider";
 import { resolveColorForInput } from "../utils";
 import { TextStyleEditor } from "./TextStyleEditor";
 import { SlotTextField } from "./SlotTextField";
 import { OverflowSettings } from "./OverflowSettings";
+import { SizeRangeControl } from "./SizeRangeControl";
 
 type CardEditorProps = {
   slot: HeroCardSlot;
@@ -16,6 +34,8 @@ type CardEditorProps = {
 
 export function CardEditor({ slot, onChange }: CardEditorProps) {
   const [advancedOpen, setAdvancedOpen] = useState(false);
+  const imagePosition = cardObjectPositionToPercents(slot.imageObjectPosition);
+  const imagePositionPreset = objectPositionPresetValue(slot.imageObjectPosition);
 
   return (
     <div className="space-y-3">
@@ -133,6 +153,87 @@ export function CardEditor({ slot, onChange }: CardEditorProps) {
           }
         />
       </div>
+
+      <SizeRangeControl
+        label="مقیاس پس‌زمینه کارت"
+        value={backgroundSizeToPercent(slot.backgroundSize)}
+        min={HERO_BACKGROUND_SCALE_MIN}
+        max={HERO_BACKGROUND_SCALE_MAX}
+        step={1}
+        unit="%"
+        onChange={(percent) =>
+          onChange({
+            ...slot,
+            backgroundSize: percentToBackgroundSize(percent),
+          })
+        }
+      />
+
+      <SizeRangeControl
+        label="عرض تصویر محصول"
+        value={customWidthToPercent(slot.imageCustomWidth)}
+        min={HERO_IMAGE_WIDTH_PERCENT_MIN}
+        max={HERO_IMAGE_WIDTH_PERCENT_MAX}
+        step={1}
+        unit="%"
+        onChange={(percent) =>
+          onChange({
+            ...slot,
+            imageCustomWidth: percentToCustomWidth(percent),
+          })
+        }
+      />
+
+      <label className="text-xs text-slate-600">
+        موقعیت تصویر محصول
+        <select
+          value={imagePositionPreset || "custom"}
+          onChange={(event) => {
+            const value = event.target.value;
+            if (value !== "custom") {
+              onChange({ ...slot, imageObjectPosition: value });
+            }
+          }}
+          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"
+        >
+          <option value="custom">سفارشی (اسلایدر)</option>
+          {HERO_BACKGROUND_POSITION_PRESETS.map((preset) => (
+            <option key={preset.value} value={preset.value}>
+              {preset.label}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <SizeRangeControl
+        label="موقعیت افقی تصویر"
+        value={imagePosition.x}
+        min={HERO_CARD_OBJECT_POSITION_MIN}
+        max={HERO_CARD_OBJECT_POSITION_MAX}
+        step={1}
+        unit="%"
+        onChange={(x) =>
+          onChange({
+            ...slot,
+            imageObjectPosition: cardPercentsToObjectPosition(x, imagePosition.y),
+          })
+        }
+      />
+
+      <SizeRangeControl
+        label="موقعیت عمودی تصویر"
+        value={imagePosition.y}
+        min={HERO_CARD_OBJECT_POSITION_MIN}
+        max={HERO_CARD_OBJECT_POSITION_MAX}
+        step={1}
+        unit="%"
+        onChange={(y) =>
+          onChange({
+            ...slot,
+            imageObjectPosition: cardPercentsToObjectPosition(imagePosition.x, y),
+          })
+        }
+      />
 
       <TextStyleEditor
         label="استایل عنوان"
