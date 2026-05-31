@@ -49,7 +49,7 @@ They also define `NPM_REGISTRY_FALLBACK_URL` as:
 
 `https://registry.npmjs.org/`
 
-Every builder-stage `pnpm` step (install, `pnpm run build`, deploy, rebuild) runs through `.cursor/docker/fallback-registry.sh` with a Corepack cache mount. Without this on post-install steps, Corepack defaults to `registry.npmjs.org` in a new `RUN` layer and times out on restricted CI networks.
+Every builder-stage `pnpm` step uses `--mount=type=cache,target=/root/.cache/node/corepack`. That cache is **not** part of the builder image filesystem — do **not** `COPY --from=builder /root/.cache/node/corepack` into the runner. The runner stage runs `fallback-registry.sh … pnpm --version` once (no cache mount) so Corepack/pnpm land in the image layer, then copies to `/home/node/.cache/node/` for the `node` user at runtime.
 
 Override at build time when needed:
 

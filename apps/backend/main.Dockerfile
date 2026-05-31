@@ -73,12 +73,11 @@ RUN chmod +x /usr/local/bin/fallback-apk.sh /usr/local/bin/fallback-registry.sh
 # su-exec so entrypoint can create uploads dir then run as node
 # Alpine default CDN (dl-cdn.alpinelinux.org) is often unreachable from same networks as Docker Hub; use Arvan APK mirror
 RUN fallback-apk.sh su-exec vips vips-dev
-# Reuse Corepack cache from builder so pnpm@10.28.2 activates without another registry fetch (CI mirrors / flaky networks).
-COPY --from=builder /root/.cache/node/corepack /root/.cache/node/corepack
-RUN mkdir -p /home/node/.cache/node \
+# Prepare pnpm in the runner layer (builder corepack cache uses --mount=cache and is not COPY-able).
+RUN fallback-registry.sh "${NPM_REGISTRY_URL}" "${NPM_REGISTRY_FALLBACK_URL}" pnpm --version \
+    && mkdir -p /home/node/.cache/node \
     && cp -a /root/.cache/node/corepack /home/node/.cache/node/ \
     && chown -R node:node /home/node/.cache
-RUN fallback-registry.sh "${NPM_REGISTRY_URL}" "${NPM_REGISTRY_FALLBACK_URL}" pnpm --version
 
 WORKDIR /app
 
