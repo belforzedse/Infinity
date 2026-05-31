@@ -169,7 +169,17 @@ export function fontSizeTokenToPx(token: string): number {
     return clampHeroNumber(Number(pxMatch[1]), HERO_FONT_SIZE_PX_MIN, HERO_FONT_SIZE_PX_MAX);
   }
 
-  const arbitraryMatches = [...token.matchAll(FONT_SIZE_ARBITRARY_PX_PATTERN)];
+  const arbitraryMatches: RegExpExecArray[] = [];
+  const arbitraryPattern = new RegExp(
+    FONT_SIZE_ARBITRARY_PX_PATTERN.source,
+    FONT_SIZE_ARBITRARY_PX_PATTERN.flags,
+  );
+  let arbitraryMatch = arbitraryPattern.exec(token);
+  while (arbitraryMatch !== null) {
+    arbitraryMatches.push(arbitraryMatch);
+    arbitraryMatch = arbitraryPattern.exec(token);
+  }
+
   if (arbitraryMatches.length > 0) {
     const values = arbitraryMatches
       .map((match) => Number(match[1]))
