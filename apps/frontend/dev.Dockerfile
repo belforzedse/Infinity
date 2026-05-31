@@ -46,9 +46,10 @@ ENV FRONTEND_REDIS_URL=${FRONTEND_REDIS_URL}
 ENV GITHUB_SHA=${GITHUB_SHA}
 
 WORKDIR /repo/apps/frontend
+ENV NODE_ENV=production
 RUN --mount=type=cache,target=/root/.cache/node/corepack \
     fallback-registry.sh "${NPM_REGISTRY_URL}" "${NPM_REGISTRY_SECOND_FALLBACK_URL}" "${NPM_REGISTRY_THIRD_FALLBACK_URL}" "${NPM_REGISTRY_FALLBACK_URL}" \
-    NODE_ENV=production pnpm run build
+    pnpm run build
 
 FROM node:22-alpine AS runner
 WORKDIR /app

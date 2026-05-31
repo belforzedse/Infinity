@@ -30,9 +30,10 @@ ENV NEXT_PUBLIC_IMAGE_BASE_URL=${NEXT_PUBLIC_IMAGE_BASE_URL}
 ENV NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
 
 WORKDIR /repo/apps/social
+ENV NODE_ENV=production
 RUN --mount=type=cache,target=/root/.cache/node/corepack \
     fallback-registry.sh "${NPM_REGISTRY_URL}" "${NPM_REGISTRY_SECOND_FALLBACK_URL}" "${NPM_REGISTRY_THIRD_FALLBACK_URL}" "${NPM_REGISTRY_FALLBACK_URL}" \
-    NODE_ENV=production pnpm run build
+    pnpm run build
 
 FROM node:22-alpine AS runner
 WORKDIR /app
