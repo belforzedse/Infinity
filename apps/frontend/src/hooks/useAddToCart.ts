@@ -1,6 +1,5 @@
 import { useCart } from "@/contexts/CartContext";
-import { useState, useEffect } from "react";
-// removed unused import: useRouter from "next/navigation"
+import { useState, useEffect, useRef } from "react";
 import notify from "@/utils/notify";
 import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
 
@@ -31,55 +30,54 @@ export default function useAddToCart({
   model,
   variationId,
 }: UseAddToCartProps) {
-  // removed unused: router
   const { addToCart: addToCartContext, openDrawer, cartItems, updateQuantity } = useCart();
-  const [quantity, setQuantity] = useState(0);
+  const [quantity, setQuantity] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
   const [isInCart, setIsInCart] = useState(false);
-  const [isManuallyChanged, setIsManuallyChanged] = useState(false);
+  const wasInCartRef = useRef(false);
 
   // Create a unique ID based on product and variation
   const cartItemId = variationId
     ? `${productId}-${variationId}`
     : `${productId}-${color || ""}-${size || ""}-${model || ""}`;
 
+  useEffect(() => {
+    setQuantity(1);
+  }, [cartItemId]);
+
   // Check if item is in cart and update quantity state if it is
   useEffect(() => {
-    const cartItem = cartItems.find((item) => item.id === cartItemId);
+    const cartItem = cartItems.find(
+      (item) => item.id === cartItemId || item.cartItemId === cartItemId,
+    );
 
     if (cartItem) {
       setIsInCart(true);
-
-      // Always sync quantity with cart
-      if (!isManuallyChanged || quantity !== cartItem.quantity) {
-        setQuantity(cartItem.quantity);
-      }
-
-      // Reset manual change flag after applying
-      if (isManuallyChanged) {
-        setIsManuallyChanged(false);
-      }
-    } else {
-      setIsInCart(false);
-      // Reset quantity to 0 if item is removed from cart elsewhere
-      if (!isAdding && quantity > 0) {
-        setQuantity(0);
-      }
+      wasInCartRef.current = true;
+      setQuantity(cartItem.quantity);
+      return;
     }
-  }, [cartItems, cartItemId, isAdding, isManuallyChanged, quantity]);
+
+    setIsInCart(false);
+    setQuantity((currentQuantity) => (wasInCartRef.current ? 1 : Math.max(currentQuantity, 1)));
+    wasInCartRef.current = false;
+  }, [cartItems, cartItemId]);
 
   // Custom quantity setter that also updates the cart when the item is already in cart
   const updateItemQuantity = (newQuantity: number) => {
-    setIsManuallyChanged(true);
     setQuantity(newQuantity);
 
-    // If the item is already in cart, update its quantity
     if (isInCart && newQuantity > 0) {
       updateQuantity(cartItemId, newQuantity);
     }
   };
 
   const handleAddToCart = (initialQuantity?: number) => {
+    if (isInCart) {
+      openDrawer();
+      return;
+    }
+
     // If an initial quantity is provided, use it (for first-time add)
     // Make sure we're working with a number to avoid object rendering issues
     let actualQuantity: number;

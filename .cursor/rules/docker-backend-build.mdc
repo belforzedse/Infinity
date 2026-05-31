@@ -38,7 +38,7 @@ They also define `NPM_REGISTRY_FALLBACK_URL` as:
 
 `https://registry.npmjs.org/`
 
-Dependency install runs through `.cursor/docker/fallback-registry.sh`: it activates Corepack/pnpm against `NPM_REGISTRY_URL`, runs `pnpm install`, and if that step fails, retries the same command against `NPM_REGISTRY_FALLBACK_URL`.
+Every builder-stage `pnpm` step (install, `pnpm run build`, deploy, rebuild) runs through `.cursor/docker/fallback-registry.sh` with a Corepack cache mount. Without this on post-install steps, Corepack defaults to `registry.npmjs.org` in a new `RUN` layer and times out on restricted CI networks.
 
 Override at build time when needed:
 

@@ -136,7 +136,7 @@ export default function PDPHeroGalleryThumbnailList(props: Props) {
   return (
     <div
       ref={scrollContainerRef}
-      className="relative h-auto w-full overflow-x-auto xl:max-h-[calc(100vh-var(--header-offset,88px)-1rem)] xl:w-[112px] xl:overflow-y-auto xl:overflow-x-hidden [-webkit-overflow-scrolling:touch] [overscroll-behavior-x:contain]"
+      className="relative h-auto w-full overflow-x-auto xl:h-[calc((112px*5/4*4)+(0.5rem*3))] xl:max-h-[calc(100vh-var(--header-offset,88px)-1rem)] xl:w-[112px] xl:overflow-y-auto xl:overflow-x-hidden [-webkit-overflow-scrolling:touch] [overscroll-behavior-x:contain]"
     >
       <div className="flex min-w-max flex-row-reverse flex-nowrap xl:flex-wrap gap-2 xl:w-full xl:flex-col xl:min-w-0">
         {assets.map((asset, index) => (

@@ -31,9 +31,13 @@ RUN --mount=type=cache,target=/root/.npm \
 
 COPY apps/backend ./apps/backend
 WORKDIR /repo/apps/backend
-RUN pnpm run build && rm -rf .strapi
+RUN --mount=type=cache,target=/root/.cache/node/corepack \
+    fallback-registry.sh "${NPM_REGISTRY_URL}" "${NPM_REGISTRY_FALLBACK_URL}" \
+    pnpm run build && rm -rf .strapi
 WORKDIR /repo
-RUN pnpm --filter @repo/backend deploy --legacy --prod /app \
+RUN --mount=type=cache,target=/root/.cache/node/corepack \
+    fallback-registry.sh "${NPM_REGISTRY_URL}" "${NPM_REGISTRY_FALLBACK_URL}" \
+    pnpm --filter @repo/backend deploy --legacy --prod /app \
     && cd /app \
     && npm_config_platform=linux npm_config_arch=x64 npm_config_libc=musl pnpm rebuild sharp --unsafe-perm \
     && node -e "const sharp=require('sharp'); console.log('sharp-ok', process.platform, process.arch, sharp.versions);"

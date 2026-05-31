@@ -38,10 +38,10 @@ describe("useAddToCart", () => {
     cartItemsMock = [];
   });
 
-  it("should initialize with quantity 0", () => {
+  it("should initialize with quantity 1", () => {
     const { result } = renderHook(() => useAddToCart(mockProps));
 
-    expect(result.current.quantity).toBe(0);
+    expect(result.current.quantity).toBe(1);
     expect(result.current.isAdding).toBe(false);
     expect(result.current.isInCart).toBe(false);
   });
@@ -85,7 +85,7 @@ describe("useAddToCart", () => {
     expect(mockOpenDrawer).toHaveBeenCalled();
   });
 
-  it("should use current quantity if no initial quantity provided", () => {
+  it("should open cart drawer without adding again when item already exists", () => {
     cartItemsMock = [{ id: "123---", quantity: 3 }];
 
     const { result } = renderHook(() => useAddToCart(mockProps));
@@ -94,11 +94,8 @@ describe("useAddToCart", () => {
       result.current.addToCart();
     });
 
-    expect(mockAddToCart).toHaveBeenCalledWith(
-      expect.objectContaining({
-        quantity: 3,
-      }),
-    );
+    expect(mockAddToCart).not.toHaveBeenCalled();
+    expect(mockOpenDrawer).toHaveBeenCalled();
   });
 
   it("should not add if quantity is 0", () => {

@@ -124,10 +124,7 @@ export default function PDPHeroInfoAction({
       return false;
     }
 
-    const alreadyInCart = isInCart ? quantity : 0;
-    const requestedTotal = alreadyInCart + requestedQuantity;
-
-    return hasStockForVariation(currentVariation, requestedTotal);
+    return hasStockForVariation(currentVariation, requestedQuantity);
   };
 
   // Enhanced add to cart handler with stock validation
@@ -136,6 +133,11 @@ export default function PDPHeroInfoAction({
    * @param {number} requestedQuantity - Quantity to add to cart
    */
   const handleAddToCart = (requestedQuantity: number = 1) => {
+    if (isInCart) {
+      addToCart();
+      return;
+    }
+
     if (process.env.NODE_ENV !== "production") {
       logger.info("=== ADD TO CART DEBUG ===");
       logger.info("Requested quantity", { requestedQuantity });
@@ -260,7 +262,7 @@ export default function PDPHeroInfoAction({
    * @param {any} option - Selected quantity option
    */
   const handleQuantityChange = (option: any) => {
-    const newQuantity = option.id;
+    const newQuantity = Number(option.id);
 
     // Validate the new quantity against available stock
     if (!validateQuantity(newQuantity)) {
@@ -348,7 +350,7 @@ export default function PDPHeroInfoAction({
               className={`text-base flex flex-1 items-center justify-center rounded-xl bg-actions-primary py-3 !text-gray-100 ${
                 isAdding ? "cursor-wait opacity-50" : ""
               }`}
-              text={isInCart ? "افزودن" : "افزودن به سبد خرید"}
+              text={isInCart ? "مشاهده سبد خرید" : "افزودن به سبد خرید"}
               variant="primary"
               leftIcon={<BasketIcon />}
               onClick={

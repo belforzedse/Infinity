@@ -35,9 +35,13 @@ RUN --mount=type=cache,target=/root/.npm \
 
 COPY apps/backend ./apps/backend
 WORKDIR /repo/apps/backend
-RUN pnpm run build && rm -rf .strapi
+RUN --mount=type=cache,target=/root/.cache/node/corepack \
+    fallback-registry.sh "${NPM_REGISTRY_URL}" "${NPM_REGISTRY_FALLBACK_URL}" \
+    pnpm run build && rm -rf .strapi
 WORKDIR /repo
-RUN pnpm --filter @repo/backend deploy --legacy --prod /app \
+RUN --mount=type=cache,target=/root/.cache/node/corepack \
+    fallback-registry.sh "${NPM_REGISTRY_URL}" "${NPM_REGISTRY_FALLBACK_URL}" \
+    pnpm --filter @repo/backend deploy --legacy --prod /app \
     && mkdir -p /app/dist /app/build \
     && cp -a /repo/apps/backend/dist/. /app/dist/ \
     && if [ -d /repo/apps/backend/build ]; then cp -a /repo/apps/backend/build/. /app/build/; fi \
