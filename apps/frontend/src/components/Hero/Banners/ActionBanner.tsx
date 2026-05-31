@@ -93,6 +93,9 @@ function Background({ background, bgStyle, className, positionStyle }: Backgroun
   const backgroundHeight = background?.height
     ? (typeof background.height === 'number' ? `${background.height}px` : background.height)
     : '100%';
+  const innerBorder = background.type === "color" ? background.innerBorder : undefined;
+  const shouldRenderInnerBorder = Boolean(innerBorder?.enabled && innerBorder.widthPx > 0);
+
   return (
     <div
       className={`absolute ${background.className || ''} ${className || ''}`}
@@ -102,7 +105,20 @@ function Background({ background, bgStyle, className, positionStyle }: Backgroun
         height: backgroundHeight,
         ...(positionStyle ?? getBackgroundPosition(background.position)),
       }}
-    />
+    >
+      {shouldRenderInnerBorder ? (
+        <div
+          aria-hidden="true"
+          data-hero-inner-border="true"
+          className="pointer-events-none absolute rounded-[inherit]"
+          style={{
+            inset: `${innerBorder?.offsetPx ?? 0}px`,
+            border: `${innerBorder?.widthPx ?? 0}px solid ${innerBorder?.color || "#ffffff"}`,
+            boxSizing: "border-box",
+          }}
+        />
+      ) : null}
+    </div>
   );
 }
 
@@ -292,7 +308,11 @@ function ContentSection({
               className={`h-5 w-5 shrink-0 transition-transform duration-200 group-hover:-translate-x-1 ${button?.arrowClassName || ''}`}
             />
           )}
-          <span className={titleClasses} style={Object.keys(titleStyle).length ? titleStyle : undefined}>
+          <span
+            className={titleClasses}
+            style={Object.keys(titleStyle).length ? titleStyle : undefined}
+            data-hero-edit-field={title.trim() ? "title" : "buttonLabel"}
+          >
             {ctaLabel}
           </span>
         </Link>
@@ -312,7 +332,9 @@ function ContentSection({
           {(button?.showArrow ?? true) && (
             <ArrowLeft className={`h-5 w-5 shrink-0 ${button?.arrowClassName || ''}`} />
           )}
-          <span className={titleClasses}>{ctaLabel}</span>
+          <span className={titleClasses} data-hero-edit-field={title.trim() ? "title" : "buttonLabel"}>
+            {ctaLabel}
+          </span>
         </span>
       </div>
     );
@@ -320,13 +342,18 @@ function ContentSection({
 
   return (
     <div className={`relative z-20 flex h-full flex-col ${alignmentClass} ${spacingClass} text-right ${contentClassName}`}>
-      <h2 className={titleClasses} style={Object.keys(titleStyle).length ? titleStyle : undefined}>
+      <h2
+        className={titleClasses}
+        style={Object.keys(titleStyle).length ? titleStyle : undefined}
+        data-hero-edit-field="title"
+      >
         {title}
       </h2>
       {subtitle && (
         <p
           className={`${subtitleClasses} mt-2`}
           style={Object.keys(subtitleStyle).length ? subtitleStyle : undefined}
+          data-hero-edit-field="subtitle"
         >
           {subtitle}
         </p>
@@ -341,7 +368,7 @@ function ContentSection({
             {button.showArrow && (
               <ArrowLeft className={`inline-block mr-2 h-4 w-4 transition-transform duration-200 group-hover:-translate-x-1 ${button.arrowClassName || ''}`} />
             )}
-            {button.label}
+            <span data-hero-edit-field="buttonLabel">{button.label}</span>
           </Link>
         </div>
       )}

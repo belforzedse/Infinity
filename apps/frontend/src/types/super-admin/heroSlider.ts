@@ -138,6 +138,16 @@ export const HERO_FOREGROUND_OFFSET_MIN_PX = -600;
 export const HERO_FOREGROUND_OFFSET_MAX_PX = 600;
 export const HERO_FOREGROUND_ZOOM_MIN = 0.25;
 export const HERO_FOREGROUND_ZOOM_MAX = 3;
+export const HERO_INNER_BORDER_WIDTH_MIN_PX = 0;
+export const HERO_INNER_BORDER_WIDTH_MAX_PX = 12;
+export const HERO_INNER_BORDER_OFFSET_MIN_PX = 0;
+export const HERO_INNER_BORDER_OFFSET_MAX_PX = 48;
+export const DEFAULT_HERO_INNER_BORDER: HeroInnerBorder = {
+  enabled: false,
+  color: "#ffffff",
+  widthPx: 1,
+  offsetPx: 12,
+};
 
 const FONT_SIZE_PX_TOKEN_PATTERN = /^text-\[(\d+)px\]$/;
 const FONT_SIZE_ARBITRARY_PX_PATTERN = /\[(\d+)px\]/g;
@@ -392,6 +402,13 @@ export type HeroTracking = {
   custom: Record<string, string>;
 };
 
+export type HeroInnerBorder = {
+  enabled: boolean;
+  color: string;
+  widthPx: number;
+  offsetPx: number;
+};
+
 export type HeroSlotLink = {
   type: HeroLinkType;
   href: string;
@@ -445,6 +462,7 @@ export type HeroMainVisualSlot = {
   /** Foreground image zoom (0.5–2). Default 1. */
   foregroundZoom?: number;
   foregroundOverflow: HeroImageOverflow;
+  innerBorder: HeroInnerBorder;
   link: HeroSlotLink | null;
   tracking: HeroTracking;
 };
@@ -593,6 +611,7 @@ export type HeroCardSlot = {
   backgroundPosition: string;
   backgroundSize: string;
   backgroundClassName: string;
+  innerBorder: HeroInnerBorder;
   className: string;
   titleClassName: string;
   subtitleClassName: string;
@@ -958,6 +977,28 @@ function sanitizeSlotLink(value: unknown): HeroSlotLink | null {
   return null;
 }
 
+function normalizeHeroInnerBorder(value: unknown): HeroInnerBorder {
+  const raw = isRecord(value) ? value : {};
+  return {
+    enabled: typeof raw.enabled === "boolean" ? raw.enabled : DEFAULT_HERO_INNER_BORDER.enabled,
+    color:
+      sanitizeColorOrClass(raw.color) ||
+      DEFAULT_HERO_INNER_BORDER.color,
+    widthPx: clamp(
+      raw.widthPx,
+      HERO_INNER_BORDER_WIDTH_MIN_PX,
+      HERO_INNER_BORDER_WIDTH_MAX_PX,
+      DEFAULT_HERO_INNER_BORDER.widthPx,
+    ),
+    offsetPx: clamp(
+      raw.offsetPx,
+      HERO_INNER_BORDER_OFFSET_MIN_PX,
+      HERO_INNER_BORDER_OFFSET_MAX_PX,
+      DEFAULT_HERO_INNER_BORDER.offsetPx,
+    ),
+  };
+}
+
 function sanitizeTextStyle(
   value: unknown,
   defaults: HeroTextStyle,
@@ -1132,6 +1173,7 @@ function normalizeMainVisualSlot(
         ? Math.min(HERO_FOREGROUND_ZOOM_MAX, Math.max(HERO_FOREGROUND_ZOOM_MIN, raw.foregroundZoom))
         : undefined,
     foregroundOverflow: normalizeImageOverflow(raw.foregroundOverflow ?? media.overflow),
+    innerBorder: normalizeHeroInnerBorder(raw.innerBorder ?? style.innerBorder),
     link: sanitizeSlotLink(raw.link),
     tracking: normalizeHeroTracking(raw.tracking),
   };
@@ -1253,6 +1295,7 @@ function normalizeCardSlot(
       raw.buttonStyle,
       defaults?.buttonStyle || DEFAULT_CARD_BUTTON_STYLE,
     ),
+    innerBorder: normalizeHeroInnerBorder(raw.innerBorder ?? style.innerBorder),
     link: sanitizeSlotLink(raw.link),
     tracking: normalizeHeroTracking(raw.tracking),
   };
@@ -1471,6 +1514,7 @@ export function syncTabletAndMobileFromDesktop(slide: HeroSlideConfig): HeroSlid
     tracking: d.rightBanner.tracking,
     backgroundColor: d.rightBanner.backgroundColor,
     backgroundType: d.rightBanner.backgroundType,
+    innerBorder: d.rightBanner.innerBorder,
   };
 
   const cardLeftContent = {
@@ -1486,6 +1530,7 @@ export function syncTabletAndMobileFromDesktop(slide: HeroSlideConfig): HeroSlid
     backgroundImageUrl: d.bottomActionBannerLeft.backgroundImageUrl,
     backgroundColor: d.bottomActionBannerLeft.backgroundColor,
     backgroundType: d.bottomActionBannerLeft.backgroundType,
+    innerBorder: d.bottomActionBannerLeft.innerBorder,
   };
 
   const cardRightContent = {
@@ -1501,6 +1546,7 @@ export function syncTabletAndMobileFromDesktop(slide: HeroSlideConfig): HeroSlid
     backgroundImageUrl: d.bottomActionBannerRight.backgroundImageUrl,
     backgroundColor: d.bottomActionBannerRight.backgroundColor,
     backgroundType: d.bottomActionBannerRight.backgroundType,
+    innerBorder: d.bottomActionBannerRight.innerBorder,
   };
 
   const desktopCardLeftImagePosition =
@@ -1519,13 +1565,11 @@ export function syncTabletAndMobileFromDesktop(slide: HeroSlideConfig): HeroSlid
         slots: {
           primaryBanner: normalizeHeadlineSlot(headlineContent, {
             titleStyle: {
-              ...DEFAULT_PRIMARY_TITLE_STYLE,
-              color: d.topLeftTextBanner.titleStyle.color || DEFAULT_PRIMARY_TITLE_STYLE.color,
+              ...d.topLeftTextBanner.titleStyle,
               fontSize: "lg:text-[40px] 2xl:text-[48px]",
             },
             subtitleStyle: {
-              ...DEFAULT_PRIMARY_SUBTITLE_STYLE,
-              color: d.topLeftTextBanner.subtitleStyle.color || DEFAULT_PRIMARY_SUBTITLE_STYLE.color,
+              ...d.topLeftTextBanner.subtitleStyle,
               fontSize: "lg:text-[24px] 2xl:text-[28px]",
             },
             backgroundColor: d.topLeftTextBanner.backgroundColor || "bg-stone-50",
@@ -1584,12 +1628,12 @@ export function syncTabletAndMobileFromDesktop(slide: HeroSlideConfig): HeroSlid
         slots: {
           primaryBanner: normalizeHeadlineSlot(headlineContent, {
             titleStyle: {
-              ...DEFAULT_PRIMARY_TITLE_STYLE,
-              color: d.topLeftTextBanner.titleStyle.color || DEFAULT_PRIMARY_TITLE_STYLE.color,
+              ...d.topLeftTextBanner.titleStyle,
+              fontSize: DEFAULT_PRIMARY_TITLE_STYLE.fontSize,
             },
             subtitleStyle: {
-              ...DEFAULT_PRIMARY_SUBTITLE_STYLE,
-              color: d.topLeftTextBanner.subtitleStyle.color || DEFAULT_PRIMARY_SUBTITLE_STYLE.color,
+              ...d.topLeftTextBanner.subtitleStyle,
+              fontSize: DEFAULT_PRIMARY_SUBTITLE_STYLE.fontSize,
             },
             backgroundColor: d.topLeftTextBanner.backgroundColor || "bg-stone-50",
             bottomMarginPx: 0,

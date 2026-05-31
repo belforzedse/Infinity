@@ -130,16 +130,60 @@ describe("Hero slider editor", () => {
   });
 
   it("switches inline editor target when a slot is selected from template preview", async () => {
-    render(<HeroSliderCustomizationPage />);
+    const { container } = render(<HeroSliderCustomizationPage />);
 
     await waitFor(() => {
       expect(screen.getByText(/در حال ویرایش:/)).toBeInTheDocument();
       expect(screen.getAllByText("تیتر").length).toBeGreaterThan(0);
     });
 
-    fireEvent.click(screen.getByRole("button", { name: /ویرایش تصویر اصلی/i }));
+    const mainVisualSlot = container.querySelector<HTMLElement>("[data-slot='rightBanner']");
+    expect(mainVisualSlot).not.toBeNull();
+    fireEvent.click(mainVisualSlot as HTMLElement);
 
     expect(screen.getAllByText("تصویر اصلی").length).toBeGreaterThan(0);
+  });
+
+  it("double clicking preview text focuses the matching editor field", async () => {
+    const { container } = render(<HeroSliderCustomizationPage />);
+
+    await waitFor(() => {
+      expect(
+        container.querySelector("[data-slot='topLeftTextBanner'] [data-hero-edit-field='title']"),
+      ).toBeInTheDocument();
+    });
+
+    const title = container.querySelector<HTMLElement>(
+      "[data-slot='topLeftTextBanner'] [data-hero-edit-field='title']",
+    );
+    expect(title).not.toBeNull();
+
+    fireEvent.doubleClick(title as HTMLElement);
+
+    await waitFor(() => {
+      expect(document.activeElement).toHaveAttribute("data-hero-editor-field", "title");
+    });
+  });
+
+  it("double clicking card text switches slots and focuses the card editor title", async () => {
+    const { container } = render(<HeroSliderCustomizationPage />);
+
+    await waitFor(() => {
+      expect(
+        container.querySelector("[data-slot='bottomActionBannerLeft'] [data-hero-edit-field='title']"),
+      ).toBeInTheDocument();
+    });
+
+    const cardTitle = container.querySelector<HTMLElement>(
+      "[data-slot='bottomActionBannerLeft'] [data-hero-edit-field='title']",
+    );
+    expect(cardTitle).not.toBeNull();
+
+    fireEvent.doubleClick(cardTitle as HTMLElement);
+
+    await waitFor(() => {
+      expect(document.activeElement).toHaveAttribute("data-hero-editor-field", "title");
+    });
   });
 
   it("reorders slides when move controls are used", () => {

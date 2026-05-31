@@ -3,13 +3,18 @@ FROM node:20-alpine AS builder
 
 ARG STRAPI_DISABLE_SOURCEMAPS=true
 ARG STRAPI_TELEMETRY_DISABLED=true
-ARG NODE_OPTIONS=""
-ARG NPM_REGISTRY_URL="https://package-mirror.liara.ir/repository/npm/"
+ARG NODE_OPTIONS="--max-old-space-size=4096"
+ARG NPM_REGISTRY_URL="https://mirror.abrha.net/repository/npm/"
+ARG NPM_REGISTRY_SECOND_FALLBACK_URL="https://package-mirror.liara.ir/repository/npm/"
+ARG NPM_REGISTRY_THIRD_FALLBACK_URL="https://mirror-npm.runflare.com/"
 ARG NPM_REGISTRY_FALLBACK_URL="https://registry.npmjs.org/"
 ENV STRAPI_DISABLE_SOURCEMAPS=${STRAPI_DISABLE_SOURCEMAPS}
 ENV STRAPI_TELEMETRY_DISABLED=${STRAPI_TELEMETRY_DISABLED}
 ENV NODE_OPTIONS=${NODE_OPTIONS}
 ENV NODE_ENV=production
+# Build must not use Redis rest-cache (no broker in builder); production runtime sets redis via deploy env.
+ENV REST_CACHE_PROVIDER=memory
+ENV CI=true
 
 WORKDIR /repo
 
@@ -30,21 +35,23 @@ COPY apps/backend/package.json ./apps/backend/package.json
 COPY packages ./packages
 RUN --mount=type=cache,target=/root/.npm \
     --mount=type=cache,target=/root/.cache/node/corepack \
-    fallback-registry.sh "${NPM_REGISTRY_URL}" "${NPM_REGISTRY_FALLBACK_URL}" \
+    fallback-registry.sh "${NPM_REGISTRY_URL}" "${NPM_REGISTRY_SECOND_FALLBACK_URL}" "${NPM_REGISTRY_THIRD_FALLBACK_URL}" "${NPM_REGISTRY_FALLBACK_URL}" \
     pnpm install --filter @repo/backend... --frozen-lockfile
 
 COPY apps/backend ./apps/backend
 WORKDIR /repo/apps/backend
 RUN --mount=type=cache,target=/root/.cache/node/corepack \
-    fallback-registry.sh "${NPM_REGISTRY_URL}" "${NPM_REGISTRY_FALLBACK_URL}" \
+    echo "starting strapi build at $(date -Iseconds)..." \
+    && fallback-registry.sh "${NPM_REGISTRY_URL}" "${NPM_REGISTRY_SECOND_FALLBACK_URL}" "${NPM_REGISTRY_THIRD_FALLBACK_URL}" "${NPM_REGISTRY_FALLBACK_URL}" \
     pnpm run build \
-    && echo "strapi build finished, removing build artifacts..." \
+    && echo "strapi build finished at $(date -Iseconds)"
+RUN echo "removing build artifacts..." \
     && rm -rf .strapi .cache .tmp \
     && echo "strapi build step complete"
 WORKDIR /repo
 RUN --mount=type=cache,target=/root/.cache/node/corepack \
     echo "starting pnpm deploy..." \
-    && fallback-registry.sh "${NPM_REGISTRY_URL}" "${NPM_REGISTRY_FALLBACK_URL}" \
+    && fallback-registry.sh "${NPM_REGISTRY_URL}" "${NPM_REGISTRY_SECOND_FALLBACK_URL}" "${NPM_REGISTRY_THIRD_FALLBACK_URL}" "${NPM_REGISTRY_FALLBACK_URL}" \
     pnpm --filter @repo/backend deploy --legacy --prod /app \
     && echo "pnpm deploy finished, copying build output..." \
     && mkdir -p /app/dist /app/build \
@@ -60,7 +67,9 @@ FROM node:20-alpine AS runner
 ARG STRAPI_DISABLE_SOURCEMAPS=true
 ARG STRAPI_TELEMETRY_DISABLED=true
 ARG NODE_OPTIONS=""
-ARG NPM_REGISTRY_URL="https://package-mirror.liara.ir/repository/npm/"
+ARG NPM_REGISTRY_URL="https://mirror.abrha.net/repository/npm/"
+ARG NPM_REGISTRY_SECOND_FALLBACK_URL="https://package-mirror.liara.ir/repository/npm/"
+ARG NPM_REGISTRY_THIRD_FALLBACK_URL="https://mirror-npm.runflare.com/"
 ARG NPM_REGISTRY_FALLBACK_URL="https://registry.npmjs.org/"
 ENV NODE_ENV=production \
     STRAPI_TELEMETRY_DISABLED=${STRAPI_TELEMETRY_DISABLED} \
@@ -74,7 +83,7 @@ RUN chmod +x /usr/local/bin/fallback-apk.sh /usr/local/bin/fallback-registry.sh
 # Alpine default CDN (dl-cdn.alpinelinux.org) is often unreachable from same networks as Docker Hub; use Arvan APK mirror
 RUN fallback-apk.sh su-exec vips vips-dev
 # Prepare pnpm in the runner layer (builder corepack cache uses --mount=cache and is not COPY-able).
-RUN fallback-registry.sh "${NPM_REGISTRY_URL}" "${NPM_REGISTRY_FALLBACK_URL}" pnpm --version \
+RUN fallback-registry.sh "${NPM_REGISTRY_URL}" "${NPM_REGISTRY_SECOND_FALLBACK_URL}" "${NPM_REGISTRY_THIRD_FALLBACK_URL}" "${NPM_REGISTRY_FALLBACK_URL}" pnpm --version \
     && mkdir -p /home/node/.cache/node \
     && cp -a /root/.cache/node/corepack /home/node/.cache/node/ \
     && chown -R node:node /home/node/.cache

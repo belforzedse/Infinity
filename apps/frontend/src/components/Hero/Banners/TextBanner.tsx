@@ -91,11 +91,19 @@ export default function TextBanner({
 
   return (
     <div className={containerClass} style={Object.keys(containerStyle).length ? containerStyle : undefined}>
-      <h1 className={titleClass} style={Object.keys(titleStyle).length ? titleStyle : undefined}>
+      <h1
+        className={titleClass}
+        style={Object.keys(titleStyle).length ? titleStyle : undefined}
+        data-hero-edit-field="title"
+      >
         {title}
       </h1>
       {subtitle ? (
-        <p className={subtitleClass} style={Object.keys(subtitleStyle).length ? subtitleStyle : undefined}>
+        <p
+          className={subtitleClass}
+          style={Object.keys(subtitleStyle).length ? subtitleStyle : undefined}
+          data-hero-edit-field="subtitle"
+        >
           {subtitle}
         </p>
       ) : null}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { type MouseEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Pencil, PanelLeftClose, PanelRight } from "lucide-react";
 import { mapHeroSlideToLayoutsForEditor } from "@/components/Hero/config/fromCms";
 import {
@@ -14,7 +14,7 @@ import {
   type HeroTabletSlotKey,
 } from "@/types/super-admin/heroSlider";
 import { DesktopCanvas, MobileCanvas, TabletCanvas } from "@/components/SuperAdmin/HeroSliderEditor/canvases";
-import { SlotEditorContent } from "@/components/SuperAdmin/HeroSliderEditor/editors";
+import { SlotEditorContent, type ActiveHeroTextFocusRequest, type ActiveHeroTextField } from "@/components/SuperAdmin/HeroSliderEditor/editors";
 import {
   getFrameByDevice,
   makeLayoutsSafe,
@@ -55,6 +55,7 @@ export default function TemplatePreview({
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const [viewportWidth, setViewportWidth] = useState(0);
   const [isPanelCollapsed, setIsPanelCollapsed] = useState(false);
+  const [activeTextField, setActiveTextField] = useState<ActiveHeroTextFocusRequest | null>(null);
 
   const frame = useMemo(() => getFrameByDevice(device), [device]);
   const panelOpenScaleFactor = useSidePanel && !isPanelCollapsed ? 0.9 : 1;
@@ -102,6 +103,27 @@ export default function TemplatePreview({
   }, [device, selectedSlotKey, slide]);
 
   const deviceLabel = DEVICE_LABELS[device];
+
+  const handlePreviewDoubleClick = (event: MouseEvent<HTMLDivElement>) => {
+    const target = event.target as HTMLElement;
+    const fieldTarget = target.closest<HTMLElement>("[data-hero-edit-field]");
+    const slotTarget = target.closest<HTMLElement>("[data-slot]");
+    const rawField = fieldTarget?.dataset.heroEditField;
+
+    if (!slotTarget || !rawField) return;
+    if (rawField !== "title" && rawField !== "subtitle" && rawField !== "buttonLabel") return;
+
+    event.preventDefault();
+    const nextSlotKey = slotTarget.dataset.slot as SlotKey | undefined;
+    if (!nextSlotKey) return;
+
+    onSelectSlot(nextSlotKey, slotTarget);
+    setIsPanelCollapsed(false);
+    setActiveTextField({
+      field: rawField as ActiveHeroTextField,
+      requestId: Date.now(),
+    });
+  };
 
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-4">
@@ -194,6 +216,7 @@ export default function TemplatePreview({
                   >
                     <div
                       className="transition-transform duration-300 ease-out"
+                      data-active-hero-field={activeTextField?.field || ""}
                       style={{
                         width: frame.width,
                         height: frame.height,
@@ -204,10 +227,58 @@ export default function TemplatePreview({
                         const target = event.target as HTMLElement;
                         if (target.closest("a")) {
                           event.preventDefault();
-                          event.stopPropagation();
                         }
                       }}
+                      onDoubleClick={handlePreviewDoubleClick}
                     >
+                      <style>{`
+                        [data-active-hero-field] [data-hero-edit-field] {
+                          cursor: text;
+                          border-radius: 6px;
+                          transition:
+                            outline-color 160ms ease,
+                            background-color 160ms ease,
+                            box-shadow 160ms ease;
+                        }
+
+                        [data-active-hero-field] [data-hero-edit-field]:hover {
+                          outline: 2px solid rgba(236, 72, 153, 0.85);
+                          outline-offset: 4px;
+                          background: rgba(236, 72, 153, 0.1);
+                          box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.7);
+                        }
+
+                        [data-active-hero-field] [data-hero-edit-field]:hover::after {
+                          content: "دابل کلیک برای ویرایش";
+                          position: absolute;
+                          z-index: 60;
+                          right: 0;
+                          top: calc(100% + 8px);
+                          white-space: nowrap;
+                          border-radius: 8px;
+                          background: rgba(15, 23, 42, 0.92);
+                          color: white;
+                          padding: 6px 9px;
+                          font-family: var(--font-peyda-fanum);
+                          font-size: 12px;
+                          font-weight: 500;
+                          line-height: 1;
+                          pointer-events: none;
+                        }
+
+                        [data-active-hero-field] [data-hero-edit-field] {
+                          position: relative;
+                        }
+
+                        [data-active-hero-field="title"] [data-slot-selected="true"] [data-hero-edit-field="title"],
+                        [data-active-hero-field="subtitle"] [data-slot-selected="true"] [data-hero-edit-field="subtitle"],
+                        [data-active-hero-field="buttonLabel"] [data-slot-selected="true"] [data-hero-edit-field="buttonLabel"] {
+                          outline: 2px solid rgb(236, 72, 153);
+                          outline-offset: 4px;
+                          background: rgba(236, 72, 153, 0.12);
+                          box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.72);
+                        }
+                      `}</style>
                       {device === "desktop" ? (
                         <DesktopCanvas
                           layouts={layouts}
@@ -250,6 +321,7 @@ export default function TemplatePreview({
                       slot={selectedSlot}
                       onChange={onChangeSelectedSlot}
                       onClose={onDeselectSlot}
+                      activeTextField={activeTextField}
                     />
                   </div>
                 ) : (

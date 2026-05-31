@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, type ReactElement, useState } from "react";
+import { type ReactElement, type ReactNode, useState } from "react";
 import { Pencil } from "lucide-react";
 import { slotLabelMap, type SlotKey } from "@/components/SuperAdmin/HeroSliderEditor/utils";
 
@@ -28,31 +28,31 @@ export function EditableSlot({
     <div
       role="group"
       aria-label={label}
-      className={`group relative overflow-visible ${className || ""}`}
+      tabIndex={0}
+      className={`group relative overflow-visible outline-none ${className || ""}`}
       data-slot={slotKey}
+      data-slot-selected={selected ? "true" : "false"}
+      onClick={(event) => onSelect(event.currentTarget)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onFocus={() => setIsFocused(true)}
+      onBlur={() => setIsFocused(false)}
     >
       {children}
 
-      <button
-        type="button"
-        onClick={(event) => onSelect(event.currentTarget)}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
-        className={`absolute inset-0 z-20 rounded-lg transition-all duration-200 ring-inset ${
+      <div
+        className={`pointer-events-none absolute inset-0 z-20 rounded-lg transition-all duration-200 ring-inset ${
           selected
             ? "ring-2 ring-pink-500"
-            : "ring-1 ring-transparent hover:ring-2 hover:ring-pink-400/60"
+            : "ring-1 ring-transparent group-hover:ring-2 group-hover:ring-pink-400/60 group-focus:ring-2 group-focus:ring-pink-400/60"
         }`}
-        aria-label={`ویرایش ${label}`}
-        title="برای ویرایش کلیک کنید"
+        aria-hidden
       />
 
       {showOverlay && (
         <div className="pointer-events-none absolute inset-0 z-[21] flex items-center justify-center rounded-lg bg-black/5">
           <span className="rounded-lg bg-white/95 px-3 py-1.5 text-xs font-medium text-slate-700 shadow-md">
-            کلیک برای ویرایش
+            کلیک برای انتخاب - دابل کلیک روی متن برای ویرایش
           </span>
         </div>
       )}

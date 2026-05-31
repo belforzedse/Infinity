@@ -69,6 +69,8 @@ export function LeftBanner({ spec, className = '' }: LeftBannerProps) {
   // Background dimensions
   const backgroundWidth = background.width ? (typeof background.width === 'number' ? `${background.width}px` : background.width) : '100%';
   const backgroundHeight = background.height ? (typeof background.height === 'number' ? `${background.height}px` : background.height) : '100%';
+  const innerBorder = background.type === "color" ? background.innerBorder : undefined;
+  const shouldRenderInnerBorder = Boolean(innerBorder?.enabled && innerBorder.widthPx > 0);
 
   // Calculate background position based on position value
   const getBackgroundPosition = (pos?: string) => {
@@ -100,7 +102,20 @@ export function LeftBanner({ spec, className = '' }: LeftBannerProps) {
           ...getBackgroundPosition(background.position),
           zIndex: 0,
         }}
-      />
+      >
+        {shouldRenderInnerBorder ? (
+          <div
+            aria-hidden="true"
+            data-hero-inner-border="true"
+            className="pointer-events-none absolute rounded-[inherit]"
+            style={{
+              inset: `${innerBorder?.offsetPx ?? 0}px`,
+              border: `${innerBorder?.widthPx ?? 0}px solid ${innerBorder?.color || "#ffffff"}`,
+              boxSizing: "border-box",
+            }}
+          />
+        ) : null}
+      </div>
       {/* Foreground image - can overlap background */}
       {shouldRenderForegroundImage ? (
         <Image

@@ -176,6 +176,7 @@ function applyCardSlot(base: ActionBannerSpec, slot: HeroCardSlot): ActionBanner
       position: slot.backgroundPosition || base.background?.position || "center",
       backgroundSize: slot.backgroundSize || base.background?.backgroundSize || "cover",
       className: slot.backgroundClassName || base.background?.className,
+      innerBorder: slot.innerBorder,
     },
     contentAlignment: slot.contentAlignment || base.contentAlignment,
     paddingClassName: slot.paddingClassName || base.paddingClassName,
@@ -219,6 +220,7 @@ function applyMainVisualSlot(base: LeftBannerSpec, slot: HeroMainVisualSlot): Le
       width: slot.backgroundWidth || base.background.width,
       height: slot.backgroundHeight || base.background.height,
       className: slot.backgroundClassName || base.background.className,
+      innerBorder: slot.innerBorder,
     },
     foregroundImage: {
       ...base.foregroundImage,

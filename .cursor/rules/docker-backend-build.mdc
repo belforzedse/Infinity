@@ -31,23 +31,19 @@ Strapi creates a `.strapi` directory (cache/CLI state) during `strapi build`. In
 
 ## “Stuck” after `✔ Building admin panel`
 
-That message is the **last line Strapi prints**. The build is usually **not hung inside Strapi**.
+That message is the **last line Strapi prints**. If you never see `strapi build finished at …`, the **Node process has not exited** — not Docker going silent.
 
-After it, step `#24` (`pnpm run build && rm -rf …`) still has to finish, then BuildKit snapshots a **very large layer** (full `node_modules` + `dist` + `build/` admin bundle). That snapshot, and `--cache-to type=registry,mode=max` exporting it to GitLab, can take **many minutes with no new log lines**.
+Common causes in this repo:
 
-The **next** Dockerfile step (`pnpm deploy --legacy --prod /app`) is also slow and mostly silent: it copies/prunes the whole backend dependency tree and then **rebuilds sharp** from source (~1 minute). Expect 10–30+ minutes on a slow runner between Strapi’s last log line and `#24 DONE` / deploy progress.
+1. **`REST_CACHE_PROVIDER=redis` during build** — With `NODE_ENV=production`, `config/plugins.ts` defaults rest-cache to Redis. There is no Redis in the builder image; plugin init can block after the admin webpack step. **Fix:** builder stage sets `ENV REST_CACHE_PROVIDER=memory` (runtime deploy env still uses Redis).
+2. **Webpack workers** — Admin build may leave watchers open. **Fix:** `src/admin/webpack.config.js` sets `watch: false`.
+3. **Heap / GC thrashing** — Builder defaults `NODE_OPTIONS=--max-old-space-size=4096`; GitLab `ENABLE_LARGE_HEAP` defaults to `true` so CI passes the same unless overridden.
 
-Echo markers in the Dockerfiles (`strapi build finished…`, `starting pnpm deploy…`) make it obvious which phase is running. Liara **HTTP 429** on Corepack during install is separate; fallback to `registry.npmjs.org` already recovered in your log.
+The Dockerfile splits `pnpm run build` and artifact cleanup into separate `RUN` layers so `#26 DONE` appears as soon as Strapi exits.
 
 ## NPM registry (build)
 
-`main.Dockerfile` and `dev.Dockerfile` default `NPM_REGISTRY_URL` to the Liara mirror:
-
-`https://package-mirror.liara.ir/repository/npm/`
-
-They also define `NPM_REGISTRY_FALLBACK_URL` as:
-
-`https://registry.npmjs.org/`
+`main.Dockerfile` and `dev.Dockerfile` default `NPM_REGISTRY_URL` to the Abrha mirror, with Liara → Runflare → npmjs fallbacks (same chain as frontend/social).
 
 Every builder-stage `pnpm` step uses `--mount=type=cache,target=/root/.cache/node/corepack`. That cache is **not** part of the builder image filesystem — do **not** `COPY --from=builder /root/.cache/node/corepack` into the runner. The runner stage runs `fallback-registry.sh … pnpm --version` once (no cache mount) so Corepack/pnpm land in the image layer, then copies to `/home/node/.cache/node/` for the `node` user at runtime.
 
@@ -56,9 +52,21 @@ Override at build time when needed:
 ```bash
 docker build \
   --build-arg NPM_REGISTRY_URL="https://…" \
+  --build-arg NPM_REGISTRY_SECOND_FALLBACK_URL="https://package-mirror.liara.ir/repository/npm/" \
+  --build-arg NPM_REGISTRY_THIRD_FALLBACK_URL="https://mirror-npm.runflare.com/" \
   --build-arg NPM_REGISTRY_FALLBACK_URL="https://registry.npmjs.org/" \
   -f apps/backend/main.Dockerfile .
 ```
+
+## Builder env (Strapi build)
+
+| Variable | Builder value | Why |
+|----------|---------------|-----|
+| `REST_CACHE_PROVIDER` | `memory` | Avoid Redis connect hang during `strapi build` |
+| `CI` | `true` | Webpack/CI-friendly admin build |
+| `NODE_OPTIONS` | `--max-old-space-size=4096` (default) | Admin webpack memory |
+
+Runtime Redis rest-cache comes from deploy `main.env` / `dev.env`, not from the builder `ENV`.
 
 ## Alpine APK fallback
 

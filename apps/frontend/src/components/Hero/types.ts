@@ -115,6 +115,12 @@ export type BackgroundSpec = {
   position?: string; // e.g., "center", "bottom center"
   backgroundSize?: string; // e.g., "cover", "contain", "100% 100%"
   className?: string; // e.g., "rounded-lg", for styling the background element
+  innerBorder?: {
+    enabled: boolean;
+    color: string;
+    widthPx: number;
+    offsetPx: number;
+  };
 };
 
 export type LeftBannerSpec = {
