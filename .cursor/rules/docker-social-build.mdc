@@ -7,32 +7,33 @@ globs: apps/social/*.Dockerfile, .gitlab-ci.yml
 
 ## NPM registry (build)
 
-`apps/social/main.Dockerfile` defaults `NPM_REGISTRY_URL` to the same Liara mirror used by frontend/backend:
+`apps/social/main.Dockerfile` defaults `NPM_REGISTRY_URL` to the **Abrha mirror**:
 
-`https://package-mirror.liara.ir/repository/npm/`
+`https://mirror.abrha.net/repository/npm/`
 
-It also defines `NPM_REGISTRY_SECOND_FALLBACK_URL` as:
+Fallbacks in order:
 
-`https://mirror-npm.runflare.com/`
+| Build arg | Default |
+|-----------|---------|
+| `NPM_REGISTRY_SECOND_FALLBACK_URL` | `https://package-mirror.liara.ir/repository/npm/` |
+| `NPM_REGISTRY_THIRD_FALLBACK_URL` | `https://mirror-npm.runflare.com/` |
+| `NPM_REGISTRY_FALLBACK_URL` | `https://registry.npmjs.org/` |
 
-And `NPM_REGISTRY_FALLBACK_URL` as:
-
-`https://registry.npmjs.org/`
-
-Every builder-stage `pnpm` step (install **and** `pnpm run build`) runs through `.cursor/docker/fallback-registry.sh` with a Corepack cache mount. The script tries registries in order — Liara, then Runflare, then npmjs.org.
+Every builder-stage `pnpm` step (install **and** `pnpm run build`) runs through `.cursor/docker/fallback-registry.sh` with a Corepack cache mount. The script tries registries in order — Abrha, then Liara, then Runflare, then npmjs.org.
 
 Override at build time when needed:
 
 ```bash
 docker build \
   --build-arg NPM_REGISTRY_URL="https://…" \
-  --build-arg NPM_REGISTRY_SECOND_FALLBACK_URL="https://mirror-npm.runflare.com/" \
+  --build-arg NPM_REGISTRY_SECOND_FALLBACK_URL="https://package-mirror.liara.ir/repository/npm/" \
+  --build-arg NPM_REGISTRY_THIRD_FALLBACK_URL="https://mirror-npm.runflare.com/" \
   --build-arg NPM_REGISTRY_FALLBACK_URL="https://registry.npmjs.org/" \
   -f apps/social/main.Dockerfile .
 ```
 
 ## CI defaults
 
-- **GitLab** (`social:build` in `.gitlab-ci.yml`): passes `NPM_REGISTRY_URL`, `NPM_REGISTRY_SECOND_FALLBACK_URL`, and `NPM_REGISTRY_FALLBACK_URL`
+- **GitLab** (`social:build` in `.gitlab-ci.yml`): passes `NPM_REGISTRY_URL`, `NPM_REGISTRY_SECOND_FALLBACK_URL`, `NPM_REGISTRY_THIRD_FALLBACK_URL`, and `NPM_REGISTRY_FALLBACK_URL`
 
-Set `NPM_REGISTRY_URL` to override the primary registry. Override `NPM_REGISTRY_SECOND_FALLBACK_URL` or `NPM_REGISTRY_FALLBACK_URL` when needed.
+Set `NPM_REGISTRY_URL` to override the primary registry. Override fallback build args when needed.

@@ -4,8 +4,9 @@ FROM node:22-alpine AS builder
 
 WORKDIR /repo
 ENV NEXT_TELEMETRY_DISABLED=1
-ARG NPM_REGISTRY_URL="https://package-mirror.liara.ir/repository/npm/"
-ARG NPM_REGISTRY_SECOND_FALLBACK_URL="https://mirror-npm.runflare.com/"
+ARG NPM_REGISTRY_URL="https://mirror.abrha.net/repository/npm/"
+ARG NPM_REGISTRY_SECOND_FALLBACK_URL="https://package-mirror.liara.ir/repository/npm/"
+ARG NPM_REGISTRY_THIRD_FALLBACK_URL="https://mirror-npm.runflare.com/"
 ARG NPM_REGISTRY_FALLBACK_URL="https://registry.npmjs.org/"
 
 COPY .cursor/docker/fallback-registry.sh /usr/local/bin/
@@ -17,7 +18,7 @@ COPY apps/frontend/package.json ./apps/frontend/package.json
 COPY packages ./packages
 RUN --mount=type=cache,target=/root/.npm \
     --mount=type=cache,target=/root/.cache/node/corepack \
-    fallback-registry.sh "${NPM_REGISTRY_URL}" "${NPM_REGISTRY_SECOND_FALLBACK_URL}" "${NPM_REGISTRY_FALLBACK_URL}" \
+    fallback-registry.sh "${NPM_REGISTRY_URL}" "${NPM_REGISTRY_SECOND_FALLBACK_URL}" "${NPM_REGISTRY_THIRD_FALLBACK_URL}" "${NPM_REGISTRY_FALLBACK_URL}" \
     pnpm install --filter @repo/frontend... --frozen-lockfile
 
 COPY apps/frontend ./apps/frontend
@@ -48,7 +49,7 @@ ENV GITHUB_SHA=${GITHUB_SHA}
 
 WORKDIR /repo/apps/frontend
 RUN --mount=type=cache,target=/root/.cache/node/corepack \
-    fallback-registry.sh "${NPM_REGISTRY_URL}" "${NPM_REGISTRY_SECOND_FALLBACK_URL}" "${NPM_REGISTRY_FALLBACK_URL}" \
+    fallback-registry.sh "${NPM_REGISTRY_URL}" "${NPM_REGISTRY_SECOND_FALLBACK_URL}" "${NPM_REGISTRY_THIRD_FALLBACK_URL}" "${NPM_REGISTRY_FALLBACK_URL}" \
     NODE_ENV=production pnpm run build
 
 FROM node:22-alpine AS runner

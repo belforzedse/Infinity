@@ -1,5 +1,5 @@
 ---
-description: Frontend (Next.js) Docker image build; npm registry mirror aligned with backend
+description: Frontend (Next.js) Docker image build; npm registry mirror with fallback chain
 globs: apps/frontend/*.Dockerfile, .github/workflows/frontend-cicd.yml
 ---
 
@@ -7,28 +7,29 @@ globs: apps/frontend/*.Dockerfile, .github/workflows/frontend-cicd.yml
 
 ## NPM registry (build)
 
-`main.Dockerfile` and `dev.Dockerfile` default `NPM_REGISTRY_URL` to the **same Liara mirror as the backend**:
+`main.Dockerfile` and `dev.Dockerfile` default `NPM_REGISTRY_URL` to the **Abrha mirror**:
 
-`https://package-mirror.liara.ir/repository/npm/`
+`https://mirror.abrha.net/repository/npm/`
 
-They also define `NPM_REGISTRY_SECOND_FALLBACK_URL` as:
+They also define fallbacks in order:
 
-`https://mirror-npm.runflare.com/`
+| Build arg | Default |
+|-----------|---------|
+| `NPM_REGISTRY_SECOND_FALLBACK_URL` | `https://package-mirror.liara.ir/repository/npm/` |
+| `NPM_REGISTRY_THIRD_FALLBACK_URL` | `https://mirror-npm.runflare.com/` |
+| `NPM_REGISTRY_FALLBACK_URL` | `https://registry.npmjs.org/` |
 
-And `NPM_REGISTRY_FALLBACK_URL` as:
+Every builder-stage `pnpm` step (install **and** `pnpm run build`) runs through `.cursor/docker/fallback-registry.sh` with a Corepack cache mount. The script tries registries in order — Abrha, then Liara, then Runflare, then npmjs.org — and stops at the first one that succeeds.
 
-`https://registry.npmjs.org/`
-
-Every builder-stage `pnpm` step (install **and** `pnpm run build`) runs through `.cursor/docker/fallback-registry.sh` with a Corepack cache mount. The script tries registries in order — Liara, then Runflare, then npmjs.org — and stops at the first one that succeeds.
-
-Without this on the build step, Corepack re-downloads `pnpm@10.28.2` from `registry.npmjs.org` (default) in a new `RUN` layer where the install-time cache mount and registry env vars are gone — which fails on CI networks that only reach the Liara mirror.
+Without this on the build step, Corepack re-downloads `pnpm@10.28.2` from `registry.npmjs.org` (default) in a new `RUN` layer where the install-time cache mount and registry env vars are gone — which fails on CI networks that only reach a local mirror.
 
 Override at build time when needed:
 
 ```bash
 docker build \
   --build-arg NPM_REGISTRY_URL="https://…" \
-  --build-arg NPM_REGISTRY_SECOND_FALLBACK_URL="https://mirror-npm.runflare.com/" \
+  --build-arg NPM_REGISTRY_SECOND_FALLBACK_URL="https://package-mirror.liara.ir/repository/npm/" \
+  --build-arg NPM_REGISTRY_THIRD_FALLBACK_URL="https://mirror-npm.runflare.com/" \
   --build-arg NPM_REGISTRY_FALLBACK_URL="https://registry.npmjs.org/" \
   -f apps/frontend/main.Dockerfile .
 ```
@@ -37,10 +38,10 @@ docker build \
 
 ## CI defaults
 
-- **GitLab** (`build:frontend` in `.gitlab-ci.yml`): passes `NPM_REGISTRY_URL`, `NPM_REGISTRY_SECOND_FALLBACK_URL`, and `NPM_REGISTRY_FALLBACK_URL`
+- **GitLab** (`frontend:build` in `.gitlab-ci.yml`): passes `NPM_REGISTRY_URL`, `NPM_REGISTRY_SECOND_FALLBACK_URL`, `NPM_REGISTRY_THIRD_FALLBACK_URL`, and `NPM_REGISTRY_FALLBACK_URL`
 - **GitHub Actions** (`frontend-cicd.yml`): passes the same build args from secrets or repo defaults
 
-Set the `NPM_REGISTRY_URL` CI variable to override the primary registry for all pipelines. Override `NPM_REGISTRY_SECOND_FALLBACK_URL` or `NPM_REGISTRY_FALLBACK_URL` when needed.
+Set the `NPM_REGISTRY_URL` CI variable to override the primary registry for all pipelines. Override fallback build args when needed.
 
 ## Docker Hub / base images
 

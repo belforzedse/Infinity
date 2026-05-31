@@ -1,0 +1,56 @@
+---
+description: NPM registry mirror for frontend/social pnpm workspace — Abrha primary with fallback chain for local dev and Docker
+globs: .npmrc, apps/frontend/*.Dockerfile, apps/social/*.Dockerfile, .cursor/scripts/pnpm-install-with-fallback.sh, .github/workflows/frontend-cicd.yml
+---
+
+# NPM registry mirror (frontend & social)
+
+## Primary mirror
+
+`https://mirror.abrha.net/repository/npm/`
+
+Used for the **pnpm monorepo** (frontend, social, shared `packages/*`). **Backend** (`apps/backend`) uses **npm** in its own directory and is configured separately (Liara mirror in Docker).
+
+## Fallback order
+
+When the primary mirror fails, try in order:
+
+1. `https://mirror.abrha.net/repository/npm/`
+2. `https://package-mirror.liara.ir/repository/npm/`
+3. `https://mirror-npm.runflare.com/`
+4. `https://registry.npmjs.org/`
+
+## Local development
+
+### Daily install (primary mirror only)
+
+Root [`.npmrc`](../../.npmrc) sets the Abrha registry for `pnpm install` at the monorepo root.
+
+```bash
+pnpm install
+pnpm install --filter @repo/frontend...
+pnpm install --filter @repo/social...
+```
+
+### Install with fallback (restricted networks)
+
+```bash
+pnpm run install:frontend
+pnpm run install:social
+pnpm run install:workspace
+```
+
+These run [`.cursor/scripts/pnpm-install-with-fallback.sh`](../../.cursor/scripts/pnpm-install-with-fallback.sh), which wraps [`.cursor/docker/fallback-registry.sh`](../../.cursor/docker/fallback-registry.sh) (same chain as Docker builds).
+
+On Windows, use **Git Bash** or WSL for the fallback script.
+
+## Docker & CI
+
+| App | Dockerfile | CI |
+|-----|------------|-----|
+| Frontend | [`apps/frontend/main.Dockerfile`](../../apps/frontend/main.Dockerfile), [`dev.Dockerfile`](../../apps/frontend/dev.Dockerfile) | GitLab `frontend:build`, GitHub `frontend-cicd.yml` |
+| Social | [`apps/social/main.Dockerfile`](../../apps/social/main.Dockerfile) | GitLab `social:build` |
+
+See also [docker-frontend-build.mdc](docker-frontend-build.mdc) and [docker-social-build.mdc](docker-social-build.mdc).
+
+Override via build args / CI variables: `NPM_REGISTRY_URL`, `NPM_REGISTRY_SECOND_FALLBACK_URL`, `NPM_REGISTRY_THIRD_FALLBACK_URL`, `NPM_REGISTRY_FALLBACK_URL`.
