@@ -27,6 +27,28 @@ export async function updateSuperAdminSettings(
   if (settings.homeBannerOneButtonHref !== undefined) {
     data.homeBannerOneButtonHref = settings.homeBannerOneButtonHref;
   }
+  if (settings.homeBannerOneSubtitle !== undefined)
+    data.homeBannerOneSubtitle = settings.homeBannerOneSubtitle;
+  if (settings.homeBannerOneSubtitleColor !== undefined)
+    data.homeBannerOneSubtitleColor = settings.homeBannerOneSubtitleColor;
+  if (settings.homeBannerOneBackgroundColor !== undefined)
+    data.homeBannerOneBackgroundColor = settings.homeBannerOneBackgroundColor;
+  if (settings.homeBannerOneTextSize !== undefined)
+    data.homeBannerOneTextSize = settings.homeBannerOneTextSize;
+  if (settings.homeBannerOneFontWeight !== undefined)
+    data.homeBannerOneFontWeight = settings.homeBannerOneFontWeight;
+  if (settings.homeBannerOneTextAlign !== undefined)
+    data.homeBannerOneTextAlign = settings.homeBannerOneTextAlign;
+  if (settings.homeBannerOneContentPosition !== undefined)
+    data.homeBannerOneContentPosition = settings.homeBannerOneContentPosition;
+  if (settings.homeBannerOneImageFit !== undefined)
+    data.homeBannerOneImageFit = settings.homeBannerOneImageFit;
+  if (settings.homeBannerOneImagePosition !== undefined)
+    data.homeBannerOneImagePosition = settings.homeBannerOneImagePosition;
+  if (settings.homeBannerOneDesktopHeight !== undefined)
+    data.homeBannerOneDesktopHeight = settings.homeBannerOneDesktopHeight;
+  if (settings.homeBannerOneMobileHeight !== undefined)
+    data.homeBannerOneMobileHeight = settings.homeBannerOneMobileHeight;
 
   if (settings.homeBannerTwoImage !== undefined)
     data.homeBannerTwoImage = settings.homeBannerTwoImage;
@@ -44,11 +66,72 @@ export async function updateSuperAdminSettings(
   if (settings.homeBannerTwoButtonHref !== undefined) {
     data.homeBannerTwoButtonHref = settings.homeBannerTwoButtonHref;
   }
+  if (settings.homeBannerTwoSubtitle !== undefined)
+    data.homeBannerTwoSubtitle = settings.homeBannerTwoSubtitle;
+  if (settings.homeBannerTwoSubtitleColor !== undefined)
+    data.homeBannerTwoSubtitleColor = settings.homeBannerTwoSubtitleColor;
+  if (settings.homeBannerTwoBackgroundColor !== undefined)
+    data.homeBannerTwoBackgroundColor = settings.homeBannerTwoBackgroundColor;
+  if (settings.homeBannerTwoTextSize !== undefined)
+    data.homeBannerTwoTextSize = settings.homeBannerTwoTextSize;
+  if (settings.homeBannerTwoFontWeight !== undefined)
+    data.homeBannerTwoFontWeight = settings.homeBannerTwoFontWeight;
+  if (settings.homeBannerTwoTextAlign !== undefined)
+    data.homeBannerTwoTextAlign = settings.homeBannerTwoTextAlign;
+  if (settings.homeBannerTwoContentPosition !== undefined)
+    data.homeBannerTwoContentPosition = settings.homeBannerTwoContentPosition;
+  if (settings.homeBannerTwoImageFit !== undefined)
+    data.homeBannerTwoImageFit = settings.homeBannerTwoImageFit;
+  if (settings.homeBannerTwoImagePosition !== undefined)
+    data.homeBannerTwoImagePosition = settings.homeBannerTwoImagePosition;
+  if (settings.homeBannerTwoDesktopHeight !== undefined)
+    data.homeBannerTwoDesktopHeight = settings.homeBannerTwoDesktopHeight;
+  if (settings.homeBannerTwoMobileHeight !== undefined)
+    data.homeBannerTwoMobileHeight = settings.homeBannerTwoMobileHeight;
   if (settings.homeFeaturedCategorySlug !== undefined) {
     data.homeFeaturedCategorySlug = settings.homeFeaturedCategorySlug;
   }
   if (settings.homeFeaturedCategoryBannerImage !== undefined) {
     data.homeFeaturedCategoryBannerImage = settings.homeFeaturedCategoryBannerImage;
+  }
+  if (settings.homeFeaturedCategoryTitle !== undefined) {
+    data.homeFeaturedCategoryTitle = settings.homeFeaturedCategoryTitle;
+  }
+  if (settings.homeFeaturedCategorySubtitle !== undefined) {
+    data.homeFeaturedCategorySubtitle = settings.homeFeaturedCategorySubtitle;
+  }
+  if (settings.homeFeaturedCategoryCtaText !== undefined) {
+    data.homeFeaturedCategoryCtaText = settings.homeFeaturedCategoryCtaText;
+  }
+  if (settings.homeFeaturedCategoryCtaHref !== undefined) {
+    data.homeFeaturedCategoryCtaHref = settings.homeFeaturedCategoryCtaHref;
+  }
+  if (settings.homeFeaturedCategoryTextColor !== undefined) {
+    data.homeFeaturedCategoryTextColor = settings.homeFeaturedCategoryTextColor;
+  }
+  if (settings.homeFeaturedCategoryTextSize !== undefined) {
+    data.homeFeaturedCategoryTextSize = settings.homeFeaturedCategoryTextSize;
+  }
+  if (settings.homeFeaturedCategoryFontWeight !== undefined) {
+    data.homeFeaturedCategoryFontWeight = settings.homeFeaturedCategoryFontWeight;
+  }
+  if (settings.homeFeaturedCategoryBannerBackgroundColor !== undefined) {
+    data.homeFeaturedCategoryBannerBackgroundColor =
+      settings.homeFeaturedCategoryBannerBackgroundColor;
+  }
+  if (settings.homeFeaturedCategoryBannerImageFit !== undefined) {
+    data.homeFeaturedCategoryBannerImageFit = settings.homeFeaturedCategoryBannerImageFit;
+  }
+  if (settings.homeFeaturedCategoryBannerImagePosition !== undefined) {
+    data.homeFeaturedCategoryBannerImagePosition =
+      settings.homeFeaturedCategoryBannerImagePosition;
+  }
+  if (settings.homeFeaturedCategoryDesktopBannerHeight !== undefined) {
+    data.homeFeaturedCategoryDesktopBannerHeight =
+      settings.homeFeaturedCategoryDesktopBannerHeight;
+  }
+  if (settings.homeFeaturedCategoryMobileBannerHeight !== undefined) {
+    data.homeFeaturedCategoryMobileBannerHeight = settings.homeFeaturedCategoryMobileBannerHeight;
   }
   if (settings.blogDefaultBannerImage !== undefined) {
     data.blogDefaultBannerImage = settings.blogDefaultBannerImage;

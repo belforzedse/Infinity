@@ -19,7 +19,7 @@ import Reveal from "@/components/Reveal";
 import PageContainer from "@/components/layout/PageContainer";
 import { OrganizationSchema } from "@/components/SEO/OrganizationSchema";
 import { SITE_NAME, SITE_URL } from "@/config/site";
-import HomePromoBanners from "@/components/Home/PromoBanners";
+import type { HomePromoBanner } from "@/components/Home/PromoBanners";
 import { getPublicSuperAdminSettings } from "@/services/super-admin/settings/public";
 import HomeProductSections from "./HomeProductSections";
 import { SkeletonBlock, SkeletonMedia, SkeletonText } from "@repo/ui/skeleton";
@@ -130,10 +130,12 @@ async function ProductSectionsBlock({
   featuredCategorySlug,
   featuredCategoryBannerImage,
   homepageSettings,
+  promoBanners,
 }: {
   featuredCategorySlug: string;
   featuredCategoryBannerImage: string;
   homepageSettings: SuperAdminSettings;
+  promoBanners: HomePromoBanner[];
 }) {
   const parentCategories = await getProductCategories({
     mainOnly: true,
@@ -149,6 +151,7 @@ async function ProductSectionsBlock({
       featuredCategoryBannerImage={featuredCategoryBannerImage}
       mainCategories={parentCategories}
       homepageSettings={homepageSettings}
+      promoBanners={promoBanners}
     />
   );
 }
@@ -183,6 +186,17 @@ export default async function Home() {
       buttonText: homepageSettings.homeBannerOneButtonText,
       buttonColor: homepageSettings.homeBannerOneButtonColor,
       buttonHref: homepageSettings.homeBannerOneButtonHref,
+      subtitle: homepageSettings.homeBannerOneSubtitle,
+      subtitleColor: homepageSettings.homeBannerOneSubtitleColor,
+      backgroundColor: homepageSettings.homeBannerOneBackgroundColor,
+      textSize: homepageSettings.homeBannerOneTextSize,
+      fontWeight: homepageSettings.homeBannerOneFontWeight,
+      textAlign: homepageSettings.homeBannerOneTextAlign,
+      contentPosition: homepageSettings.homeBannerOneContentPosition,
+      imageFit: homepageSettings.homeBannerOneImageFit,
+      imagePosition: homepageSettings.homeBannerOneImagePosition,
+      desktopHeight: homepageSettings.homeBannerOneDesktopHeight,
+      mobileHeight: homepageSettings.homeBannerOneMobileHeight,
     },
     {
       id: "home-banner-two",
@@ -192,12 +206,19 @@ export default async function Home() {
       buttonText: homepageSettings.homeBannerTwoButtonText,
       buttonColor: homepageSettings.homeBannerTwoButtonColor,
       buttonHref: homepageSettings.homeBannerTwoButtonHref,
+      subtitle: homepageSettings.homeBannerTwoSubtitle,
+      subtitleColor: homepageSettings.homeBannerTwoSubtitleColor,
+      backgroundColor: homepageSettings.homeBannerTwoBackgroundColor,
+      textSize: homepageSettings.homeBannerTwoTextSize,
+      fontWeight: homepageSettings.homeBannerTwoFontWeight,
+      textAlign: homepageSettings.homeBannerTwoTextAlign,
+      contentPosition: homepageSettings.homeBannerTwoContentPosition,
+      imageFit: homepageSettings.homeBannerTwoImageFit,
+      imagePosition: homepageSettings.homeBannerTwoImagePosition,
+      desktopHeight: homepageSettings.homeBannerTwoDesktopHeight,
+      mobileHeight: homepageSettings.homeBannerTwoMobileHeight,
     },
   ];
-
-  const hasPromoBanners = promoBanners.some(
-    (banner) => banner.imageUrl?.trim() && banner.title?.trim(),
-  );
   const featuredCategorySlug = homepageSettings.homeFeaturedCategorySlug?.trim() || "";
   const featuredCategoryBannerImage =
     homepageSettings.homeFeaturedCategoryBannerImage?.trim() || "";
@@ -254,16 +275,9 @@ export default async function Home() {
           featuredCategorySlug={featuredCategorySlug}
           featuredCategoryBannerImage={featuredCategoryBannerImage}
           homepageSettings={homepageSettings}
+          promoBanners={promoBanners}
         />
       </Suspense>
-
-      {hasPromoBanners && (
-        <section>
-          <Reveal variant="fade-up" duration={700}>
-            <HomePromoBanners banners={promoBanners} />
-          </Reveal>
-        </section>
-      )}
 
       <Suspense fallback={<BlogSectionFallback />}>
         <BlogSection />

@@ -7,7 +7,7 @@ import {
 } from "@/services/super-admin/product/category/getAll";
 import type { SuperAdminSettings } from "@/types/super-admin/settings";
 
-const fetchFeaturedCategoryOptions = async (
+export const fetchFeaturedCategoryOptions = async (
   searchTerm: string,
 ): Promise<Array<{ label: string; value: string }>> => {
   try {

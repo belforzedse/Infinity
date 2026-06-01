@@ -39,6 +39,53 @@
       "type": "text",
       "default": ""
     },
+    "homeBannerOneSubtitle": {
+      "type": "string",
+      "default": ""
+    },
+    "homeBannerOneSubtitleColor": {
+      "type": "string",
+      "default": "#ffffff"
+    },
+    "homeBannerOneBackgroundColor": {
+      "type": "string",
+      "default": "#f1f5f9"
+    },
+    "homeBannerOneTextSize": {
+      "type": "integer",
+      "default": 30
+    },
+    "homeBannerOneFontWeight": {
+      "type": "string",
+      "default": "500"
+    },
+    "homeBannerOneTextAlign": {
+      "type": "enumeration",
+      "enum": ["right", "center", "left"],
+      "default": "right"
+    },
+    "homeBannerOneContentPosition": {
+      "type": "enumeration",
+      "enum": ["top", "center", "bottom"],
+      "default": "top"
+    },
+    "homeBannerOneImageFit": {
+      "type": "enumeration",
+      "enum": ["cover", "contain"],
+      "default": "cover"
+    },
+    "homeBannerOneImagePosition": {
+      "type": "string",
+      "default": "center"
+    },
+    "homeBannerOneDesktopHeight": {
+      "type": "integer",
+      "default": 220
+    },
+    "homeBannerOneMobileHeight": {
+      "type": "integer",
+      "default": 220
+    },
     "homeBannerTwoImage": {
       "type": "text",
       "default": ""
@@ -63,6 +110,53 @@
       "type": "text",
       "default": ""
     },
+    "homeBannerTwoSubtitle": {
+      "type": "string",
+      "default": ""
+    },
+    "homeBannerTwoSubtitleColor": {
+      "type": "string",
+      "default": "#ffffff"
+    },
+    "homeBannerTwoBackgroundColor": {
+      "type": "string",
+      "default": "#f1f5f9"
+    },
+    "homeBannerTwoTextSize": {
+      "type": "integer",
+      "default": 30
+    },
+    "homeBannerTwoFontWeight": {
+      "type": "string",
+      "default": "500"
+    },
+    "homeBannerTwoTextAlign": {
+      "type": "enumeration",
+      "enum": ["right", "center", "left"],
+      "default": "right"
+    },
+    "homeBannerTwoContentPosition": {
+      "type": "enumeration",
+      "enum": ["top", "center", "bottom"],
+      "default": "top"
+    },
+    "homeBannerTwoImageFit": {
+      "type": "enumeration",
+      "enum": ["cover", "contain"],
+      "default": "cover"
+    },
+    "homeBannerTwoImagePosition": {
+      "type": "string",
+      "default": "center"
+    },
+    "homeBannerTwoDesktopHeight": {
+      "type": "integer",
+      "default": 220
+    },
+    "homeBannerTwoMobileHeight": {
+      "type": "integer",
+      "default": 220
+    },
     "homeFeaturedCategorySlug": {
       "type": "string",
       "default": ""
@@ -70,6 +164,55 @@
     "homeFeaturedCategoryBannerImage": {
       "type": "text",
       "default": ""
+    },
+    "homeFeaturedCategoryTitle": {
+      "type": "string",
+      "default": ""
+    },
+    "homeFeaturedCategorySubtitle": {
+      "type": "string",
+      "default": ""
+    },
+    "homeFeaturedCategoryCtaText": {
+      "type": "string",
+      "default": ""
+    },
+    "homeFeaturedCategoryCtaHref": {
+      "type": "text",
+      "default": ""
+    },
+    "homeFeaturedCategoryTextColor": {
+      "type": "string",
+      "default": "#111827"
+    },
+    "homeFeaturedCategoryTextSize": {
+      "type": "integer",
+      "default": 30
+    },
+    "homeFeaturedCategoryFontWeight": {
+      "type": "string",
+      "default": "500"
+    },
+    "homeFeaturedCategoryBannerBackgroundColor": {
+      "type": "string",
+      "default": "#f1f5f9"
+    },
+    "homeFeaturedCategoryBannerImageFit": {
+      "type": "enumeration",
+      "enum": ["cover", "contain"],
+      "default": "cover"
+    },
+    "homeFeaturedCategoryBannerImagePosition": {
+      "type": "string",
+      "default": "center"
+    },
+    "homeFeaturedCategoryDesktopBannerHeight": {
+      "type": "integer",
+      "default": 340
+    },
+    "homeFeaturedCategoryMobileBannerHeight": {
+      "type": "integer",
+      "default": 260
     },
     "blogDefaultBannerImage": {
       "type": "text",

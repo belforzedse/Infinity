@@ -12,6 +12,26 @@ export type BlogCategoryBannerOrderItem = {
   slug: string;
 };
 
+export type HomePromoTextAlign = "right" | "center" | "left";
+export type HomePromoContentPosition = "top" | "center" | "bottom";
+export type HomeBannerImageFit = "cover" | "contain";
+
+const normalizeString = (value: unknown): string => (typeof value === "string" ? value : "");
+
+const normalizeNumber = (value: unknown, fallback: number): number => {
+  const numeric = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(numeric) ? numeric : fallback;
+};
+
+const normalizeTextAlign = (value: unknown): HomePromoTextAlign =>
+  value === "left" || value === "center" || value === "right" ? value : "right";
+
+const normalizeContentPosition = (value: unknown): HomePromoContentPosition =>
+  value === "top" || value === "center" || value === "bottom" ? value : "top";
+
+const normalizeImageFit = (value: unknown): HomeBannerImageFit =>
+  value === "contain" || value === "cover" ? value : "cover";
+
 export const normalizeBlogCategoryBannerOrder = (value: unknown): BlogCategoryBannerOrderItem[] => {
   if (!Array.isArray(value)) return [];
 
@@ -57,14 +77,48 @@ export type SuperAdminSettings = {
   homeBannerOneButtonText: string;
   homeBannerOneButtonColor: string;
   homeBannerOneButtonHref: string;
+  homeBannerOneSubtitle: string;
+  homeBannerOneSubtitleColor: string;
+  homeBannerOneBackgroundColor: string;
+  homeBannerOneTextSize: number;
+  homeBannerOneFontWeight: string;
+  homeBannerOneTextAlign: HomePromoTextAlign;
+  homeBannerOneContentPosition: HomePromoContentPosition;
+  homeBannerOneImageFit: HomeBannerImageFit;
+  homeBannerOneImagePosition: string;
+  homeBannerOneDesktopHeight: number;
+  homeBannerOneMobileHeight: number;
   homeBannerTwoImage: string;
   homeBannerTwoTitle: string;
   homeBannerTwoTitleColor: string;
   homeBannerTwoButtonText: string;
   homeBannerTwoButtonColor: string;
   homeBannerTwoButtonHref: string;
+  homeBannerTwoSubtitle: string;
+  homeBannerTwoSubtitleColor: string;
+  homeBannerTwoBackgroundColor: string;
+  homeBannerTwoTextSize: number;
+  homeBannerTwoFontWeight: string;
+  homeBannerTwoTextAlign: HomePromoTextAlign;
+  homeBannerTwoContentPosition: HomePromoContentPosition;
+  homeBannerTwoImageFit: HomeBannerImageFit;
+  homeBannerTwoImagePosition: string;
+  homeBannerTwoDesktopHeight: number;
+  homeBannerTwoMobileHeight: number;
   homeFeaturedCategorySlug: string;
   homeFeaturedCategoryBannerImage: string;
+  homeFeaturedCategoryTitle: string;
+  homeFeaturedCategorySubtitle: string;
+  homeFeaturedCategoryCtaText: string;
+  homeFeaturedCategoryCtaHref: string;
+  homeFeaturedCategoryTextColor: string;
+  homeFeaturedCategoryTextSize: number;
+  homeFeaturedCategoryFontWeight: string;
+  homeFeaturedCategoryBannerBackgroundColor: string;
+  homeFeaturedCategoryBannerImageFit: HomeBannerImageFit;
+  homeFeaturedCategoryBannerImagePosition: string;
+  homeFeaturedCategoryDesktopBannerHeight: number;
+  homeFeaturedCategoryMobileBannerHeight: number;
   blogDefaultBannerImage: string;
   blogDefaultBannerTitle: string;
   blogDefaultBannerSubtitle: string;
@@ -91,14 +145,48 @@ export const defaultSettings = (): SuperAdminSettings => ({
   homeBannerOneButtonText: "",
   homeBannerOneButtonColor: "",
   homeBannerOneButtonHref: "",
+  homeBannerOneSubtitle: "",
+  homeBannerOneSubtitleColor: "#ffffff",
+  homeBannerOneBackgroundColor: "#f1f5f9",
+  homeBannerOneTextSize: 30,
+  homeBannerOneFontWeight: "500",
+  homeBannerOneTextAlign: "right",
+  homeBannerOneContentPosition: "top",
+  homeBannerOneImageFit: "cover",
+  homeBannerOneImagePosition: "center",
+  homeBannerOneDesktopHeight: 220,
+  homeBannerOneMobileHeight: 220,
   homeBannerTwoImage: "",
   homeBannerTwoTitle: "",
   homeBannerTwoTitleColor: "",
   homeBannerTwoButtonText: "",
   homeBannerTwoButtonColor: "",
   homeBannerTwoButtonHref: "",
+  homeBannerTwoSubtitle: "",
+  homeBannerTwoSubtitleColor: "#ffffff",
+  homeBannerTwoBackgroundColor: "#f1f5f9",
+  homeBannerTwoTextSize: 30,
+  homeBannerTwoFontWeight: "500",
+  homeBannerTwoTextAlign: "right",
+  homeBannerTwoContentPosition: "top",
+  homeBannerTwoImageFit: "cover",
+  homeBannerTwoImagePosition: "center",
+  homeBannerTwoDesktopHeight: 220,
+  homeBannerTwoMobileHeight: 220,
   homeFeaturedCategorySlug: "",
   homeFeaturedCategoryBannerImage: "",
+  homeFeaturedCategoryTitle: "",
+  homeFeaturedCategorySubtitle: "",
+  homeFeaturedCategoryCtaText: "",
+  homeFeaturedCategoryCtaHref: "",
+  homeFeaturedCategoryTextColor: "#111827",
+  homeFeaturedCategoryTextSize: 30,
+  homeFeaturedCategoryFontWeight: "500",
+  homeFeaturedCategoryBannerBackgroundColor: "#f1f5f9",
+  homeFeaturedCategoryBannerImageFit: "cover",
+  homeFeaturedCategoryBannerImagePosition: "center",
+  homeFeaturedCategoryDesktopBannerHeight: 340,
+  homeFeaturedCategoryMobileBannerHeight: 260,
   blogDefaultBannerImage: "",
   blogDefaultBannerTitle: "",
   blogDefaultBannerSubtitle: "",
@@ -122,32 +210,62 @@ export const normalizeSuperAdminSettings = (
 ): SuperAdminSettings => ({
   id,
   filterPublicProductsByTitle: Boolean(data?.filterPublicProductsByTitle) || false,
-  homeBannerOneImage: typeof data?.homeBannerOneImage === "string" ? data.homeBannerOneImage : "",
-  homeBannerOneTitle: typeof data?.homeBannerOneTitle === "string" ? data.homeBannerOneTitle : "",
-  homeBannerOneTitleColor:
-    typeof data?.homeBannerOneTitleColor === "string" ? data.homeBannerOneTitleColor : "",
-  homeBannerOneButtonText:
-    typeof data?.homeBannerOneButtonText === "string" ? data.homeBannerOneButtonText : "",
-  homeBannerOneButtonColor:
-    typeof data?.homeBannerOneButtonColor === "string" ? data.homeBannerOneButtonColor : "",
-  homeBannerOneButtonHref:
-    typeof data?.homeBannerOneButtonHref === "string" ? data.homeBannerOneButtonHref : "",
-  homeBannerTwoImage: typeof data?.homeBannerTwoImage === "string" ? data.homeBannerTwoImage : "",
-  homeBannerTwoTitle: typeof data?.homeBannerTwoTitle === "string" ? data.homeBannerTwoTitle : "",
-  homeBannerTwoTitleColor:
-    typeof data?.homeBannerTwoTitleColor === "string" ? data.homeBannerTwoTitleColor : "",
-  homeBannerTwoButtonText:
-    typeof data?.homeBannerTwoButtonText === "string" ? data.homeBannerTwoButtonText : "",
-  homeBannerTwoButtonColor:
-    typeof data?.homeBannerTwoButtonColor === "string" ? data.homeBannerTwoButtonColor : "",
-  homeBannerTwoButtonHref:
-    typeof data?.homeBannerTwoButtonHref === "string" ? data.homeBannerTwoButtonHref : "",
-  homeFeaturedCategorySlug:
-    typeof data?.homeFeaturedCategorySlug === "string" ? data.homeFeaturedCategorySlug : "",
-  homeFeaturedCategoryBannerImage:
-    typeof data?.homeFeaturedCategoryBannerImage === "string"
-      ? data.homeFeaturedCategoryBannerImage
-      : "",
+  homeBannerOneImage: normalizeString(data?.homeBannerOneImage),
+  homeBannerOneTitle: normalizeString(data?.homeBannerOneTitle),
+  homeBannerOneTitleColor: normalizeString(data?.homeBannerOneTitleColor),
+  homeBannerOneButtonText: normalizeString(data?.homeBannerOneButtonText),
+  homeBannerOneButtonColor: normalizeString(data?.homeBannerOneButtonColor),
+  homeBannerOneButtonHref: normalizeString(data?.homeBannerOneButtonHref),
+  homeBannerOneSubtitle: normalizeString(data?.homeBannerOneSubtitle),
+  homeBannerOneSubtitleColor: normalizeString(data?.homeBannerOneSubtitleColor) || "#ffffff",
+  homeBannerOneBackgroundColor: normalizeString(data?.homeBannerOneBackgroundColor) || "#f1f5f9",
+  homeBannerOneTextSize: normalizeNumber(data?.homeBannerOneTextSize, 30),
+  homeBannerOneFontWeight: normalizeString(data?.homeBannerOneFontWeight) || "500",
+  homeBannerOneTextAlign: normalizeTextAlign(data?.homeBannerOneTextAlign),
+  homeBannerOneContentPosition: normalizeContentPosition(data?.homeBannerOneContentPosition),
+  homeBannerOneImageFit: normalizeImageFit(data?.homeBannerOneImageFit),
+  homeBannerOneImagePosition: normalizeString(data?.homeBannerOneImagePosition) || "center",
+  homeBannerOneDesktopHeight: normalizeNumber(data?.homeBannerOneDesktopHeight, 220),
+  homeBannerOneMobileHeight: normalizeNumber(data?.homeBannerOneMobileHeight, 220),
+  homeBannerTwoImage: normalizeString(data?.homeBannerTwoImage),
+  homeBannerTwoTitle: normalizeString(data?.homeBannerTwoTitle),
+  homeBannerTwoTitleColor: normalizeString(data?.homeBannerTwoTitleColor),
+  homeBannerTwoButtonText: normalizeString(data?.homeBannerTwoButtonText),
+  homeBannerTwoButtonColor: normalizeString(data?.homeBannerTwoButtonColor),
+  homeBannerTwoButtonHref: normalizeString(data?.homeBannerTwoButtonHref),
+  homeBannerTwoSubtitle: normalizeString(data?.homeBannerTwoSubtitle),
+  homeBannerTwoSubtitleColor: normalizeString(data?.homeBannerTwoSubtitleColor) || "#ffffff",
+  homeBannerTwoBackgroundColor: normalizeString(data?.homeBannerTwoBackgroundColor) || "#f1f5f9",
+  homeBannerTwoTextSize: normalizeNumber(data?.homeBannerTwoTextSize, 30),
+  homeBannerTwoFontWeight: normalizeString(data?.homeBannerTwoFontWeight) || "500",
+  homeBannerTwoTextAlign: normalizeTextAlign(data?.homeBannerTwoTextAlign),
+  homeBannerTwoContentPosition: normalizeContentPosition(data?.homeBannerTwoContentPosition),
+  homeBannerTwoImageFit: normalizeImageFit(data?.homeBannerTwoImageFit),
+  homeBannerTwoImagePosition: normalizeString(data?.homeBannerTwoImagePosition) || "center",
+  homeBannerTwoDesktopHeight: normalizeNumber(data?.homeBannerTwoDesktopHeight, 220),
+  homeBannerTwoMobileHeight: normalizeNumber(data?.homeBannerTwoMobileHeight, 220),
+  homeFeaturedCategorySlug: normalizeString(data?.homeFeaturedCategorySlug),
+  homeFeaturedCategoryBannerImage: normalizeString(data?.homeFeaturedCategoryBannerImage),
+  homeFeaturedCategoryTitle: normalizeString(data?.homeFeaturedCategoryTitle),
+  homeFeaturedCategorySubtitle: normalizeString(data?.homeFeaturedCategorySubtitle),
+  homeFeaturedCategoryCtaText: normalizeString(data?.homeFeaturedCategoryCtaText),
+  homeFeaturedCategoryCtaHref: normalizeString(data?.homeFeaturedCategoryCtaHref),
+  homeFeaturedCategoryTextColor: normalizeString(data?.homeFeaturedCategoryTextColor) || "#111827",
+  homeFeaturedCategoryTextSize: normalizeNumber(data?.homeFeaturedCategoryTextSize, 30),
+  homeFeaturedCategoryFontWeight: normalizeString(data?.homeFeaturedCategoryFontWeight) || "500",
+  homeFeaturedCategoryBannerBackgroundColor:
+    normalizeString(data?.homeFeaturedCategoryBannerBackgroundColor) || "#f1f5f9",
+  homeFeaturedCategoryBannerImageFit: normalizeImageFit(data?.homeFeaturedCategoryBannerImageFit),
+  homeFeaturedCategoryBannerImagePosition:
+    normalizeString(data?.homeFeaturedCategoryBannerImagePosition) || "center",
+  homeFeaturedCategoryDesktopBannerHeight: normalizeNumber(
+    data?.homeFeaturedCategoryDesktopBannerHeight,
+    340,
+  ),
+  homeFeaturedCategoryMobileBannerHeight: normalizeNumber(
+    data?.homeFeaturedCategoryMobileBannerHeight,
+    260,
+  ),
   blogDefaultBannerImage:
     typeof data?.blogDefaultBannerImage === "string" ? data.blogDefaultBannerImage : "",
   blogDefaultBannerTitle:

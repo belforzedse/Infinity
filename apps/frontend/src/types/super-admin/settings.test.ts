@@ -7,6 +7,18 @@ describe("super-admin settings type helpers", () => {
 
     expect(settings.homeFeaturedCategorySlug).toBe("");
     expect(settings.homeFeaturedCategoryBannerImage).toBe("");
+    expect(settings.homeFeaturedCategoryTitle).toBe("");
+    expect(settings.homeFeaturedCategoryCtaText).toBe("");
+    expect(settings.homeFeaturedCategoryBannerImageFit).toBe("cover");
+    expect(settings.homeFeaturedCategoryDesktopBannerHeight).toBe(340);
+    expect(settings.homeBannerOneSubtitle).toBe("");
+    expect(settings.homeBannerOneTextSize).toBe(30);
+    expect(settings.homeBannerOneTextAlign).toBe("right");
+    expect(settings.homeBannerOneDesktopHeight).toBe(220);
+    expect(settings.homeBannerTwoSubtitle).toBe("");
+    expect(settings.homeBannerTwoTextSize).toBe(30);
+    expect(settings.homeBannerTwoTextAlign).toBe("right");
+    expect(settings.homeBannerTwoDesktopHeight).toBe(220);
     expect(settings.blogDefaultBannerImage).toBe("");
     expect(settings.blogDefaultBannerTitle).toBe("");
     expect(settings.blogDefaultBannerSubtitle).toBe("");
@@ -26,6 +38,18 @@ describe("super-admin settings type helpers", () => {
       {
         homeFeaturedCategorySlug: "summer-collection",
         homeFeaturedCategoryBannerImage: "/uploads/banner.jpg",
+        homeFeaturedCategoryTitle: "Special picks",
+        homeFeaturedCategoryCtaText: "Shop all",
+        homeFeaturedCategoryBannerImageFit: "contain",
+        homeFeaturedCategoryDesktopBannerHeight: 360,
+        homeBannerOneSubtitle: "Banner subtitle",
+        homeBannerOneTextSize: 34,
+        homeBannerOneTextAlign: "center",
+        homeBannerOneDesktopHeight: 240,
+        homeBannerTwoSubtitle: "Second subtitle",
+        homeBannerTwoTextSize: 28,
+        homeBannerTwoTextAlign: "left",
+        homeBannerTwoDesktopHeight: 210,
         blogDefaultBannerImage: "/uploads/blog-default.jpg",
         blogDefaultBannerTitle: "همه مقالات",
         blogDefaultBannerSubtitle: "مرور مقالات",
@@ -44,6 +68,18 @@ describe("super-admin settings type helpers", () => {
     expect(settings.id).toBe(2);
     expect(settings.homeFeaturedCategorySlug).toBe("summer-collection");
     expect(settings.homeFeaturedCategoryBannerImage).toBe("/uploads/banner.jpg");
+    expect(settings.homeFeaturedCategoryTitle).toBe("Special picks");
+    expect(settings.homeFeaturedCategoryCtaText).toBe("Shop all");
+    expect(settings.homeFeaturedCategoryBannerImageFit).toBe("contain");
+    expect(settings.homeFeaturedCategoryDesktopBannerHeight).toBe(360);
+    expect(settings.homeBannerOneSubtitle).toBe("Banner subtitle");
+    expect(settings.homeBannerOneTextSize).toBe(34);
+    expect(settings.homeBannerOneTextAlign).toBe("center");
+    expect(settings.homeBannerOneDesktopHeight).toBe(240);
+    expect(settings.homeBannerTwoSubtitle).toBe("Second subtitle");
+    expect(settings.homeBannerTwoTextSize).toBe(28);
+    expect(settings.homeBannerTwoTextAlign).toBe("left");
+    expect(settings.homeBannerTwoDesktopHeight).toBe(210);
     expect(settings.blogDefaultBannerImage).toBe("/uploads/blog-default.jpg");
     expect(settings.blogDefaultBannerTitle).toBe("همه مقالات");
     expect(settings.blogDefaultBannerSubtitle).toBe("مرور مقالات");
@@ -63,6 +99,12 @@ describe("super-admin settings type helpers", () => {
     const settings = normalizeSuperAdminSettings({
       homeFeaturedCategorySlug: null,
       homeFeaturedCategoryBannerImage: 12345,
+      homeFeaturedCategoryTitle: false,
+      homeFeaturedCategoryBannerImageFit: "stretch",
+      homeFeaturedCategoryDesktopBannerHeight: "bad",
+      homeBannerOneTextAlign: "middle",
+      homeBannerOneTextSize: "bad",
+      homeBannerOneImageFit: "stretch",
       blogDefaultBannerImage: null,
       blogDefaultBannerTitle: 999,
       blogDefaultBannerSubtitle: false,
@@ -80,6 +122,12 @@ describe("super-admin settings type helpers", () => {
 
     expect(settings.homeFeaturedCategorySlug).toBe("");
     expect(settings.homeFeaturedCategoryBannerImage).toBe("");
+    expect(settings.homeFeaturedCategoryTitle).toBe("");
+    expect(settings.homeFeaturedCategoryBannerImageFit).toBe("cover");
+    expect(settings.homeFeaturedCategoryDesktopBannerHeight).toBe(340);
+    expect(settings.homeBannerOneTextAlign).toBe("right");
+    expect(settings.homeBannerOneTextSize).toBe(30);
+    expect(settings.homeBannerOneImageFit).toBe("cover");
     expect(settings.blogDefaultBannerImage).toBe("");
     expect(settings.blogDefaultBannerTitle).toBe("");
     expect(settings.blogDefaultBannerSubtitle).toBe("");

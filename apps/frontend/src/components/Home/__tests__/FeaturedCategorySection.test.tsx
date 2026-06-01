@@ -45,6 +45,33 @@ describe("FeaturedCategorySection", () => {
     expect(screen.getByLabelText("Featured category banner")).toBeInTheDocument();
   });
 
+  it("renders configurable heading, CTA and banner styles", () => {
+    render(
+      <FeaturedCategorySection
+        bannerImageUrl="/uploads/featured-banner.jpg"
+        categorySlug="special-category"
+        products={products}
+        title="منتخب فصل"
+        subtitle="برای استایل روزانه"
+        ctaText="دیدن کالکشن"
+        ctaHref="/custom"
+        bannerImageFit="contain"
+        bannerImagePosition="top right"
+      />,
+    );
+
+    expect(screen.getByText("منتخب فصل")).toBeInTheDocument();
+    expect(screen.getByText("برای استایل روزانه")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /دیدن کالکشن/ })).toHaveAttribute(
+      "href",
+      "/custom",
+    );
+    expect(screen.getByLabelText("Featured category banner")).toHaveStyle({
+      objectFit: "contain",
+      objectPosition: "top right",
+    });
+  });
+
   it("does not render when required fields are missing", () => {
     const { container } = render(
       <FeaturedCategorySection bannerImageUrl="" categorySlug="" products={products} />,

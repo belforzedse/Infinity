@@ -3,6 +3,7 @@ import OffIcon from "@/components/PDP/Icons/OffIcon";
 import OffersListHomePage from "@/components/PDP/OffersListHomePage";
 import Reveal from "@/components/Reveal";
 import FeaturedCategorySection from "@/components/Home/FeaturedCategorySection";
+import HomePromoBanners, { type HomePromoBanner } from "@/components/Home/PromoBanners";
 import CategoryCarousel from "@/components/Categories/CategoryCarousel";
 import {
   getHomepageSections,
@@ -18,11 +19,13 @@ export default async function HomeProductSections({
   featuredCategoryBannerImage,
   mainCategories,
   homepageSettings,
+  promoBanners,
 }: {
   featuredCategorySlug: string;
   featuredCategoryBannerImage: string;
   mainCategories: ProductCategorySummary[];
   homepageSettings?: SuperAdminSettings;
+  promoBanners?: HomePromoBanner[];
 }) {
   const [{ discounted, new: newProducts, favorites }, featuredCategoryProducts] =
     await Promise.all([
@@ -53,6 +56,9 @@ export default async function HomeProductSections({
     Boolean(featuredCategorySlug) &&
     Boolean(featuredCategoryBannerImage) &&
     featuredCategorySmallProducts.length > 0;
+  const hasPromoBanners = promoBanners?.some(
+    (banner) => banner.imageUrl?.trim() && banner.title?.trim(),
+  );
 
   return (
     <>
@@ -113,6 +119,14 @@ export default async function HomeProductSections({
         </section>
       )}
 
+      {hasPromoBanners && (
+        <section>
+          <Reveal variant="fade-up" duration={700}>
+            <HomePromoBanners banners={promoBanners ?? []} />
+          </Reveal>
+        </section>
+      )}
+
       {hasFeaturedCategorySection && (
         <section>
           <Reveal variant="fade-up" duration={700}>
@@ -120,6 +134,18 @@ export default async function HomeProductSections({
               bannerImageUrl={featuredCategoryBannerImage}
               categorySlug={featuredCategorySlug}
               products={featuredCategorySmallProducts}
+              title={homepageSettings?.homeFeaturedCategoryTitle}
+              subtitle={homepageSettings?.homeFeaturedCategorySubtitle}
+              ctaText={homepageSettings?.homeFeaturedCategoryCtaText}
+              ctaHref={homepageSettings?.homeFeaturedCategoryCtaHref}
+              textColor={homepageSettings?.homeFeaturedCategoryTextColor}
+              textSize={homepageSettings?.homeFeaturedCategoryTextSize}
+              fontWeight={homepageSettings?.homeFeaturedCategoryFontWeight}
+              bannerBackgroundColor={homepageSettings?.homeFeaturedCategoryBannerBackgroundColor}
+              bannerImageFit={homepageSettings?.homeFeaturedCategoryBannerImageFit}
+              bannerImagePosition={homepageSettings?.homeFeaturedCategoryBannerImagePosition}
+              desktopBannerHeight={homepageSettings?.homeFeaturedCategoryDesktopBannerHeight}
+              mobileBannerHeight={homepageSettings?.homeFeaturedCategoryMobileBannerHeight}
             />
           </Reveal>
         </section>
