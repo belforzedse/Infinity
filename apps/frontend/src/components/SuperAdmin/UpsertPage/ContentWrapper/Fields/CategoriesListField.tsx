@@ -31,6 +31,16 @@ type Props = {
   fetchCategories?: () => Promise<Category[]>;
 };
 
+function normalizeSearchText(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/ي/g, "ی")
+    .replace(/ك/g, "ک")
+    .replace(/\u200c/g, "")
+    .replace(/\s+/g, " ");
+}
+
 // Sortable item component
 function SortableItem({
   category,
@@ -178,15 +188,15 @@ export default function CategoriesListField({ value, onChange, readOnly, fetchCa
 
   // Filter available categories based on search query and exclude already selected ones
   useEffect(() => {
-    const query = searchQuery.trim().toLowerCase();
+    const query = normalizeSearchText(searchQuery);
     const filtered = availableCategories.filter((cat) => {
       const isNotSelected = !categories.some((selected) => selected.id === cat.id);
       if (!isNotSelected) return false;
 
       if (!query) return true;
 
-      const title = (cat.title || "").toLowerCase();
-      const slug = (cat.slug || "").toLowerCase();
+      const title = normalizeSearchText(cat.title || "");
+      const slug = normalizeSearchText(cat.slug || "");
       return title.includes(query) || slug.includes(query);
     });
 

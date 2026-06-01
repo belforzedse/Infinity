@@ -29,10 +29,10 @@ export default function DesktopSlider({
   }
 
   return (
-    <div className="desktop-slider-container relative hidden flex-col gap-8 pb-12">
+    <div className="desktop-slider-container relative hidden flex-col gap-2 pb-0">
       <DesktopHero layout={slides[index]} slideKey={index} />
 
-      <div className="flex items-center justify-center py-4">
+      <div className="flex items-center justify-center py-1">
         <PaginationDesktop
           total={slides.length}
           index={index}

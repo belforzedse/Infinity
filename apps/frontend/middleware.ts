@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+export const LEGACY_REDIRECT_STATUS = 301;
+
 const PRIVATE_ROUTE_PREFIXES = [
   '/account',
   '/addresses',
@@ -16,6 +18,186 @@ const PRIVATE_ROUTE_PREFIXES = [
 ];
 
 const PDP_REDIRECT_TIMEOUT_MS = 1500;
+const WOO_VARIATION_PARAM_NAMES = new Set(['رنگ', 'سایز', 'طرح']);
+const RETIRED_LEGACY_PATHS = new Set(['/offer/best-sellers', '/offer/week-style']);
+type LegacyRedirectSourceUrl = Pick<URL, 'href' | 'pathname' | 'search' | 'searchParams'>;
+
+function safeDecodeURIComponent(value: string) {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
+export function stripTrailingSlash(pathname: string) {
+  if (pathname === '/') {
+    return pathname;
+  }
+
+  return pathname.replace(/\/+$/, '') || '/';
+}
+
+export function getSegments(pathname: string) {
+  return stripTrailingSlash(pathname)
+    .split('/')
+    .filter(Boolean)
+    .map((segment) => safeDecodeURIComponent(segment));
+}
+
+function getDecodedPathname(pathname: string) {
+  const segments = getSegments(pathname);
+  return segments.length > 0 ? `/${segments.join('/')}` : '/';
+}
+
+export function lastCategorySegmentFromShopPath(segments: string[]) {
+  const pathSegments = segments[0] === 'shop' ? segments.slice(1) : segments;
+  const pageIndex = pathSegments.lastIndexOf('page');
+  const categorySegments = pageIndex >= 0 ? pathSegments.slice(0, pageIndex) : pathSegments;
+
+  return categorySegments.length > 0 ? categorySegments[categorySegments.length - 1] : null;
+}
+
+function buildRedirectUrl(
+  sourceUrl: LegacyRedirectSourceUrl,
+  pathname: string,
+  searchParams?: URLSearchParams,
+) {
+  const url = new URL(sourceUrl.href);
+  url.pathname = pathname;
+  url.search = searchParams?.toString() ? `?${searchParams.toString()}` : '';
+
+  return url;
+}
+
+export function redirectTo(
+  request: NextRequest,
+  pathname: string,
+  searchParams?: URLSearchParams,
+) {
+  return buildRedirectUrl(request.nextUrl, pathname, searchParams);
+}
+
+export function isWooVariationParam(name: string) {
+  return name.startsWith('pa_') || WOO_VARIATION_PARAM_NAMES.has(name);
+}
+
+export function hasWooVariationParams(searchParams: URLSearchParams) {
+  return Array.from(searchParams.keys()).some(isWooVariationParam);
+}
+
+function encodePathSegment(segment: string) {
+  return encodeURIComponent(segment);
+}
+
+function redirectIfChanged(
+  sourceUrl: LegacyRedirectSourceUrl,
+  pathname: string,
+  searchParams?: URLSearchParams,
+) {
+  const target = buildRedirectUrl(sourceUrl, pathname, searchParams);
+
+  if (target.pathname === sourceUrl.pathname && target.search === sourceUrl.search) {
+    return null;
+  }
+
+  return target;
+}
+
+export function isRetiredLegacyPath(pathname: string) {
+  return RETIRED_LEGACY_PATHS.has(getDecodedPathname(pathname));
+}
+
+function isWordPressInternalPath(pathname: string) {
+  const decodedPathname = getDecodedPathname(pathname);
+
+  return (
+    decodedPathname === '/xmlrpc.php' ||
+    decodedPathname.startsWith('/wp-json') ||
+    decodedPathname.startsWith('/wp-content') ||
+    decodedPathname.startsWith('/wp-includes')
+  );
+}
+
+export function getLegacyRedirectUrl(sourceUrl: LegacyRedirectSourceUrl) {
+  const { pathname, searchParams } = sourceUrl;
+  const segments = getSegments(pathname);
+  const decodedPathname = getDecodedPathname(pathname);
+
+  if (segments[0] === 'product' && segments[1]) {
+    return redirectIfChanged(sourceUrl, `/pdp/${encodePathSegment(segments[1])}`);
+  }
+
+  if (segments[0] === 'shop') {
+    const pageIndex = segments.lastIndexOf('page');
+    const page = pageIndex >= 0 ? segments[pageIndex + 1] : null;
+    const hasPagination = Boolean(page && /^\d+$/.test(page));
+    const pageParams = new URLSearchParams();
+
+    if (hasPagination && page) {
+      pageParams.set('page', page);
+    }
+
+    if (segments.length === 1) {
+      return redirectIfChanged(sourceUrl, '/plp');
+    }
+
+    if (segments[1] === 'page' && hasPagination) {
+      return redirectIfChanged(sourceUrl, '/plp', pageParams);
+    }
+
+    const categorySlug = lastCategorySegmentFromShopPath(segments);
+    if (categorySlug) {
+      return redirectIfChanged(
+        sourceUrl,
+        `/plp/category/${encodePathSegment(categorySlug)}`,
+        hasPagination ? pageParams : undefined,
+      );
+    }
+
+    return redirectIfChanged(sourceUrl, '/plp', hasPagination ? pageParams : undefined);
+  }
+
+  if (segments[0] === 'category' && segments[1]) {
+    const categorySlug = segments[segments.length - 1];
+    const params = new URLSearchParams();
+    params.set('category', categorySlug);
+    return redirectIfChanged(sourceUrl, '/blog', params);
+  }
+
+  if ((segments[0] === 'tag' || segments[0] === 'author') && segments[1]) {
+    return redirectIfChanged(sourceUrl, '/blog');
+  }
+
+  if (decodedPathname === '/offer/oppsi' || decodedPathname === '/محصولات-زده-دار') {
+    const params = new URLSearchParams();
+    params.set('search', 'Oppsi');
+    return redirectIfChanged(sourceUrl, '/plp', params);
+  }
+
+  const exactRedirects = new Map<string, string>([
+    ['/سوالات-متداول', '/faq'],
+    ['/شرایط-و-مقررات-تعویض-و-مرجوع', '/faq'],
+    ['/my-account/orders', '/orders'],
+    ['/my-account', '/account'],
+    ['/user-login', '/auth'],
+    ['/cart', '/cart'],
+    ['/checkout', '/checkout'],
+    ['/payment', '/checkout'],
+    ['/sitemap_index.xml', '/sitemap.xml'],
+  ]);
+  const exactDestination = exactRedirects.get(decodedPathname);
+
+  if (exactDestination) {
+    return redirectIfChanged(sourceUrl, exactDestination);
+  }
+
+  if (segments[0] === 'product' && segments[1] && hasWooVariationParams(searchParams)) {
+    return redirectIfChanged(sourceUrl, `/pdp/${encodePathSegment(segments[1])}`);
+  }
+
+  return null;
+}
 
 function isPrivateRoute(pathname: string) {
   return PRIVATE_ROUTE_PREFIXES.some(
@@ -57,11 +239,20 @@ export default async function middleware(request: NextRequest) {
     );
   }
 
+  const legacyRedirectUrl = getLegacyRedirectUrl(request.nextUrl);
+  if (legacyRedirectUrl) {
+    return NextResponse.redirect(legacyRedirectUrl, LEGACY_REDIRECT_STATUS);
+  }
+
+  if (isRetiredLegacyPath(pathname) || isWordPressInternalPath(pathname)) {
+    return response;
+  }
+
   // Handle trailing slashes - redirect to non-trailing slash for SEO
   if (pathname !== '/' && pathname.endsWith('/')) {
     const url = request.nextUrl.clone();
     url.pathname = pathname.slice(0, -1);
-    return NextResponse.redirect(url, 301);
+    return NextResponse.redirect(url, LEGACY_REDIRECT_STATUS);
   }
 
   // Clean up empty category parameter in PLP - redirect /plp?category= to /plp
@@ -73,7 +264,7 @@ export default async function middleware(request: NextRequest) {
     if (category !== null && category.trim() === '') {
       const url = request.nextUrl.clone();
       url.searchParams.delete('category');
-      return NextResponse.redirect(url, 301); // Permanent redirect to clean URL
+      return NextResponse.redirect(url, LEGACY_REDIRECT_STATUS); // Permanent redirect to clean URL
     }
   }
 
@@ -111,7 +302,7 @@ export default async function middleware(request: NextRequest) {
           if (slug) {
             const url = request.nextUrl.clone();
             url.pathname = `/pdp/${slug}`;
-            return NextResponse.redirect(url, 301); // Permanent redirect
+            return NextResponse.redirect(url, LEGACY_REDIRECT_STATUS); // Permanent redirect
           }
         }
       } catch (error) {

@@ -30,7 +30,7 @@ export default function MobileSlider({
   }
 
   return (
-    <div ref={hostRef} className="mobile-slider-container block space-y-6 pb-12 [touch-action:manipulation]">
+    <div ref={hostRef} className="mobile-slider-container block space-y-2 pb-0 [touch-action:manipulation]">
       <MobileHero layout={slides[index]} slideKey={index} />
 
       <div className="flex w-full items-center justify-center">

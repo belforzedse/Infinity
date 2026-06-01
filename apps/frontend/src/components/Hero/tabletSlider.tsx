@@ -30,7 +30,7 @@ export default function TabletSlider({
   }
 
   return (
-    <div ref={hostRef} className="tablet-slider-container block space-y-6 pb-12 px-4 [touch-action:manipulation]">
+    <div ref={hostRef} className="tablet-slider-container block space-y-2 pb-0 px-4 [touch-action:manipulation]">
       <TabletHero layout={slides[index]} slideKey={index} />
 
       <div className="flex w-full items-center justify-center">

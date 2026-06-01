@@ -217,11 +217,11 @@ export default async function Home() {
       };
 
   return (
-    <PageContainer variant="wide" className="space-y-12 pb-16 pt-8">
+    <PageContainer variant="wide" className="space-y-4 pb-16 pt-8">
       {/* JSON-LD Organization Schema for SEO */}
       <OrganizationSchema />
 
-      <section className="space-y-6">
+      <section className="space-y-0">
         <Reveal variant="zoom-in" duration={650}>
           <MobileSlider
             slides={effectiveHero.mobileSlides}
