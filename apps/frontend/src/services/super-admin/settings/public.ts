@@ -35,16 +35,16 @@ const PUBLIC_SETTINGS_FIELDS = [
   "updatedAt",
 ];
 
-const PUBLIC_SETTINGS_QUERY = PUBLIC_SETTINGS_FIELDS
-  .map((field, index) => `fields[${index}]=${encodeURIComponent(field)}`)
-  .join("&");
+const PUBLIC_SETTINGS_QUERY = PUBLIC_SETTINGS_FIELDS.map(
+  (field, index) => `fields[${index}]=${encodeURIComponent(field)}`,
+).join("&");
 
 export async function getPublicSuperAdminSettings(): Promise<SuperAdminSettings> {
   try {
     // Use internal URL for server-side fetches to bypass TLS/DNS overhead
     const baseUrl = typeof window === "undefined" ? getStrapiServerUrl() : API_BASE_URL;
     const response = await fetch(`${baseUrl}/settings?${PUBLIC_SETTINGS_QUERY}`, {
-      next: { revalidate: 60 },
+      next: { revalidate: 60, tags: ["site-settings"] },
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",

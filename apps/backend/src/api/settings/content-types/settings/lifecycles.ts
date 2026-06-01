@@ -1,8 +1,9 @@
-async function triggerBlogListingRevalidation() {
+async function triggerSiteSettingsRevalidation() {
   const frontendUrls = [
+    process.env.NEXTJS_REVALIDATION_URL,
     "https://staging.infinitycolor.org",
     "https://infinitycolor.co",
-  ];
+  ].filter(Boolean);
 
   const revalidationSecret = process.env.REVALIDATION_SECRET;
   if (!revalidationSecret) {
@@ -20,7 +21,7 @@ async function triggerBlogListingRevalidation() {
           Authorization: `Bearer ${revalidationSecret}`,
         },
         body: JSON.stringify({
-          type: "blog-listing",
+          type: "site-settings",
         }),
         signal: AbortSignal.timeout(5000),
       });
@@ -28,19 +29,19 @@ async function triggerBlogListingRevalidation() {
       if (!response.ok) {
         const errorText = await response.text();
         strapi.log.error(
-          `[Settings Lifecycle] Revalidation failed for ${frontendUrl}: ${response.status} ${errorText}`,
+          `[Settings Lifecycle] Site settings revalidation failed for ${frontendUrl}: ${response.status} ${errorText}`,
         );
         return { url: frontendUrl, success: false };
       }
 
-      strapi.log.info(`[Settings Lifecycle] Blog listing revalidated for ${frontendUrl}`);
+      strapi.log.info(`[Settings Lifecycle] Site settings revalidated for ${frontendUrl}`);
       return { url: frontendUrl, success: true };
     } catch (error: any) {
       if (error.name === "AbortError") {
         strapi.log.warn(`[Settings Lifecycle] Revalidation timeout for ${frontendUrl}`);
       } else {
         strapi.log.error(
-          `[Settings Lifecycle] Error triggering revalidation for ${frontendUrl}:`,
+          `[Settings Lifecycle] Error triggering site settings revalidation for ${frontendUrl}:`,
           error,
         );
       }
@@ -53,6 +54,6 @@ async function triggerBlogListingRevalidation() {
 
 export default {
   async afterUpdate() {
-    await triggerBlogListingRevalidation();
+    await triggerSiteSettingsRevalidation();
   },
 };

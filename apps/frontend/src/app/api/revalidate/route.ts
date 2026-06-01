@@ -22,25 +22,19 @@ export async function POST(request: NextRequest) {
 
     if (!secret) {
       console.error("REVALIDATION_SECRET environment variable is not set");
-      return NextResponse.json(
-        { error: "Server configuration error" },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: "Server configuration error" }, { status: 500 });
     }
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return NextResponse.json(
         { error: "Missing or invalid authorization header" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     const token = authHeader.replace("Bearer ", "");
     if (token !== secret) {
-      return NextResponse.json(
-        { error: "Invalid authorization token" },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "Invalid authorization token" }, { status: 403 });
     }
 
     // Parse request body
@@ -50,7 +44,7 @@ export async function POST(request: NextRequest) {
     if (!path && !tag) {
       return NextResponse.json(
         { error: "Missing 'path' or 'tag' in request body" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -106,11 +100,27 @@ export async function POST(request: NextRequest) {
     if (type === "hero-slider") {
       // Hero slider is shown on the home page; revalidate root
       revalidatePath("/");
+      revalidateTag("site-settings", "max");
 
       return NextResponse.json({
         revalidated: true,
         now: Date.now(),
         paths: ["/"],
+        tags: ["site-settings"],
+      });
+    }
+
+    if (type === "site-settings") {
+      revalidatePath("/");
+      revalidatePath("/blog");
+      revalidatePath("/sitemap.xml");
+      revalidateTag("site-settings", "max");
+
+      return NextResponse.json({
+        revalidated: true,
+        now: Date.now(),
+        paths: ["/", "/blog", "/sitemap.xml"],
+        tags: ["site-settings"],
       });
     }
 
@@ -134,19 +144,15 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    return NextResponse.json(
-      { error: "Invalid revalidation request" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Invalid revalidation request" }, { status: 400 });
   } catch (error) {
     console.error("Revalidation error:", error);
     return NextResponse.json(
       { error: "Error revalidating", details: (error as Error).message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 // Disable caching for this route
 export const dynamic = "force-dynamic";
-
