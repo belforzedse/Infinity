@@ -1,17 +1,20 @@
 import { apiClient } from "@/services";
 import type { SuperAdminSettings } from "@/types/super-admin/settings";
+import { normalizeSettingsApiResponse } from "./get";
 
 export async function updateSuperAdminSettings(
   settings: Partial<SuperAdminSettings>,
-): Promise<void> {
+): Promise<SuperAdminSettings | null> {
   const data: Partial<SuperAdminSettings> = {};
 
   if (typeof settings.filterPublicProductsByTitle === "boolean") {
     data.filterPublicProductsByTitle = settings.filterPublicProductsByTitle;
   }
 
-  if (settings.homeBannerOneImage !== undefined) data.homeBannerOneImage = settings.homeBannerOneImage;
-  if (settings.homeBannerOneTitle !== undefined) data.homeBannerOneTitle = settings.homeBannerOneTitle;
+  if (settings.homeBannerOneImage !== undefined)
+    data.homeBannerOneImage = settings.homeBannerOneImage;
+  if (settings.homeBannerOneTitle !== undefined)
+    data.homeBannerOneTitle = settings.homeBannerOneTitle;
   if (settings.homeBannerOneTitleColor !== undefined) {
     data.homeBannerOneTitleColor = settings.homeBannerOneTitleColor;
   }
@@ -25,8 +28,10 @@ export async function updateSuperAdminSettings(
     data.homeBannerOneButtonHref = settings.homeBannerOneButtonHref;
   }
 
-  if (settings.homeBannerTwoImage !== undefined) data.homeBannerTwoImage = settings.homeBannerTwoImage;
-  if (settings.homeBannerTwoTitle !== undefined) data.homeBannerTwoTitle = settings.homeBannerTwoTitle;
+  if (settings.homeBannerTwoImage !== undefined)
+    data.homeBannerTwoImage = settings.homeBannerTwoImage;
+  if (settings.homeBannerTwoTitle !== undefined)
+    data.homeBannerTwoTitle = settings.homeBannerTwoTitle;
   if (settings.homeBannerTwoTitleColor !== undefined) {
     data.homeBannerTwoTitleColor = settings.homeBannerTwoTitleColor;
   }
@@ -76,10 +81,12 @@ export async function updateSuperAdminSettings(
     data.homeDiscountedProductIds = settings.homeDiscountedProductIds;
   }
 
-  if (Object.keys(data).length === 0) return;
+  if (Object.keys(data).length === 0) return null;
 
   // PUT to /settings with data object
-  await apiClient.put(`/settings`, {
+  const response = await apiClient.put(`/settings?populate=*`, {
     data,
   });
+
+  return normalizeSettingsApiResponse(response);
 }

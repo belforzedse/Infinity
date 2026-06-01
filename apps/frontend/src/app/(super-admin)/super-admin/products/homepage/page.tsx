@@ -3,7 +3,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "react-hot-toast";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
-import HomepageProductPicker, { type ProductSummary } from "@/components/SuperAdmin/Products/HomepageProductPicker";
+import HomepageProductPicker, {
+  type ProductSummary,
+} from "@/components/SuperAdmin/Products/HomepageProductPicker";
 import { getSuperAdminSettings } from "@/services/super-admin/settings/get";
 import { updateSuperAdminSettings } from "@/services/super-admin/settings/update";
 import { getProductSummariesByIds } from "@/services/super-admin/product/get";
@@ -55,12 +57,21 @@ export default function HomepageProductsPage() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await updateSuperAdminSettings({
+      const saved = await updateSuperAdminSettings({
         homeNewestProductIds: newestIds,
         homeDiscountedProductIds: discountedIds,
       });
       toast.success("تنظیمات با موفقیت ذخیره شد");
-      await loadSettingsAndSummaries();
+      const settings = saved ?? (await getSuperAdminSettings());
+      setNewestIds(settings.homeNewestProductIds);
+      setDiscountedIds(settings.homeDiscountedProductIds);
+
+      const [newest, discounted] = await Promise.all([
+        getProductSummariesByIds(settings.homeNewestProductIds),
+        getProductSummariesByIds(settings.homeDiscountedProductIds),
+      ]);
+      setNewestSummaries(newest);
+      setDiscountedSummaries(discounted);
     } catch (err) {
       console.error(err);
       toast.error("خطا در ذخیره. دوباره تلاش کنید.");
@@ -81,7 +92,8 @@ export default function HomepageProductsPage() {
     <ContentWrapper title="محصولات صفحه اصلی">
       <div className="space-y-6 p-4">
         <p className="rounded-lg border border-blue-100 bg-blue-50/50 p-3 text-sm text-blue-800">
-          اگر برای هر بخش محصولی انتخاب نشود، در صفحه اصلی محصولات به صورت خودکار (جدیدترین یا دارای تخفیف) نمایش داده می‌شوند.
+          اگر برای هر بخش محصولی انتخاب نشود، در صفحه اصلی محصولات به صورت خودکار (جدیدترین یا دارای
+          تخفیف) نمایش داده می‌شوند.
         </p>
 
         <div className="grid gap-6 lg:grid-cols-2">

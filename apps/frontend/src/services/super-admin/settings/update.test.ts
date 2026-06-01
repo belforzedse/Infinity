@@ -7,6 +7,10 @@ jest.mock("@/services", () => ({
   },
 }));
 
+jest.mock("./get", () => ({
+  normalizeSettingsApiResponse: jest.fn(() => null),
+}));
+
 const putMock = apiClient.put as jest.Mock;
 
 describe("updateSuperAdminSettings", () => {
@@ -22,7 +26,7 @@ describe("updateSuperAdminSettings", () => {
       homeFeaturedCategoryBannerImage: "/uploads/featured-banner.jpg",
     });
 
-    expect(putMock).toHaveBeenCalledWith("/settings", {
+    expect(putMock).toHaveBeenCalledWith("/settings?populate=*", {
       data: {
         homeFeaturedCategorySlug: "featured-slug",
         homeFeaturedCategoryBannerImage: "/uploads/featured-banner.jpg",

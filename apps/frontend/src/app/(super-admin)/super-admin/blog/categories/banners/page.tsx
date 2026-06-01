@@ -98,7 +98,9 @@ export default function BlogCategoryBannersPage() {
         getSuperAdminSettings(),
       ]);
 
-      const loadedCategories = (categoriesResponse.data || []).filter((category) => Boolean(trimmed(category.Slug)));
+      const loadedCategories = (categoriesResponse.data || []).filter((category) =>
+        Boolean(trimmed(category.Slug)),
+      );
       setCategories(loadedCategories);
       setSettings(settingsResponse);
 
@@ -170,7 +172,7 @@ export default function BlogCategoryBannersPage() {
         ),
       );
 
-      await updateSuperAdminSettings({
+      const saved = await updateSuperAdminSettings({
         blogCategoryBannerOrder: normalizedOrder,
         blogDefaultBannerImage: trimmed(settings.blogDefaultBannerImage),
         blogDefaultBannerTitle: trimmed(settings.blogDefaultBannerTitle),
@@ -182,7 +184,7 @@ export default function BlogCategoryBannersPage() {
       });
 
       toast.success("بنرهای بلاگ با موفقیت ذخیره شدند");
-      await fetchData();
+      setSettings(saved ?? (await getSuperAdminSettings()));
     } catch (error) {
       console.error(error);
       toast.error("خطا در ذخیره بنرهای بلاگ");
@@ -233,19 +235,25 @@ export default function BlogCategoryBannersPage() {
             <div className="md:col-span-2">
               <ImageUploadField
                 value={settings.blogDefaultBannerImage}
-                onChange={(value) => setSettings((prev) => ({ ...prev, blogDefaultBannerImage: value }))}
+                onChange={(value) =>
+                  setSettings((prev) => ({ ...prev, blogDefaultBannerImage: value }))
+                }
               />
             </div>
             <BannerField
               label="عنوان"
               value={settings.blogDefaultBannerTitle}
-              onChange={(value) => setSettings((prev) => ({ ...prev, blogDefaultBannerTitle: value }))}
+              onChange={(value) =>
+                setSettings((prev) => ({ ...prev, blogDefaultBannerTitle: value }))
+              }
               placeholder="همه مقالات اینفینیتی مگ"
             />
             <BannerField
               label="متن لینک"
               value={settings.blogDefaultBannerLinkText}
-              onChange={(value) => setSettings((prev) => ({ ...prev, blogDefaultBannerLinkText: value }))}
+              onChange={(value) =>
+                setSettings((prev) => ({ ...prev, blogDefaultBannerLinkText: value }))
+              }
               placeholder="مشاهده همه مقالات"
             />
             <div className="md:col-span-2">
@@ -254,7 +262,10 @@ export default function BlogCategoryBannersPage() {
                 <textarea
                   value={settings.blogDefaultBannerSubtitle}
                   onChange={(event) =>
-                    setSettings((prev) => ({ ...prev, blogDefaultBannerSubtitle: event.target.value }))
+                    setSettings((prev) => ({
+                      ...prev,
+                      blogDefaultBannerSubtitle: event.target.value,
+                    }))
                   }
                   placeholder="تمامی مقالات و محتوای آموزشی ما را مشاهده کنید"
                   rows={3}
@@ -265,19 +276,25 @@ export default function BlogCategoryBannersPage() {
             <BannerField
               label="رنگ عنوان"
               value={settings.blogDefaultBannerTitleColor}
-              onChange={(value) => setSettings((prev) => ({ ...prev, blogDefaultBannerTitleColor: value }))}
+              onChange={(value) =>
+                setSettings((prev) => ({ ...prev, blogDefaultBannerTitleColor: value }))
+              }
               placeholder="#FFFFFF"
             />
             <BannerField
               label="رنگ زیرعنوان"
               value={settings.blogDefaultBannerSubtitleColor}
-              onChange={(value) => setSettings((prev) => ({ ...prev, blogDefaultBannerSubtitleColor: value }))}
+              onChange={(value) =>
+                setSettings((prev) => ({ ...prev, blogDefaultBannerSubtitleColor: value }))
+              }
               placeholder="#CBD5E1"
             />
             <BannerField
               label="رنگ لینک"
               value={settings.blogDefaultBannerLinkColor}
-              onChange={(value) => setSettings((prev) => ({ ...prev, blogDefaultBannerLinkColor: value }))}
+              onChange={(value) =>
+                setSettings((prev) => ({ ...prev, blogDefaultBannerLinkColor: value }))
+              }
               placeholder="#FFFFFF"
             />
           </div>

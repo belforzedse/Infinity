@@ -93,13 +93,12 @@ export default function FeaturedCategorySettingsPage() {
       footer={(formData) => <FeaturedCategoryPreview data={formData} />}
       onSubmit={async (formData) => {
         try {
-          await updateSuperAdminSettings({
+          const saved = await updateSuperAdminSettings({
             homeFeaturedCategorySlug: formData.homeFeaturedCategorySlug,
             homeFeaturedCategoryBannerImage: formData.homeFeaturedCategoryBannerImage,
           });
           toast.success("تنظیمات با موفقیت بروزرسانی شد");
-          const refreshed = await getSuperAdminSettings();
-          setData(refreshed);
+          setData(saved ?? (await getSuperAdminSettings()));
         } catch (error) {
           console.error(error);
           toast.error("خطا در ذخیره تنظیمات");

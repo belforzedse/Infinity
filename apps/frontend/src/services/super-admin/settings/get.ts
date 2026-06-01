@@ -2,25 +2,33 @@ import { apiClient } from "@/services";
 import type { SuperAdminSettings } from "@/types/super-admin/settings";
 import { defaultSettings, normalizeSuperAdminSettings } from "@/types/super-admin/settings";
 
-export async function getSuperAdminSettings(): Promise<SuperAdminSettings> {
-  try {
-    const res = await apiClient.get("/settings?populate=*");
-    const raw = (res as {
+export function normalizeSettingsApiResponse(res: unknown): SuperAdminSettings | null {
+  const raw = (
+    res as {
       data?: {
         id?: number;
         attributes?: Record<string, unknown>;
         createdAt?: string;
         updatedAt?: string;
       };
-    })?.data;
-    if (!raw) return defaultSettings();
+    }
+  )?.data;
 
-    const data = {
-      ...(raw.attributes ?? {}),
-      createdAt: raw.createdAt,
-      updatedAt: raw.updatedAt,
-    };
-    return normalizeSuperAdminSettings(data, raw.id ?? 1);
+  if (!raw) return null;
+
+  const data = {
+    ...(raw.attributes ?? {}),
+    createdAt: raw.createdAt ?? raw.attributes?.createdAt,
+    updatedAt: raw.updatedAt ?? raw.attributes?.updatedAt,
+  };
+
+  return normalizeSuperAdminSettings(data, raw.id ?? 1);
+}
+
+export async function getSuperAdminSettings(): Promise<SuperAdminSettings> {
+  try {
+    const res = await apiClient.get("/settings?populate=*", { cache: "no-store" });
+    return normalizeSettingsApiResponse(res) ?? defaultSettings();
   } catch (error: unknown) {
     const status =
       error &&

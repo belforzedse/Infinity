@@ -36,12 +36,11 @@ export default function SettingsPage() {
       data={data}
       onSubmit={async (formData) => {
         try {
-          await updateSuperAdminSettings({
+          const saved = await updateSuperAdminSettings({
             filterPublicProductsByTitle: Boolean(formData.filterPublicProductsByTitle),
           });
           toast.success("تنظیمات با موفقیت بروزرسانی شد");
-          const refreshed = await getSuperAdminSettings();
-          setData(refreshed);
+          setData(saved ?? (await getSuperAdminSettings()));
         } catch (e) {
           console.error(e);
           toast.error("خطا در ذخیره تنظیمات");
