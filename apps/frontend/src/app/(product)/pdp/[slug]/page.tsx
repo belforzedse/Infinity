@@ -17,13 +17,190 @@ import { ProductSchema } from "@/components/SEO/ProductSchema";
 import { BreadcrumbSchema } from "@/components/SEO/BreadcrumbSchema";
 import { ReviewSchema } from "@/components/SEO/ReviewSchema";
 import ViewItemTracker from "@/components/Analytics/ViewItemTracker";
-import type {
-  ProductDetail} from "@/services/product/product";
+import type { ProductDetail } from "@/services/product/product";
 import {
   getRelatedProductsByMainCategory,
   getRelatedProductsByOtherCategories,
 } from "@/services/product/product";
 import { getCategoryPlpHref } from "@/utils/plpRoutes";
+
+type ProductLookupResult = {
+  product: ProductDetail | null;
+  errorDetails?: { message?: string; status?: number; endpoint?: string };
+};
+
+const decodeProductSlug = (slug: string) => {
+  try {
+    return decodeURIComponent(slug);
+  } catch {
+    return slug;
+  }
+};
+
+const stripHtml = (value: unknown) =>
+  String(value || "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const truncate = (value: string, maxLength: number) =>
+  value.length > maxLength ? value.slice(0, maxLength).trim() : value;
+
+const normalizeRelation = (rel: any, isVariation = false): any => {
+  if (!rel) return null;
+
+  if (rel.data) return rel;
+
+  if (Array.isArray(rel)) {
+    return {
+      data: rel.map((item: any) => {
+        if (item.attributes) {
+          if (isVariation) {
+            const {
+              product_stock,
+              product_variation_color,
+              product_variation_size,
+              product_variation_model,
+              ...rest
+            } = item.attributes;
+
+            return {
+              ...item,
+              attributes: {
+                ...rest,
+                product_stock: normalizeRelation(product_stock),
+                product_variation_color: normalizeRelation(product_variation_color),
+                product_variation_size: normalizeRelation(product_variation_size),
+                product_variation_model: normalizeRelation(product_variation_model),
+              },
+            };
+          }
+
+          return item;
+        }
+
+        const {
+          id,
+          product_stock,
+          product_variation_color,
+          product_variation_size,
+          product_variation_model,
+          ...rest
+        } = item;
+        const normalized: any = { id, attributes: rest };
+
+        if (isVariation) {
+          normalized.attributes.product_stock = normalizeRelation(product_stock);
+          normalized.attributes.product_variation_color =
+            normalizeRelation(product_variation_color);
+          normalized.attributes.product_variation_size = normalizeRelation(product_variation_size);
+          normalized.attributes.product_variation_model =
+            normalizeRelation(product_variation_model);
+        }
+
+        return normalized;
+      }),
+    };
+  }
+
+  if (rel.id !== undefined) {
+    const { id, ...rest } = rel;
+    return {
+      data: { id, attributes: rest },
+    };
+  }
+
+  return null;
+};
+
+const normalizeProductDetail = (rawProduct: any): ProductDetail | null => {
+  if (!rawProduct) return null;
+
+  if (rawProduct.attributes) {
+    return {
+      ...rawProduct,
+      attributes: {
+        ...rawProduct.attributes,
+        product_main_category: normalizeRelation(rawProduct.attributes.product_main_category),
+        product_other_categories: normalizeRelation(rawProduct.attributes.product_other_categories),
+        product_variations: normalizeRelation(rawProduct.attributes.product_variations, true),
+        product_reviews: normalizeRelation(rawProduct.attributes.product_reviews),
+        product_tags: normalizeRelation(rawProduct.attributes.product_tags),
+        CoverImage: normalizeRelation(rawProduct.attributes.CoverImage),
+        Media: normalizeRelation(rawProduct.attributes.Media),
+        Files: normalizeRelation(rawProduct.attributes.Files),
+        product_size_helper: normalizeRelation(rawProduct.attributes.product_size_helper),
+      },
+    };
+  }
+
+  const {
+    id,
+    product_main_category,
+    product_other_categories,
+    product_variations,
+    product_reviews,
+    product_tags,
+    CoverImage,
+    Media,
+    Files,
+    product_size_helper,
+    ...rest
+  } = rawProduct;
+
+  return {
+    id,
+    attributes: {
+      ...rest,
+      product_main_category: normalizeRelation(product_main_category),
+      product_other_categories: normalizeRelation(product_other_categories),
+      product_variations: normalizeRelation(product_variations, true),
+      product_reviews: normalizeRelation(product_reviews),
+      product_tags: normalizeRelation(product_tags),
+      CoverImage: normalizeRelation(CoverImage),
+      Media: normalizeRelation(Media),
+      Files: normalizeRelation(Files),
+      product_size_helper: normalizeRelation(product_size_helper),
+    },
+  } as ProductDetail;
+};
+
+const isActiveProduct = (product: ProductDetail | null) =>
+  product?.attributes?.Status === "Active" && !product?.attributes?.removedAt;
+
+const fetchPdpProduct = async (
+  decodedSlug: string,
+  revalidateSeconds: number,
+): Promise<ProductLookupResult> => {
+  const strapiBaseUrl = getStrapiServerUrl();
+  const encodedSlug = encodeURIComponent(decodedSlug);
+  const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}/by-slug/${encodedSlug}`;
+  const apiUrl = `${strapiBaseUrl}${endpoint}`;
+
+  const response = await fetch(apiUrl, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    next: { revalidate: revalidateSeconds },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    return {
+      product: null,
+      errorDetails: {
+        message: errorData?.error?.message || `HTTP ${response.status}: ${response.statusText}`,
+        status: response.status,
+        endpoint: apiUrl,
+      },
+    };
+  }
+
+  const data = await response.json();
+  return { product: normalizeProductDetail(data?.data), errorDetails: { endpoint: apiUrl } };
+};
 
 /**
  * Generate static params for popular products to pre-render at build time
@@ -48,11 +225,11 @@ export async function generateStaticParams() {
         fetch(`${strapiBaseUrl}${endpoint}`, {
           next: { revalidate: 3600 }, // Cache for 1 hour
           headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
+            "Content-Type": "application/json",
+            Accept: "application/json",
           },
-        }).then((res) => res.json())
-      )
+        }).then((res) => res.json()),
+      ),
     );
 
     const allProducts: Array<{ id: number; slug: string }> = [];
@@ -78,10 +255,14 @@ export async function generateStaticParams() {
         slug: product.slug,
       }));
 
-    logger.info(`[generateStaticParams] Generated ${params.length} static params for product pages`);
+    logger.info(
+      `[generateStaticParams] Generated ${params.length} static params for product pages`,
+    );
     return params;
   } catch (error) {
-    logger.error('[generateStaticParams] Error generating static params:', { error: String(error) });
+    logger.error("[generateStaticParams] Error generating static params:", {
+      error: String(error),
+    });
     // Return empty array on error - ISR will handle remaining products
     return [];
   }
@@ -95,76 +276,43 @@ export async function generateMetadata({
   const { slug } = await params;
   const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://new.infinitycolor.co";
 
-  let product: ProductDetail | undefined = undefined;
+  let product: ProductDetail | null = null;
+  const decodedSlug = decodeProductSlug(slug);
+  const isNumericId = /^\d+$/.test(decodedSlug);
+  const requestedUrl = `${SITE_URL}/pdp/${slug}`;
 
   try {
-    // Decode slug first to prevent double-encoding
-    let decodedSlug = slug;
-    try {
-      decodedSlug = decodeURIComponent(slug);
-    } catch {
-      decodedSlug = slug;
-    }
-
-    // If product accessed by numeric ID (not slug), add noindex to prevent duplicate indexing
-    const isNumericId = /^\d+$/.test(decodedSlug);
-    if (isNumericId) {
-      return {
-        title: "محصول",
-        robots: {
-          index: false,
-          follow: false,
-        },
-      };
-    }
-
-    // Use server-safe fetch for metadata generation too
-    const encodedSlug = encodeURIComponent(decodedSlug);
-    const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}/by-slug/${encodedSlug}`;
-    const apiUrl = `${getStrapiServerUrl()}${endpoint}`;
-
-    const response = await fetch(apiUrl, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-      },
-      next: { revalidate: 3600 }, // Cache metadata for 1 hour
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      const candidate = data?.data as ProductDetail | undefined;
-
-      const status = candidate?.attributes?.Status;
-      const removedAt = candidate?.attributes?.removedAt;
-      if (status === "Active" && !removedAt) {
-        product = candidate;
-      }
-    } else {
+    const lookup = await fetchPdpProduct(decodedSlug, 3600);
+    if (lookup.product && isActiveProduct(lookup.product)) {
+      product = lookup.product;
+    } else if (lookup.errorDetails?.status) {
       logger.warn("[PDP Metadata] Failed to fetch product for metadata", {
         slug,
-        status: response.status
+        status: lookup.errorDetails.status,
       });
     }
 
     if (!product) {
       return {
-        title: "مشاهده محصول",
-        description: `جزئیات و مشخصات کامل محصول در ${SITE_NAME}`,
-        alternates: { canonical: `${SITE_URL}/pdp/${slug}` },
+        title: "محصول یافت نشد",
+        description: `محصول مورد نظر در ${SITE_NAME} یافت نشد.`,
+        robots: {
+          index: false,
+          follow: false,
+        },
+        alternates: { canonical: requestedUrl },
       };
     }
 
-    const titleRaw = product.attributes?.Title || "";
-    const descRaw = product.attributes?.Description || "";
-    const description = String(descRaw).slice(0, 160);
+    const titleRaw = product.attributes?.Title?.trim() || "";
+    const title = titleRaw || `محصول ${product.id || decodedSlug}`;
+    const descRaw = stripHtml(product.attributes?.Description);
+    const description = descRaw
+      ? truncate(descRaw, 160)
+      : `خرید ${titleRaw || "محصول"} از ${SITE_NAME}`;
     const imageUrl = product.attributes?.CoverImage?.data?.attributes?.url
       ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
       : undefined;
-
-    const title = titleRaw || "محصول";
-    const productId = product?.id || slug;
 
     // Get price info for OpenGraph
     const variations = product?.attributes?.product_variations?.data || [];
@@ -185,7 +333,7 @@ export async function generateMetadata({
       title,
       description,
       type: "website",
-      url: `${SITE_URL}/pdp/${slug}`,
+      url: requestedUrl,
       siteName: SITE_NAME,
       locale: "fa_IR",
       images: imageUrl
@@ -221,18 +369,28 @@ export async function generateMetadata({
         images: imageUrl ? [imageUrl] : undefined,
       },
       alternates: {
-        canonical: `${SITE_URL}/pdp/${slug}`,
+        canonical: requestedUrl,
       },
+      robots: isNumericId
+        ? {
+            index: false,
+            follow: false,
+          }
+        : undefined,
     };
   } catch (error) {
     logger.error("[PDP Metadata] Error fetching product for metadata", {
       slug,
-      error: String(error)
+      error: String(error),
     });
     return {
-      title: "مشاهده محصول",
-      description: `جزئیات و مشخصات کامل محصول در ${SITE_NAME}`,
-      alternates: { canonical: `${SITE_URL}/pdp/${slug}` },
+      title: "محصول یافت نشد",
+      description: `محصول مورد نظر در ${SITE_NAME} یافت نشد.`,
+      robots: {
+        index: false,
+        follow: false,
+      },
+      alternates: { canonical: requestedUrl },
     };
   }
 }
@@ -258,196 +416,71 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
 
   // Decode slug first (Next.js may pass it already encoded), then encode for URL
   // This prevents double-encoding issues
-  let decodedSlug = slug;
-  try {
-    // Try to decode - if it's already decoded, this will just return the original
-    decodedSlug = decodeURIComponent(slug);
-  } catch {
-    // If decoding fails, slug is already decoded, use as-is
-    decodedSlug = slug;
-  }
+  const decodedSlug = decodeProductSlug(slug);
 
   // Fetch product data from API using server-safe fetch
   let productData: ProductDetail | null = null;
-  let error: any = null;
   let errorDetails: { message?: string; status?: number; endpoint?: string } = {};
 
   try {
-    // Use server-safe fetch instead of apiClient (apiClient uses localStorage which doesn't exist on server)
-    // Encode the decoded slug for the URL
-    const encodedSlug = encodeURIComponent(decodedSlug);
-    const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}/by-slug/${encodedSlug}`;
-    const apiUrl = `${strapiBaseUrl}${endpoint}`;
-
     logger.info("[PDP] Making API request", {
       originalSlug: slug,
       decodedSlug,
-      encodedSlug,
-      endpoint,
-      apiUrl,
       apiBaseUrl: strapiBaseUrl,
       hasApiBaseUrl: !!strapiBaseUrl,
     });
 
-    const response = await fetch(apiUrl, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-      },
-      next: { revalidate: 30 }, // ISR: revalidate every 30 seconds
-    });
+    const lookup = await fetchPdpProduct(decodedSlug, 30);
+    errorDetails = {
+      ...errorDetails,
+      ...lookup.errorDetails,
+    };
 
     logger.info("[PDP] API response received", {
-      status: response.status,
-      statusText: response.statusText,
-      ok: response.ok
+      status: lookup.errorDetails?.status || 200,
+      ok: Boolean(lookup.product),
     });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      errorDetails = {
-        message: errorData?.error?.message || `HTTP ${response.status}: ${response.statusText}`,
-        status: response.status,
-        endpoint: apiUrl,
-      };
+    if (!lookup.product) {
+      if (lookup.errorDetails) {
+        errorDetails = lookup.errorDetails;
+      }
       logger.error("[PDP] API request failed", errorDetails);
-      throw new Error(errorDetails.message);
+      throw new Error(errorDetails.message || "Product not found");
     }
 
-    const data = await response.json();
+    productData = lookup.product;
 
-    if (data?.data) {
-      // Normalize data structure: backend may return flat structure or Strapi REST format
-      const rawProduct = data.data;
-
-      // Helper function to normalize a relation (single or array)
-      // Also handles nested relations within variations
-      const normalizeRelation = (rel: any, isVariation = false): any => {
-        if (!rel) return null;
-
-        // If already in Strapi format (has data wrapper), return as-is
-        if (rel.data) return rel;
-
-        // If it's an array of flat objects
-        if (Array.isArray(rel)) {
-          return {
-            data: rel.map((item: any) => {
-              if (item.attributes) {
-                // Already normalized, but check nested relations if it's a variation
-                if (isVariation) {
-                  const { product_stock, product_variation_color, product_variation_size, product_variation_model, ...rest } = item.attributes;
-                  return {
-                    ...item,
-                    attributes: {
-                      ...rest,
-                      product_stock: normalizeRelation(product_stock),
-                      product_variation_color: normalizeRelation(product_variation_color),
-                      product_variation_size: normalizeRelation(product_variation_size),
-                      product_variation_model: normalizeRelation(product_variation_model),
-                    },
-                  };
-                }
-                return item;
-              }
-              // Flat structure - normalize it
-              const { id, product_stock, product_variation_color, product_variation_size, product_variation_model, ...rest } = item;
-              const normalized: any = { id, attributes: rest };
-
-              // Normalize nested relations if this is a variation
-              if (isVariation) {
-                normalized.attributes.product_stock = normalizeRelation(product_stock);
-                normalized.attributes.product_variation_color = normalizeRelation(product_variation_color);
-                normalized.attributes.product_variation_size = normalizeRelation(product_variation_size);
-                normalized.attributes.product_variation_model = normalizeRelation(product_variation_model);
-              }
-
-              return normalized;
-            }),
-          };
-        }
-
-        // Single flat object - wrap in Strapi format
-        if (rel.id !== undefined) {
-          const { id, ...rest } = rel;
-          return {
-            data: { id, attributes: rest },
-          };
-        }
-
-        return null;
+    // Check if product is trashed (removedAt is not null)
+    const status = productData?.attributes?.Status;
+    const removedAt = productData?.attributes?.removedAt;
+    if (productData && (status !== "Active" || removedAt)) {
+      errorDetails = {
+        message: "Product has been removed or is inactive",
+        status: 404,
+        endpoint: lookup.errorDetails?.endpoint,
       };
-
-      if (rawProduct.attributes) {
-        // Already in Strapi REST format - but normalize relations
-        productData = {
-          ...rawProduct,
-          attributes: {
-            ...rawProduct.attributes,
-            product_main_category: normalizeRelation(rawProduct.attributes.product_main_category),
-            product_other_categories: normalizeRelation(rawProduct.attributes.product_other_categories),
-            product_variations: normalizeRelation(rawProduct.attributes.product_variations, true), // true = isVariation
-            product_reviews: normalizeRelation(rawProduct.attributes.product_reviews),
-            product_tags: normalizeRelation(rawProduct.attributes.product_tags),
-            CoverImage: normalizeRelation(rawProduct.attributes.CoverImage),
-            Media: normalizeRelation(rawProduct.attributes.Media),
-            Files: normalizeRelation(rawProduct.attributes.Files),
-            product_size_helper: normalizeRelation(rawProduct.attributes.product_size_helper),
-          },
-        };
-      } else {
-        // Flat structure - normalize to Strapi format
-        const { id, product_main_category, product_other_categories, product_variations, product_reviews, product_tags, CoverImage, Media, Files, product_size_helper, ...rest } = rawProduct;
-        productData = {
-          id,
-          attributes: {
-            ...rest,
-            product_main_category: normalizeRelation(product_main_category),
-            product_other_categories: normalizeRelation(product_other_categories),
-            product_variations: normalizeRelation(product_variations, true), // true = isVariation
-            product_reviews: normalizeRelation(product_reviews),
-            product_tags: normalizeRelation(product_tags),
-            CoverImage: normalizeRelation(CoverImage),
-            Media: normalizeRelation(Media),
-            Files: normalizeRelation(Files),
-            product_size_helper: normalizeRelation(product_size_helper),
-          },
-        };
-        logger.info("[PDP] Normalized flat product structure to Strapi format", { productId: id });
-      }
-
-      // Check if product is trashed (removedAt is not null)
-      const status = productData?.attributes?.Status;
-      const removedAt = productData?.attributes?.removedAt;
-      if (productData && (status !== "Active" || removedAt)) {
-        errorDetails = {
-          message: "Product has been removed or is inactive",
-          status: 404,
-          endpoint: apiUrl,
-        };
-        logger.warn("[PDP] Product is inactive or removed", {
-          slug,
-          productId: productData?.id,
-          status,
-          removedAt,
-        });
-        throw new Error("Product not found");
-      }
-
-      logger.info("[PDP] Product found successfully", {
+      logger.warn("[PDP] Product is inactive or removed", {
+        slug,
         productId: productData?.id,
-        title: productData?.attributes?.Title?.substring(0, 50),
-        hasAttributes: !!productData?.attributes
+        status,
+        removedAt,
       });
-    } else {
-      logger.warn("[PDP] API returned no data", { slug, responseData: data });
+      throw new Error("Product not found");
     }
+
+    logger.info("[PDP] Product found successfully", {
+      productId: productData?.id,
+      title: productData?.attributes?.Title?.substring(0, 50),
+      hasAttributes: !!productData?.attributes,
+    });
   } catch (err: any) {
-    error = err;
     errorDetails = {
       message: err?.message || String(err),
       status: err?.status || (err as any)?.response?.status,
-      endpoint: errorDetails.endpoint || `${strapiBaseUrl}${ENDPOINTS.PRODUCT.PRODUCT}/by-slug/${encodeURIComponent(slug)}`,
+      endpoint:
+        errorDetails.endpoint ||
+        `${strapiBaseUrl}${ENDPOINTS.PRODUCT.PRODUCT}/by-slug/${encodeURIComponent(slug)}`,
     };
     logger.error("[PDP] Error fetching product", {
       slug,
@@ -470,7 +503,7 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            "Accept": "application/json",
+            Accept: "application/json",
           },
           next: { revalidate: 30 },
         });
@@ -482,93 +515,7 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
         const fallbackData = await fallbackResponse.json();
 
         if (fallbackData?.data) {
-          // Apply same normalization logic as main path
-          const rawProduct = fallbackData.data;
-
-          // Helper function to normalize a relation (same as main path)
-          const normalizeRelation = (rel: any, isVariation = false): any => {
-            if (!rel) return null;
-            if (rel.data) return rel;
-
-            if (Array.isArray(rel)) {
-              return {
-                data: rel.map((item: any) => {
-                  if (item.attributes) {
-                    if (isVariation) {
-                      const { product_stock, product_variation_color, product_variation_size, product_variation_model, ...rest } = item.attributes;
-                      return {
-                        ...item,
-                        attributes: {
-                          ...rest,
-                          product_stock: normalizeRelation(product_stock),
-                          product_variation_color: normalizeRelation(product_variation_color),
-                          product_variation_size: normalizeRelation(product_variation_size),
-                          product_variation_model: normalizeRelation(product_variation_model),
-                        },
-                      };
-                    }
-                    return item;
-                  }
-                  const { id, product_stock, product_variation_color, product_variation_size, product_variation_model, ...rest } = item;
-                  const normalized: any = { id, attributes: rest };
-
-                  if (isVariation) {
-                    normalized.attributes.product_stock = normalizeRelation(product_stock);
-                    normalized.attributes.product_variation_color = normalizeRelation(product_variation_color);
-                    normalized.attributes.product_variation_size = normalizeRelation(product_variation_size);
-                    normalized.attributes.product_variation_model = normalizeRelation(product_variation_model);
-                  }
-
-                  return normalized;
-                }),
-              };
-            }
-
-            if (rel.id !== undefined) {
-              const { id, ...rest } = rel;
-              return {
-                data: { id, attributes: rest },
-              };
-            }
-
-            return null;
-          };
-
-          if (rawProduct.attributes) {
-            productData = {
-              ...rawProduct,
-              attributes: {
-                ...rawProduct.attributes,
-                product_main_category: normalizeRelation(rawProduct.attributes.product_main_category),
-                product_other_categories: normalizeRelation(rawProduct.attributes.product_other_categories),
-                product_variations: normalizeRelation(rawProduct.attributes.product_variations, true),
-                product_reviews: normalizeRelation(rawProduct.attributes.product_reviews),
-                product_tags: normalizeRelation(rawProduct.attributes.product_tags),
-                CoverImage: normalizeRelation(rawProduct.attributes.CoverImage),
-                Media: normalizeRelation(rawProduct.attributes.Media),
-                Files: normalizeRelation(rawProduct.attributes.Files),
-                product_size_helper: normalizeRelation(rawProduct.attributes.product_size_helper),
-              },
-            };
-          } else {
-            const { id, product_main_category, product_other_categories, product_variations, product_reviews, product_tags, CoverImage, Media, Files, product_size_helper, ...rest } = rawProduct;
-            productData = {
-              id,
-              attributes: {
-                ...rest,
-                product_main_category: normalizeRelation(product_main_category),
-                product_other_categories: normalizeRelation(product_other_categories),
-                product_variations: normalizeRelation(product_variations, true),
-                product_reviews: normalizeRelation(product_reviews),
-                product_tags: normalizeRelation(product_tags),
-                CoverImage: normalizeRelation(CoverImage),
-                Media: normalizeRelation(Media),
-                Files: normalizeRelation(Files),
-                product_size_helper: normalizeRelation(product_size_helper),
-              },
-            };
-            logger.info("[PDP] Normalized flat product structure to Strapi format (fallback)", { productId: id });
-          }
+          productData = normalizeProductDetail(fallbackData.data);
 
           // Check if product is trashed
           const status = productData?.attributes?.Status;
@@ -603,7 +550,13 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
             <p className="font-semibold">Debug Info (Development Mode):</p>
             <p>Original Slug: {slug}</p>
             <p>Decoded Slug: {decodedSlug}</p>
-            <p>Error: {translateErrorMessage(errorDetails.message, "متأسفانه مشکلی پیش آمد. دوباره تلاش کنید.")}</p>
+            <p>
+              Error:{" "}
+              {translateErrorMessage(
+                errorDetails.message,
+                "متأسفانه مشکلی پیش آمد. دوباره تلاش کنید.",
+              )}
+            </p>
             {errorDetails.status && <p>Status: {errorDetails.status}</p>}
             {errorDetails.endpoint && <p>Endpoint: {errorDetails.endpoint}</p>}
             {strapiBaseUrl && <p>API Base URL: {strapiBaseUrl}</p>}
@@ -622,8 +575,7 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
     productData.attributes.product_main_category?.data?.attributes?.Name ||
     "";
 
-  const categorySlug =
-    productData.attributes.product_main_category?.data?.attributes?.Slug || "";
+  const categorySlug = productData.attributes.product_main_category?.data?.attributes?.Slug || "";
 
   const productTitle = productData.attributes.Title || "";
 
@@ -633,7 +585,9 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
 
   // Get IDs of other categories this product belongs to
   const otherCategoryIds =
-    productData.attributes.product_other_categories?.data?.map((cat) => cat.id?.toString()).filter(Boolean) || [];
+    productData.attributes.product_other_categories?.data
+      ?.map((cat) => cat.id?.toString())
+      .filter(Boolean) || [];
 
   // Fetch related products from same main category and other categories
   let sameMainCategoryProducts: any[] = [];
@@ -665,49 +619,49 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
     logger.error("Error fetching related products", { error: String(error) });
   }
 
-      // Format product reviews data for the component
-      const productReviews: ProductReview[] =
-        productData.attributes.product_reviews?.data
-          ?.filter((review: any) => {
-            const attrs = review.attributes || {};
-            return attrs.Status === "Accepted" && !attrs.removedAt;
-          })
-          .map((review: any) => {
-            const attrs = review.attributes || {};
-            const rawUserInfo = attrs.user?.data?.attributes?.user_info;
-            const normalizedUserInfo = normalizeUserInfo(rawUserInfo);
+  // Format product reviews data for the component
+  const productReviews: ProductReview[] =
+    productData.attributes.product_reviews?.data
+      ?.filter((review: any) => {
+        const attrs = review.attributes || {};
+        return attrs.Status === "Accepted" && !attrs.removedAt;
+      })
+      .map((review: any) => {
+        const attrs = review.attributes || {};
+        const rawUserInfo = attrs.user?.data?.attributes?.user_info;
+        const normalizedUserInfo = normalizeUserInfo(rawUserInfo);
 
-            // Basic normalization to match ProductReview interface
-            return {
-              id: review.id,
-              Content: attrs.Content || "",
-              Status: attrs.Status || "Accepted",
-              Date: attrs.Date || attrs.createdAt,
-              Rate: attrs.Rate || 0,
-              LikeCounts: attrs.LikeCounts || 0,
-              DislikeCounts: attrs.DislikeCounts || 0,
-              user: attrs.user?.data
+        // Basic normalization to match ProductReview interface
+        return {
+          id: review.id,
+          Content: attrs.Content || "",
+          Status: attrs.Status || "Accepted",
+          Date: attrs.Date || attrs.createdAt,
+          Rate: attrs.Rate || 0,
+          LikeCounts: attrs.LikeCounts || 0,
+          DislikeCounts: attrs.DislikeCounts || 0,
+          user: attrs.user?.data
+            ? {
+                id: attrs.user.data.id,
+                ...attrs.user.data.attributes,
+                user_info: normalizedUserInfo,
+              }
+            : attrs.user,
+          product_review_replies:
+            attrs.product_review_replies?.data?.map((reply: any) => ({
+              id: reply.id,
+              ...reply.attributes,
+              user: reply.attributes?.user?.data
                 ? {
-                    id: attrs.user.data.id,
-                    ...attrs.user.data.attributes,
-                    user_info: normalizedUserInfo,
+                    id: reply.attributes.user.data.id,
+                    ...reply.attributes.user.data.attributes,
                   }
-                : attrs.user,
-              product_review_replies:
-                attrs.product_review_replies?.data?.map((reply: any) => ({
-                  id: reply.id,
-                  ...reply.attributes,
-                  user: reply.attributes?.user?.data
-                    ? {
-                        id: reply.attributes.user.data.id,
-                        ...reply.attributes.user.data.attributes,
-                      }
-                    : reply.attributes?.user,
-                })) || [],
-              createdAt: attrs.createdAt,
-              updatedAt: attrs.updatedAt,
-            };
-          }) || [];
+                : reply.attributes?.user,
+            })) || [],
+          createdAt: attrs.createdAt,
+          updatedAt: attrs.updatedAt,
+        };
+      }) || [];
 
   const breadcrumbItems = [
     {
@@ -727,18 +681,25 @@ export default async function PDP({ params }: { params: Promise<{ slug: string }
   const productUrl = `${SITE_URL}/pdp/${slug}`;
   const averageRating = productData.attributes.AverageRating || 0;
   const reviewCount = productData.attributes.RatingCount || productReviews.length;
-  const variationPrices = productData.attributes.product_variations?.data
-    ?.map((variation: any) => {
-      const price = Number(variation?.attributes?.DiscountPrice || variation?.attributes?.Price || 0);
-      return Number.isFinite(price) ? price : 0;
-    })
-    .filter((price) => price > 0) || [];
+  const variationPrices =
+    productData.attributes.product_variations?.data
+      ?.map((variation: any) => {
+        const price = Number(
+          variation?.attributes?.DiscountPrice || variation?.attributes?.Price || 0,
+        );
+        return Number.isFinite(price) ? price : 0;
+      })
+      .filter((price) => price > 0) || [];
   const minVisiblePrice = variationPrices.length > 0 ? Math.min(...variationPrices) : 0;
 
   return (
     <PageContainer variant="wide" className="flex flex-col gap-10 pb-16 pt-6">
       {/* JSON-LD Schemas for SEO */}
-      <ViewItemTracker productId={productData.id || 0} title={productTitle} price={minVisiblePrice} />
+      <ViewItemTracker
+        productId={productData.id || 0}
+        title={productTitle}
+        price={minVisiblePrice}
+      />
       {productData && <ProductSchema product={productData} slug={slug} />}
       {productReviews.length > 0 && (
         <ReviewSchema

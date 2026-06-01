@@ -432,6 +432,16 @@ class ImageUploader {
         100
       ).toFixed(1);
 
+      if (processedBuffer.length >= imageBuffer.length) {
+        this.logger.debug(
+          `WebP conversion skipped: ${originalFormat?.toUpperCase() || "UNKNOWN"} original is smaller (${originalSizeKb}KB <= ${newSizeKb}KB)`,
+        );
+        return {
+          buffer: imageBuffer,
+          fileName: this.generateFileName(imageUrl, prefix),
+        };
+      }
+
       this.logger.success(
         `✅ Converted to WebP: ${originalFormat?.toUpperCase() || "UNKNOWN"} → ${fileName} (${originalSizeKb}KB → ${newSizeKb}KB, ${savings}% savings)`,
       );

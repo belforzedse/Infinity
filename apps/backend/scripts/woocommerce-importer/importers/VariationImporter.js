@@ -950,10 +950,12 @@ class VariationImporter {
         throw new Error(errorMsg);
       }
 
-      const strapiVariation = await this.transformVariation(wcVariation, parentProductStrapiId);
+      const strapiVariation = await this.transformVariation(wcVariation, parentProductStrapiId, {
+        preserveMissingPrice: Boolean(existingStrapiId),
+      });
 
       // Final validation of variation data
-      if (!strapiVariation.SKU || !strapiVariation.Price === undefined) {
+      if (!strapiVariation.SKU || (!existingStrapiId && strapiVariation.Price === undefined)) {
         const errorMsg = `Variation ${wcVariation.id}: Missing required fields - SKU: ${strapiVariation.SKU}, Price: ${strapiVariation.Price}`;
         this.logger.error(errorMsg);
         throw new Error(errorMsg);
@@ -1023,7 +1025,7 @@ class VariationImporter {
   /**
    * Transform WooCommerce variation to Strapi format
    */
-  async transformVariation(wcVariation, parentProductStrapiId) {
+  async transformVariation(wcVariation, parentProductStrapiId, options = {}) {
     // Validate parent product is set
     if (!parentProductStrapiId) {
       throw new Error(`Variation ${wcVariation.id}: Parent product ID is missing or invalid`);
@@ -1048,16 +1050,29 @@ class VariationImporter {
       product: parentProductStrapiId,
     };
 
-    const regularPrice = parseFloat(wcVariation.regular_price || wcVariation.price || 0);
-    const salePrice = parseFloat(wcVariation.sale_price || 0);
+    const variationRegularPrice = parseFloat(wcVariation.regular_price || wcVariation.price || 0);
+    const variationSalePrice = parseFloat(wcVariation.sale_price || 0);
+    const parentProduct = wcVariation._parentProduct || {};
+    const parentRegularPrice = parseFloat(parentProduct.regular_price || parentProduct.price || 0);
+    const parentSalePrice = parseFloat(parentProduct.sale_price || 0);
+    const hasVariationPrice = Number.isFinite(variationRegularPrice) && variationRegularPrice > 0;
+    const hasParentPrice = Number.isFinite(parentRegularPrice) && parentRegularPrice > 0;
+    const regularPrice = hasVariationPrice ? variationRegularPrice : parentRegularPrice;
+    const salePrice = hasVariationPrice ? variationSalePrice : parentSalePrice;
 
     // Validate price is set
     if (!regularPrice || regularPrice <= 0) {
       this.logger.warn(
         `⚠️ Variation ${wcVariation.id}: No valid price found (regular: ${wcVariation.regular_price}, price: ${wcVariation.price})`,
       );
-      // Still allow creation with 0 price, but log warning
-      strapiVariation.Price = 0;
+      if (options.preserveMissingPrice) {
+        this.logger.warn(
+          `⚠️ Variation ${wcVariation.id}: Keeping existing Strapi price unchanged because WooCommerce price is blank`,
+        );
+      } else {
+        // New Strapi variations require Price, so create missing-price variations with 0.
+        strapiVariation.Price = 0;
+      }
     } else if (salePrice > 0 && salePrice < regularPrice) {
       strapiVariation.Price = this.convertPrice(regularPrice);
       strapiVariation.DiscountPrice = this.convertPrice(salePrice);
@@ -1065,6 +1080,11 @@ class VariationImporter {
         `💰 Variation ${wcVariation.id}: Regular price ${regularPrice}, Discount price ${salePrice}`,
       );
     } else {
+      if (!hasVariationPrice && hasParentPrice) {
+        this.logger.warn(
+          `⚠️ Variation ${wcVariation.id}: WooCommerce variation price is blank; using parent product ${parentProduct.id || "unknown"} price ${parentRegularPrice}`,
+        );
+      }
       strapiVariation.Price = this.convertPrice(regularPrice);
     }
 
