@@ -8,6 +8,7 @@ import SearchIcon from "../../Icons/SearchIcon";
 import CartIcon from "../../Icons/CartIcon";
 import MenuIcon from "../../Icons/MenuIcon";
 import { StorefrontLogo } from "@repo/brand";
+import InfinitygramHeaderLink from "@/components/PLP/Header/InfinitygramHeaderLink";
 import { useCart } from "@/contexts/CartContext";
 import { usePathname, useRouter } from "next/navigation";
 import MobileBackButton from "@/components/MobileBackButton";
@@ -93,17 +94,18 @@ export default function PLPMobileHeader({}: Props) {
         </div>
 
         {/* Left Section */}
-        <div className="relative z-10 flex w-32 items-center justify-end gap-2">
+        <div className="relative z-10 flex items-center justify-end gap-0.5 min-[520px]:gap-2">
+          <InfinitygramHeaderLink className="h-9 w-9 min-[390px]:h-10 min-[390px]:w-10" />
           <button
             onClick={openSearch}
-            className="hidden h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white 440:flex"
+            className="hidden h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white min-[520px]:flex"
             aria-label="جستجو"
           >
             <SearchIcon className="text-neutral-800" />
           </button>
           <button
             onClick={() => setIsMenuOpen(true)}
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white min-[390px]:h-10 min-[390px]:w-10"
             aria-label="فهرست"
           >
             <MenuIcon className="text-neutral-800" />
@@ -111,7 +113,7 @@ export default function PLPMobileHeader({}: Props) {
 
           <button
             onClick={openDrawer}
-            className="relative flex h-10 w-10 items-center justify-center rounded-full bg-pink-500"
+            className="relative flex h-9 w-9 items-center justify-center rounded-full bg-pink-500 min-[390px]:h-10 min-[390px]:w-10"
             aria-label="سبد خریدتان"
           >
             <CartIcon className="text-white" />
