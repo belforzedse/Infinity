@@ -157,14 +157,13 @@ export async function generateMetadata({
     }
 
     const titleRaw = product.attributes?.Title || "";
-    const titleSegment = titleRaw.length > 70 ? `${titleRaw.slice(0, 67)}...` : titleRaw;
     const descRaw = product.attributes?.Description || "";
     const description = String(descRaw).slice(0, 160);
     const imageUrl = product.attributes?.CoverImage?.data?.attributes?.url
       ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
       : undefined;
 
-    const title = `خرید ${titleSegment}`;
+    const title = titleRaw || "محصول";
     const productId = product?.id || slug;
 
     // Get price info for OpenGraph

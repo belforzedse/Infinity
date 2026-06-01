@@ -905,6 +905,8 @@ class ProductImporter {
           importedSlug: payload.Slug,
           type: wcProduct.type,
           status: wcProduct.status,
+          createdAt: payload.createdAt || null,
+          updatedAt: payload.updatedAt || null,
           rating: wcProduct.average_rating, // Track rating to detect changes
         });
 
@@ -949,6 +951,8 @@ class ProductImporter {
     }
 
     const expectedImportedSlug = this.resolveWooCommerceProductSlug(wcProduct);
+    const expectedCreatedAt = this.resolveWooCommerceDate(wcProduct, "date_created");
+    const expectedUpdatedAt = this.resolveWooCommerceDate(wcProduct, "date_modified");
     const hasTrackedImportedSlug = Object.prototype.hasOwnProperty.call(
       existingMapping,
       "importedSlug",
@@ -961,6 +965,8 @@ class ProductImporter {
       // If legacy mappings don't have it, force one update to sync and persist.
       slug: !hasTrackedImportedSlug || existingMapping.importedSlug !== expectedImportedSlug,
       status: existingMapping.status !== wcProduct.status,
+      createdAt: existingMapping.createdAt !== expectedCreatedAt,
+      updatedAt: existingMapping.updatedAt !== expectedUpdatedAt,
       description: wcProduct.description && wcProduct.description !== "",
       price: wcProduct.price && parseFloat(wcProduct.price) > 0,
       rating:
@@ -1061,6 +1067,8 @@ class ProductImporter {
 
     const normalizedName = this.normalizeProductName(wcProduct.name);
     const slug = this.resolveWooCommerceProductSlug(wcProduct);
+    const createdAt = this.resolveWooCommerceDate(wcProduct, "date_created");
+    const updatedAt = this.resolveWooCommerceDate(wcProduct, "date_modified");
 
     // Prepare description - use main description if available, otherwise use short_description
     let descriptionContent = "";
@@ -1085,6 +1093,8 @@ class ProductImporter {
       // Store WooCommerce ID for reference
       external_id: wcProduct.id.toString(),
       external_source: "woocommerce",
+      createdAt,
+      updatedAt,
     };
 
     // Handle short description as cleaning tips or return conditions
@@ -1454,6 +1464,35 @@ class ProductImporter {
 
     // Last resort: use WooCommerce ID
     return `product-${wcProduct.id}`;
+  }
+
+  /**
+   * Resolve a WooCommerce timestamp to an ISO string for Strapi.
+   * Prefer *_gmt fields because WooCommerce's non-GMT dates often have no timezone.
+   */
+  resolveWooCommerceDate(wcProduct, fieldName) {
+    const gmtFieldName = `${fieldName}_gmt`;
+    const rawValue = wcProduct?.[gmtFieldName] || wcProduct?.[fieldName];
+
+    if (!rawValue || typeof rawValue !== "string" || rawValue.trim() === "") {
+      return null;
+    }
+
+    const trimmedValue = rawValue.trim();
+    const isoCandidate =
+      rawValue === wcProduct?.[gmtFieldName] && !/[zZ]|[+-]\d{2}:\d{2}$/.test(trimmedValue)
+        ? `${trimmedValue}Z`
+        : trimmedValue;
+    const parsedDate = new Date(isoCandidate);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+      this.logger.warn(
+        `⚠️ Product ${wcProduct?.id || "unknown"} has invalid WooCommerce ${fieldName}: ${rawValue}`,
+      );
+      return null;
+    }
+
+    return parsedDate.toISOString();
   }
 
   /**

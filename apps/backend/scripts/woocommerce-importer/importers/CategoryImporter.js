@@ -294,13 +294,8 @@ class CategoryImporter {
    * Transform WooCommerce category to Strapi format
    */
   async transformCategory(wcCategory) {
-    // Generate slug from WooCommerce slug or name
-    let slug = this.generateCategorySlug(wcCategory);
-
-    // Add WooCommerce ID to slug to ensure uniqueness (only if not already present)
-    if (!slug.endsWith(`-${wcCategory.id}`)) {
-      slug = `${slug}-${wcCategory.id}`;
-    }
+    // Preserve the WooCommerce slug for SEO continuity.
+    const slug = this.generateCategorySlug(wcCategory);
 
     const strapiCategory = {
       Title: wcCategory.name,
