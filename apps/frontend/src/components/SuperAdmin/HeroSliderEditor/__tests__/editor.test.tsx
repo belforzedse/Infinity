@@ -17,9 +17,17 @@ jest.mock("@/components/SuperAdmin/Layout/ContentWrapper", () => ({
 
 jest.mock("@/components/SuperAdmin/UpsertPage/ContentWrapper/Fields/ImageUploadField", () => ({
   __esModule: true,
-  default: ({ value, onChange }: { value: string; onChange: (value: string) => void }) => (
+  default: ({
+    value,
+    onChange,
+    urlInputAriaLabel = "آدرس تصویر",
+  }: {
+    value: string;
+    onChange: (value: string) => void;
+    urlInputAriaLabel?: string;
+  }) => (
     <input
-      aria-label="تصویر بنر"
+      aria-label={urlInputAriaLabel}
       value={value}
       onChange={(event) => onChange(event.target.value)}
     />
@@ -104,17 +112,16 @@ describe("Hero slider editor", () => {
       expect(screen.getByText("پیش‌نمایش بنر هیرو")).toBeInTheDocument();
     });
 
-    expect(screen.getByLabelText("تصویر بنر")).toHaveValue("/uploads/a.webp");
+    expect(screen.getByLabelText("تصویر بنر دسکتاپ")).toHaveValue("/uploads/a.webp");
     expect(screen.getByDisplayValue("بنر اول")).toBeInTheDocument();
     expect(screen.queryByText(/در حال ویرایش:/)).not.toBeInTheDocument();
   });
 
-  it("updates the selected slide banner image", async () => {
+  it("auto-saves the selected slide banner image", async () => {
     render(<HeroSliderCustomizationPage />);
 
-    const imageInput = await screen.findByLabelText("تصویر بنر");
+    const imageInput = await screen.findByLabelText("تصویر بنر دسکتاپ");
     fireEvent.change(imageInput, { target: { value: "/uploads/new.webp" } });
-    fireEvent.click(screen.getByRole("button", { name: "ذخیره پیش‌نویس" }));
 
     await waitFor(() => {
       expect(updateHeroSliderDraftMock).toHaveBeenCalledTimes(1);
@@ -122,6 +129,21 @@ describe("Hero slider editor", () => {
 
     const savedPayload = updateHeroSliderDraftMock.mock.calls[0][0] as HeroSliderPayload;
     expect(savedPayload.slides[0].imageUrl).toBe("/uploads/new.webp");
+  });
+
+  it("saves draft before publishing", async () => {
+    render(<HeroSliderCustomizationPage />);
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "انتشار" })).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "انتشار" }));
+
+    await waitFor(() => {
+      expect(updateHeroSliderDraftMock).toHaveBeenCalledTimes(1);
+      expect(publishHeroSliderDraftMock).toHaveBeenCalledTimes(1);
+    });
   });
 
   it("reorders slides when move controls are used", () => {
@@ -160,7 +182,7 @@ describe("Hero slider editor", () => {
     expect(screen.getByTestId("first-slide-id")).toHaveTextContent("slide-b");
   });
 
-  it("publishes draft and updates published summary", async () => {
+  it("saves draft before publishing and updates published summary", async () => {
     render(<HeroSliderCustomizationPage />);
 
     await waitFor(() => {
@@ -170,6 +192,7 @@ describe("Hero slider editor", () => {
     fireEvent.click(screen.getByRole("button", { name: "انتشار" }));
 
     await waitFor(() => {
+      expect(updateHeroSliderDraftMock).toHaveBeenCalledTimes(1);
       expect(publishHeroSliderDraftMock).toHaveBeenCalledTimes(1);
       expect(screen.getByText(/تعداد اسلاید منتشرشده: 1/)).toBeInTheDocument();
     });

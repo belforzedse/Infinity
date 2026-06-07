@@ -30,6 +30,8 @@ export type HeroSlideConfig = {
   id: string;
   imageUrl: string;
   imageAlt: string;
+  mobileImageUrl: string;
+  mobileImageAlt: string;
   link: HeroSlotLink | null;
   isActive: boolean;
   autoplayEligible: boolean;

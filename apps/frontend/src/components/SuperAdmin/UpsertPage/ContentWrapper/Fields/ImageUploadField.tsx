@@ -6,8 +6,19 @@ import toast from "react-hot-toast";
 import { uploadFile } from "@/services/super-admin/files/upload";
 import resolveAssetUrl from "@/utils/resolveAssetUrl";
 
-const getBestUrl = (image?: { formats?: any; url?: string }) => {
+type UploadedImageShape = {
+  formats?: {
+    large?: { url?: string };
+    medium?: { url?: string };
+    small?: { url?: string };
+    thumbnail?: { url?: string };
+  };
+  url?: string;
+};
+
+const getBestUrl = (image?: UploadedImageShape, preferOriginal = false): string => {
   if (!image) return "";
+  if (preferOriginal && image.url) return image.url;
   return (
     image.formats?.large?.url ||
     image.formats?.medium?.url ||
@@ -24,6 +35,12 @@ type Props = {
   readOnly?: boolean;
   placeholder?: string;
   helper?: React.ReactNode;
+  /** Use the original Strapi upload URL instead of a smaller responsive format. */
+  preferOriginal?: boolean;
+  /** Upload with higher fidelity compression for large banners. */
+  highQuality?: boolean;
+  /** Accessible label for the URL text input (used in tests and screen readers). */
+  urlInputAriaLabel?: string;
 };
 
 export default function ImageUploadField({
@@ -32,6 +49,9 @@ export default function ImageUploadField({
   readOnly,
   placeholder,
   helper,
+  preferOriginal = false,
+  highQuality = false,
+  urlInputAriaLabel = "آدرس تصویر",
 }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -41,10 +61,10 @@ export default function ImageUploadField({
     if (!file || readOnly) return;
     setIsUploading(true);
     try {
-      const uploaded = await uploadFile(file);
+      const uploaded = await uploadFile(file, { highQuality });
       if (uploaded && uploaded.length > 0) {
         const img = uploaded[0];
-        const bestUrl = getBestUrl(img);
+        const bestUrl = getBestUrl(img, preferOriginal);
         onChange(bestUrl || "");
         toast.success("تصویر با موفقیت بارگذاری شد");
       } else {
@@ -161,6 +181,7 @@ export default function ImageUploadField({
         <label className="text-xs text-slate-500">آدرس تصویر</label>
         <input
           type="text"
+          aria-label={urlInputAriaLabel}
           value={value}
           disabled={readOnly}
           readOnly={readOnly}

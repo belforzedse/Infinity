@@ -44,18 +44,31 @@ export type UploadedImage = {
 export type Response = UploadedImage[];
 
 const MAX_DIMENSION = 2560;
-const LARGE_FILE_THRESHOLD = 8 * 1024 * 1024; // compress only when it materially helps
+const HERO_MAX_DIMENSION = 2720;
+const LARGE_FILE_THRESHOLD = 8 * 1024 * 1024;
 
-async function compressImageToWebP(file: File): Promise<File> {
+export type UploadFileOptions = {
+  highQuality?: boolean;
+};
+
+async function compressImageToWebP(file: File, options?: UploadFileOptions): Promise<File> {
   if (!file.type.startsWith("image/")) return file;
-  if (file.size < LARGE_FILE_THRESHOLD && file.type === "image/webp") return file;
+
+  const highQuality = options?.highQuality === true;
+  if (highQuality && file.size <= 20 * 1024 * 1024) {
+    return file;
+  }
+
+  if (!highQuality && file.size < LARGE_FILE_THRESHOLD && file.type === "image/webp") {
+    return file;
+  }
 
   try {
     const compressed = await imageCompression(file, {
-      maxSizeMB: 20,
-      maxWidthOrHeight: MAX_DIMENSION,
+      maxSizeMB: highQuality ? 30 : 20,
+      maxWidthOrHeight: highQuality ? HERO_MAX_DIMENSION : MAX_DIMENSION,
       fileType: "image/webp",
-      initialQuality: 0.82,
+      initialQuality: highQuality ? 0.95 : 0.82,
       useWebWorker: true,
     });
 
@@ -67,12 +80,15 @@ async function compressImageToWebP(file: File): Promise<File> {
   }
 }
 
-export const uploadFile = async (file: File): Promise<Response | undefined> => {
+export const uploadFile = async (
+  file: File,
+  options?: UploadFileOptions,
+): Promise<Response | undefined> => {
   const endpoint = ENDPOINTS.FILE.UPLOAD;
 
   try {
     const formData = new FormData();
-    const processed = await compressImageToWebP(file);
+    const processed = await compressImageToWebP(file, options);
     formData.append("files", processed);
 
     const token = getAccessToken();

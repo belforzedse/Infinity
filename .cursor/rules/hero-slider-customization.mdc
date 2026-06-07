@@ -10,20 +10,19 @@ The homepage hero slider is now a **single-image banner slider**. Do not reintro
 ## Figma Contract
 
 - Design reference node: `1:2977`
-- Desktop banner size: `1360px × 581px`
-- Aspect ratio: `1360 / 581`
-- Border radius: `34px`
-- Storefront rendering must reserve this aspect ratio to avoid layout shift.
-- The uploaded image should be a complete composed banner. The app does not rebuild Figma's inner text/right-image layers.
+- **Desktop** banner: `1360px × 581px`, aspect `1360 / 581`, radius `34px` (`lg+`)
+- **Mobile** banner: `361px × 387px`, aspect `361 / 387`, radius `18px` (`<lg`)
+- Storefront rendering must reserve the correct aspect ratio per breakpoint to avoid layout shift.
+- Each device image is a complete composed banner. The app does not rebuild Figma text/image layers.
 
 ## Data Model
 
 `homeHeroSliderDraft` and `homeHeroSliderPublished` remain JSON fields on settings, but payloads normalize to `version: 3`.
 
-Each slide exposes only:
+Each slide exposes:
 
-- `imageUrl`
-- `imageAlt`
+- `imageUrl` / `imageAlt` — desktop banner (required for slide visibility)
+- `mobileImageUrl` / `mobileImageAlt` — optional mobile-only banner (falls back to desktop when empty)
 - optional `link`
 - `order`
 - `isActive`
@@ -37,10 +36,10 @@ Obsolete v2 controls such as foreground/background split images, headline slots,
 
 Existing v2 payloads are read safely by the frontend and backend normalizers:
 
-1. Prefer `devices.desktop.slots.rightBanner.foregroundImageUrl`.
-2. Fallback to desktop `rightBanner.backgroundImageUrl`.
-3. Fallback to tablet/mobile `heroBanner` foreground/background images.
-4. Preserve slide id, order, active state, autoplay eligibility, schedule, tracking, alt text, and main-visual link when available.
+1. Desktop `imageUrl`: prefer `devices.desktop.slots.rightBanner.foregroundImageUrl`, then background, then tablet `heroBanner`.
+2. Mobile `mobileImageUrl`: prefer `devices.mobile.slots.heroBanner` foreground/background.
+3. Preserve slide id, order, active state, autoplay eligibility, schedule, tracking, alt text, and main-visual link when available.
+4. Storefront mobile uses `resolveHeroSlideMobileImage()` (`mobileImageUrl` → fallback `imageUrl`).
 
 No SQL migration is required because the settings fields are JSON.
 
@@ -58,10 +57,15 @@ No SQL migration is required because the settings fields are JSON.
 ## Storefront Behavior
 
 - Use the existing optimized image path (`BannerImage` + `imageLoader`).
-- Intrinsic dimensions are `width={1360}` and `height={581}`.
-- Use `sizes="(max-width: 1360px) 100vw, 1360px"`.
+- Desktop (`lg+`): `width={1360}` `height={581}`, `sizes="(max-width: 1360px) 100vw, 1360px"`, `rounded-[34px]`.
+- Mobile (`<lg`): `width={361}` `height={387}`, `sizes="100vw"`, `rounded-[18px]`, separate `mobileImageUrl` when set.
 - The first visible slide should be priority-loaded; later slides can lazy-load.
 - Keep autoplay, arrows/dots, slide ordering, active status, schedule filtering, and links.
+
+## Admin Editor
+
+- [TemplatePreview.tsx](apps/frontend/src/components/SuperAdmin/HeroSliderEditor/TemplatePreview.tsx) shows desktop + mobile previews and separate upload fields.
+- Mobile image upload auto-saves draft (same as desktop upload).
 ---
 description: Hero slider customization in super-admin: slot structure, CMS mapping, and font configuration. Use when modifying the hero editor, adding slots, or configuring typography.
 globs: 

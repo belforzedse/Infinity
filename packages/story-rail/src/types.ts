@@ -56,11 +56,14 @@ export interface StoryViewerClassNames {
   progressFill?: string;
 }
 
+export type StoryRailMobileLayout = "card" | "avatar";
+
 export interface StoriesAvatarListProps<TStory extends StoryRailStory = StoryRailStory> {
   stories: TStory[];
   seenIds: Set<number>;
   onAvatarClick: (index: number) => void;
   resolveMediaUrl: ResolveStoryMediaUrl;
+  mobileLayout?: StoryRailMobileLayout;
   renderMobileBadge?: (args: StoryRailMobileBadgeRenderArgs<TStory>) => ReactNode;
   emptyPreviewLabel?: string;
   classNames?: Pick<StoryRailClassNames, "list" | "avatarButton" | "mobileCard" | "desktopRing">;
@@ -89,6 +92,7 @@ export interface StoryRailProps<TStory extends StoryRailStory = StoryRailStory> 
   className?: string;
   classNames?: StoryRailClassNames;
   viewerClassNames?: StoryViewerClassNames;
+  mobileLayout?: StoryRailMobileLayout;
   renderMobileBadge?: (args: StoryRailMobileBadgeRenderArgs<TStory>) => ReactNode;
   emptyPreviewLabel?: string;
   unavailableText?: string;

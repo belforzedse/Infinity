@@ -249,12 +249,12 @@
     "homeHeroSliderDraft": {
       "type": "json",
       "default": {},
-      "description": "Draft hero slider payload: version 3 object with autoplayIntervalMs and single-image banner slides. Legacy version 2 devices/slots payloads are normalized on read."
+      "description": "Draft hero slider payload: version 3 object with autoplayIntervalMs and banner slides (desktop imageUrl 1360x581, optional mobileImageUrl 361x387). Legacy version 2 devices/slots payloads are normalized on read."
     },
     "homeHeroSliderPublished": {
       "type": "json",
       "default": {},
-      "description": "Published hero slider payload: version 3 object with autoplayIntervalMs and single-image banner slides. Consumed by the frontend home page hero banner slider."
+      "description": "Published hero slider payload: version 3 object with autoplayIntervalMs and banner slides (desktop + optional mobile images). Consumed by the frontend home page hero banner slider."
     },
     "homeHeroSliderMeta": {
       "type": "json",

@@ -122,7 +122,7 @@ Endpoints are registered in `apps/frontend/src/constants/api.ts` → `ENDPOINTS.
 
 `apps/frontend/src/components/Home/StoriesRail.tsx`:
 - Section header: **`داستان ها`** title (social-style `font-peyda` heading, no logo) + **`برو به اینفینیتی گرام`** external link to `https://infinitygram.co`
-- Story scroller via `@repo/story-rail` (`SharedStoryRail`)
+- Story scroller via `@repo/story-rail` (`SharedStoryRail`) with **`mobileLayout="avatar"`** — circular avatar rings on all breakpoints (social app keeps default `card` mobile layout with 129×188 preview cards).
 
 ## Story Viewer Library
 

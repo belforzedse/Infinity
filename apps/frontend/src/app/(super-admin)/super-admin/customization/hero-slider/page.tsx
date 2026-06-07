@@ -33,6 +33,7 @@ export default function HeroSliderCustomizationPage() {
         <TemplatePreview
           slide={editor.selectedSlide}
           onChangeSlide={(nextSlide) => editor.updateSelectedSlide(() => nextSlide)}
+          onImageChange={editor.persistSelectedSlide}
         />
 
         <SlideList

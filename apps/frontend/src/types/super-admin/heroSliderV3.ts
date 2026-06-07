@@ -30,6 +30,8 @@ export type HeroSlideConfig = {
   id: string;
   imageUrl: string;
   imageAlt: string;
+  mobileImageUrl: string;
+  mobileImageAlt: string;
   link: HeroSlotLink | null;
   isActive: boolean;
   autoplayEligible: boolean;
@@ -172,14 +174,16 @@ function normalizeLegacySlide(slideRaw: Record<string, unknown>, index: number):
       readPath(desktopRight, ["backgroundImageUrl"]),
       readPath(tabletHero, ["foregroundImageUrl"]),
       readPath(tabletHero, ["backgroundImageUrl"]),
-      readPath(mobileHero, ["foregroundImageUrl"]),
-      readPath(mobileHero, ["backgroundImageUrl"]),
     ),
     imageAlt: firstString(
       readPath(desktopRight, ["foregroundAlt"]),
       readPath(tabletHero, ["foregroundAlt"]),
-      readPath(mobileHero, ["foregroundAlt"]),
     ),
+    mobileImageUrl: firstImageUrl(
+      readPath(mobileHero, ["foregroundImageUrl"]),
+      readPath(mobileHero, ["backgroundImageUrl"]),
+    ),
+    mobileImageAlt: firstString(readPath(mobileHero, ["foregroundAlt"])),
     link:
       normalizeLink(readPath(desktopRight, ["link"])) ??
       normalizeLink(readPath(tabletHero, ["link"])) ??
@@ -199,6 +203,8 @@ function normalizeV3Slide(value: unknown, index: number): HeroSlideConfig {
     id: sanitizeString(slideRaw.id, 80) || `slide-${index + 1}`,
     imageUrl: sanitizeImageUrl(slideRaw.imageUrl),
     imageAlt: sanitizeString(slideRaw.imageAlt, 140),
+    mobileImageUrl: sanitizeImageUrl(slideRaw.mobileImageUrl),
+    mobileImageAlt: sanitizeString(slideRaw.mobileImageAlt, 140),
     link: normalizeLink(slideRaw.link),
     isActive: typeof slideRaw.isActive === "boolean" ? slideRaw.isActive : true,
     autoplayEligible:
@@ -265,11 +271,22 @@ export function isHeroSlideVisible(slide: HeroSlideConfig, now = new Date()): bo
   return true;
 }
 
+export function resolveHeroSlideMobileImage(slide: HeroSlideConfig): {
+  url: string;
+  alt: string;
+} {
+  const url = slide.mobileImageUrl.trim() || slide.imageUrl.trim();
+  const alt = slide.mobileImageAlt.trim() || slide.imageAlt.trim() || "بنر اینفینیتی";
+  return { url, alt };
+}
+
 export function createEmptyHeroSlide(order: number): HeroSlideConfig {
   return {
     id: `slide-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
     imageUrl: "",
     imageAlt: "",
+    mobileImageUrl: "",
+    mobileImageAlt: "",
     link: null,
     isActive: true,
     autoplayEligible: true,

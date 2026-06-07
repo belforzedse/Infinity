@@ -176,14 +176,19 @@ export function StoriesAvatarList<TStory extends StoryRailStory = StoryRailStory
   seenIds,
   onAvatarClick,
   resolveMediaUrl,
+  mobileLayout = "card",
   renderMobileBadge,
   emptyPreviewLabel = "Video",
   classNames,
 }: StoriesAvatarListProps<TStory>) {
+  const useAvatarOnMobile = mobileLayout === "avatar";
+
   return (
     <div
       className={joinClasses(
-        "flex min-h-[188px] flex-none flex-row items-stretch gap-4 lg:h-20 lg:min-h-0 lg:items-center",
+        useAvatarOnMobile
+          ? "flex h-20 min-h-0 flex-none flex-row items-center gap-4"
+          : "flex min-h-[188px] flex-none flex-row items-stretch gap-4 lg:h-20 lg:min-h-0 lg:items-center",
         classNames?.list,
       )}
     >
@@ -197,25 +202,13 @@ export function StoriesAvatarList<TStory extends StoryRailStory = StoryRailStory
             type="button"
             onClick={() => onAvatarClick(index)}
             className={joinClasses(
-              "group pressable flex shrink-0 items-center justify-center rounded-[10px] p-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3C4D6E] focus-visible:ring-offset-2 lg:size-20 lg:rounded-full",
+              "group pressable flex shrink-0 items-center justify-center rounded-[10px] p-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3C4D6E] focus-visible:ring-offset-2",
+              useAvatarOnMobile ? "size-20 rounded-full" : "lg:size-20 lg:rounded-full",
               classNames?.avatarButton,
             )}
             aria-label={`نمایش استوری ${story.Title}`}
           >
-            <span
-              className={joinClasses("relative overflow-hidden rounded-[10px] lg:hidden", classNames?.mobileCard)}
-              style={{ width: STORY_CARD_W_PX, height: STORY_CARD_H_PX }}
-            >
-              <StoryMobileCardInner
-                preview={preview}
-                story={story}
-                isSeen={isSeen}
-                renderMobileBadge={renderMobileBadge}
-                emptyPreviewLabel={emptyPreviewLabel}
-              />
-            </span>
-
-            <span className="hidden lg:contents">
+            {useAvatarOnMobile ? (
               <StoryAvatarRing
                 isSeen={isSeen}
                 preview={preview}
@@ -223,7 +216,35 @@ export function StoriesAvatarList<TStory extends StoryRailStory = StoryRailStory
                 emptyPreviewLabel={emptyPreviewLabel}
                 className={classNames?.desktopRing}
               />
-            </span>
+            ) : (
+              <>
+                <span
+                  className={joinClasses(
+                    "relative overflow-hidden rounded-[10px] lg:hidden",
+                    classNames?.mobileCard,
+                  )}
+                  style={{ width: STORY_CARD_W_PX, height: STORY_CARD_H_PX }}
+                >
+                  <StoryMobileCardInner
+                    preview={preview}
+                    story={story}
+                    isSeen={isSeen}
+                    renderMobileBadge={renderMobileBadge}
+                    emptyPreviewLabel={emptyPreviewLabel}
+                  />
+                </span>
+
+                <span className="hidden lg:contents">
+                  <StoryAvatarRing
+                    isSeen={isSeen}
+                    preview={preview}
+                    title={story.Title}
+                    emptyPreviewLabel={emptyPreviewLabel}
+                    className={classNames?.desktopRing}
+                  />
+                </span>
+              </>
+            )}
           </button>
         );
       })}

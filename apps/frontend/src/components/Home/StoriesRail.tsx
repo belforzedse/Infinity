@@ -54,6 +54,7 @@ export default function StoriesRail({ stories }: StoriesRailProps) {
         onMarkSeen={handleStoryView}
         resolveMediaUrl={buildMediaUrl}
         dir="rtl"
+        mobileLayout="avatar"
         emptyPreviewLabel="ویدیو"
         unavailableText="Story unavailable"
       />

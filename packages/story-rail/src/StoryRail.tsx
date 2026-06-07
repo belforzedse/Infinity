@@ -21,10 +21,12 @@ export function StoryRail<TStory extends StoryRailStory = StoryRailStory>({
   className,
   classNames,
   viewerClassNames,
+  mobileLayout = "card",
   renderMobileBadge,
   emptyPreviewLabel = "Video",
   unavailableText = "Story unavailable",
 }: StoryRailProps<TStory>) {
+  const useAvatarOnMobile = mobileLayout === "avatar";
   const orderedStories = useMemo(() => sortStoriesNewestFirst(stories), [stories]);
   const [viewerOpen, setViewerOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -76,14 +78,20 @@ export function StoryRail<TStory extends StoryRailStory = StoryRailStory>({
 
         <div
           className={joinClasses(
-            "stories-rail min-h-[188px] w-full min-w-0 overflow-x-auto scrollbar-hide lg:h-20 lg:min-h-0",
+            "stories-rail w-full min-w-0 overflow-x-auto scrollbar-hide",
+            useAvatarOnMobile
+              ? "h-20 min-h-0"
+              : "min-h-[188px] lg:h-20 lg:min-h-0",
             classNames?.scroller,
           )}
           dir={dir}
         >
           <div
             className={joinClasses(
-              "flex min-h-[188px] w-max min-w-full flex-row items-stretch justify-start gap-4 lg:h-20 lg:min-h-0 lg:items-center",
+              "flex w-max min-w-full flex-row justify-start gap-4",
+              useAvatarOnMobile
+                ? "h-20 min-h-0 items-center"
+                : "min-h-[188px] items-stretch lg:h-20 lg:min-h-0 lg:items-center",
               classNames?.scrollerInner,
             )}
           >
@@ -92,6 +100,7 @@ export function StoryRail<TStory extends StoryRailStory = StoryRailStory>({
               seenIds={seenIds}
               onAvatarClick={handleAvatarClick}
               resolveMediaUrl={resolveMediaUrl}
+              mobileLayout={mobileLayout}
               renderMobileBadge={renderMobileBadge}
               emptyPreviewLabel={emptyPreviewLabel}
               classNames={classNames}

@@ -130,6 +130,28 @@ export function useHeroSliderEditor() {
     }));
   };
 
+  const persistSelectedSlide = async (nextSlide: HeroSlideConfig) => {
+    if (!selectedSlideId) return;
+
+    const nextDraft: HeroSliderPayload = {
+      ...draft,
+      slides: draft.slides.map((slide) => (slide.id === selectedSlideId ? nextSlide : slide)),
+    };
+
+    setDraft(nextDraft);
+
+    try {
+      setIsSavingDraft(true);
+      const saved = await updateHeroSliderDraft(nextDraft);
+      setDraft(saved);
+    } catch (error) {
+      console.error(error);
+      toast.error("ذخیره تغییرات اسلاید ناموفق بود. دوباره تلاش کنید");
+    } finally {
+      setIsSavingDraft(false);
+    }
+  };
+
   const updateAutoplayIntervalMs = (autoplayIntervalMs: number) => {
     setDraft((prev) => normalizeHeroSliderPayload({ ...prev, autoplayIntervalMs }));
   };
@@ -151,6 +173,8 @@ export function useHeroSliderEditor() {
   const handlePublish = async () => {
     try {
       setIsPublishing(true);
+      const savedDraft = await updateHeroSliderDraft(draft);
+      setDraft(savedDraft);
       const response = await publishHeroSliderDraft();
       setPublished(response.published);
       setMeta(response.meta);
@@ -178,6 +202,7 @@ export function useHeroSliderEditor() {
     deleteSlide,
     updateSlides,
     updateSelectedSlide,
+    persistSelectedSlide,
     updateAutoplayIntervalMs,
     handleSaveDraft,
     handlePublish,

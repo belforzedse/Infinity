@@ -190,14 +190,16 @@ function sanitizeLegacySlide(
       readPath(desktopRight, ["backgroundImageUrl"]),
       readPath(tabletHero, ["foregroundImageUrl"]),
       readPath(tabletHero, ["backgroundImageUrl"]),
-      readPath(mobileHero, ["foregroundImageUrl"]),
-      readPath(mobileHero, ["backgroundImageUrl"]),
     ),
     imageAlt: firstString(
       readPath(desktopRight, ["foregroundAlt"]),
       readPath(tabletHero, ["foregroundAlt"]),
-      readPath(mobileHero, ["foregroundAlt"]),
     ),
+    mobileImageUrl: firstImageUrl(
+      readPath(mobileHero, ["foregroundImageUrl"]),
+      readPath(mobileHero, ["backgroundImageUrl"]),
+    ),
+    mobileImageAlt: firstString(readPath(mobileHero, ["foregroundAlt"])),
     link:
       sanitizeLink(readPath(desktopRight, ["link"]), errors, `${slidePath}.legacyLink`) ??
       sanitizeLink(readPath(tabletHero, ["link"]), errors, `${slidePath}.legacyLink`) ??
@@ -228,6 +230,8 @@ function sanitizeV3Slide(value: unknown, index: number, errors: string[]): HeroS
     id: sanitizeString(slideRaw.id, 80) || `slide-${index + 1}`,
     imageUrl: sanitizeImageUrl(slideRaw.imageUrl),
     imageAlt: sanitizeString(slideRaw.imageAlt, 140),
+    mobileImageUrl: sanitizeImageUrl(slideRaw.mobileImageUrl),
+    mobileImageAlt: sanitizeString(slideRaw.mobileImageAlt, 140),
     link: sanitizeLink(slideRaw.link, errors, `${slidePath}.link`),
     isActive: typeof slideRaw.isActive === "boolean" ? slideRaw.isActive : true,
     autoplayEligible:

@@ -19,6 +19,7 @@ export type {
   StoryRailMediaAsset,
   StoryRailMediaType,
   StoryRailMobileBadgeRenderArgs,
+  StoryRailMobileLayout,
   StoryRailPreview,
   StoryRailProps,
   StoryRailStory,

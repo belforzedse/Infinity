@@ -2,6 +2,7 @@ import {
   HERO_SLIDER_VERSION,
   isHeroSlideVisible,
   normalizeHeroSliderPayload,
+  resolveHeroSlideMobileImage,
 } from "./heroSliderV3";
 
 describe("heroSlider v3", () => {
@@ -115,5 +116,79 @@ describe("heroSlider v3", () => {
     expect(payload.slides.filter((slide) => isHeroSlideVisible(slide, now)).map((slide) => slide.id)).toEqual([
       "visible",
     ]);
+  });
+
+  it("normalizes separate mobile banner fields", () => {
+    const payload = normalizeHeroSliderPayload({
+      slides: [
+        {
+          id: "slide-1",
+          imageUrl: "/uploads/desktop.webp",
+          imageAlt: "Desktop banner",
+          mobileImageUrl: "/uploads/mobile.webp",
+          mobileImageAlt: "Mobile banner",
+        },
+      ],
+    });
+
+    expect(payload.slides[0]).toMatchObject({
+      imageUrl: "/uploads/desktop.webp",
+      imageAlt: "Desktop banner",
+      mobileImageUrl: "/uploads/mobile.webp",
+      mobileImageAlt: "Mobile banner",
+    });
+  });
+
+  it("maps legacy mobile hero banner into mobileImageUrl", () => {
+    const payload = normalizeHeroSliderPayload({
+      version: 2,
+      slides: [
+        {
+          id: "legacy-slide",
+          devices: {
+            desktop: {
+              slots: {
+                rightBanner: {
+                  foregroundImageUrl: "/uploads/desktop.png",
+                  foregroundAlt: "Desktop",
+                },
+              },
+            },
+            mobile: {
+              slots: {
+                heroBanner: {
+                  foregroundImageUrl: "/uploads/mobile.png",
+                  foregroundAlt: "Mobile",
+                },
+              },
+            },
+          },
+        },
+      ],
+    });
+
+    expect(payload.slides[0]).toMatchObject({
+      imageUrl: "/uploads/desktop.png",
+      imageAlt: "Desktop",
+      mobileImageUrl: "/uploads/mobile.png",
+      mobileImageAlt: "Mobile",
+    });
+  });
+
+  it("falls back mobile rendering to desktop image when mobile image is empty", () => {
+    const payload = normalizeHeroSliderPayload({
+      slides: [
+        {
+          id: "slide-1",
+          imageUrl: "/uploads/desktop.webp",
+          imageAlt: "Desktop only",
+        },
+      ],
+    });
+
+    expect(resolveHeroSlideMobileImage(payload.slides[0])).toEqual({
+      url: "/uploads/desktop.webp",
+      alt: "Desktop only",
+    });
   });
 });

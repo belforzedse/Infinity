@@ -14,6 +14,7 @@ type BannerImageProps = {
   sizes?: string;
   href?: string;
   objectPosition?: string;
+  quality?: number;
 };
 
 export default function BannerImage({
@@ -27,6 +28,7 @@ export default function BannerImage({
   sizes,
   href,
   objectPosition,
+  quality = 70,
 }: BannerImageProps) {
   const normalizedSrc = typeof src === "string" ? src.trim() : "";
   if (!normalizedSrc) return null;
@@ -36,7 +38,9 @@ export default function BannerImage({
   const img = (
     <Image
       src={normalizedSrc}
-      loader={imageLoader}
+      loader={({ src, width, quality: loaderQuality }) =>
+        imageLoader({ src, width, quality: loaderQuality ?? quality })
+      }
       alt={alt}
       width={width}
       height={height}
