@@ -60,6 +60,8 @@ export interface ProductDataResponse {
   Title: string;
   Description: string;
   Status: string;
+  ProductType?: "Variable" | "Simple" | null;
+  IsSimpleProduct?: boolean | null;
   Weight?: number;
   AverageRating: number | null;
   RatingCount: number | null;

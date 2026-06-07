@@ -270,6 +270,26 @@
       "type": "json",
       "default": [],
       "description": "Curated product IDs for the 'تخفیف‌های وسوسه انگیز' section on the homepage. Empty array = algorithmic fallback."
+    },
+    "siteGifEnabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Show the site GIF banner at the top of the homepage, before the hero slider."
+    },
+    "siteGifImage": {
+      "type": "string",
+      "default": "",
+      "description": "Strapi upload path or URL for the homepage GIF banner (recommended 1320x55)."
+    },
+    "siteGifLinkHref": {
+      "type": "string",
+      "default": "",
+      "description": "Optional click-through URL for the site GIF banner."
+    },
+    "siteGifAltText": {
+      "type": "string",
+      "default": "",
+      "description": "Alt text for the site GIF banner (accessibility / SEO)."
     }
   }
 }

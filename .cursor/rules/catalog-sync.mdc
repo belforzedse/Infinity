@@ -1,0 +1,92 @@
+---
+description: WooCommerce → Strapi catalog sync CLI — dry-run, sync, verify. WooCommerce is read-only source of truth.
+globs:
+  - apps/backend/scripts/woocommerce-importer/catalog-sync.js
+  - apps/backend/scripts/woocommerce-importer/sync/**
+  - apps/backend/scripts/woocommerce-importer/importers/ProductImporter.js
+  - apps/backend/scripts/woocommerce-importer/importers/CategoryImporter.js
+  - apps/backend/scripts/woocommerce-importer/utils/DuplicateTracker.js
+alwaysApply: false
+---
+
+# Catalog Sync (WooCommerce → Strapi)
+
+## Source of truth
+
+- **WooCommerce**: read-only (GET). Never POST/PUT/DELETE to WC.
+- **Strapi**: writable target. WC wins on conflicts.
+
+| Scenario | Action |
+|----------|--------|
+| In WC, missing in Strapi | Create in Strapi |
+| In both, data differs | Update Strapi |
+| In both, identical | Skip (unchanged) |
+| In Strapi, missing in WC | Report as `strapiOnly` only |
+| Delete | Never by default; optional `--deactivate-strapi-only` |
+
+## Commands
+
+From `apps/backend`:
+
+```bash
+npm run import:sync:dry-run -- --env production
+npm run import:sync -- --env production
+npm run import:sync:verify -- --env production
+```
+
+Direct:
+
+```bash
+node scripts/woocommerce-importer/catalog-sync.js dry-run --env production
+node scripts/woocommerce-importer/catalog-sync.js sync --env production
+node scripts/woocommerce-importer/catalog-sync.js verify --env production --allow-strapi-only
+```
+
+## Required env
+
+- `WOOCOMMERCE_CONSUMER_KEY`
+- `WOOCOMMERCE_CONSUMER_SECRET`
+- `STRAPI_API_TOKEN_PRODUCTION` (production)
+
+Optional: `IMPORT_TRACKING_DIR`, `IMPORT_IMAGES_ENABLE_UPLOAD`, `IMPORT_VIDEOS_ENABLE_UPLOAD`, `CURRENCY_MULTIPLIER`
+
+## Sync pipeline
+
+1. Preflight API health
+2. Optional `--repair-duplicates` (dedup script)
+3. Repair mappings from Strapi `external_id`
+4. Categories → Products → Variations (update-all) → Media
+5. Detect/report Strapi-only items
+6. Save report to `import-tracking/{env}/sync-reports/`
+
+## Flags
+
+| Flag | Effect |
+|------|--------|
+| `--skip-categories` | Skip category phase |
+| `--skip-media` | Skip image/video upload |
+| `--repair-duplicates` | Run full dedup before sync |
+| `--deactivate-strapi-only` | Set `Status: InActive` on Strapi-only products |
+| `--allow-strapi-only` (verify) | Exit 0 even if Strapi-only items exist |
+| `--strict-media` (verify) | Fail when WC vs Strapi media counts differ |
+
+## Importer fixes used by sync
+
+- **ProductImporter**: `resolveExistingStrapiProduct()` — lookup by `external_id` then slug before create
+- **CategoryImporter**: update when changed; repair mapping from Strapi
+- **DuplicateTracker**: debounced flush + per-type write queue (Windows-safe)
+- **ProductImporter**: `syncMode: true` → sequential imports (batch size 1)
+
+## Operational notes
+
+- Close mapping JSON files in the editor before running
+- Run only one sync instance at a time
+- Always run `verify` after `sync`
+- Reports: `apps/backend/import-tracking/production/sync-reports/`
+
+## Matching keys
+
+- Categories: `external_id`, fallback `Slug`
+- Products: `external_id`, fallback `Slug`
+- Variations: `external_id`, fallback `SKU`
+- Stock: `external_id` = `stock_{wcVariationId}`

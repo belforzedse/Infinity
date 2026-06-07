@@ -65,6 +65,10 @@ const PUBLIC_SETTINGS_FIELDS = [
   "homeHeroSliderMeta",
   "homeNewestProductIds",
   "homeDiscountedProductIds",
+  "siteGifEnabled",
+  "siteGifImage",
+  "siteGifLinkHref",
+  "siteGifAltText",
   "createdAt",
   "updatedAt",
 ];

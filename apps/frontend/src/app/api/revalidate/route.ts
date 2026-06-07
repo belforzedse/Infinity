@@ -124,6 +124,31 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    if (type === "site-identity") {
+      // Site identity affects layout, footer, about, contact and metadata everywhere.
+      revalidatePath("/", "layout");
+      revalidateTag("site-identity", "max");
+
+      return NextResponse.json({
+        revalidated: true,
+        now: Date.now(),
+        paths: ["/"],
+        tags: ["site-identity"],
+      });
+    }
+
+    if (type === "faq") {
+      revalidatePath("/faq");
+      revalidateTag("faq", "max");
+
+      return NextResponse.json({
+        revalidated: true,
+        now: Date.now(),
+        paths: ["/faq"],
+        tags: ["faq"],
+      });
+    }
+
     // Generic path revalidation
     if (path) {
       revalidatePath(path);

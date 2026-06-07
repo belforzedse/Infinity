@@ -1,6 +1,6 @@
 import type { ImageResponse, ProductCategory } from "./media";
 
-export type CheckoutGatewayCode = "samankish" | "snappay" | "wallet" | "mellat";
+export type CheckoutGatewayCode = "samankish" | "snappay" | "wallet" | "mellat" | "zarinpal";
 
 export const DEFAULT_CHECKOUT_GATEWAYS: CheckoutGatewayCode[] = [
   "samankish",

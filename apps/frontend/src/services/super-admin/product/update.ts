@@ -1,6 +1,7 @@
 import { apiClient } from "@/services";
 import { ENDPOINTS } from "@/constants/api";
 import type { EditProductData, ProductData } from "@/types/super-admin/products";
+import { syncSimpleProductVariation } from "./simple-variation";
 
 interface TransformedProductData
   extends Omit<
@@ -21,11 +22,26 @@ interface TransformedProductData
 }
 
 function transformProductDataForApi(data: EditProductData): TransformedProductData {
-  // Create a new object without the CoverImage field
-  const { CoverImage, ...rest } = data;
+  // Create a new object without the CoverImage field. Simple* fields live on the
+  // synthetic variation (synced separately), so they are stripped here too.
+  const {
+    CoverImage,
+    SimpleVariationId,
+    SimpleStockId,
+    SimpleSKU,
+    SimplePrice,
+    SimpleDiscountPrice,
+    SimpleStock,
+    SimpleIsPublished,
+    ...rest
+  } = data;
+
+  const productType = rest.ProductType === "Simple" || rest.IsSimpleProduct ? "Simple" : "Variable";
 
   const transformedData: TransformedProductData = {
     ...rest,
+    ProductType: productType,
+    IsSimpleProduct: productType === "Simple",
     Media: data.Media?.map((media) => +media.id),
     Files: data.Files?.map((file) => +file.id),
     product_main_category: data.product_main_category?.id || null,
@@ -55,6 +71,8 @@ export const updateProduct = async (id: string, body: EditProductData) => {
     const response = await apiClient.put(endpoint, {
       data: transformedBody,
     });
+
+    await syncSimpleProductVariation(Number(id), body);
 
     return { success: true, data: response.data };
   } catch (error: any) {

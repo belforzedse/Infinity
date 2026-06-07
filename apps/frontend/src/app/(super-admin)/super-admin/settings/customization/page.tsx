@@ -29,6 +29,12 @@ const tiles = [
     href: "/super-admin/settings/customization/hero-slider",
     icon: <FiImage className="h-5 w-5" />,
   },
+  {
+    title: "گیف سایت",
+    description: "بنر متحرک (GIF) بالای صفحه اصلی را فعال و مدیریت کنید.",
+    href: "/super-admin/settings/customization/site-gif",
+    icon: <FiImage className="h-5 w-5" />,
+  },
 ];
 
 export default function SettingsCustomizationPage() {

@@ -5,6 +5,7 @@ import {
   requestMellatPayment,
   requestSamanPayment,
   requestSnappPayment,
+  requestZarinPalPayment,
 } from "./gateway-helpers";
 import {
   isCheckoutGatewayEnabled,
@@ -300,6 +301,8 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
         ? "SnappPay"
         : selectedGateway === "samankish"
         ? "SamanKish"
+        : selectedGateway === "zarinpal"
+        ? "ZarinPal"
         : selectedGateway === "wallet"
         ? "Wallet"
         : "Mellat";
@@ -600,6 +603,15 @@ export const finalizeToOrderHandler = (strapi: Strapi) => async (ctx: any) => {
         callbackURL: callbackURL,
         userId: user.id,
         cellNumber: mobile || user?.Phone,
+      });
+      paymentResult = pr;
+    } else if (selectedGateway === "zarinpal") {
+      const { paymentResult: pr } = await requestZarinPalPayment(strapi, {
+        order,
+        contract,
+        financialSummary,
+        userId: user.id,
+        mobile: mobile || user?.Phone,
       });
       paymentResult = pr;
     } else {

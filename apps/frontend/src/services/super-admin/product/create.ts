@@ -2,6 +2,7 @@ import { apiClient } from "@/services";
 import { ENDPOINTS } from "@/constants/api";
 import type { ProductData } from "@/types/super-admin/products";
 import { toast } from "react-hot-toast";
+import { syncSimpleProductVariation } from "./simple-variation";
 
 type RawRelationValue =
   | null
@@ -57,14 +58,30 @@ interface TransformedProductData
 }
 
 function transformProductDataForApi(data: ProductData): TransformedProductData {
-  const { CoverImage, Media, Files, ...rest } = data;
+  // Simple* fields live on the synthetic variation, not on the product itself,
+  // so they are stripped here and persisted via syncSimpleProductVariation.
+  const {
+    CoverImage,
+    Media,
+    Files,
+    SimpleSKU,
+    SimplePrice,
+    SimpleDiscountPrice,
+    SimpleStock,
+    SimpleIsPublished,
+    ...rest
+  } = data;
 
   const coverImageId = normalizeRelationId(CoverImage?.data ?? CoverImage);
   const mediaIds = normalizeRelationIds(Media as unknown as RawRelationValue[]);
   const fileIds = normalizeRelationIds(Files as unknown as RawRelationValue[]);
 
+  const productType = rest.ProductType === "Simple" || rest.IsSimpleProduct ? "Simple" : "Variable";
+
   return {
     ...rest,
+    ProductType: productType,
+    IsSimpleProduct: productType === "Simple",
     CoverImage: coverImageId ?? undefined,
     Media: mediaIds,
     Files: fileIds,
@@ -82,6 +99,11 @@ export const createProduct = async (body: ProductData) => {
     const response = await apiClient.post(endpoint, {
       data: transformedBody,
     });
+    const productId = (response.data as { id?: number } | undefined)?.id;
+
+    if (productId) {
+      await syncSimpleProductVariation(Number(productId), body);
+    }
 
     return { success: true, data: response.data };
   } catch (error: any) {

@@ -1,6 +1,11 @@
 import { Strapi } from "@strapi/strapi";
 
-export type CheckoutGatewayCode = "samankish" | "mellat" | "snappay" | "wallet";
+export type CheckoutGatewayCode =
+  | "samankish"
+  | "mellat"
+  | "snappay"
+  | "wallet"
+  | "zarinpal";
 
 export type CheckoutGatewayItem = {
   code: CheckoutGatewayCode;
@@ -10,9 +15,18 @@ export type CheckoutGatewayItem = {
 export const SUPPORTED_CHECKOUT_GATEWAYS: readonly CheckoutGatewayItem[] = [
   { code: "samankish", title: "سامان‌کیش" },
   { code: "mellat", title: "بانک ملت" },
+  { code: "zarinpal", title: "زرین‌پال" },
   { code: "snappay", title: "پرداخت اقساطی اسنپ‌پی" },
   { code: "wallet", title: "کیف پول" },
 ] as const;
+
+/**
+ * ZarinPal is additive and OFF by default: it only becomes available once the
+ * merchant credential is configured via env. An admin can still disable it via a
+ * payment-gateway DB row (IsActive=false), but it never surfaces unconfigured.
+ */
+const isZarinPalConfigured = (): boolean =>
+  Boolean(String(process.env.ZARINPAL_MERCHANT_ID || "").trim());
 
 const SUPPORTED_CODES = new Set<CheckoutGatewayCode>(
   SUPPORTED_CHECKOUT_GATEWAYS.map((gateway) => gateway.code),
@@ -29,6 +43,7 @@ const mapGatewayTitleToCode = (title: unknown): CheckoutGatewayCode | null => {
   if (!normalized) return null;
 
   if (normalized.includes("snapp") || normalized.includes("اسنپ")) return "snappay";
+  if (normalized.includes("zarin") || normalized.includes("زرین")) return "zarinpal";
   if (normalized.includes("saman") || normalized.includes("سامان")) return "samankish";
   if (normalized.includes("mellat") || normalized.includes("ملت")) return "mellat";
   if (normalized.includes("wallet") || normalized.includes("کیف")) return "wallet";
@@ -43,6 +58,9 @@ const resolveGatewayAvailabilityMap = async (
   for (const gateway of SUPPORTED_CHECKOUT_GATEWAYS) {
     availability.set(gateway.code, true);
   }
+  // ZarinPal defaults to OFF unless its merchant credential is configured.
+  // (A DB row may still turn it off below, but never on without env config.)
+  availability.set("zarinpal", isZarinPalConfigured());
 
   try {
     const rows = (await strapi.entityService.findMany(
@@ -90,6 +108,7 @@ export const normalizeCheckoutGatewayCode = (
   if (normalized === "mellat") return "mellat";
   if (normalized === "snappay") return "snappay";
   if (normalized === "wallet") return "wallet";
+  if (normalized === "zarinpal" || normalized === "zarin-pal") return "zarinpal";
 
   return null;
 };

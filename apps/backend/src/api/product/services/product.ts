@@ -3,6 +3,12 @@
  */
 
 import { factories } from "@strapi/strapi";
+import {
+  findOrderedProductIds,
+  FindProductCardsParams,
+  PRODUCT_CARD_FIELDS,
+  PRODUCT_CARD_POPULATE,
+} from "./product-card-query";
 
 const CARD_COLOR_CODE_LIMIT = 8;
 
@@ -209,6 +215,36 @@ export default factories.createCoreService(
       return products
         .map((product) => this.serializeProductCard(product))
         .filter((product: any) => product && product.id);
+    },
+
+    /**
+     * Card listing with stock-aware ordering (in-stock products first), computed
+     * at the SQL level via findOrderedProductIds. The secondary sort (e.g.
+     * createdAt:desc, Price) is preserved within each stock group. Products are
+     * fetched by id then re-ordered to match the SQL-computed order.
+     */
+    async findProductCards(params: FindProductCardsParams = {}) {
+      const { ids, pagination } = await findOrderedProductIds(strapi, params);
+      const order = new Map<number, number>(ids.map((id: number, index: number) => [id, index]));
+
+      if (ids.length === 0) {
+        return { data: [], meta: { pagination } };
+      }
+
+      const results = await strapi.entityService.findMany("api::product.product", {
+        filters: { id: { $in: ids } },
+        fields: [...PRODUCT_CARD_FIELDS] as any,
+        populate: PRODUCT_CARD_POPULATE as any,
+        limit: ids.length,
+      });
+
+      const orderedResults = [...results].sort((a: any, b: any) => {
+        const aIndex = order.get(Number(a?.id)) ?? Number.MAX_SAFE_INTEGER;
+        const bIndex = order.get(Number(b?.id)) ?? Number.MAX_SAFE_INTEGER;
+        return aIndex - bIndex;
+      });
+
+      return { data: this.serializeProductCards(orderedResults), meta: { pagination } };
     },
 
     /**

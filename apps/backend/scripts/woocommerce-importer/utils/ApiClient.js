@@ -525,6 +525,16 @@ class StrapiClient extends BaseApiClient {
   }
 
   /**
+   * Update an existing category
+   */
+  async updateCategory(categoryId, categoryData) {
+    const response = await this.retryRequest(() =>
+      this.client.put(`/product-categories/${categoryId}`, { data: categoryData }),
+    );
+    return response.data;
+  }
+
+  /**
    * Create a new product
    */
   async createProduct(productData) {

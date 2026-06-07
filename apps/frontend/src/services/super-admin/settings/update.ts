@@ -163,6 +163,18 @@ export async function updateSuperAdminSettings(
   if (settings.homeDiscountedProductIds !== undefined) {
     data.homeDiscountedProductIds = settings.homeDiscountedProductIds;
   }
+  if (settings.siteGifEnabled !== undefined) {
+    data.siteGifEnabled = settings.siteGifEnabled;
+  }
+  if (settings.siteGifImage !== undefined) {
+    data.siteGifImage = settings.siteGifImage;
+  }
+  if (settings.siteGifLinkHref !== undefined) {
+    data.siteGifLinkHref = settings.siteGifLinkHref;
+  }
+  if (settings.siteGifAltText !== undefined) {
+    data.siteGifAltText = settings.siteGifAltText;
+  }
 
   if (Object.keys(data).length === 0) return null;
 

@@ -22,6 +22,7 @@ class CategoryImporter {
     this.stats = {
       total: 0,
       success: 0,
+      updated: 0,
       skipped: 0,
       failed: 0,
       errors: 0,
@@ -195,77 +196,123 @@ class CategoryImporter {
   }
 
   /**
-   * Import a single category
+   * Import a single category (create, update, or repair mapping)
    */
   async importSingleCategory(wcCategory, dryRun = false) {
     this.logger.debug(`📂 Processing category: ${wcCategory.id} - ${wcCategory.name}`);
 
-    // Check for duplicates in mapping tracker
-    const duplicateCheck = this.duplicateTracker.checkDuplicate('categories', wcCategory);
-    if (duplicateCheck.isDuplicate) {
-      this.stats.skipped++;
-      this.logger.debug(`⏭️ Category ${wcCategory.id} already in mappings, skipping`);
-      return duplicateCheck;
-    }
-
     try {
-      // Transform WooCommerce category to Strapi format
       const strapiCategory = await this.transformCategory(wcCategory);
-
-      // Check if category already exists in Strapi database by slug
-      const existingCategory = await this.findExistingCategoryBySlug(strapiCategory.Slug);
-
-      if (existingCategory) {
-        this.stats.skipped++;
-        this.logger.warn(`📦 Category already exists in database: ${wcCategory.name} (ID: ${existingCategory.id}) - syncing mapping`);
-
-        // Record the mapping so we don't try to create it again
-        this.duplicateTracker.recordMapping(
-          'categories',
-          wcCategory.id,
-          existingCategory.id,
-          {
-            name: wcCategory.name,
-            slug: wcCategory.slug,
-            parentId: wcCategory.parent,
-            syncedFromExisting: true
-          }
-        );
-
-        return { isSynced: true, data: existingCategory };
-      }
+      const resolved = await this.resolveExistingStrapiCategory(wcCategory, strapiCategory);
+      const existingStrapiId = resolved.strapiId;
+      const existingMapping = resolved.mapping;
 
       if (dryRun) {
-        this.logger.info(`🔍 [DRY RUN] Would import category: ${wcCategory.name}`);
+        const mode = existingStrapiId ? "update" : "create";
+        this.logger.info(`🔍 [DRY RUN] Would ${mode} category: ${wcCategory.name}`);
         this.stats.success++;
-        return { isDryRun: true, data: strapiCategory };
+        if (existingStrapiId) {
+          this.stats.updated++;
+        }
+        return { isDryRun: true, mode, data: strapiCategory };
       }
 
-      // Create category in Strapi
-      const result = await this.strapiClient.createCategory(strapiCategory);
+      if (existingStrapiId) {
+        if (this.hasCategoryChanged(wcCategory, strapiCategory, existingMapping)) {
+          await this.strapiClient.updateCategory(existingStrapiId, strapiCategory);
+          this.stats.updated++;
+          this.logger.success(
+            `✅ Updated category: ${wcCategory.name} → ID: ${existingStrapiId}`,
+          );
+        } else {
+          this.stats.skipped++;
+          this.logger.debug(`⏭️ No changes detected, skipping category update: ${wcCategory.name}`);
+        }
 
-      // Record the mapping
-      this.duplicateTracker.recordMapping(
-        'categories',
-        wcCategory.id,
-        result.data.id,
-        {
+        this.duplicateTracker.recordMapping("categories", wcCategory.id, existingStrapiId, {
           name: wcCategory.name,
           slug: wcCategory.slug,
-          parentId: wcCategory.parent
-        }
-      );
+          parentId: wcCategory.parent,
+          importedSlug: strapiCategory.Slug,
+        });
+
+        this.stats.success++;
+        return { mode: "update", strapiId: existingStrapiId };
+      }
+
+      const result = await this.strapiClient.createCategory(strapiCategory);
+
+      this.duplicateTracker.recordMapping("categories", wcCategory.id, result.data.id, {
+        name: wcCategory.name,
+        slug: wcCategory.slug,
+        parentId: wcCategory.parent,
+        importedSlug: strapiCategory.Slug,
+      });
 
       this.stats.success++;
       this.logger.debug(`✅ Created category: ${wcCategory.name} → ID: ${result.data.id}`);
 
-      return result;
-
+      return { mode: "create", strapiId: result.data.id, data: result };
     } catch (error) {
       this.stats.failed++;
-      this.logger.error(`❌ Failed to create category ${wcCategory.name}:`, error.message);
+      this.logger.error(`❌ Failed to upsert category ${wcCategory.name}:`, error.message);
       throw error;
     }
+  }
+
+  /**
+   * Resolve Strapi category ID from mapping or Strapi lookup.
+   */
+  async resolveExistingStrapiCategory(wcCategory, strapiCategory) {
+    const existingMapping = this.duplicateTracker.getStrapiId("categories", wcCategory.id);
+    if (existingMapping?.strapiId) {
+      return { strapiId: existingMapping.strapiId, mapping: existingMapping };
+    }
+
+    try {
+      const existingByExternal = await this.strapiClient.findByExternalId(
+        "/product-categories",
+        wcCategory.id.toString(),
+      );
+      const existingItems = Array.isArray(existingByExternal?.data) ? existingByExternal.data : [];
+      if (existingItems.length > 0) {
+        const strapiId = existingItems[0].id;
+        this.logger.warn(
+          `⚠️ Recovered category mapping by external_id for WC ${wcCategory.id} → Strapi ${strapiId}`,
+        );
+        return { strapiId, mapping: { strapiId, syncedFromExisting: true } };
+      }
+    } catch (lookupError) {
+      this.logger.warn(
+        `⚠️ Failed to lookup category ${wcCategory.id} by external_id: ${lookupError.message}`,
+      );
+    }
+
+    const existingCategory = await this.findExistingCategoryBySlug(strapiCategory.Slug);
+    if (existingCategory?.id) {
+      this.logger.warn(
+        `⚠️ Recovered category mapping by slug for WC ${wcCategory.id} → Strapi ${existingCategory.id}`,
+      );
+      return { strapiId: existingCategory.id, mapping: { strapiId: existingCategory.id, syncedFromExisting: true } };
+    }
+
+    return { strapiId: null, mapping: null };
+  }
+
+  /**
+   * Determine if WooCommerce category data differs from last known mapping.
+   */
+  hasCategoryChanged(wcCategory, strapiCategory, existingMapping) {
+    if (!existingMapping) {
+      return true;
+    }
+
+    return (
+      existingMapping.name !== wcCategory.name ||
+      existingMapping.slug !== wcCategory.slug ||
+      existingMapping.parentId !== wcCategory.parent ||
+      (existingMapping.importedSlug && existingMapping.importedSlug !== strapiCategory.Slug)
+    );
   }
 
   /**

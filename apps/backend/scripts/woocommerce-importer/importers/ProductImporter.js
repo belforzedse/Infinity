@@ -214,8 +214,10 @@ class ProductImporter {
       createdBefore,
       publishedAfter,
       inStockOnly = this.config?.import?.filters?.inStockOnly !== false,
+      syncMode = false,
     } = options;
 
+    this.syncMode = syncMode;
     this.stats.startTime = Date.now();
 
     const normalizedCreatedAfter = this.normalizeDateFilter(createdAfter, "createdAfter");
@@ -317,8 +319,8 @@ class ProductImporter {
             `🔄 Processing ${result.data.length} products from page ${currentPage}... (parallel mode)`,
           );
 
-          // Process products in batches of 5 concurrent imports
-          const BATCH_SIZE = 5;
+          // Lower concurrency in sync mode to reduce mapping write races and Strapi pressure
+          const BATCH_SIZE = this.syncMode ? 1 : 5;
           for (let i = 0; i < result.data.length; i += BATCH_SIZE) {
             const batch = result.data.slice(i, i + BATCH_SIZE);
 
@@ -784,8 +786,9 @@ class ProductImporter {
       throw new Error(errorMsg);
     }
 
-    const existingMapping = this.duplicateTracker.getStrapiId("products", wcProduct.id);
-    const existingStrapiId = existingMapping?.strapiId;
+    const resolved = await this.resolveExistingStrapiProduct(wcProduct);
+    let existingMapping = resolved.existingMapping;
+    let existingStrapiId = resolved.existingStrapiId;
 
     try {
       const strapiProduct = await this.transformProduct(wcProduct);
@@ -939,6 +942,70 @@ class ProductImporter {
       this.logger.error(`❌ Failed to upsert product ${wcProduct.name}:`, error.message);
       throw error;
     }
+  }
+
+  /**
+   * Resolve Strapi product ID from mapping file or Strapi lookup (external_id, then slug).
+   */
+  async resolveExistingStrapiProduct(wcProduct) {
+    let existingMapping = this.duplicateTracker.getStrapiId("products", wcProduct.id);
+    let existingStrapiId = existingMapping?.strapiId;
+
+    if (existingStrapiId) {
+      return { existingStrapiId, existingMapping };
+    }
+
+    try {
+      const existingByExternal = await this.strapiClient.findByExternalId(
+        "/products",
+        wcProduct.id.toString(),
+      );
+      const existingItems = Array.isArray(existingByExternal?.data) ? existingByExternal.data : [];
+
+      if (existingItems.length > 0) {
+        existingStrapiId = existingItems[0].id;
+        existingMapping = { strapiId: existingStrapiId, syncedFromExisting: true };
+        this.duplicateTracker.recordMapping("products", wcProduct.id, existingStrapiId, {
+          syncedFromExisting: true,
+          name: wcProduct.name,
+          slug: wcProduct.slug,
+        });
+        this.logger.warn(
+          `⚠️ Recovered missing product mapping for WC ${wcProduct.id} → Strapi ${existingStrapiId}`,
+        );
+        return { existingStrapiId, existingMapping };
+      }
+    } catch (lookupError) {
+      this.logger.warn(
+        `⚠️ Failed to lookup existing product ${wcProduct.id} by external_id: ${lookupError.message}`,
+      );
+    }
+
+    const expectedSlug = this.resolveWooCommerceProductSlug(wcProduct);
+    if (expectedSlug) {
+      try {
+        const bySlug = await this.strapiClient.getProductBySlug(expectedSlug);
+        if (bySlug?.id) {
+          existingStrapiId = bySlug.id;
+          existingMapping = { strapiId: existingStrapiId, syncedFromExisting: true };
+          this.duplicateTracker.recordMapping("products", wcProduct.id, existingStrapiId, {
+            syncedFromExisting: true,
+            name: wcProduct.name,
+            slug: wcProduct.slug,
+            importedSlug: expectedSlug,
+          });
+          this.logger.warn(
+            `⚠️ Recovered product mapping by slug for WC ${wcProduct.id} → Strapi ${existingStrapiId}`,
+          );
+        }
+      } catch (slugLookupError) {
+        this.logger.warn(
+          `⚠️ Failed to lookup existing product ${wcProduct.id} by slug: ${slugLookupError.message}`,
+        );
+      }
+    }
+
+    return { existingStrapiId, existingMapping };
   }
 
   /**

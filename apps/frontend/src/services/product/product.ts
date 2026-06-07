@@ -63,6 +63,8 @@ export interface ProductDetail {
     Slug?: string;
     Description: string;
     Status: "Active" | "InActive";
+    ProductType?: "Variable" | "Simple";
+    IsSimpleProduct?: boolean;
     AverageRating?: number;
     RatingCount?: number;
     SeenCount?: number;

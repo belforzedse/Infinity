@@ -1,0 +1,46 @@
+{
+  "collectionName": "components_identity_stores",
+  "info": {
+    "displayName": "Store",
+    "icon": "store"
+  },
+  "options": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "address": {
+      "type": "text"
+    },
+    "phones": {
+      "type": "component",
+      "repeatable": true,
+      "component": "identity.phone"
+    },
+    "wazeLink": {
+      "type": "string"
+    },
+    "neshanLink": {
+      "type": "string"
+    },
+    "baladLink": {
+      "type": "string"
+    },
+    "googleMapsLink": {
+      "type": "string"
+    },
+    "showInFooter": {
+      "type": "boolean",
+      "default": true
+    },
+    "showInAbout": {
+      "type": "boolean",
+      "default": false
+    },
+    "socialLinks": {
+      "type": "component",
+      "repeatable": true,
+      "component": "identity.social-link"
+    }
+  }
+}

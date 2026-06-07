@@ -1,0 +1,17 @@
+{
+  "collectionName": "components_identity_phones",
+  "info": {
+    "displayName": "Phone",
+    "icon": "phone"
+  },
+  "options": {},
+  "attributes": {
+    "label": {
+      "type": "string"
+    },
+    "number": {
+      "type": "string",
+      "required": true
+    }
+  }
+}

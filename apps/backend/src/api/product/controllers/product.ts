@@ -94,39 +94,6 @@ const PRODUCT_POPULATE = {
   },
 } as const;
 
-const PRODUCT_CARD_POPULATE = {
-  CoverImage: {
-    fields: ["url", "alternativeText", "formats", "mime", "width", "height"],
-  },
-  product_main_category: {
-    fields: ["Title", "Slug"],
-  },
-  product_variations: {
-    fields: ["IsPublished", "Price", "DiscountPrice", "SKU"],
-    populate: {
-      product_stock: {
-        fields: ["Count"],
-      },
-      product_variation_color: {
-        fields: ["Title", "ColorCode"],
-      },
-      general_discounts: {
-        fields: ["Amount"],
-      },
-    },
-  },
-} as const;
-
-const PRODUCT_CARD_FIELDS = [
-  "Title",
-  "Slug",
-  "Status",
-  "SeenCount",
-  "AverageRating",
-  "RatingCount",
-  "createdAt",
-] as const;
-
 async function findProductBySlugInternal(
   strapi: any,
   decodedSlug: string,
@@ -279,19 +246,16 @@ export default factories.createCoreController(
 
       if (isCardView) {
         const { view: _view, populate: _populate, fields: _fields, ...restQuery } = ctx.query || {};
-        ctx.query = {
-          ...restQuery,
-          fields: PRODUCT_CARD_FIELDS,
-          populate: PRODUCT_CARD_POPULATE,
-        };
-
-        const response = await (super.find as any)(ctx, next);
         const productService: any = strapi.service("api::product.product");
 
-        return {
-          data: productService.serializeProductCards(response?.data || []),
-          meta: response?.meta,
-        };
+        // Delegate to the stock-aware query (in-stock products first, computed
+        // at the SQL level), preserving the secondary sort within each group.
+        return productService.findProductCards({
+          filters: restQuery.filters,
+          sort: restQuery.sort,
+          availability: restQuery.availability,
+          pagination: restQuery.pagination,
+        });
       }
 
       const response = await (super.find as any)(ctx, next);

@@ -23,6 +23,34 @@ interface StrapiTagData {
   attributes: TagAttributes;
 }
 
+interface VariationStockData {
+  id: number;
+  attributes?: {
+    Count?: number;
+  };
+}
+
+interface VariationData {
+  id: number;
+  attributes?: {
+    IsPublished?: boolean;
+    SKU?: string;
+    Price?: number | string;
+    DiscountPrice?: number | string | null;
+    product_stock?: {
+      data?: VariationStockData | null;
+    };
+    product_variation_color?: { data?: unknown | null };
+    product_variation_size?: { data?: unknown | null };
+    product_variation_model?: { data?: unknown | null };
+  };
+}
+
+const safeNumber = (value: number | string | null | undefined, fallback: number): number => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+};
+
 export function transformToProductData(strapiProduct: ProductDataResponse): EditProductData {
   // Extract CoverImage URL if it exists, otherwise use an empty string
   const coverImageUrl = {
@@ -59,11 +87,41 @@ export function transformToProductData(strapiProduct: ProductDataResponse): Edit
     },
   }));
 
+  const productVariations = (strapiProduct.product_variations?.data || []) as VariationData[];
+  const simpleVariation =
+    productVariations.find((variation) => variation?.attributes?.IsPublished === true) ||
+    productVariations[0];
+  const hasOnlyRelationlessVariation =
+    productVariations.length === 1 &&
+    !simpleVariation?.attributes?.product_variation_color?.data &&
+    !simpleVariation?.attributes?.product_variation_size?.data &&
+    !simpleVariation?.attributes?.product_variation_model?.data;
+  const isSimpleProduct =
+    strapiProduct.IsSimpleProduct === true ||
+    strapiProduct.ProductType === "Simple" ||
+    hasOnlyRelationlessVariation;
+  const productType = isSimpleProduct ? "Simple" : "Variable";
+  const simpleVariationAttributes = simpleVariation?.attributes;
+  const simpleStock = simpleVariationAttributes?.product_stock?.data;
+  const simpleDiscountPrice = simpleVariationAttributes?.DiscountPrice;
+
   return {
     Title: strapiProduct.Title,
     CoverImage: coverImageUrl,
     Description: strapiProduct.Description,
     Status: "Active",
+    ProductType: productType,
+    IsSimpleProduct: isSimpleProduct,
+    SimpleVariationId: simpleVariation?.id,
+    SimpleStockId: simpleStock?.id,
+    SimpleSKU: simpleVariationAttributes?.SKU || "",
+    SimplePrice: safeNumber(simpleVariationAttributes?.Price, 0),
+    SimpleDiscountPrice:
+      simpleDiscountPrice === null || simpleDiscountPrice === undefined
+        ? null
+        : safeNumber(simpleDiscountPrice, 0),
+    SimpleStock: safeNumber(simpleStock?.attributes?.Count, 0),
+    SimpleIsPublished: simpleVariationAttributes?.IsPublished !== false,
     Weight: strapiProduct.Weight ?? 100,
     Media: mediaIds,
     product_main_category: mainCategory,

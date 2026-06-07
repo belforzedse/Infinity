@@ -338,6 +338,27 @@ class MyImporter {
 }
 ```
 
+## Catalog Sync (recommended for keeping stores aligned)
+
+Production-safe sync CLI: **WooCommerce read-only → Strapi writable**.
+
+```bash
+cd apps/backend
+
+# Preview changes
+npm run import:sync:dry-run -- --env production
+
+# Apply sync
+npm run import:sync -- --env production
+
+# Verify alignment
+npm run import:sync:verify -- --env production --allow-strapi-only
+```
+
+Reports are saved under `import-tracking/{env}/sync-reports/`.
+
+See [`.cursor/rules/catalog-sync.mdc`](../../../.cursor/rules/catalog-sync.mdc) for full documentation.
+
 ## 🐛 Troubleshooting
 
 ### Common Issues

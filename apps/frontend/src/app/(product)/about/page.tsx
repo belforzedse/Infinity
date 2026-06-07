@@ -8,24 +8,33 @@ import AboutSection from "@/components/About/AboutSection";
 import WhyChooseSection from "@/components/About/WhyChooseSection";
 import TrustSection from "@/components/About/TrustSection";
 import CategoryShowcase from "@/components/About/CategoryShowcase";
-import { SITE_NAME, SITE_URL } from "@/config/site";
+import { SITE_URL } from "@/config/site";
 import { getProductCategories } from "@/services/product/categories";
+import { getSiteIdentity, resolveSiteName } from "@/services/site-identity";
+import { storeMapLinks } from "@/utils/identityIcons";
 
-export const metadata: Metadata = {
-  title: "درباره ما",
-  description:
-    "اینفینیتی یک فروشگاه آنلاین پیشرو در زمینه پوشاک است که با هدف ارائه تجربه خرید آنلاین منحصر به فرد و لذت‌بخش، بر تنوع، کیفیت و قیمت‌های رقابتی برای پوشاک مردانه، زنانه و کودکان تمرکز دارد.",
-  alternates: {
-    canonical: `${SITE_URL}/about`,
-  },
-  openGraph: {
-    title: `درباره ما | ${SITE_NAME}`,
-    description:
-      "اینفینیتی یک فروشگاه آنلاین پیشرو در زمینه پوشاک است که با هدف ارائه تجربه خرید آنلاین منحصر به فرد و لذت‌بخش، بر تنوع، کیفیت و قیمت‌های رقابتی برای پوشاک مردانه، زنانه و کودکان تمرکز دارد.",
-    url: `${SITE_URL}/about`,
-    type: "website",
-  },
-};
+const ABOUT_DESCRIPTION =
+  "اینفینیتی یک فروشگاه آنلاین پیشرو در زمینه پوشاک است که با هدف ارائه تجربه خرید آنلاین منحصر به فرد و لذت‌بخش، بر تنوع، کیفیت و قیمت‌های رقابتی برای پوشاک مردانه، زنانه و کودکان تمرکز دارد.";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const identity = await getSiteIdentity();
+  const siteName = resolveSiteName(identity.siteName);
+  const description = identity.brandDescription?.trim() || ABOUT_DESCRIPTION;
+
+  return {
+    title: "درباره ما",
+    description,
+    alternates: {
+      canonical: `${SITE_URL}/about`,
+    },
+    openGraph: {
+      title: `درباره ما | ${siteName}`,
+      description,
+      url: `${SITE_URL}/about`,
+      type: "website",
+    },
+  };
+}
 
 const breadcrumbItems = [
   { label: "صفحه اصلی", href: "/" },
@@ -33,11 +42,18 @@ const breadcrumbItems = [
 ];
 
 export default async function AboutPage() {
-  const categories = await getProductCategories({
-    parentOnly: true,
-    sort: "Title:asc",
-    revalidate: 60,
-  });
+  const [categories, identity] = await Promise.all([
+    getProductCategories({
+      parentOnly: true,
+      sort: "Title:asc",
+      revalidate: 60,
+    }),
+    getSiteIdentity(),
+  ]);
+
+  const aboutStores = identity.hasPhysicalStores
+    ? identity.stores.filter((store) => store.showInAbout)
+    : [];
 
   return (
     <>
@@ -138,6 +154,69 @@ export default async function AboutPage() {
             </p>
           </TrustSection>
         </Reveal>
+
+        {/* Physical Stores (driven by site identity, stores flagged showInAbout) */}
+        {aboutStores.length > 0 && (
+          <Reveal variant="fade-up" duration={700} delay={700}>
+            <AboutSection title="فروشگاه‌های حضوری">
+              <div className="grid gap-4 md:grid-cols-2">
+                {aboutStores.map((store, index) => {
+                  const mapLinks = storeMapLinks(store);
+                  return (
+                    <div
+                      key={index}
+                      className="space-y-3 rounded-2xl border border-slate-100 bg-white p-5"
+                    >
+                      {store.name && (
+                        <p className="text-lg font-bold text-foreground-primary">{store.name}</p>
+                      )}
+                      {store.address && (
+                        <p className="text-sm leading-7 text-neutral-600">{store.address}</p>
+                      )}
+                      {store.phones.length > 0 && (
+                        <div className="flex flex-col gap-1">
+                          {store.phones.map((phone, phoneIndex) => (
+                            <span
+                              key={phoneIndex}
+                              className="text-sm text-neutral-600"
+                              dir="ltr"
+                            >
+                              {phone.label ? `${phone.label}: ${phone.number}` : phone.number}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      {mapLinks.length > 0 && (
+                        <div className="flex gap-2">
+                          {mapLinks.map((icon) => (
+                            <a
+                              key={icon.src}
+                              href={icon.href}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="transition-transform hover:scale-110"
+                              aria-label={icon.alt}
+                            >
+                              <Image
+                                src={icon.src}
+                                alt={icon.alt}
+                                width={28}
+                                height={28}
+                                className="rounded-full"
+                                loading="lazy"
+                                sizes="28px"
+                              />
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </AboutSection>
+          </Reveal>
+        )}
       </PageContainer>
     </>
   );

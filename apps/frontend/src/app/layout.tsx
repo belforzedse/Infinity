@@ -12,54 +12,64 @@ import { DebugPanel } from "@/components/Debug";
 import { NavigationProgress } from "@repo/ui/navigation-progress";
 import { OrganizationSchema } from "@/components/SEO/OrganizationSchema";
 import { IMAGE_BASE_URL } from "@/constants/api";
-import { SITE_URL, SITE_NAME } from "@/config/site";
+import { SITE_URL } from "@/config/site";
+import { getSiteIdentity, resolveSiteName } from "@/services/site-identity";
+import { SiteIdentityProvider } from "@/components/providers/SiteIdentityProvider";
 
-export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
-  title: {
-    template: `%s | ${SITE_NAME}`,
-    default: SITE_NAME,
-  },
-  description: "فروشگاه پوشاک آنلاین اینفینیتی - جدیدترین محصولات، تخفیف‌ها و پیشنهادهای ویژه",
-  keywords: ["پوشاک", "فروشگاه آنلاین", "مد", "لباس", "اینفینیتی", "خرید آنلاین"],
-  applicationName: "اینفینیتی",
-  authors: [{ name: SITE_NAME }],
-  creator: SITE_NAME,
-  publisher: SITE_NAME,
-  formatDetection: {
-    email: false,
-    address: false,
-    telephone: false,
-  },
-  openGraph: {
-    type: "website",
-    locale: "fa_IR",
-    url: SITE_URL,
-    siteName: SITE_NAME,
-    title: SITE_NAME,
-    description: "فروشگاه پوشاک آنلاین اینفینیتی - جدیدترین محصولات، تخفیف‌ها و پیشنهادهای ویژه",
-    images: [
-      {
-        url: `${SITE_URL}/images/og-default.jpg`,
-        width: 1200,
-        height: 630,
-        alt: SITE_NAME,
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: SITE_NAME,
-    description: "فروشگاه پوشاک آنلاین اینفینیتی - جدیدترین محصولات، تخفیف‌ها و پیشنهادهای ویژه",
-    images: [`${SITE_URL}/images/og-default.jpg`],
-  },
-  alternates: {
-    canonical: SITE_URL,
-    languages: {
-      "fa-IR": SITE_URL,
+const DEFAULT_SITE_DESCRIPTION =
+  "فروشگاه پوشاک آنلاین اینفینیتی - جدیدترین محصولات، تخفیف‌ها و پیشنهادهای ویژه";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const identity = await getSiteIdentity();
+  const siteName = resolveSiteName(identity.siteName);
+  const description = identity.brandDescription?.trim() || DEFAULT_SITE_DESCRIPTION;
+
+  return {
+    metadataBase: new URL(SITE_URL),
+    title: {
+      template: `%s | ${siteName}`,
+      default: siteName,
     },
-  },
-  robots: {
+    description,
+    keywords: ["پوشاک", "فروشگاه آنلاین", "مد", "لباس", "اینفینیتی", "خرید آنلاین"],
+    applicationName: "اینفینیتی",
+    authors: [{ name: siteName }],
+    creator: siteName,
+    publisher: siteName,
+    formatDetection: {
+      email: false,
+      address: false,
+      telephone: false,
+    },
+    openGraph: {
+      type: "website",
+      locale: "fa_IR",
+      url: SITE_URL,
+      siteName,
+      title: siteName,
+      description,
+      images: [
+        {
+          url: `${SITE_URL}/images/og-default.jpg`,
+          width: 1200,
+          height: 630,
+          alt: siteName,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: siteName,
+      description,
+      images: [`${SITE_URL}/images/og-default.jpg`],
+    },
+    alternates: {
+      canonical: SITE_URL,
+      languages: {
+        "fa-IR": SITE_URL,
+      },
+    },
+    robots: {
     index: true,
     follow: true,
     googleBot: {
@@ -70,10 +80,11 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-  verification: {
-    google: "l6i1v4-mkeaMxCGEXenzCdyBdhipiZdHuyiaIE011Kg",
-  },
-};
+    verification: {
+      google: "l6i1v4-mkeaMxCGEXenzCdyBdhipiZdHuyiaIE011Kg",
+    },
+  };
+}
 
 // Ensure proper mobile scaling and responsiveness
 export const viewport: Viewport = {
@@ -85,11 +96,19 @@ export const viewport: Viewport = {
   themeColor: "#ec4899", // Pink theme color for mobile browsers
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const identity = await getSiteIdentity();
+  const siteName = resolveSiteName(identity.siteName);
+  const organizationSocialLinks = identity.socialLinks.map((link) => link.url).filter(Boolean);
+  const primaryPhone =
+    identity.contactNumbers.find((c) => c.type !== "whatsapp")?.number ??
+    identity.contactNumbers[0]?.number;
+  const primaryStore = identity.stores[0];
+
   const defaultApiBaseDomain =
     process.env.NODE_ENV === "production"
       ? "https://api.infinitycolor.co"
@@ -134,7 +153,7 @@ export default function RootLayout({
           rel="search"
           type="application/opensearchdescription+xml"
           href="/opensearch.xml"
-          title={SITE_NAME}
+          title={siteName}
         />
 
         {/* PWA Web App Manifest */}
@@ -143,7 +162,7 @@ export default function RootLayout({
         {/* PWA meta tags for mobile */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content={SITE_NAME} />
+        <meta name="apple-mobile-web-app-title" content={siteName} />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="theme-color" content="#ec4899" />
 
@@ -154,8 +173,15 @@ export default function RootLayout({
       <body className={`${peydaFanum.className} bg-white antialiased`}>
         <NavigationProgress />
 
-        {/* Organization Schema for SEO */}
-        <OrganizationSchema />
+        {/* Organization Schema for SEO (driven by site identity, with fallbacks) */}
+        <OrganizationSchema
+          name={siteName}
+          description={identity.brandDescription}
+          email={identity.contactEmail}
+          phone={primaryPhone}
+          sameAs={organizationSocialLinks}
+          streetAddress={primaryStore?.address}
+        />
 
         {/* Skip to main content link for keyboard users */}
         <a
@@ -165,15 +191,17 @@ export default function RootLayout({
           رفتن به محتوای اصلی
         </a>
 
-        <CartProvider>
-          <NuqsAdapter>
-            <Providers>
-              <Suspense fallback={null}>
-                <div id="main-content">{children}</div>
-              </Suspense>
-            </Providers>
-          </NuqsAdapter>
-        </CartProvider>
+        <SiteIdentityProvider identity={identity}>
+          <CartProvider>
+            <NuqsAdapter>
+              <Providers>
+                <Suspense fallback={null}>
+                  <div id="main-content">{children}</div>
+                </Suspense>
+              </Providers>
+            </NuqsAdapter>
+          </CartProvider>
+        </SiteIdentityProvider>
         <Toaster
           position="bottom-center"
           containerStyle={{ zIndex: 2147483647 }}

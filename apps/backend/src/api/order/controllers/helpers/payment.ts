@@ -433,6 +433,14 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
   // Normalize from both sources and accept common aliases
   const q: any = (ctx.request as any).query || {};
   const b: any = (ctx.request as any).body || {};
+  const zarinpalAuthorityInput: string | undefined = (b.Authority ??
+    q.Authority ??
+    b.authority ??
+    q.authority) as any;
+  const zarinpalStatusInput: string | undefined = (b.Status ??
+    q.Status ??
+    b.status ??
+    q.status) as any;
   const state: string | undefined = (b.state ?? q.state) as any;
   const paymentTokenInput: string | undefined = (b.paymentToken ??
     q.paymentToken ??
@@ -493,12 +501,349 @@ export async function verifyPaymentHandler(strapi: Strapi, ctx: any) {
       state,
       paymentToken: paymentTokenInput,
       transactionId: transactionIdInput,
+      zarinpalAuthority: zarinpalAuthorityInput,
+      zarinpalStatus: zarinpalStatusInput,
       samanState: samanStateInput,
       samanStatus: samanStatusInput,
       samanRefNum: samanRefNumInput,
       samanResNum: samanResNumInput,
       timestamp: new Date().toISOString(),
     });
+
+    const isZarinPalFlow =
+      !ResCode &&
+      zarinpalAuthorityInput !== undefined;
+
+    if (isZarinPalFlow) {
+      const authority =
+        zarinpalAuthorityInput !== undefined && zarinpalAuthorityInput !== null
+          ? String(zarinpalAuthorityInput).trim()
+          : "";
+      const callbackStatus =
+        zarinpalStatusInput !== undefined && zarinpalStatusInput !== null
+          ? String(zarinpalStatusInput).trim().toUpperCase()
+          : "";
+
+      if (!authority) {
+        strapi.log.error("ZarinPal callback missing authority", {
+          callbackStatus,
+        });
+        return ctx.redirect(
+          buildPaymentRedirectUrl("failure", {
+            error: "Missing ZarinPal authority",
+          }),
+        );
+      }
+
+      let contractTransaction: any | undefined;
+      const findTransaction = async (filters: any) => {
+        const matches = (await strapi.entityService.findMany(
+          "api::contract-transaction.contract-transaction",
+          {
+            filters,
+            populate: { contract: { populate: { order: true } } },
+            sort: { createdAt: "desc" },
+            limit: 1,
+          },
+        )) as any[];
+        return matches?.[0];
+      };
+
+      try {
+        contractTransaction = await findTransaction({
+          external_source: "ZarinPal",
+          GatewayAuthority: authority,
+        });
+        if (!contractTransaction) {
+          contractTransaction = await findTransaction({
+            external_source: "ZarinPal",
+            TrackId: authority,
+          });
+        }
+        if (!contractTransaction) {
+          contractTransaction = await findTransaction({
+            external_source: "ZarinPal",
+            external_id: authority,
+          });
+        }
+      } catch (error) {
+        strapi.log.error("Failed to locate ZarinPal contract transaction", {
+          authority,
+          error: (error as Error)?.message || error,
+        });
+      }
+
+      if (!contractTransaction) {
+        strapi.log.error("ZarinPal callback authority not found", { authority });
+        return ctx.redirect(
+          buildPaymentRedirectUrl("failure", {
+            error: "ZarinPal transaction not found",
+          }),
+        );
+      }
+
+      const orderRelation = contractTransaction.contract?.order;
+      const orderId =
+        typeof orderRelation === "object" && orderRelation
+          ? Number(orderRelation.id)
+          : Number(orderRelation);
+      const contractId =
+        typeof contractTransaction.contract === "object" && contractTransaction.contract
+          ? Number(contractTransaction.contract.id)
+          : Number(contractTransaction.contract);
+
+      if (!orderId || Number.isNaN(orderId) || !contractId || Number.isNaN(contractId)) {
+        strapi.log.error("ZarinPal callback has invalid local references", {
+          authority,
+          txId: contractTransaction.id,
+          orderId,
+          contractId,
+        });
+        return ctx.redirect(
+          buildPaymentRedirectUrl("failure", {
+            error: "Invalid ZarinPal order reference",
+          }),
+        );
+      }
+
+      if (contractTransaction.Status === "Success") {
+        strapi.log.info("ZarinPal callback already processed", {
+          authority,
+          orderId,
+          txId: contractTransaction.id,
+        });
+        return ctx.redirect(buildPaymentRedirectUrl("success", { orderId }));
+      }
+
+      const orderEntity = (await strapi.entityService.findOne("api::order.order", orderId, {
+        fields: ["Status", "ReservationStatus", "ReservedUntil", "DiscountCode"],
+        populate: { contract: true },
+      } as any)) as any;
+
+      if (!orderEntity) {
+        strapi.log.error("ZarinPal order not found", { orderId, authority });
+        return ctx.redirect(
+          buildPaymentRedirectUrl("failure", {
+            error: "ZarinPal order not found",
+          }),
+        );
+      }
+
+      const amountToman = Math.round(
+        Number(
+          orderEntity?.contract?.Amount ??
+            contractTransaction?.contract?.Amount ??
+            Number(contractTransaction.Amount || 0) / 10,
+        ),
+      );
+
+      const markFailed = async (
+        reason: string,
+        redirectType: "failure" | "cancelled" = "failure",
+      ) => {
+        try {
+          await strapi.entityService.update(
+            "api::contract-transaction.contract-transaction",
+            contractTransaction.id,
+            {
+              data: {
+                Status: "Failed",
+                GatewayAuthority: authority,
+                GatewayStatus: callbackStatus || reason,
+                GatewayResponse: {
+                  callbackStatus,
+                  authority,
+                  reason,
+                },
+              } as any,
+            },
+          );
+        } catch (error) {
+          strapi.log.error("Failed to mark ZarinPal transaction failed", error);
+        }
+
+        try {
+          await strapi.entityService.update("api::order.order", orderId, {
+            data: { Status: "Cancelled", external_source: "ZarinPal", external_id: authority },
+          });
+        } catch (error) {
+          strapi.log.error("Failed to cancel ZarinPal order", error);
+        }
+
+        try {
+          await releaseOrderReservation(strapi as any, Number(orderId), "Released");
+        } catch {}
+
+        try {
+          await strapi.entityService.update("api::contract.contract", contractId, {
+            data: { Status: "Cancelled", external_source: "ZarinPal", external_id: authority },
+          });
+        } catch (error) {
+          strapi.log.error("Failed to cancel ZarinPal contract", error);
+        }
+
+        try {
+          await strapi.entityService.create("api::order-log.order-log", {
+            data: {
+              order: orderId,
+              Action: "Update",
+              Description: `ZarinPal gateway callback failed: ${reason}`,
+              Changes: { authority, callbackStatus, reason },
+            },
+          });
+        } catch (error) {
+          strapi.log.error("Failed to log ZarinPal failure", error);
+        }
+
+        return ctx.redirect(
+          buildPaymentRedirectUrl(redirectType, {
+            orderId,
+            error: reason,
+            reason: redirectType === "cancelled" ? "user-cancelled" : undefined,
+          }),
+        );
+      };
+
+      if (callbackStatus !== "OK") {
+        return markFailed(callbackStatus || "NOK", "cancelled");
+      }
+
+      const zarinpalService = strapi.service("api::payment-gateway.zarinpal") as any;
+      const verificationResult = await zarinpalService.verifyPayment({
+        authority,
+        amountToman,
+      });
+
+      if (!verificationResult?.success) {
+        return markFailed(
+          verificationResult?.message ||
+            verificationResult?.error ||
+            `Verification failed with code ${verificationResult?.code ?? "unknown"}`,
+        );
+      }
+
+      const stockResult = await handlePostPaymentStock(strapi, orderId, "ZarinPal");
+      const stockErrors =
+        stockResult.errors && stockResult.errors.length > 0
+          ? stockResult.errors
+          : stockResult.success
+          ? []
+          : [
+              {
+                error: stockResult.expired
+                  ? "Reservation expired"
+                  : "Stock decrement failed",
+              },
+            ];
+
+      if (!stockResult.success || stockErrors.length > 0) {
+        try {
+          await strapi.entityService.update(
+            "api::contract-transaction.contract-transaction",
+            contractTransaction.id,
+            {
+              data: {
+                GatewayStatus: "VERIFIED_STOCK_FAILED",
+                GatewayResponse: verificationResult.gatewayResponse,
+              } as any,
+            },
+          );
+        } catch {}
+        return handleStockDecrementFailure(strapi, ctx, {
+          orderId,
+          stockErrors,
+          refNum: verificationResult.refId || authority,
+          paymentMethod: "ZarinPal",
+          externalSource: "ZarinPal",
+          externalId: verificationResult.refId || authority,
+        });
+      }
+
+      const finalReference = verificationResult.refId || authority;
+      try {
+        await strapi.db.transaction(async ({ trx }) => {
+          await strapi.db.query("api::order.order").update({
+            where: { id: orderId },
+            data: {
+              Status: "Started",
+              external_source: "ZarinPal",
+              external_id: finalReference,
+            },
+            transacting: trx,
+          } as any);
+          await strapi.db.query("api::contract.contract").update({
+            where: { id: contractId },
+            data: {
+              Status: "Confirmed",
+              external_source: "ZarinPal",
+              external_id: finalReference,
+            },
+            transacting: trx,
+          } as any);
+          await strapi.db.query("api::contract-transaction.contract-transaction").update({
+            where: { id: contractTransaction.id },
+            data: {
+              Status: "Success",
+              TrackId: authority,
+              GatewayAuthority: authority,
+              GatewayRefId: verificationResult.refId,
+              GatewayStatus: verificationResult.alreadyVerified
+                ? "ALREADY_VERIFIED"
+                : "VERIFIED",
+              GatewayResponse: verificationResult.gatewayResponse,
+              VerifiedAt: new Date(),
+              external_id: finalReference,
+              external_source: "ZarinPal",
+            },
+            transacting: trx,
+          } as any);
+        });
+      } catch (error) {
+        strapi.log.error("Failed to finalize ZarinPal payment transaction", {
+          orderId,
+          authority,
+          error: (error as Error)?.message || error,
+        });
+        return ctx.redirect(
+          buildPaymentRedirectUrl("issue", {
+            orderId,
+            code: "zarinpal_finalize_failed",
+          }),
+        );
+      }
+
+      if (orderEntity?.DiscountCode) {
+        await incrementDiscountUsageCounter(strapi, orderEntity.DiscountCode, orderId);
+      }
+
+      try {
+        await strapi.entityService.create("api::order-log.order-log", {
+          data: {
+            order: orderId,
+            Action: "Update",
+            Description: verificationResult.alreadyVerified
+              ? "ZarinPal gateway verify succeeded (already verified)"
+              : "ZarinPal gateway verify succeeded",
+            Changes: {
+              authority,
+              refId: verificationResult.refId,
+              code: verificationResult.code,
+            },
+          },
+        });
+      } catch (error) {
+        strapi.log.error("Failed to log ZarinPal success", error);
+      }
+
+      await clearCartAfterPayment(strapi, orderId);
+
+      return ctx.redirect(
+        buildPaymentRedirectUrl("success", {
+          orderId,
+          transactionId: finalReference,
+        }),
+      );
+    }
 
     const isSamanFlow =
       !paymentTokenInput &&

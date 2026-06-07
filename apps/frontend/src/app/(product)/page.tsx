@@ -22,6 +22,7 @@ import { SITE_NAME, SITE_URL } from "@/config/site";
 import type { HomePromoBanner } from "@/components/Home/PromoBanners";
 import { getPublicSuperAdminSettings } from "@/services/super-admin/settings/public";
 import HomeProductSections from "./HomeProductSections";
+import SiteGifBanner from "@/components/Home/SiteGifBanner";
 import { SkeletonBlock, SkeletonMedia, SkeletonText } from "@repo/ui/skeleton";
 import type { SuperAdminSettings } from "@/types/super-admin/settings";
 
@@ -241,6 +242,13 @@ export default async function Home() {
     <PageContainer variant="wide" className="space-y-4 pb-16 pt-8">
       {/* JSON-LD Organization Schema for SEO */}
       <OrganizationSchema />
+
+      <SiteGifBanner
+        enabled={homepageSettings.siteGifEnabled}
+        imageUrl={homepageSettings.siteGifImage}
+        linkHref={homepageSettings.siteGifLinkHref}
+        altText={homepageSettings.siteGifAltText}
+      />
 
       <section className="space-y-0">
         <Reveal variant="zoom-in" duration={650}>

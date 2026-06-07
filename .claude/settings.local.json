@@ -25,7 +25,13 @@
       "Bash(pnpm --filter social lint)",
       "Bash(pnpm --filter social check-types)",
       "Bash(pnpm check-types *)",
-      "Bash(pnpm run *)"
+      "Bash(pnpm run *)",
+      "Bash(echo \"=== CURRENT REPO TOP LEVEL ===\" && ls D:/projects/Infinitycolor && echo \"\" && echo \"=== PANDAAK TOP LEVEL ===\" && ls D:/projects/pandaak)",
+      "Read(//d/projects/pandaak/apps/backend/src/**)",
+      "Read(//d/projects/pandaak/apps/**)",
+      "Bash(echo \"=== Infinitycolor top-level ===\"; ls /d/projects/Infinitycolor; echo \"=== pandaak top-level ===\"; ls /d/projects/pandaak)",
+      "Bash(cd /d/projects && diff -rq Infinitycolor/apps/frontend/src pandaak/apps/frontend/src \\\\ *)",
+      "Bash(cd /d/projects && diff -rq Infinitycolor/packages pandaak/packages \\\\ *)"
     ],
     "deny": [],
     "ask": []

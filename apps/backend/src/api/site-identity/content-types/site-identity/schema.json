@@ -1,0 +1,53 @@
+{
+  "kind": "singleType",
+  "collectionName": "site_identities",
+  "info": {
+    "singularName": "site-identity",
+    "pluralName": "site-identities",
+    "displayName": "Site Identity",
+    "description": "Central site identity, contact and store data"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "siteName": {
+      "type": "string",
+      "required": true,
+      "default": "فروشگاه پوشاک اینفینیتی"
+    },
+    "brandDescription": {
+      "type": "text"
+    },
+    "contactEmail": {
+      "type": "string"
+    },
+    "supportHours": {
+      "type": "text"
+    },
+    "hasPhysicalStores": {
+      "type": "boolean",
+      "default": true
+    },
+    "hasMultipleStores": {
+      "type": "boolean",
+      "default": false
+    },
+    "stores": {
+      "type": "component",
+      "repeatable": true,
+      "component": "identity.store"
+    },
+    "socialLinks": {
+      "type": "component",
+      "repeatable": true,
+      "component": "identity.social-link"
+    },
+    "contactNumbers": {
+      "type": "component",
+      "repeatable": true,
+      "component": "identity.contact-number"
+    }
+  }
+}

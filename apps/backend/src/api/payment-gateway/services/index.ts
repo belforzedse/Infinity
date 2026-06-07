@@ -8,6 +8,7 @@ import mellatV2 from "./mellat-v2";
 import mellatV3 from "./mellat-v3";
 import samanKish from "./saman-kish";
 import snappay from "./snappay";
+import zarinpal from "./zarinpal";
 
 export default {
   "payment-gateway": paymentGateway,
@@ -16,4 +17,5 @@ export default {
   "mellat-v3": mellatV3,
   "saman-kish": samanKish,
   snappay: snappay,
+  zarinpal: zarinpal,
 };

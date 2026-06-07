@@ -1,16 +1,17 @@
 import { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { faqService } from "@/services/faq/faq.service";
 import { FAQCategory } from "@/types/faq";
 import PageContainer from "@/components/layout/PageContainer";
 import FAQPageClient from "@/components/FAQ/FAQPageClient";
 import { FAQSchema } from "@/components/SEO/FAQSchema";
-import logger from "@/utils/logger";
-import { SITE_NAME, SITE_URL } from "@/config/site";
+import { SITE_URL } from "@/config/site";
+import { getSiteFaq } from "@/services/site-faq";
+import { getSiteIdentity, resolveSiteName } from "@/services/site-identity";
+import type { SiteFaqCategory } from "@/types/site-identity";
 import Breadcrumb from "@/components/Kits/Breadcrumb";
 import { BreadcrumbSchema } from "@/components/SEO/BreadcrumbSchema";
 
-export const revalidate = 60; // Revalidate every minute
+// Public FAQ is cached and tagged ("faq"); on-demand revalidation refreshes it.
+export const revalidate = 3600;
 
 const breadcrumbItems = [
   { label: "صفحه اصلی", href: "/" },
@@ -18,36 +19,54 @@ const breadcrumbItems = [
 ];
 
 export async function generateMetadata(): Promise<Metadata> {
+  const identity = await getSiteIdentity();
+  const siteName = resolveSiteName(identity.siteName);
+
   return {
     title: "سوالات متداول",
-    description: `سوالات متداول ${SITE_NAME} - پاسخ به سوالات شما درباره محصولات، ارسال، پرداخت و خدمات مشتریان`,
+    description: `سوالات متداول ${siteName} - پاسخ به سوالات شما درباره محصولات، ارسال، پرداخت و خدمات مشتریان`,
     alternates: {
       canonical: `${SITE_URL}/faq`,
     },
     openGraph: {
-      title: `سوالات متداول - ${SITE_NAME}`,
+      title: `سوالات متداول - ${siteName}`,
       description: `پاسخ به سوالات متداول درباره محصولات، ارسال، پرداخت و خدمات مشتریان`,
       url: `${SITE_URL}/faq`,
-      siteName: SITE_NAME,
+      siteName,
       type: "website",
     },
   };
 }
 
+/**
+ * Map the `site-faq` single-type shape into the legacy `FAQCategory[]` shape the
+ * FAQ client components already consume. Ids/dates are synthesized; the data is
+ * read-only on the storefront so synthetic ids are safe and stable per render.
+ */
+function mapSiteFaqToCategories(categories: SiteFaqCategory[]): FAQCategory[] {
+  return categories.map((category, categoryIndex) => ({
+    id: categoryIndex + 1,
+    Title: category.title,
+    Slug: `faq-category-${categoryIndex + 1}`,
+    Description: category.description,
+    Order: category.order ?? categoryIndex,
+    createdAt: "",
+    updatedAt: "",
+    faq_questions: (category.items || []).map((item, itemIndex) => ({
+      id: (categoryIndex + 1) * 1000 + itemIndex + 1,
+      Question: item.question,
+      Answer: item.answer,
+      Order: item.order ?? itemIndex,
+      IsActive: item.isActive !== false,
+      createdAt: "",
+      updatedAt: "",
+    })),
+  }));
+}
+
 export default async function FAQPage() {
-  let categories: FAQCategory[] = [];
-
-  try {
-    const response = await faqService.getFAQCategories();
-    categories = response.data || [];
-
-    if (categories.length === 0) {
-      logger.warn("[FAQ] No FAQ categories found");
-    }
-  } catch (error) {
-    logger.error("[FAQ] Error fetching FAQ categories", { error });
-    notFound();
-  }
+  const siteFaq = await getSiteFaq();
+  const categories = mapSiteFaqToCategories(siteFaq.categories);
 
   // Prepare FAQ schema data
   const faqSchemaData = categories.flatMap((category) =>

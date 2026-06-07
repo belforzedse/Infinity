@@ -7,8 +7,17 @@ import type { Strapi } from "@strapi/strapi";
  */
 export interface Stock {
   Count?: number | string;
+  /** Strapi schema field name (DB column: reserved_count). */
+  reservedCount?: number | string;
+  /** Legacy / normalized alias accepted for backward compatibility. */
   ReservedCount?: number | string;
 }
+
+/**
+ * Fields to populate on the product-stock relation when serializing product
+ * cards. Uses the Strapi schema attribute names (DB columns: count, reserved_count).
+ */
+export const PRODUCT_STOCK_POPULATE_FIELDS = ["Count", "reservedCount"] as const;
 
 /**
  * Normalized Stock interface with guaranteed numeric properties
@@ -103,9 +112,11 @@ export const validateAndNormalizeStock = (
     };
   }
 
-  // Validate and normalize ReservedCount
+  // Validate and normalize ReservedCount.
+  // Strapi returns the schema attribute `reservedCount`; older/normalized
+  // shapes use `ReservedCount`. Accept either to stay backward compatible.
   const reservedCountValidation = normalizeNumericValue(
-    stockObj.ReservedCount,
+    stockObj.ReservedCount ?? stockObj.reservedCount,
     "ReservedCount"
   );
   if (!reservedCountValidation.isValid) {

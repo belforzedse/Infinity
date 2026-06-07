@@ -49,6 +49,24 @@
       "type": "string",
       "required": false
     },
+    "GatewayAuthority": {
+      "type": "string",
+      "required": false
+    },
+    "GatewayRefId": {
+      "type": "string",
+      "required": false
+    },
+    "GatewayStatus": {
+      "type": "string",
+      "required": false
+    },
+    "GatewayResponse": {
+      "type": "json"
+    },
+    "VerifiedAt": {
+      "type": "datetime"
+    },
     "contract": {
       "type": "relation",
       "relation": "manyToOne",

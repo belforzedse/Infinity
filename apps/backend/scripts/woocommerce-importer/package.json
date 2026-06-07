@@ -33,6 +33,9 @@
     "reset-variations": "node index.js reset-progress --type variations",
     "reset-orders": "node index.js reset-progress --type orders",
     "reset-users": "node index.js reset-progress --type users",
+    "catalog-sync:dry-run": "node catalog-sync.js dry-run",
+    "catalog-sync": "node catalog-sync.js sync",
+    "catalog-sync:verify": "node catalog-sync.js verify",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [

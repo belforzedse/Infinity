@@ -44,6 +44,18 @@
         "InActive"
       ]
     },
+    "ProductType": {
+      "type": "enumeration",
+      "enum": [
+        "Variable",
+        "Simple"
+      ],
+      "default": "Variable"
+    },
+    "IsSimpleProduct": {
+      "type": "boolean",
+      "default": false
+    },
     "Media": {
       "type": "media",
       "multiple": true,

@@ -2,25 +2,40 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://new.infinitycolor.
 const IMAGE_BASE_URL = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || "https://api.infinitycolor.co";
 
 interface OrganizationSchemaProps {
+  /** Site/brand name. Falls back to the historical hardcoded value. */
+  name?: string;
+  /** Brand description. Falls back to the historical hardcoded value. */
+  description?: string;
   phone?: string;
   email?: string;
   instagram?: string;
+  /** Full list of social profile URLs (preferred over `instagram`). */
+  sameAs?: string[];
   streetAddress?: string;
   postalCode?: string;
 }
 
+const DEFAULT_ORG_NAME = "فروشگاه پوشاک اینفینیتی";
+const DEFAULT_ORG_DESCRIPTION =
+  "پوشاک اینفینیتی با عرضه پوشاک با بهترین قیمت و کیفیت همیشه سعی کرده است تا بهترین ها را برای شما به ارمغان بیاورد!";
+
 export function OrganizationSchema({
+  name,
+  description,
   phone,
   email,
   instagram,
+  sameAs: sameAsProp,
   streetAddress,
   postalCode,
 }: OrganizationSchemaProps = {}) {
-  // Build sameAs array with Instagram only
+  // Build sameAs array. Prefer the explicit social link list (from site identity),
+  // then a single instagram prop, then the historical boutique account.
   const sameAs: string[] = [];
 
-  // Add Instagram - prioritize provided prop, then use the new boutique URL
-  if (instagram) {
+  if (sameAsProp && sameAsProp.length > 0) {
+    sameAs.push(...sameAsProp.filter(Boolean));
+  } else if (instagram) {
     sameAs.push(instagram);
   } else {
     // Add the boutique Instagram account
@@ -67,7 +82,7 @@ export function OrganizationSchema({
   const schema: any = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "فروشگاه پوشاک اینفینیتی",
+    name: name?.trim() || DEFAULT_ORG_NAME,
     alternateName: "Infinitycolor",
     url: SITE_URL,
     logo: {
@@ -76,7 +91,7 @@ export function OrganizationSchema({
       width: 400,
       height: 400,
     },
-    description: "پوشاک اینفینیتی با عرضه پوشاک با بهترین قیمت و کیفیت همیشه سعی کرده است تا بهترین ها را برای شما به ارمغان بیاورد!",
+    description: description?.trim() || DEFAULT_ORG_DESCRIPTION,
     foundingDate: "2020",
     address,
     sameAs,

@@ -1,0 +1,21 @@
+{
+  "kind": "singleType",
+  "collectionName": "site_faqs",
+  "info": {
+    "singularName": "site-faq",
+    "pluralName": "site-faqs",
+    "displayName": "Site FAQ",
+    "description": "Frequently asked questions managed from the Identity hub"
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "categories": {
+      "type": "component",
+      "repeatable": true,
+      "component": "identity.faq-category"
+    }
+  }
+}

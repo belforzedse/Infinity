@@ -740,6 +740,10 @@ export interface ApiContractTransactionContractTransaction extends Schema.Collec
     DiscountAmount: Attribute.BigInteger & Attribute.DefaultTo<"0">;
     external_id: Attribute.String;
     external_source: Attribute.String;
+    GatewayAuthority: Attribute.String;
+    GatewayRefId: Attribute.String;
+    GatewayResponse: Attribute.JSON;
+    GatewayStatus: Attribute.String;
     payment_gateway: Attribute.Relation<
       "api::contract-transaction.contract-transaction",
       "manyToOne",
@@ -765,6 +769,7 @@ export interface ApiContractTransactionContractTransaction extends Schema.Collec
       "admin::user"
     > &
       Attribute.Private;
+    VerifiedAt: Attribute.DateTime;
   };
 }
 
@@ -1684,7 +1689,7 @@ export interface ApiOrderOrder extends Schema.CollectionType {
     Note: Attribute.Text;
     order_items: Attribute.Relation<"api::order.order", "oneToMany", "api::order-item.order-item">;
     PaymentGateway: Attribute.Enumeration<
-      ["Unknown", "Wallet", "Mellat", "SnappPay", "SamanKish"]
+      ["Unknown", "Wallet", "Mellat", "SnappPay", "SamanKish", "ZarinPal"]
     > &
       Attribute.DefaultTo<"Unknown">;
     ReservationStatus: Attribute.Enumeration<["Reserved", "Released", "Consumed", "Expired"]> &
@@ -2724,6 +2729,7 @@ export interface ApiProductProduct extends Schema.CollectionType {
     external_id: Attribute.String & Attribute.Unique;
     external_source: Attribute.String;
     Files: Attribute.Media<"files", true>;
+    IsSimpleProduct: Attribute.Boolean & Attribute.DefaultTo<false>;
     Media: Attribute.Media<"images" | "videos", true>;
     product_faqs: Attribute.Relation<
       "api::product.product",
@@ -2765,6 +2771,7 @@ export interface ApiProductProduct extends Schema.CollectionType {
       "oneToMany",
       "api::product-view.product-view"
     >;
+    ProductType: Attribute.Enumeration<["Variable", "Simple"]> & Attribute.DefaultTo<"Variable">;
     RatingCount: Attribute.Integer;
     removedAt: Attribute.DateTime;
     ReturnConditions: Attribute.Text;
@@ -2809,25 +2816,70 @@ export interface ApiSettingsSettings extends Schema.SingleType {
     createdBy: Attribute.Relation<"api::settings.settings", "oneToOne", "admin::user"> &
       Attribute.Private;
     filterPublicProductsByTitle: Attribute.Boolean & Attribute.DefaultTo<false>;
+    homeBannerOneBackgroundColor: Attribute.String & Attribute.DefaultTo<"#f1f5f9">;
     homeBannerOneButtonColor: Attribute.String & Attribute.DefaultTo<"">;
     homeBannerOneButtonHref: Attribute.Text & Attribute.DefaultTo<"">;
     homeBannerOneButtonText: Attribute.String & Attribute.DefaultTo<"">;
+    homeBannerOneContentPosition: Attribute.Enumeration<["top", "center", "bottom"]> &
+      Attribute.DefaultTo<"top">;
+    homeBannerOneDesktopHeight: Attribute.Integer & Attribute.DefaultTo<220>;
+    homeBannerOneFontWeight: Attribute.String & Attribute.DefaultTo<"500">;
     homeBannerOneImage: Attribute.Text & Attribute.DefaultTo<"">;
+    homeBannerOneImageFit: Attribute.Enumeration<["cover", "contain"]> &
+      Attribute.DefaultTo<"cover">;
+    homeBannerOneImagePosition: Attribute.String & Attribute.DefaultTo<"center">;
+    homeBannerOneMobileHeight: Attribute.Integer & Attribute.DefaultTo<220>;
+    homeBannerOneSubtitle: Attribute.String & Attribute.DefaultTo<"">;
+    homeBannerOneSubtitleColor: Attribute.String & Attribute.DefaultTo<"#ffffff">;
+    homeBannerOneTextAlign: Attribute.Enumeration<["right", "center", "left"]> &
+      Attribute.DefaultTo<"right">;
+    homeBannerOneTextSize: Attribute.Integer & Attribute.DefaultTo<30>;
     homeBannerOneTitle: Attribute.String & Attribute.DefaultTo<"">;
     homeBannerOneTitleColor: Attribute.String & Attribute.DefaultTo<"">;
+    homeBannerTwoBackgroundColor: Attribute.String & Attribute.DefaultTo<"#f1f5f9">;
     homeBannerTwoButtonColor: Attribute.String & Attribute.DefaultTo<"">;
     homeBannerTwoButtonHref: Attribute.Text & Attribute.DefaultTo<"">;
     homeBannerTwoButtonText: Attribute.String & Attribute.DefaultTo<"">;
+    homeBannerTwoContentPosition: Attribute.Enumeration<["top", "center", "bottom"]> &
+      Attribute.DefaultTo<"top">;
+    homeBannerTwoDesktopHeight: Attribute.Integer & Attribute.DefaultTo<220>;
+    homeBannerTwoFontWeight: Attribute.String & Attribute.DefaultTo<"500">;
     homeBannerTwoImage: Attribute.Text & Attribute.DefaultTo<"">;
+    homeBannerTwoImageFit: Attribute.Enumeration<["cover", "contain"]> &
+      Attribute.DefaultTo<"cover">;
+    homeBannerTwoImagePosition: Attribute.String & Attribute.DefaultTo<"center">;
+    homeBannerTwoMobileHeight: Attribute.Integer & Attribute.DefaultTo<220>;
+    homeBannerTwoSubtitle: Attribute.String & Attribute.DefaultTo<"">;
+    homeBannerTwoSubtitleColor: Attribute.String & Attribute.DefaultTo<"#ffffff">;
+    homeBannerTwoTextAlign: Attribute.Enumeration<["right", "center", "left"]> &
+      Attribute.DefaultTo<"right">;
+    homeBannerTwoTextSize: Attribute.Integer & Attribute.DefaultTo<30>;
     homeBannerTwoTitle: Attribute.String & Attribute.DefaultTo<"">;
     homeBannerTwoTitleColor: Attribute.String & Attribute.DefaultTo<"">;
     homeDiscountedProductIds: Attribute.JSON & Attribute.DefaultTo<[]>;
+    homeFeaturedCategoryBannerBackgroundColor: Attribute.String & Attribute.DefaultTo<"#f1f5f9">;
     homeFeaturedCategoryBannerImage: Attribute.Text & Attribute.DefaultTo<"">;
+    homeFeaturedCategoryBannerImageFit: Attribute.Enumeration<["cover", "contain"]> &
+      Attribute.DefaultTo<"cover">;
+    homeFeaturedCategoryBannerImagePosition: Attribute.String & Attribute.DefaultTo<"center">;
+    homeFeaturedCategoryCtaHref: Attribute.Text & Attribute.DefaultTo<"">;
+    homeFeaturedCategoryCtaText: Attribute.String & Attribute.DefaultTo<"">;
+    homeFeaturedCategoryDesktopBannerHeight: Attribute.Integer & Attribute.DefaultTo<340>;
+    homeFeaturedCategoryFontWeight: Attribute.String & Attribute.DefaultTo<"500">;
+    homeFeaturedCategoryMobileBannerHeight: Attribute.Integer & Attribute.DefaultTo<260>;
     homeFeaturedCategorySlug: Attribute.String & Attribute.DefaultTo<"">;
+    homeFeaturedCategorySubtitle: Attribute.String & Attribute.DefaultTo<"">;
+    homeFeaturedCategoryTextColor: Attribute.String & Attribute.DefaultTo<"#111827">;
+    homeFeaturedCategoryTextSize: Attribute.Integer & Attribute.DefaultTo<30>;
+    homeFeaturedCategoryTitle: Attribute.String & Attribute.DefaultTo<"">;
     homeHeroSliderDraft: Attribute.JSON & Attribute.DefaultTo<{}>;
     homeHeroSliderMeta: Attribute.JSON & Attribute.DefaultTo<{}>;
     homeHeroSliderPublished: Attribute.JSON & Attribute.DefaultTo<{}>;
     homeNewestProductIds: Attribute.JSON & Attribute.DefaultTo<[]>;
+    siteGifAltText: Attribute.String & Attribute.DefaultTo<"">;
+    siteGifEnabled: Attribute.Boolean & Attribute.DefaultTo<false>;
+    siteGifImage: Attribute.String & Attribute.DefaultTo<"">;
+    siteGifLinkHref: Attribute.String & Attribute.DefaultTo<"">;
     updatedAt: Attribute.DateTime;
     updatedBy: Attribute.Relation<"api::settings.settings", "oneToOne", "admin::user"> &
       Attribute.Private;
@@ -2926,6 +2978,60 @@ export interface ApiShippingShipping extends Schema.CollectionType {
     Title: Attribute.String & Attribute.Required;
     updatedAt: Attribute.DateTime;
     updatedBy: Attribute.Relation<"api::shipping.shipping", "oneToOne", "admin::user"> &
+      Attribute.Private;
+  };
+}
+
+export interface ApiSiteFaqSiteFaq extends Schema.SingleType {
+  collectionName: "site_faqs";
+  info: {
+    description: "Frequently asked questions managed from the Identity hub";
+    displayName: "Site FAQ";
+    pluralName: "site-faqs";
+    singularName: "site-faq";
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    categories: Attribute.Component<"identity.faq-category", true>;
+    createdAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<"api::site-faq.site-faq", "oneToOne", "admin::user"> &
+      Attribute.Private;
+    updatedAt: Attribute.DateTime;
+    updatedBy: Attribute.Relation<"api::site-faq.site-faq", "oneToOne", "admin::user"> &
+      Attribute.Private;
+  };
+}
+
+export interface ApiSiteIdentitySiteIdentity extends Schema.SingleType {
+  collectionName: "site_identities";
+  info: {
+    description: "Central site identity, contact and store data";
+    displayName: "Site Identity";
+    pluralName: "site-identities";
+    singularName: "site-identity";
+  };
+  options: {
+    draftAndPublish: false;
+  };
+  attributes: {
+    brandDescription: Attribute.Text;
+    contactEmail: Attribute.String;
+    contactNumbers: Attribute.Component<"identity.contact-number", true>;
+    createdAt: Attribute.DateTime;
+    createdBy: Attribute.Relation<"api::site-identity.site-identity", "oneToOne", "admin::user"> &
+      Attribute.Private;
+    hasMultipleStores: Attribute.Boolean & Attribute.DefaultTo<false>;
+    hasPhysicalStores: Attribute.Boolean & Attribute.DefaultTo<true>;
+    siteName: Attribute.String &
+      Attribute.Required &
+      Attribute.DefaultTo<"\u0641\u0631\u0648\u0634\u06AF\u0627\u0647 \u067E\u0648\u0634\u0627\u06A9 \u0627\u06CC\u0646\u0641\u06CC\u0646\u06CC\u062A\u06CC">;
+    socialLinks: Attribute.Component<"identity.social-link", true>;
+    stores: Attribute.Component<"identity.store", true>;
+    supportHours: Attribute.Text;
+    updatedAt: Attribute.DateTime;
+    updatedBy: Attribute.Relation<"api::site-identity.site-identity", "oneToOne", "admin::user"> &
       Attribute.Private;
   };
 }
@@ -3575,6 +3681,8 @@ declare module "@strapi/types" {
       "api::shipping-city.shipping-city": ApiShippingCityShippingCity;
       "api::shipping-province.shipping-province": ApiShippingProvinceShippingProvince;
       "api::shipping.shipping": ApiShippingShipping;
+      "api::site-faq.site-faq": ApiSiteFaqSiteFaq;
+      "api::site-identity.site-identity": ApiSiteIdentitySiteIdentity;
       "api::story-seen.story-seen": ApiStorySeenStorySeen;
       "api::story.story": ApiStoryStory;
       "api::user-activity.user-activity": ApiUserActivityUserActivity;

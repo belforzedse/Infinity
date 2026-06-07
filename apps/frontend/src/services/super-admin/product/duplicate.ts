@@ -21,6 +21,8 @@ interface ProductAttributes {
   Title: string;
   Description?: string;
   Status?: string;
+  ProductType?: "Variable" | "Simple" | null;
+  IsSimpleProduct?: boolean | null;
   Weight?: number;
   CleaningTips?: string;
   ReturnConditions?: string;
@@ -53,10 +55,14 @@ export const duplicateProduct = async (productId: string) => {
     const originalData = originalProduct.data.attributes as unknown as ProductAttributes;
 
     // Prepare data for duplicate
+    const duplicatedProductType =
+      originalData.ProductType === "Simple" || originalData.IsSimpleProduct ? "Simple" : "Variable";
     const duplicateData = {
       Title: `${originalData.Title} - کپی`,
       Description: originalData.Description,
       Status: originalData.Status,
+      ProductType: duplicatedProductType,
+      IsSimpleProduct: duplicatedProductType === "Simple",
       Weight: originalData.Weight ?? 100,
       CleaningTips: originalData.CleaningTips,
       ReturnConditions: originalData.ReturnConditions,

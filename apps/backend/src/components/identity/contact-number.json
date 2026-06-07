@@ -1,0 +1,25 @@
+{
+  "collectionName": "components_identity_contact_numbers",
+  "info": {
+    "displayName": "ContactNumber",
+    "icon": "phone"
+  },
+  "options": {},
+  "attributes": {
+    "label": {
+      "type": "string"
+    },
+    "number": {
+      "type": "string",
+      "required": true
+    },
+    "type": {
+      "type": "enumeration",
+      "enum": [
+        "phone",
+        "mobile",
+        "whatsapp"
+      ]
+    }
+  }
+}

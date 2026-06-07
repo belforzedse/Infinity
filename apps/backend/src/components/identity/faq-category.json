@@ -1,0 +1,26 @@
+{
+  "collectionName": "components_identity_faq_categories",
+  "info": {
+    "displayName": "FaqCategory",
+    "icon": "bulletList"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "text"
+    },
+    "order": {
+      "type": "integer",
+      "default": 0
+    },
+    "items": {
+      "type": "component",
+      "repeatable": true,
+      "component": "identity.faq-item"
+    }
+  }
+}

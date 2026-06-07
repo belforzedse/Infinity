@@ -46,7 +46,14 @@ export default function EditProductsPage({ params }: { params: Promise<{ id: str
       CoverImage: true,
       product_main_category: true,
       product_tags: true,
-      product_variations: true,
+      // Deep-populate variations so simple-product fields (stock + attribute-less
+      // detection) can be reconstructed for the edit form.
+      product_variations: {
+        product_stock: true,
+        product_variation_color: true,
+        product_variation_size: true,
+        product_variation_model: true,
+      },
       product_other_categories: true,
     }),
     [],
@@ -128,15 +135,21 @@ export default function EditProductsPage({ params }: { params: Promise<{ id: str
     }
   };
 
+  const isSimpleProduct = productData.ProductType === "Simple";
+
   const tabs: TabItem[] = [
     {
       key: "1",
       value: "کلی",
     },
-    {
-      key: "2",
-      value: "متغیرها",
-    },
+    ...(!isSimpleProduct
+      ? [
+          {
+            key: "2",
+            value: "متغیرها",
+          },
+        ]
+      : []),
     {
       key: "3",
       value: "راهنمای سایز",
@@ -147,7 +160,7 @@ export default function EditProductsPage({ params }: { params: Promise<{ id: str
     <div className="flex w-full grid-cols-3 flex-col gap-4 pb-32 lg:grid">
       <div className="order-2 flex flex-col gap-4 lg:order-1">
         <IndexPhotoUploader isEditMode />
-        <PublishAllVariations productId={Number(id)} />
+        {!isSimpleProduct && <PublishAllVariations productId={Number(id)} />}
         {/* <SetPrice />
         <SetStatus /> */}
         <SetDetails isEditMode />
@@ -156,7 +169,9 @@ export default function EditProductsPage({ params }: { params: Promise<{ id: str
         <Tabs tabs={tabs} tabsClassName="!bg-transparent">
           {[
             <Overall key={"overall"} productData={productData} isEditMode />,
-            <Variables key={"variables"} productId={Number(id)} />,
+            ...(!isSimpleProduct
+              ? [<Variables key={"variables"} productId={Number(id)} />]
+              : []),
             <Sizes key={"sizes"} ref={sizeGuideRef} productId={Number(id)} />,
           ]}
         </Tabs>

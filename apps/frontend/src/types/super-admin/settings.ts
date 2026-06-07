@@ -132,6 +132,10 @@ export type SuperAdminSettings = {
   homeHeroSliderMeta: HeroSliderMeta | null;
   homeNewestProductIds: number[];
   homeDiscountedProductIds: number[];
+  siteGifEnabled: boolean;
+  siteGifImage: string;
+  siteGifLinkHref: string;
+  siteGifAltText: string;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -200,6 +204,10 @@ export const defaultSettings = (): SuperAdminSettings => ({
   homeHeroSliderMeta: null,
   homeNewestProductIds: [],
   homeDiscountedProductIds: [],
+  siteGifEnabled: false,
+  siteGifImage: "",
+  siteGifLinkHref: "",
+  siteGifAltText: "",
   createdAt: new Date(),
   updatedAt: new Date(),
 });
@@ -288,6 +296,10 @@ export const normalizeSuperAdminSettings = (
   homeHeroSliderMeta: normalizeHeroSliderMeta(data?.homeHeroSliderMeta),
   homeNewestProductIds: normalizeHomepageProductIds(data?.homeNewestProductIds),
   homeDiscountedProductIds: normalizeHomepageProductIds(data?.homeDiscountedProductIds),
+  siteGifEnabled: Boolean(data?.siteGifEnabled),
+  siteGifImage: normalizeString(data?.siteGifImage),
+  siteGifLinkHref: normalizeString(data?.siteGifLinkHref),
+  siteGifAltText: normalizeString(data?.siteGifAltText),
   createdAt: new Date(data?.createdAt || Date.now()),
   updatedAt: new Date(data?.updatedAt || Date.now()),
 });

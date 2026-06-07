@@ -1,9 +1,14 @@
 "use client";
 import Image from "next/image";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Barcode from "react-barcode";
 import { translatePaymentGateway } from "@/utils/statusTranslations";
 import { SITE_URL } from "@/config/site";
+import { getSiteIdentity } from "@/services/site-identity";
+
+// Fallback store address used until site identity loads (and if it is unavailable).
+const DEFAULT_STORE_ADDRESS =
+  "گلستان، گرگان، بلوار ناهارخوران، نبش عدالت ۶۸، کد پستی ۴۹۱۶۹۷۳۳۸۱";
 type Props = {
   order: {
     shipping?: {
@@ -117,6 +122,23 @@ const formatPersianTime = (value?: string) => {
 };
 export default function Invoice({ order, isPreInvoice = false }: Props) {
   const attrs = order.attributes;
+
+  // Store address is sourced from site identity (primary store), with a static fallback.
+  const [storeAddress, setStoreAddress] = useState<string>(DEFAULT_STORE_ADDRESS);
+  useEffect(() => {
+    let active = true;
+    getSiteIdentity()
+      .then((identity) => {
+        const primaryAddress = identity.stores.find((store) => store.address)?.address;
+        if (active && primaryAddress) setStoreAddress(primaryAddress);
+      })
+      .catch(() => {
+        /* keep fallback */
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
   // robust number coercion (handles strings)
   const toNum = (v: unknown) =>
     typeof v === "number" ? v : Number(String(v ?? 0).replace(/[^\d.-]/g, "")); // strip commas etc.
@@ -262,9 +284,7 @@ export default function Invoice({ order, isPreInvoice = false }: Props) {
               {/* Store Address Column - spans full width */}
               <div className="col-span-2 flex items-center gap-2">
                 <span className="font-bold text-gray-700">آدرس فروشگاه:</span>
-                <span className="text-gray-800">
-                  گلستان، گرگان، بلوار ناهارخوران، نبش عدالت ۶۸، کد پستی ۴۹۱۶۹۷۳۳۸۱
-                </span>
+                <span className="text-gray-800">{storeAddress}</span>
               </div>
 
               {/* Website URL Column */}

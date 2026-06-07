@@ -646,6 +646,127 @@ export const requestSamanPayment = async (
   };
 };
 
+type ZarinPalRequestParams = {
+  order: any;
+  contract: any;
+  financialSummary: FinancialSummary;
+  userId: number;
+  mobile?: string;
+  email?: string;
+};
+
+export const requestZarinPalPayment = async (
+  strapi: Strapi,
+  params: ZarinPalRequestParams
+) => {
+  const amountToman = Math.round(Number(params.contract?.Amount || 0));
+  const amountIrr = amountToman * 10;
+
+  if (!params.order?.id || !params.contract?.id || amountToman <= 0) {
+    return {
+      paymentResult: {
+        success: false,
+        error: "Invalid order or amount for ZarinPal payment",
+        requestId: `ZPINVALID-${Date.now()}`,
+      },
+    };
+  }
+
+  const zarinpal = strapi.service("api::payment-gateway.zarinpal") as any;
+  const paymentResult = await zarinpal.requestPayment({
+    orderId: params.order.id,
+    contractId: params.contract.id,
+    amountToman,
+    mobile: params.mobile,
+    email: params.email,
+  });
+
+  if (!paymentResult?.success) {
+    return { paymentResult };
+  }
+
+  const gatewayEntity = await ensurePaymentGateway(strapi, "ZarinPal", {
+    Description: "ZarinPal payment gateway",
+  });
+
+  let transactionCreated = false;
+  try {
+    const discountIrr = Math.round(Number(params.financialSummary?.discount || 0) * 10);
+    await strapi.entityService.create(
+      "api::contract-transaction.contract-transaction",
+      {
+        data: {
+          Type: "Gateway",
+          Amount: amountIrr,
+          DiscountAmount: discountIrr,
+          Step: 1,
+          Status: "Pending",
+          TrackId: paymentResult.authority,
+          GatewayAuthority: paymentResult.authority,
+          GatewayStatus: "REQUESTED",
+          GatewayResponse: paymentResult.gatewayResponse,
+          external_id: paymentResult.authority,
+          external_source: "ZarinPal",
+          contract: params.contract.id,
+          payment_gateway: gatewayEntity.id,
+          Date: new Date(),
+        } as any,
+      }
+    );
+    transactionCreated = true;
+  } catch (error) {
+    strapi.log.error("Failed to create ZarinPal contract transaction", {
+      orderId: params.order.id,
+      contractId: params.contract.id,
+      authority: paymentResult.authority,
+      error: (error as Error)?.message || error,
+    });
+  }
+
+  if (!transactionCreated) {
+    return {
+      paymentResult: {
+        success: false,
+        error: "Failed to persist ZarinPal payment request",
+        requestId: paymentResult.requestId,
+      },
+    };
+  }
+
+  try {
+    await strapi.entityService.update("api::contract.contract", params.contract.id, {
+      data: {
+        Type: "Cash",
+        external_source: "ZarinPal",
+        external_id: paymentResult.authority,
+      },
+    });
+  } catch (error) {
+    strapi.log.error("Failed to update contract for ZarinPal gateway", error);
+  }
+
+  try {
+    await strapi.entityService.update("api::order.order", params.order.id, {
+      data: {
+        external_source: "ZarinPal",
+        external_id: paymentResult.authority,
+      },
+    });
+  } catch (error) {
+    strapi.log.error("Failed to update order external source for ZarinPal", error);
+  }
+
+  return {
+    paymentResult: {
+      success: true,
+      refId: paymentResult.authority,
+      redirectUrl: paymentResult.redirectUrl,
+      requestId: paymentResult.requestId,
+      authority: paymentResult.authority,
+    },
+  };
+};
+
 export const requestMellatPayment = async (
   strapi: Strapi,
   params: {

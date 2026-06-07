@@ -87,6 +87,12 @@ const ROLE_PERMISSION_SPECS: Record<string, RolePermissionSpec> = {
       "api::footer": {
         footer: ["find"],
       },
+      "api::site-identity": {
+        "site-identity": ["find"],
+      },
+      "api::site-faq": {
+        "site-faq": ["find"],
+      },
       "api::settings": {
         settings: ["find"],
       },
@@ -828,6 +834,152 @@ export default {
         }
       } catch (error) {
         strapi.log.error("Failed to ensure settings entry", {
+          error: (error as any)?.message,
+        });
+      }
+    })();
+
+    // Ensure site-identity single type exists with the project's existing identity
+    // values (idempotent). Seeds ONLY when no record exists, so an administrator's
+    // edits are never overwritten on subsequent boots.
+    //
+    // Seed values are migrated from the previously hardcoded frontend sources:
+    //   - siteName/brandDescription -> components/SEO/OrganizationSchema.tsx, config/site.ts
+    //   - supportHours/contactNumbers/socialLinks -> constants/footer.ts (FOOTER_DATA)
+    //   - stores/addresses -> constants/footer.ts (storeLocations) + components/invoice.tsx
+    (async function ensureSiteIdentity() {
+      try {
+        const existing = await strapi.db.query("api::site-identity.site-identity").findOne();
+        if (!existing) {
+          await strapi.entityService.create("api::site-identity.site-identity", {
+            data: {
+              siteName: "فروشگاه پوشاک اینفینیتی",
+              brandDescription:
+                "پوشاک اینفینیتی با عرضه پوشاک با بهترین قیمت و کیفیت همیشه سعی کرده است تا بهترین ها را برای شما به ارمغان بیاورد!",
+              supportHours:
+                "شنبه تا پنج شنبه (غیر از روزهای تعطیل) از ساعت9 صبح الی 17 پاسخگوی شما هستیم.",
+              hasPhysicalStores: true,
+              hasMultipleStores: true,
+              stores: [
+                {
+                  name: "گرگان",
+                  address:
+                    "گلستان، گرگان، بلوار ناهارخوران، نبش عدالت ۶۸، کد پستی ۴۹۱۶۹۷۳۳۸۱",
+                  phones: [{ label: "تلفن فروشگاه", number: "017-325-304-39" }],
+                  showInFooter: true,
+                  showInAbout: true,
+                },
+                {
+                  name: "گنبد کاووس",
+                  address: "گنبد کاووس، ابتدای بلوار دانشجو",
+                  showInFooter: true,
+                  showInAbout: true,
+                },
+              ],
+              socialLinks: [
+                {
+                  platform: "instagram",
+                  url: "https://www.instagram.com/infinity.color_boutique/",
+                  label: "infinity.color_boutique",
+                },
+                {
+                  platform: "telegram",
+                  url: "https://t.me/InfinityColorShop",
+                  label: "InfinityColorShop",
+                },
+              ],
+              contactNumbers: [
+                { label: "تلفن", number: "017-325-304-39", type: "phone" },
+                { label: "واتساپ", number: "0901-655-25-30", type: "whatsapp" },
+              ],
+            },
+          });
+          strapi.log.info("✓ Created default site-identity entry");
+        }
+      } catch (error) {
+        strapi.log.error("Failed to ensure site-identity entry", {
+          error: (error as any)?.message,
+        });
+      }
+    })();
+
+    // Ensure site-faq single type exists, migrating any existing collection-type
+    // FAQ data (api::faq-category / api::faq-question) into it once. Guarded by a
+    // migrations key so it runs a single time; legacy collection types are left
+    // intact (non-destructive) and can be removed later.
+    (async function ensureSiteFaq() {
+      try {
+        const existing = await strapi.db.query("api::site-faq.site-faq").findOne();
+        if (existing) {
+          return;
+        }
+
+        const migrationStore = strapi.store({ type: "core", name: "migrations" });
+        const migrationKey = "migrate-legacy-faq-to-site-faq-v1";
+        const alreadyRan = await migrationStore.get({ key: migrationKey });
+
+        type LegacyQuestion = {
+          Question?: string;
+          Answer?: string;
+          Order?: number | null;
+          IsActive?: boolean | null;
+        };
+        type LegacyCategory = {
+          Title?: string;
+          Description?: string | null;
+          Order?: number | null;
+          faq_questions?: LegacyQuestion[];
+        };
+
+        let categories: any[] = [];
+        if (!alreadyRan) {
+          const legacyCategories = (await strapi.entityService.findMany(
+            "api::faq-category.faq-category",
+            {
+              fields: ["Title", "Description", "Order"],
+              populate: {
+                faq_questions: {
+                  fields: ["Question", "Answer", "Order", "IsActive"],
+                },
+              },
+              limit: -1,
+            },
+          )) as LegacyCategory[];
+
+          categories = (legacyCategories || [])
+            .filter((cat) => cat?.Title)
+            .map((cat) => ({
+              title: cat.Title as string,
+              description: cat.Description ?? undefined,
+              order: cat.Order ?? 0,
+              items: (cat.faq_questions || [])
+                .filter((q) => q?.Question && q?.Answer)
+                .map((q) => ({
+                  question: q.Question as string,
+                  answer: q.Answer as string,
+                  order: q.Order ?? 0,
+                  isActive: q.IsActive !== false,
+                })),
+            }));
+        }
+
+        await strapi.entityService.create("api::site-faq.site-faq", {
+          data: { categories },
+        });
+
+        await migrationStore.set({
+          key: migrationKey,
+          value: {
+            executedAt: new Date().toISOString(),
+            migratedCategories: categories.length,
+          },
+        });
+
+        strapi.log.info(
+          `✓ Created default site-faq entry (migrated ${categories.length} categories)`,
+        );
+      } catch (error) {
+        strapi.log.error("Failed to ensure site-faq entry", {
           error: (error as any)?.message,
         });
       }

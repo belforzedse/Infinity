@@ -98,7 +98,11 @@ export const getAvailableGateways = async (): Promise<CheckoutGatewayCode[]> => 
       .map((item) => String(item?.code || "").toLowerCase())
       .filter(
         (code): code is CheckoutGatewayCode =>
-          code === "samankish" || code === "mellat" || code === "snappay" || code === "wallet",
+          code === "samankish" ||
+          code === "mellat" ||
+          code === "snappay" ||
+          code === "wallet" ||
+          code === "zarinpal",
       );
 
     return gatewayCodes;

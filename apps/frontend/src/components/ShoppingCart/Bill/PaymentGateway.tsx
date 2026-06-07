@@ -55,6 +55,12 @@ function ShoppingCartBillPaymentGateway({
     img: "/images/cart/melat.png",
   };
 
+  const zarinpal = {
+    id: "zarinpal" as const,
+    name: "زرین‌پال",
+    img: "/images/cart/zarinpal.svg",
+  };
+
   const wallet = {
     id: "wallet" as const,
     name: "کیف پول",
@@ -80,6 +86,7 @@ function ShoppingCartBillPaymentGateway({
 
   const showSaman = availableGateways.includes("samankish");
   const showMellat = availableGateways.includes("mellat");
+  const showZarinPal = availableGateways.includes("zarinpal");
   const showSnappay = availableGateways.includes("snappay") && snappEligible;
   const showWallet = availableGateways.includes("wallet");
 
@@ -156,6 +163,28 @@ function ShoppingCartBillPaymentGateway({
                 />
               </div>
               <span className="text-sm lg:text-base">درگاه پرداخت {mellat.name}</span>
+            </button>
+          )}
+
+          {showZarinPal && (
+            <button
+              onClick={() => onChange(zarinpal.id)}
+              className={classNames(
+                "flex w-full flex-col items-center gap-2 text-nowrap rounded-lg border border-stone-50 bg-stone-50 p-4",
+                selected === zarinpal.id && "!border-pink-600",
+              )}
+              type="button"
+            >
+              <div className="relative h-24 w-24 flex-shrink-0 lg:h-32 lg:w-32">
+                <Image
+                  src={zarinpal.img}
+                  alt={zarinpal.name}
+                  fill
+                  className="bg-stone-50 object-contain p-3"
+                  sizes="(min-width: 1024px) 128px, 96px"
+                />
+              </div>
+              <span className="text-sm lg:text-base">درگاه پرداخت {zarinpal.name}</span>
             </button>
           )}
 
