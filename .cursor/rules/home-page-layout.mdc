@@ -40,7 +40,7 @@ The Home Page is structured as follows:
 ## Responsive Design Guidelines
 - Mobile-first approach with responsive classes
 - Different image sources for mobile vs desktop
-- Storefront shell: [`StorefrontContainer`](apps/frontend/src/components/storefront/StorefrontContainer.tsx) (`max-w-[1280px]`, `px-1 sm:px-5 lg:px-[60px]`)
+- Storefront shell: [`StorefrontContainer`](apps/frontend/src/components/storefront/StorefrontContainer.tsx) (`max-w-[1360px]`, `px-1 sm:px-5 lg:px-[60px]`)
 
 ### Homepage product sections (`OffersListHomePage`)
 - Mobile (&lt;768): horizontal scroll; each card wrapper `w-[calc(50%-0.1875rem)]` with `gap-1.5` (≈2 visible, no `max-w` cap)

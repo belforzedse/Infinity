@@ -9,11 +9,8 @@ import { blogService } from "@/services/blog/blog.service";
 import { getActiveStories } from "@/services/story/story.service";
 import { BlogCarousel } from "@/components/Blog";
 import StoriesRail from "@/components/Home/StoriesRail";
-import DesktopSlider from "@/components/Hero/desktopSlider";
-import MobileSlider from "@/components/Hero/mobileSlider";
-import TabletSlider from "@/components/Hero/tabletSlider";
-import { defaultSliderConfig } from "@/components/Hero/config";
-import { mapCmsHeroSliderToLayouts } from "@/components/Hero/config/fromCms";
+import HeroBannerSlider from "@/components/Hero/HeroBannerSlider";
+import { mapCmsHeroSliderToBannerSlides } from "@/components/Hero/config/fromCms";
 import { Suspense } from "react";
 import Reveal from "@/components/Reveal";
 import PageContainer from "@/components/layout/PageContainer";
@@ -223,20 +220,7 @@ export default async function Home() {
   const featuredCategorySlug = homepageSettings.homeFeaturedCategorySlug?.trim() || "";
   const featuredCategoryBannerImage =
     homepageSettings.homeFeaturedCategoryBannerImage?.trim() || "";
-  const heroFromCms = mapCmsHeroSliderToLayouts(homepageSettings.homeHeroSliderPublished);
-  const hasHeroSlides =
-    heroFromCms.desktopSlides.length > 0 ||
-    heroFromCms.tabletSlides.length > 0 ||
-    heroFromCms.mobileSlides.length > 0;
-  const effectiveHero = hasHeroSlides
-    ? heroFromCms
-    : {
-        desktopSlides: [],
-        tabletSlides: [],
-        mobileSlides: [],
-        autoplayIntervalMs: defaultSliderConfig.autoplayInterval ?? 600000,
-        autoplayEligibility: [] as boolean[],
-      };
+  const heroFromCms = mapCmsHeroSliderToBannerSlides(homepageSettings.homeHeroSliderPublished);
 
   return (
     <PageContainer variant="wide" className="space-y-4 pb-16 pt-8">
@@ -256,24 +240,10 @@ export default async function Home() {
 
       <section className="space-y-0">
         <Reveal variant="zoom-in" duration={650}>
-          <MobileSlider
-            slides={effectiveHero.mobileSlides}
-            autoplayInterval={effectiveHero.autoplayIntervalMs}
-            autoplayEligibility={effectiveHero.autoplayEligibility}
-          />
-        </Reveal>
-        <Reveal delay={50} variant="zoom-in" duration={650}>
-          <TabletSlider
-            slides={effectiveHero.tabletSlides}
-            autoplayInterval={effectiveHero.autoplayIntervalMs}
-            autoplayEligibility={effectiveHero.autoplayEligibility}
-          />
-        </Reveal>
-        <Reveal delay={100} variant="zoom-in" duration={650}>
-          <DesktopSlider
-            slides={effectiveHero.desktopSlides}
-            autoplayInterval={effectiveHero.autoplayIntervalMs}
-            autoplayEligibility={effectiveHero.autoplayEligibility}
+          <HeroBannerSlider
+            slides={heroFromCms.slides}
+            autoplayInterval={heroFromCms.autoplayIntervalMs}
+            autoplayEligibility={heroFromCms.autoplayEligibility}
           />
         </Reveal>
       </section>

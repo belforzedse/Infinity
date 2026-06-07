@@ -1,4 +1,68 @@
 ---
+description: Hero slider customization v3: single-image slides, CMS normalization, and admin editor fields.
+globs: 
+alwaysApply: false
+---
+# Hero Slider Customization
+
+The homepage hero slider is now a **single-image banner slider**. Do not reintroduce the previous headline + main visual + two action-card slot composition.
+
+## Figma Contract
+
+- Design reference node: `1:2977`
+- Desktop banner size: `1360px × 581px`
+- Aspect ratio: `1360 / 581`
+- Border radius: `34px`
+- Storefront rendering must reserve this aspect ratio to avoid layout shift.
+- The uploaded image should be a complete composed banner. The app does not rebuild Figma's inner text/right-image layers.
+
+## Data Model
+
+`homeHeroSliderDraft` and `homeHeroSliderPublished` remain JSON fields on settings, but payloads normalize to `version: 3`.
+
+Each slide exposes only:
+
+- `imageUrl`
+- `imageAlt`
+- optional `link`
+- `order`
+- `isActive`
+- `autoplayEligible`
+- `schedule`
+- slide-level `tracking`
+
+Obsolete v2 controls such as foreground/background split images, headline slots, card slots, image overflow, inner borders, typography packages, and device-specific slot trees must not be visible in the admin UI.
+
+## Compatibility
+
+Existing v2 payloads are read safely by the frontend and backend normalizers:
+
+1. Prefer `devices.desktop.slots.rightBanner.foregroundImageUrl`.
+2. Fallback to desktop `rightBanner.backgroundImageUrl`.
+3. Fallback to tablet/mobile `heroBanner` foreground/background images.
+4. Preserve slide id, order, active state, autoplay eligibility, schedule, tracking, alt text, and main-visual link when available.
+
+No SQL migration is required because the settings fields are JSON.
+
+## Key Files
+
+- [apps/frontend/src/types/super-admin/heroSliderV3.ts](apps/frontend/src/types/super-admin/heroSliderV3.ts) — frontend v3 types and legacy normalization.
+- [apps/backend/src/api/settings/services/hero-slider-types.ts](apps/backend/src/api/settings/services/hero-slider-types.ts) — backend v3 types.
+- [apps/backend/src/api/settings/services/hero-slider-sanitizers.ts](apps/backend/src/api/settings/services/hero-slider-sanitizers.ts) — backend sanitizer and v2 compatibility.
+- [apps/frontend/src/components/Hero/HeroBannerSlider.tsx](apps/frontend/src/components/Hero/HeroBannerSlider.tsx) — storefront slider.
+- [apps/frontend/src/components/Hero/config/fromCms.ts](apps/frontend/src/components/Hero/config/fromCms.ts) — CMS to banner slide mapping.
+- [apps/frontend/src/components/SuperAdmin/HeroSliderEditor/TemplatePreview.tsx](apps/frontend/src/components/SuperAdmin/HeroSliderEditor/TemplatePreview.tsx) — admin preview and image/link editor.
+- [apps/frontend/src/components/SuperAdmin/HeroSliderEditor/SchedulePanel.tsx](apps/frontend/src/components/SuperAdmin/HeroSliderEditor/SchedulePanel.tsx) — slide-level timing/status/tracking.
+- [apps/frontend/src/hooks/useHeroSliderEditor.ts](apps/frontend/src/hooks/useHeroSliderEditor.ts) — v3 editor state and slide CRUD.
+
+## Storefront Behavior
+
+- Use the existing optimized image path (`BannerImage` + `imageLoader`).
+- Intrinsic dimensions are `width={1360}` and `height={581}`.
+- Use `sizes="(max-width: 1360px) 100vw, 1360px"`.
+- The first visible slide should be priority-loaded; later slides can lazy-load.
+- Keep autoplay, arrows/dots, slide ordering, active status, schedule filtering, and links.
+---
 description: Hero slider customization in super-admin: slot structure, CMS mapping, and font configuration. Use when modifying the hero editor, adding slots, or configuring typography.
 globs: 
 alwaysApply: false

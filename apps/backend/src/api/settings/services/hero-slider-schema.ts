@@ -8,15 +8,8 @@
 
 export type {
   HeroSlotLink,
-  HeroContentAlignment,
-  HeroBackgroundType,
   HeroTracking,
-  HeroTextStyle,
-  HeroHeadlineSlot,
-  HeroMainVisualSlot,
-  HeroCardSlot,
   HeroSlideSchedule,
-  HeroSlideDevices,
   HeroSlideConfig,
   HeroSliderPayload,
   HeroSliderMeta,

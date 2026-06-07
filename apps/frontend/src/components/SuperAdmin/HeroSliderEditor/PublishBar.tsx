@@ -1,10 +1,6 @@
 "use client";
 
-import dayjs from "dayjs";
-import jalaliday from "jalaliday";
-import type { HeroSliderMeta, HeroSliderPayload } from "@/types/super-admin/heroSlider";
-
-dayjs.extend(jalaliday);
+import type { HeroSliderMeta, HeroSliderPayload } from "@/types/super-admin/heroSliderV3";
 
 type Props = {
   draft: HeroSliderPayload;
@@ -15,8 +11,22 @@ type Props = {
   onSaveDraft: () => void;
   onPublish: () => void;
   onAddSlide: () => void;
-  onSyncTabletMobileFromDesktop: () => void;
 };
+
+function formatPublishedAt(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+
+  return new Intl.DateTimeFormat("fa-IR-u-ca-persian", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone: "Asia/Tehran",
+  }).format(date);
+}
 
 export default function PublishBar({
   draft,
@@ -27,7 +37,6 @@ export default function PublishBar({
   onSaveDraft,
   onPublish,
   onAddSlide,
-  onSyncTabletMobileFromDesktop,
 }: Props) {
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-4">
@@ -40,8 +49,7 @@ export default function PublishBar({
           </p>
           {meta?.publishedAt ? (
             <p className="text-xs text-slate-500">
-              آخرین انتشار:{" "}
-              {(dayjs(meta.publishedAt) as dayjs.Dayjs & { calendar: (c: string) => dayjs.Dayjs }).calendar("jalali").locale("fa").format("YYYY/MM/DD HH:mm")}
+              آخرین انتشار: {formatPublishedAt(meta.publishedAt)}
             </p>
           ) : (
             <p className="text-xs text-amber-600">هنوز اسلایدر هیرو منتشر نشده است.</p>
@@ -55,15 +63,6 @@ export default function PublishBar({
             className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
           >
             افزودن اسلاید
-          </button>
-          <button
-            type="button"
-            onClick={onSyncTabletMobileFromDesktop}
-            disabled={draft.slides.length === 0}
-            className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-60"
-            title="کپی محتوای دسکتاپ به تبلت و موبایل با استایل پیش‌فرض"
-          >
-            همگام‌سازی تبلت و موبایل از دسکتاپ
           </button>
           <button
             type="button"

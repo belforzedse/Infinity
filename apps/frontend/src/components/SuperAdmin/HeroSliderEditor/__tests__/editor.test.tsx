@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import HeroSliderCustomizationPage from "@/app/(super-admin)/super-admin/customization/hero-slider/page";
 import SlideList from "@/components/SuperAdmin/HeroSliderEditor/SlideList";
-import type { HeroSliderPayload } from "@/types/super-admin/heroSlider";
-import { normalizeHeroSliderPayload } from "@/types/super-admin/heroSlider";
+import type { HeroSliderPayload } from "@/types/super-admin/heroSliderV3";
+import { normalizeHeroSliderPayload } from "@/types/super-admin/heroSliderV3";
 import {
   getHeroSliderDraftAndPublished,
   publishHeroSliderDraft,
@@ -15,36 +15,14 @@ jest.mock("@/components/SuperAdmin/Layout/ContentWrapper", () => ({
   default: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
-jest.mock("@/components/SuperAdmin/HeroSliderEditor/PublishBar", () => ({
+jest.mock("@/components/SuperAdmin/UpsertPage/ContentWrapper/Fields/ImageUploadField", () => ({
   __esModule: true,
-  default: ({
-    draft,
-    published,
-    onAddSlide,
-    onSaveDraft,
-    onPublish,
-  }: {
-    draft: HeroSliderPayload;
-    published: HeroSliderPayload;
-    onAddSlide: () => void;
-    onSaveDraft: () => void;
-    onPublish: () => void;
-  }) => (
-    <section>
-      <p>
-        تعداد اسلاید پیش‌نویس: {draft.slides.length} | تعداد اسلاید منتشرشده:{" "}
-        {published.slides.length}
-      </p>
-      <button type="button" onClick={onAddSlide}>
-        افزودن اسلاید
-      </button>
-      <button type="button" onClick={onSaveDraft}>
-        ذخیره پیش‌نویس
-      </button>
-      <button type="button" onClick={onPublish}>
-        انتشار
-      </button>
-    </section>
+  default: ({ value, onChange }: { value: string; onChange: (value: string) => void }) => (
+    <input
+      aria-label="تصویر بنر"
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+    />
   ),
 }));
 
@@ -68,27 +46,21 @@ const getHeroSliderDraftAndPublishedMock = getHeroSliderDraftAndPublished as jes
 const updateHeroSliderDraftMock = updateHeroSliderDraft as jest.Mock;
 const publishHeroSliderDraftMock = publishHeroSliderDraft as jest.Mock;
 
-beforeAll(() => {
-  class ResizeObserverMock {
-    observe() {}
-    unobserve() {}
-    disconnect() {}
-  }
-
-  global.ResizeObserver = ResizeObserverMock as typeof ResizeObserver;
-});
-
 function createHeroState() {
   const draft = normalizeHeroSliderPayload({
     slides: [
       {
         id: "slide-a",
+        imageUrl: "/uploads/a.webp",
+        imageAlt: "بنر اول",
         order: 0,
         isActive: true,
         autoplayEligible: true,
       },
       {
         id: "slide-b",
+        imageUrl: "/uploads/b.webp",
+        imageAlt: "بنر دوم",
         order: 1,
         isActive: true,
         autoplayEligible: false,
@@ -96,13 +68,9 @@ function createHeroState() {
     ],
   });
 
-  const published = normalizeHeroSliderPayload({
-    slides: [],
-  });
-
   return {
     draft,
-    published,
+    published: normalizeHeroSliderPayload({ slides: [] }),
     meta: null,
   };
 }
@@ -115,10 +83,10 @@ describe("Hero slider editor", () => {
     updateHeroSliderDraftMock.mockImplementation(async (payload: HeroSliderPayload) => payload);
     publishHeroSliderDraftMock.mockResolvedValue({
       published: normalizeHeroSliderPayload({
-        slides: [{ id: "published-slide", order: 0, isActive: true, autoplayEligible: true }],
+        slides: [{ id: "published-slide", imageUrl: "/uploads/published.webp", order: 0 }],
       }),
       meta: {
-        version: 2,
+        version: 3,
         publishedAt: "2026-02-10T10:00:00.000Z",
         publishedBy: 1,
       },
@@ -129,68 +97,38 @@ describe("Hero slider editor", () => {
     jest.clearAllMocks();
   });
 
-  it("switches inline editor target when a slot is selected from template preview", async () => {
-    const { container } = render(<HeroSliderCustomizationPage />);
+  it("renders the simplified single-image editor", async () => {
+    render(<HeroSliderCustomizationPage />);
 
     await waitFor(() => {
-      expect(screen.getByText(/در حال ویرایش:/)).toBeInTheDocument();
-      expect(screen.getAllByText("تیتر").length).toBeGreaterThan(0);
+      expect(screen.getByText("پیش‌نمایش بنر هیرو")).toBeInTheDocument();
     });
 
-    const mainVisualSlot = container.querySelector<HTMLElement>("[data-slot='rightBanner']");
-    expect(mainVisualSlot).not.toBeNull();
-    fireEvent.click(mainVisualSlot as HTMLElement);
-
-    expect(screen.getAllByText("تصویر اصلی").length).toBeGreaterThan(0);
+    expect(screen.getByLabelText("تصویر بنر")).toHaveValue("/uploads/a.webp");
+    expect(screen.getByDisplayValue("بنر اول")).toBeInTheDocument();
+    expect(screen.queryByText(/در حال ویرایش:/)).not.toBeInTheDocument();
   });
 
-  it("double clicking preview text focuses the matching editor field", async () => {
-    const { container } = render(<HeroSliderCustomizationPage />);
+  it("updates the selected slide banner image", async () => {
+    render(<HeroSliderCustomizationPage />);
+
+    const imageInput = await screen.findByLabelText("تصویر بنر");
+    fireEvent.change(imageInput, { target: { value: "/uploads/new.webp" } });
+    fireEvent.click(screen.getByRole("button", { name: "ذخیره پیش‌نویس" }));
 
     await waitFor(() => {
-      expect(
-        container.querySelector("[data-slot='topLeftTextBanner'] [data-hero-edit-field='title']"),
-      ).toBeInTheDocument();
+      expect(updateHeroSliderDraftMock).toHaveBeenCalledTimes(1);
     });
 
-    const title = container.querySelector<HTMLElement>(
-      "[data-slot='topLeftTextBanner'] [data-hero-edit-field='title']",
-    );
-    expect(title).not.toBeNull();
-
-    fireEvent.doubleClick(title as HTMLElement);
-
-    await waitFor(() => {
-      expect(document.activeElement).toHaveAttribute("data-hero-editor-field", "title");
-    });
-  });
-
-  it("double clicking card text switches slots and focuses the card editor title", async () => {
-    const { container } = render(<HeroSliderCustomizationPage />);
-
-    await waitFor(() => {
-      expect(
-        container.querySelector("[data-slot='bottomActionBannerLeft'] [data-hero-edit-field='title']"),
-      ).toBeInTheDocument();
-    });
-
-    const cardTitle = container.querySelector<HTMLElement>(
-      "[data-slot='bottomActionBannerLeft'] [data-hero-edit-field='title']",
-    );
-    expect(cardTitle).not.toBeNull();
-
-    fireEvent.doubleClick(cardTitle as HTMLElement);
-
-    await waitFor(() => {
-      expect(document.activeElement).toHaveAttribute("data-hero-editor-field", "title");
-    });
+    const savedPayload = updateHeroSliderDraftMock.mock.calls[0][0] as HeroSliderPayload;
+    expect(savedPayload.slides[0].imageUrl).toBe("/uploads/new.webp");
   });
 
   it("reorders slides when move controls are used", () => {
     const initialSlides = normalizeHeroSliderPayload({
       slides: [
-        { id: "slide-a", order: 0 },
-        { id: "slide-b", order: 1 },
+        { id: "slide-a", imageUrl: "/uploads/a.webp", order: 0 },
+        { id: "slide-b", imageUrl: "/uploads/b.webp", order: 1 },
       ],
     }).slides;
 

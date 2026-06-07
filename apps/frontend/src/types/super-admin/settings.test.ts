@@ -1,5 +1,5 @@
 import { defaultSettings, normalizeSuperAdminSettings } from "./settings";
-import { HERO_SLIDER_VERSION } from "./heroSlider";
+import { HERO_SLIDER_VERSION } from "./heroSliderV3";
 
 describe("super-admin settings type helpers", () => {
   it("should include featured category defaults", () => {

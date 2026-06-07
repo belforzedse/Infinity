@@ -28,6 +28,11 @@ import {
   HERO_FOREGROUND_ZOOM_MAX,
   HERO_FOREGROUND_ZOOM_MIN,
 } from "@/types/super-admin/heroSlider";
+import {
+  isHeroSlideVisible as isV3HeroSlideVisible,
+  normalizeHeroSliderPayload as normalizeHeroSliderV3Payload,
+  type HeroSlideConfig as HeroBannerSlide,
+} from "@/types/super-admin/heroSliderV3";
 import resolveAssetUrl from "@/utils/resolveAssetUrl";
 
 const DEFAULT_AUTOPLAY_INTERVAL_MS = 600000;
@@ -313,5 +318,29 @@ export function mapCmsHeroSliderToLayouts(
     desktopSlides: visibleSlides.map(createDesktopLayout),
     tabletSlides: visibleSlides.map(createTabletLayout),
     mobileSlides: visibleSlides.map(createMobileLayout),
+  };
+}
+
+export type CmsHeroBannerMappingResult = {
+  autoplayIntervalMs: number;
+  slides: HeroBannerSlide[];
+  autoplayEligibility: boolean[];
+};
+
+export function mapCmsHeroSliderToBannerSlides(
+  rawPayload: unknown,
+  now = new Date(),
+): CmsHeroBannerMappingResult {
+  const payload = normalizeHeroSliderV3Payload(rawPayload);
+  const visibleSlides = payload.slides
+    .filter((slide) => isV3HeroSlideVisible(slide, now))
+    .sort((a, b) => a.order - b.order);
+
+  return {
+    autoplayIntervalMs: Number.isFinite(payload.autoplayIntervalMs)
+      ? payload.autoplayIntervalMs
+      : DEFAULT_AUTOPLAY_INTERVAL_MS,
+    autoplayEligibility: visibleSlides.map((slide) => slide.autoplayEligible),
+    slides: visibleSlides,
   };
 }

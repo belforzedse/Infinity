@@ -1,4 +1,5 @@
 import { Header } from "@/components/Header";
+import { SocialContainer } from "@/components/SocialContainer";
 import { POST_CARD_LAYOUTS, fluidMaxWidthCapPx } from "@/components/posts/post-card-variants";
 import { PostDetailSkeleton } from "@/components/ui/skeletons/PostDetailSkeleton";
 import { StoriesRailSkeleton } from "@/components/ui/skeletons/StoriesRailSkeleton";
@@ -40,8 +41,9 @@ export default function PostDetailLoading() {
   return (
     <div className="flex min-h-dvh flex-col">
       <Header />
-      <main
-        className="mx-auto flex w-full max-w-[1280px] flex-1 flex-col gap-6 px-4 pb-8 pt-3 sm:px-6 lg:px-[60px] lg:pb-12 lg:pt-6"
+      <SocialContainer
+        as="main"
+        className="flex flex-1 flex-col gap-6 px-4 pb-8 pt-3 lg:pb-12 lg:pt-6"
         dir="rtl"
       >
         <section>
@@ -95,7 +97,7 @@ export default function PostDetailLoading() {
         <div className="flex w-full flex-col gap-6 lg:hidden">
           <PostDetailSkeleton />
         </div>
-      </main>
+      </SocialContainer>
     </div>
   );
 }

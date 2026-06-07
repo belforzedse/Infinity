@@ -6,6 +6,7 @@ import { HomePostsCollageSkeleton } from "@/components/posts/HomePostsCollageSke
 import { StoriesRail } from "@/components/StoriesRail";
 import { StoriesRailSkeleton } from "@/components/ui/skeletons/StoriesRailSkeleton";
 import { getActiveStories } from "@/services/story.service";
+import { SocialContainer } from "@/components/SocialContainer";
 
 export const revalidate = 10;
 
@@ -39,7 +40,7 @@ export default function HomePage() {
   return (
     <div className="flex min-h-dvh flex-col">
       <Header />
-      <main className="mx-auto flex w-full max-w-[1280px] flex-1 flex-col gap-10 px-5 pb-6 pt-6 sm:px-6 lg:px-[60px] lg:pb-12">
+      <SocialContainer as="main" className="flex flex-1 flex-col gap-10 pb-6 pt-6 lg:pb-12">
         <Suspense
           fallback={
             <>
@@ -54,7 +55,7 @@ export default function HomePage() {
         >
           <HomeBody />
         </Suspense>
-      </main>
+      </SocialContainer>
     </div>
   );
 }

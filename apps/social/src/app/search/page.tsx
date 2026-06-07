@@ -14,6 +14,7 @@ import { useSmoothLoading } from "@/hooks/useSmoothLoading";
 import { searchPosts, SEARCH_RESULTS_PAGE_SIZE } from "@/services/search.service";
 import type { HomeFeedPost } from "@/services/feed-post.service";
 import { getUserFacingErrorMessage } from "@/utils/userErrorMessage";
+import { SocialContainer } from "@/components/SocialContainer";
 
 const RECENTS_KEY = "social:recent-searches";
 const MAX_RECENTS = 8;
@@ -143,7 +144,7 @@ export default function SearchPage() {
   return (
     <div className="flex min-h-dvh flex-col">
       <Header />
-      <main className="mx-auto flex w-full max-w-[1280px] flex-1 flex-col gap-6 px-5 pb-6 pt-6 sm:px-6 lg:px-[60px] lg:pb-12">
+      <SocialContainer as="main" className="flex flex-1 flex-col gap-6 pb-6 pt-6 lg:pb-12">
         <div className="flex flex-col items-end gap-4">
           <h1 className="font-peyda text-lg font-semibold text-zinc-800 lg:text-xl">
             جستجو
@@ -163,7 +164,7 @@ export default function SearchPage() {
           />
         </div>
         {stateView}
-      </main>
+      </SocialContainer>
     </div>
   );
 }

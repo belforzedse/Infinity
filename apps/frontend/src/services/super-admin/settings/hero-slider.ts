@@ -5,7 +5,7 @@ import {
   normalizeHeroSliderPayload,
   type HeroSliderMeta,
   type HeroSliderPayload,
-} from "@/types/super-admin/heroSlider";
+} from "@/types/super-admin/heroSliderV3";
 
 type HeroSliderStateResponse = {
   draft: HeroSliderPayload;
@@ -13,9 +13,18 @@ type HeroSliderStateResponse = {
   meta: HeroSliderMeta | null;
 };
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function getResponseData(response: unknown): Record<string, unknown> {
+  if (!isRecord(response) || !isRecord(response.data)) return {};
+  return response.data;
+}
+
 export async function getHeroSliderDraftAndPublished(): Promise<HeroSliderStateResponse> {
   const response = await apiClient.get("/settings/hero-slider");
-  const source = (response as any)?.data || {};
+  const source = getResponseData(response);
 
   return {
     draft: normalizeHeroSliderPayload(source.draft),
@@ -29,7 +38,8 @@ export async function updateHeroSliderDraft(payload: HeroSliderPayload): Promise
     data: payload,
   });
 
-  const draft = (response as any)?.data?.draft;
+  const source = getResponseData(response);
+  const draft = source.draft;
   return normalizeHeroSliderPayload(draft);
 }
 
@@ -41,7 +51,7 @@ export async function publishHeroSliderDraft(): Promise<{
     data: {},
   });
 
-  const source = (response as any)?.data || {};
+  const source = getResponseData(response);
   return {
     published: normalizeHeroSliderPayload(source.published),
     meta: normalizeHeroSliderMeta(source.meta),

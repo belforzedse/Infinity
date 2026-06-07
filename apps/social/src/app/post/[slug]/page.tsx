@@ -9,6 +9,7 @@ import { getHomeFeedPosts } from "@/services/feed-post.service";
 import { getPostDetailBySlug } from "@/services/post-detail.service";
 import { getActiveStories } from "@/services/story.service";
 import { SITE_NAME, SITE_URL } from "@/config/site";
+import { SocialContainer } from "@/components/SocialContainer";
 
 export const revalidate = 10;
 
@@ -92,8 +93,9 @@ export default async function PostDetailPage({ params }: PostPageProps) {
   return (
     <div className="flex min-h-dvh flex-col">
       <Header />
-      <main
-        className="mx-auto flex w-full max-w-[1280px] flex-1 flex-col gap-6 px-4 pb-8 pt-3 sm:px-6 lg:px-[60px] lg:pb-12 lg:pt-6"
+      <SocialContainer
+        as="main"
+        className="flex flex-1 flex-col gap-6 px-4 pb-8 pt-3 lg:pb-12 lg:pt-6"
         dir="rtl"
       >
         {activeStories.length > 0 ? (
@@ -114,7 +116,7 @@ export default async function PostDetailPage({ params }: PostPageProps) {
         <div className="post-page-drawer-enter">
           <PostDetailRelatedLayout post={post} relatedPosts={relatedPosts} />
         </div>
-      </main>
+      </SocialContainer>
     </div>
   );
 }

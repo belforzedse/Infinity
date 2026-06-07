@@ -28,17 +28,11 @@ export default function HeroSliderCustomizationPage() {
           onSaveDraft={editor.handleSaveDraft}
           onPublish={editor.handlePublish}
           onAddSlide={editor.addSlide}
-          onSyncTabletMobileFromDesktop={editor.syncTabletMobileFromDesktop}
         />
 
         <TemplatePreview
           slide={editor.selectedSlide}
-          device={editor.selectedDevice}
-          selectedSlotKey={editor.selectedSlotKey}
-          onSelectSlot={(slotKey) => editor.setSelectedSlotKey(slotKey)}
-          onDeselectSlot={() => editor.setSelectedSlotKey(null)}
-          onChangeSelectedSlot={editor.updateSelectedSlot}
-          onDeviceChange={editor.setSelectedDevice}
+          onChangeSlide={(nextSlide) => editor.updateSelectedSlide(() => nextSlide)}
         />
 
         <SlideList
@@ -85,12 +79,21 @@ export default function HeroSliderCustomizationPage() {
               }
               globalAutoplayIntervalMs={editor.draft.autoplayIntervalMs}
               onGlobalAutoplayIntervalChange={editor.updateAutoplayIntervalMs}
-              selectedSlotKey={editor.selectedSlide ? editor.selectedSlotKey : null}
-              selectedSlot={editor.selectedSlot}
-              slotLink={editor.selectedSlot?.link || null}
-              onSlotLinkChange={editor.handleSelectedSlotLinkChange}
-              slotTracking={editor.slotTrackingForForm}
-              onSlotTrackingChange={editor.handleSelectedSlotTrackingChange}
+              tracking={
+                editor.selectedSlide?.tracking || {
+                  campaign: "",
+                  source: "",
+                  medium: "",
+                  content: "",
+                  custom: {},
+                }
+              }
+              onTrackingChange={(tracking) =>
+                editor.updateSelectedSlide((slide) => ({
+                  ...slide,
+                  tracking,
+                }))
+              }
             />
           </div>
         </div>

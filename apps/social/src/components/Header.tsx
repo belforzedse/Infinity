@@ -9,6 +9,7 @@ import { HeaderProfileNav } from "@/components/HeaderProfileNav";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { NotificationDropdown } from "@/components/notifications/NotificationDropdown";
 import { MobileHeaderBackButton } from "@/components/MobileHeaderBackButton";
+import { SOCIAL_CONTAINER_CLASS } from "@/components/SocialContainer";
 
 const LG_BREAKPOINT_PX = 1024;
 const NEAR_TOP_SCROLL_Y = 80;
@@ -84,7 +85,7 @@ export function Header() {
       </div>
 
       {/* Desktop */}
-      <div className="mx-auto hidden min-h-[4.25rem] w-full max-w-[1280px] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 px-5 py-2 sm:gap-4 sm:px-6 lg:grid lg:px-[60px]">
+      <div className={`${SOCIAL_CONTAINER_CLASS} hidden min-h-[4.25rem] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 py-2 sm:gap-4 lg:grid`}>
         <div className="flex min-w-0 justify-start">
           <SearchBar aria-label="جستجو" />
         </div>

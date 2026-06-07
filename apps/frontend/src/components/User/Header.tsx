@@ -72,7 +72,7 @@ const UserHeader: React.FC = () => {
       <div className="mb-6 h-[4.5rem] lg:hidden" aria-hidden />
 
       <header
-        className="fixed left-1/2 top-5 z-50 hidden min-h-[4.5rem] w-[calc(100%-2.5rem)] max-w-[1280px] -translate-x-1/2 items-center justify-between rounded-2xl border border-white/60 bg-white/55 px-6 py-3 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-white/35 lg:flex"
+        className="fixed left-1/2 top-5 z-50 hidden min-h-[4.5rem] w-[calc(100%-2.5rem)] max-w-[1360px] -translate-x-1/2 items-center justify-between rounded-2xl border border-white/60 bg-white/55 px-6 py-3 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-white/35 lg:flex"
         dir="ltr"
       >
         <div className="relative z-10 flex w-48 items-center justify-start">

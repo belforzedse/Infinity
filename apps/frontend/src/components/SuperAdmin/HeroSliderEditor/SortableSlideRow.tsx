@@ -3,7 +3,9 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Copy, GripVertical, Trash2 } from "lucide-react";
-import type { HeroSlideConfig } from "@/types/super-admin/heroSlider";
+import type { CSSProperties } from "react";
+import type { HeroSlideConfig } from "@/types/super-admin/heroSliderV3";
+import resolveAssetUrl from "@/utils/resolveAssetUrl";
 
 export type SlideRowProps = {
   slide: HeroSlideConfig;
@@ -34,10 +36,15 @@ export default function SortableSlideRow({
     id: slide.id,
   });
 
-  const style = {
+  const style: CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
   };
+  const thumbnailStyle: CSSProperties | undefined = slide.imageUrl
+    ? {
+        backgroundImage: `url("${resolveAssetUrl(slide.imageUrl)}")`,
+      }
+    : undefined;
 
   return (
     <div
@@ -50,11 +57,7 @@ export default function SortableSlideRow({
       }`}
     >
       <div className="flex items-center justify-between gap-2">
-        <button
-          type="button"
-          onClick={onSelect}
-          className="flex min-w-0 flex-1 items-center gap-2 text-right"
-        >
+        <button type="button" onClick={onSelect} className="flex min-w-0 flex-1 items-center gap-2 text-right">
           <span
             className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-xs ${
               slide.isActive ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-500"
@@ -62,8 +65,18 @@ export default function SortableSlideRow({
           >
             {index + 1}
           </span>
-          <span className="truncate text-sm font-medium text-slate-800">
-            {slide.id || `اسلاید ${index + 1}`}
+          <span
+            className="h-10 w-16 shrink-0 rounded-lg bg-slate-100 bg-cover bg-center"
+            style={thumbnailStyle}
+            aria-hidden
+          />
+          <span className="min-w-0 flex-1">
+            <span className="block truncate text-sm font-medium text-slate-800">
+              {slide.imageAlt || slide.id || `اسلاید ${index + 1}`}
+            </span>
+            <span className="block truncate text-[11px] text-slate-500">
+              {slide.imageUrl ? "بنر تک‌تصویر" : "تصویر انتخاب نشده"}
+            </span>
           </span>
         </button>
 

@@ -4,7 +4,7 @@ import {
   normalizeHeroSliderPayload,
   type HeroSliderMeta,
   type HeroSliderPayload,
-} from "./heroSlider";
+} from "./heroSliderV3";
 
 export type BlogCategoryBannerOrderItem = {
   id: number;

@@ -1,6 +1,13 @@
 "use client";
 
-import { DndContext, PointerSensor, closestCenter, useSensor, useSensors } from "@dnd-kit/core";
+import {
+  DndContext,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
 import {
   SortableContext,
   arrayMove,
@@ -8,7 +15,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { Plus } from "lucide-react";
-import type { HeroSlideConfig } from "@/types/super-admin/heroSlider";
+import type { HeroSlideConfig } from "@/types/super-admin/heroSliderV3";
 import SortableSlideRow from "./SortableSlideRow";
 
 type SlideListProps = {
@@ -34,7 +41,7 @@ export default function SlideList({
 }: SlideListProps) {
   const sensors = useSensors(useSensor(PointerSensor));
 
-  const handleDragEnd = (event: any) => {
+  const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!active?.id || !over?.id || active.id === over.id) return;
 

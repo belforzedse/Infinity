@@ -8,11 +8,11 @@ alwaysApply: false
 
 ## Page width and spacing (desktop)
 
-- **Max width:** `max-w-[1280px]` on the main content column and header inner row (`mx-auto w-full`).
+- **Max width:** `max-w-[1360px]` via [`SocialContainer`](apps/social/src/components/SocialContainer.tsx) / `SOCIAL_CONTAINER_CLASS` on the main content column and desktop header inner row (`mx-auto w-full`).
 - **Top padding (below header):** `pt-6` (24px) on the primary scrollable/main wrapper.
 - **Horizontal padding:** `lg:px-[60px]` on desktop; below `sm`, use **`px-5`** (20px) with **`sm:px-6`** so mobile matches the 20px side inset.
 
-Apply the same horizontal padding to the sticky header inner row so header and body align.
+Apply the same `SocialContainer` horizontal padding to the sticky header inner row so header and body align.
 
 ## Brand color (Infinity-Primary)
 
