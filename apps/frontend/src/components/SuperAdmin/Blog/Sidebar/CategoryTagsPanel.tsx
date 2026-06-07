@@ -135,7 +135,7 @@ export default function CategoryTagsPanel({
           onClick={() => setActiveTab("categories")}
           className={`flex-1 rounded-lg px-3 py-1.5 text-sm transition ${
             activeTab === "categories"
-              ? "bg-pink-50 text-pink-600"
+              ? "bg-infinity-primary-lighter/20 text-infinity-primary"
               : "text-slate-500 hover:text-slate-700"
           }`}
         >
@@ -146,7 +146,7 @@ export default function CategoryTagsPanel({
           onClick={() => setActiveTab("tags")}
           className={`flex-1 rounded-lg px-3 py-1.5 text-sm transition ${
             activeTab === "tags"
-              ? "bg-pink-50 text-pink-600"
+              ? "bg-infinity-primary-lighter/20 text-infinity-primary"
               : "text-slate-500 hover:text-slate-700"
           }`}
         >
@@ -162,7 +162,7 @@ export default function CategoryTagsPanel({
               onChange={(e) =>
                 onCategoryChange(e.target.value ? Number(e.target.value) : undefined)
               }
-              className="w-full appearance-none rounded-xl border border-slate-100 bg-white px-4 py-3 pr-10 text-xs text-neutral-500 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
+              className="w-full appearance-none rounded-xl border border-slate-100 bg-white px-4 py-3 pr-10 text-xs text-neutral-500 focus:border-infinity-primary focus:outline-none focus:ring-1 focus:ring-infinity-primary"
             >
               <option value="">انتخاب دسته بندی</option>
               {categories.map((category) => (
@@ -181,7 +181,7 @@ export default function CategoryTagsPanel({
                 value={newCategoryName}
                 onChange={(e) => setNewCategoryName(e.target.value)}
                 placeholder="نام دسته بندی جدید"
-                className="w-full rounded-xl border border-slate-100 bg-white px-4 py-2 text-sm text-neutral-600 placeholder:text-slate-400 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
+                className="w-full rounded-xl border border-slate-100 bg-white px-4 py-2 text-sm text-neutral-600 placeholder:text-slate-400 focus:border-infinity-primary focus:outline-none focus:ring-1 focus:ring-infinity-primary"
               />
 
               <div className="relative">
@@ -190,7 +190,7 @@ export default function CategoryTagsPanel({
                   onChange={(e) =>
                     setParentCategoryId(e.target.value ? Number(e.target.value) : undefined)
                   }
-                  className="w-full appearance-none rounded-xl border border-slate-100 bg-white px-4 py-2 pr-10 text-sm text-neutral-600 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
+                  className="w-full appearance-none rounded-xl border border-slate-100 bg-white px-4 py-2 pr-10 text-sm text-neutral-600 focus:border-infinity-primary focus:outline-none focus:ring-1 focus:ring-infinity-primary"
                 >
                   <option value="">دسته بندی مادر</option>
                   {categories.map((category) => (
@@ -206,7 +206,7 @@ export default function CategoryTagsPanel({
                 type="button"
                 onClick={handleAddCategory}
                 disabled={isAddingCategory || !newCategoryName.trim()}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-pink-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-pink-600 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-infinity-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-infinity-primary disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isAddingCategory ? (
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -221,7 +221,7 @@ export default function CategoryTagsPanel({
             <button
               type="button"
               onClick={() => setShowAddCategoryForm(true)}
-              className="flex items-center gap-1 text-xs text-pink-500 hover:text-pink-600"
+              className="flex items-center gap-1 text-xs text-infinity-primary hover:text-infinity-primary"
             >
               <Plus className="h-4 w-4" />
               <span>افزودن دسته بندی جدید</span>
@@ -237,7 +237,7 @@ export default function CategoryTagsPanel({
                 handleTagSelect(e.target.value);
                 e.currentTarget.selectedIndex = 0;
               }}
-              className="w-full appearance-none rounded-xl border border-slate-100 bg-white px-4 py-3 pr-10 text-xs text-neutral-500 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
+              className="w-full appearance-none rounded-xl border border-slate-100 bg-white px-4 py-3 pr-10 text-xs text-neutral-500 focus:border-infinity-primary focus:outline-none focus:ring-1 focus:ring-infinity-primary"
             >
               <option value="">انتخاب برچسب</option>
               {tags.map((tag) => (
@@ -278,7 +278,7 @@ export default function CategoryTagsPanel({
                 value={newTagName}
                 onChange={(e) => setNewTagName(e.target.value)}
                 placeholder="نام برچسب جدید"
-                className="flex-1 rounded-xl border border-slate-100 bg-white px-3 py-2 text-sm text-neutral-600 placeholder:text-slate-400 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
+                className="flex-1 rounded-xl border border-slate-100 bg-white px-3 py-2 text-sm text-neutral-600 placeholder:text-slate-400 focus:border-infinity-primary focus:outline-none focus:ring-1 focus:ring-infinity-primary"
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();
@@ -290,7 +290,7 @@ export default function CategoryTagsPanel({
                 type="button"
                 onClick={handleAddTag}
                 disabled={isAddingTag || !newTagName.trim()}
-                className="flex items-center justify-center rounded-xl bg-pink-500 px-3 text-white transition-colors hover:bg-pink-600 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex items-center justify-center rounded-xl bg-infinity-primary px-3 text-white transition-colors hover:bg-infinity-primary disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isAddingTag ? (
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -305,7 +305,7 @@ export default function CategoryTagsPanel({
             <button
               type="button"
               onClick={() => setShowAddTagForm(true)}
-              className="flex items-center justify-end gap-1 text-xs text-pink-500 hover:text-pink-600"
+              className="flex items-center justify-end gap-1 text-xs text-infinity-primary hover:text-infinity-primary"
             >
               <Plus className="h-4 w-4" />
               <span>افزودن برچسب جدید</span>

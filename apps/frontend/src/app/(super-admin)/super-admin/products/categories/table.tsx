@@ -131,7 +131,7 @@ const ChildCategoryCard = ({
 
   return (
     <article className="relative w-full">
-      <div className="flex h-[116px] flex-row gap-2 rounded-2xl border border-slate-200 bg-white p-2 transition-all duration-300 hover:border-pink-100 hover:shadow-md">
+      <div className="flex h-[116px] flex-row gap-2 rounded-2xl border border-slate-200 bg-white p-2 transition-all duration-300 hover:border-infinity-primary-lighter/40 hover:shadow-md">
         <div
           className="relative h-[100px] w-24 overflow-hidden rounded-xl"
           style={{ backgroundColor: colorValue ? hexToRgba(colorValue, 0.16) : "#f8fafc" }}
@@ -195,7 +195,7 @@ const ChildCategoryCard = ({
             <span className="text-[10px] text-slate-500">ویرایش سریع</span>
             <Link
               href={`/super-admin/products/categories/edit/${child.id}`}
-              className="text-[10px] font-semibold text-pink-600"
+              className="text-[10px] font-semibold text-infinity-primary"
             >
               ویرایش
             </Link>
@@ -225,7 +225,7 @@ const ParentCategoryCard = ({
 
   return (
     <>
-      <div className="interactive-card pressable group relative flex h-full w-full flex-col rounded-3xl border border-pink-50 bg-white p-1 transition-all duration-300 hover:border-pink-100 hover:shadow-lg md:mx-auto md:w-[258px]">
+      <div className="interactive-card pressable group relative flex h-full w-full flex-col rounded-3xl border border-infinity-primary-lighter/30 bg-white p-1 transition-all duration-300 hover:border-infinity-primary-lighter/40 hover:shadow-lg md:mx-auto md:w-[258px]">
         <div className="flex h-full flex-col rounded-[20px] bg-white p-3">
           <div
             className="relative aspect-[4/5] overflow-hidden rounded-[20px] md:aspect-auto md:h-[270px]"
@@ -241,7 +241,7 @@ const ParentCategoryCard = ({
             </div>
 
             {hasChildren && (
-              <span className="absolute left-2 top-2 rounded-full bg-pink-50 px-2 py-1 text-[11px] font-semibold text-pink-700 shadow-sm">
+              <span className="absolute left-2 top-2 rounded-full bg-infinity-primary-lighter/20 px-2 py-1 text-[11px] font-semibold text-infinity-primary-dark shadow-sm">
                 {childCategories.length} فرزند
               </span>
             )}
@@ -270,7 +270,7 @@ const ParentCategoryCard = ({
               type="button"
               onClick={() => setIsChildrenModalOpen(true)}
               disabled={!hasChildren}
-              className={`text-xs font-semibold ${hasChildren ? "text-pink-700" : "text-slate-400"}`}
+              className={`text-xs font-semibold ${hasChildren ? "text-infinity-primary-dark" : "text-slate-400"}`}
             >
               {hasChildren ? "مشاهده فرزندان" : "بدون فرزند"}
             </button>

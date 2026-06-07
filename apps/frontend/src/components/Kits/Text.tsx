@@ -20,7 +20,7 @@ export default function Text({
     helper: "text-sm text-foreground-muted/80",
     link: clsx(
       "text-sm transition-colors",
-      disabled ? "text-foreground-muted" : "text-pink-500 hover:text-pink-600",
+      disabled ? "text-foreground-muted" : "text-infinity-primary hover:text-infinity-primary",
       "cursor-pointer",
     ),
   };

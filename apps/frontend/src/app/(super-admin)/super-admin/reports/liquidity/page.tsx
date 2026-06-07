@@ -73,7 +73,7 @@ export default function LiquidityReportPage() {
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium text-neutral-600">تاریخ شروع</label>
                 <DatePicker
-                  inputClass="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+                  inputClass="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-infinity-primary focus:border-transparent transition-all"
                   defaultValue={start}
                   onChange={(d: any) => setStart(normalizeDateInput(d, start))}
                 />
@@ -81,7 +81,7 @@ export default function LiquidityReportPage() {
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium text-neutral-600">تاریخ پایان</label>
                 <DatePicker
-                  inputClass="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+                  inputClass="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-infinity-primary focus:border-transparent transition-all"
                   defaultValue={end}
                   onChange={(d: any) => setEnd(normalizeDateInput(d, end))}
                 />
@@ -89,7 +89,7 @@ export default function LiquidityReportPage() {
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium text-neutral-600">بازه زمانی</label>
                 <select
-                  className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 transition-all focus:border-transparent focus:ring-2 focus:ring-pink-500"
+                  className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 transition-all focus:border-transparent focus:ring-2 focus:ring-infinity-primary"
                   value={interval}
                   onChange={(e) => setInterval(e.target.value as LiquidityInterval)}
                 >
@@ -107,24 +107,24 @@ export default function LiquidityReportPage() {
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <div className="flex items-center gap-3">
-                <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-pink-500"></div>
+                <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-infinity-primary"></div>
                 <span className="text-neutral-600">در حال بارگذاری...</span>
               </div>
             </div>
           ) : (
             <div className="space-y-6">
               {/* Summary Card */}
-              <div className="rounded-xl border border-pink-100 bg-gradient-to-r from-pink-50 to-purple-50 p-6">
+              <div className="rounded-xl border border-infinity-primary-lighter/40 bg-gradient-to-r from-infinity-primary-lighter/20 to-infinity-primary-lighter/30 p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="text-lg mb-2 font-medium text-neutral-700">مجموع نقدینگی</h3>
-                    <p className="text-3xl font-bold text-pink-600">
+                    <p className="text-3xl font-bold text-infinity-primary">
                       {faNum(data?.total || 0)} تومان
                     </p>
                   </div>
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-pink-100">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-infinity-primary-lighter/30">
                     <svg
-                      className="h-8 w-8 text-pink-600"
+                      className="h-8 w-8 text-infinity-primary"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -197,7 +197,7 @@ function LiquidityChart({ series }: { series: Array<{ bucket: string; total: num
       return (
         <div className="rounded-lg border border-neutral-200 bg-white p-4 shadow-lg" dir="rtl">
           <p className="mb-2 font-medium text-neutral-800">{data.fullDate}</p>
-          <p className="text-pink-600">
+          <p className="text-infinity-primary">
             <span className="font-medium">نقدینگی:</span> {faNum(data.total)} تومان
           </p>
         </div>

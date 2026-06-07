@@ -97,7 +97,7 @@ const SetCategoryTable: React.FC<SetCategoryTableProps> = ({ categories }) => {
                 <td className="text-sm py-3 text-right text-neutral-800">
                   {editingId === category.id.toString() ? (
                     <input
-                      className="w-full rounded border border-slate-200 px-2 py-1 text-sm focus:border-pink-400 focus:outline-none"
+                      className="w-full rounded border border-slate-200 px-2 py-1 text-sm focus:border-infinity-primary-light focus:outline-none"
                       value={draftTitle}
                       onChange={(e) => setDraftTitle(e.target.value)}
                     />
@@ -108,7 +108,7 @@ const SetCategoryTable: React.FC<SetCategoryTableProps> = ({ categories }) => {
                 <td className="text-sm py-3 text-right text-neutral-800">
                   {editingId === category.id.toString() ? (
                     <input
-                      className="w-full rounded border border-slate-200 px-2 py-1 text-sm focus:border-pink-400 focus:outline-none"
+                      className="w-full rounded border border-slate-200 px-2 py-1 text-sm focus:border-infinity-primary-light focus:outline-none"
                       value={draftSlug}
                       onChange={(e) => setDraftSlug(e.target.value)}
                     />

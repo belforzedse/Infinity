@@ -3,9 +3,9 @@ import React from "react";
 const BlogIcon = () => {
   return (
     <svg
-      className="h-5 w-5 text-pink-500"
+      className="h-5 w-5 text-infinity-primary"
       fill="none"
-      stroke="#EC4899"
+      stroke="#3d4c6e"
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
     >

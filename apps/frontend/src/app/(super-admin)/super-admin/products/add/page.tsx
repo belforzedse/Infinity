@@ -103,7 +103,7 @@ export default function AddProductsPage() {
 
           <button
             onClick={handleCreateProduct}
-            className="w-full rounded-xl border-2 border-pink-200 bg-pink-500/10 px-5 py-2 text-sm text-pink-900 hover:bg-pink-500/80 hover:text-white md:w-fit"
+            className="w-full rounded-xl border-2 border-infinity-primary-lighter/60 bg-infinity-primary/10 px-5 py-2 text-sm text-infinity-primary-darker hover:bg-infinity-primary/80 hover:text-white md:w-fit"
           >
             ذخیره
           </button>

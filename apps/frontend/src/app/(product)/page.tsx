@@ -243,6 +243,10 @@ export default async function Home() {
       {/* JSON-LD Organization Schema for SEO */}
       <OrganizationSchema />
 
+      <Suspense fallback={<StoriesRailFallback />}>
+        <StoriesSection />
+      </Suspense>
+
       <SiteGifBanner
         enabled={homepageSettings.siteGifEnabled}
         imageUrl={homepageSettings.siteGifImage}
@@ -273,10 +277,6 @@ export default async function Home() {
           />
         </Reveal>
       </section>
-
-      <Suspense fallback={<StoriesRailFallback />}>
-        <StoriesSection />
-      </Suspense>
 
       <Suspense fallback={<ProductSectionsFallback />}>
         <ProductSectionsBlock

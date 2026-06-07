@@ -291,14 +291,14 @@ export default function ProductsCommentsPage() {
               placeholder="جستجو در متن، نام کاربر، شماره تلفن یا محصول..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full rounded-xl border border-slate-100 bg-slate-50 py-2.5 pl-4 pr-10 text-sm text-neutral-700 placeholder:text-slate-400 focus:border-pink-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-pink-500/10"
+              className="w-full rounded-xl border border-slate-100 bg-slate-50 py-2.5 pl-4 pr-10 text-sm text-neutral-700 placeholder:text-slate-400 focus:border-infinity-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-infinity-primary/10"
             />
           </div>
           <div className="sm:w-56">
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full appearance-none rounded-xl border border-slate-100 bg-slate-50 px-4 py-2.5 text-sm text-neutral-700 focus:border-pink-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-pink-500/10"
+              className="w-full appearance-none rounded-xl border border-slate-100 bg-slate-50 px-4 py-2.5 text-sm text-neutral-700 focus:border-infinity-primary focus:bg-white focus:outline-none focus:ring-2 focus:ring-infinity-primary/10"
             >
               <option value="all">همه وضعیت‌ها</option>
               <option value="Need for Review">در انتظار تایید</option>

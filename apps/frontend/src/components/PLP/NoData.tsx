@@ -51,7 +51,7 @@ export default function NoData({ category }: NoDataProps) {
       <div className="flex flex-col gap-4 sm:flex-row">
         <Link
           href="/"
-          className="bg-pink-500 hover:bg-pink-600 rounded-lg px-6 py-3 text-white transition-colors"
+          className="bg-infinity-primary hover:bg-infinity-primary rounded-lg px-6 py-3 text-white transition-colors"
         >
           بازگشت به صفحه اصلی
         </Link>

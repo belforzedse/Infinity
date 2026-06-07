@@ -18,20 +18,7 @@ export default function TopProgressBar() {
       )}
       aria-hidden
     >
-      <div className="h-full w-1/3 animate-[loaderSlide_1.2s_ease-in-out_infinite] bg-gradient-to-r from-pink-500 via-purple-500 to-rose-500" />
-      <style jsx>{`
-        @keyframes loaderSlide {
-          0% {
-            transform: translateX(-150%);
-          }
-          50% {
-            transform: translateX(50%);
-          }
-          100% {
-            transform: translateX(250%);
-          }
-        }
-      `}</style>
+      <div className="h-full w-1/3 animate-auth-loader-slide bg-gradient-to-l from-[#334155] via-[#33415e] to-[#aebfdb] shadow-[0_0_10px_rgba(57,76,110,0.55)]" />
     </div>
   );
 }

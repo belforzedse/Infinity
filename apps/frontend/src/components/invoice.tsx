@@ -499,7 +499,7 @@ export default function Invoice({ order, isPreInvoice = false }: Props) {
               <tr className="border border-black">
                 <td className="w-1/2 border bg-gray-100 p-2 text-center font-bold">قابل پرداخت</td>
                 <td className="w-1/2 border p-2 text-center">
-                  <span className="text-2xl text-pink-600">{nf.format(total)}</span> تومان
+                  <span className="text-2xl text-infinity-primary">{nf.format(total)}</span> تومان
                 </td>
               </tr>
             </tbody>

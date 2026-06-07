@@ -132,7 +132,7 @@ export default function VersionCheck() {
 
   return (
     <div
-      className="fixed bottom-0 left-0 right-0 z-[9998] bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg"
+      className="fixed bottom-0 left-0 right-0 z-[9998] bg-[linear-gradient(180deg,#566D97_0%,#98BDFF_100%)] text-white shadow-lg"
       role="alert"
       aria-live="polite"
     >

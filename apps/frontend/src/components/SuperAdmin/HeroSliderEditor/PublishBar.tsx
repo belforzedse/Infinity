@@ -77,7 +77,7 @@ export default function PublishBar({
             type="button"
             onClick={onPublish}
             disabled={isPublishing || isSavingDraft}
-            className="rounded-lg bg-pink-500 px-3 py-2 text-sm text-white hover:bg-pink-600 disabled:opacity-60"
+            className="rounded-lg bg-infinity-primary px-3 py-2 text-sm text-white hover:bg-infinity-primary disabled:opacity-60"
           >
             {isPublishing ? "در حال انتشار..." : "انتشار"}
           </button>

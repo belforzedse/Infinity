@@ -267,7 +267,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
     <div className="space-y-4">
       {/* Search Input */}
       <div className="relative">
-        <div className="relative flex w-full items-center justify-between rounded-[28px] border border-slate-200 bg-white py-2 pl-2 pr-4 shadow-sm focus-within:ring-2 focus-within:ring-pink-200">
+        <div className="relative flex w-full items-center justify-between rounded-[28px] border border-slate-200 bg-white py-2 pl-2 pr-4 shadow-sm focus-within:ring-2 focus-within:ring-infinity-primary-lighter/60">
           <div className="flex w-full items-center justify-between px-2">
             <input
               type="text"
@@ -277,7 +277,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
               className="text-sm flex-1 bg-transparent text-right text-neutral-600 placeholder-neutral-400 outline-none"
             />
 
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-pink-500 shadow-sm">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-infinity-primary shadow-sm">
               <SearchIcon className="h-5 w-5 text-white" />
             </div>
           </div>
@@ -345,7 +345,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
                   className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                     isProductSelected(product.id)
                       ? "bg-slate-200 text-slate-500 cursor-not-allowed"
-                      : "bg-pink-500 text-white hover:bg-pink-600"
+                      : "bg-infinity-primary text-white hover:bg-infinity-primary"
                   }`}
                 >
                   {isProductSelected(product.id) ? "انتخاب شده" : "انتخاب"}
@@ -431,7 +431,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
                         className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
                           isDisabled
                             ? "bg-slate-200 text-slate-500 cursor-not-allowed"
-                            : "bg-pink-500 text-white hover:bg-pink-600"
+                            : "bg-infinity-primary text-white hover:bg-infinity-primary"
                         }`}
                       >
                         {isProductSelected(selectedProduct.id, variation.id) ? "انتخاب شده" : "انتخاب"}

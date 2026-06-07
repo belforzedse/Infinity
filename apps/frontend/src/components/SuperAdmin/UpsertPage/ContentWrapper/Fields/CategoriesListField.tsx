@@ -214,7 +214,7 @@ export default function CategoriesListField({ value, onChange, readOnly, fetchCa
       <div className="relative">
         <input
           type="text"
-          className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-neutral-600 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500/30"
+          className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-neutral-600 focus:border-infinity-primary focus:outline-none focus:ring-1 focus:ring-infinity-primary/30"
           placeholder="جستجوی دسته بندی..."
           value={searchQuery}
           onChange={(e) => {

@@ -22,8 +22,8 @@ const SidebarItem = ({ href, icon, text, onClick, tone = "default" }: SidebarIte
   const renderIcon = (iconElement: ReactNode) => {
     const iconClassName = clsx(
       "h-5 w-5 shrink-0 transition-colors",
-      isActive ? "text-white" : "text-[#EC4899]",
-      isLogout && "text-[#EC4899]",
+      isActive ? "text-white" : "text-[#3d4c6e]",
+      isLogout && "text-[#3d4c6e]",
     );
 
     if (isValidElement<{ className?: string }>(iconElement)) {
@@ -36,7 +36,7 @@ const SidebarItem = ({ href, icon, text, onClick, tone = "default" }: SidebarIte
     return (
       <button
         onClick={onClick}
-        className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-right text-[14px] font-medium text-slate-600 transition-colors hover:text-pink-600"
+        className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-right text-[14px] font-medium text-slate-600 transition-colors hover:text-infinity-primary"
       >
         {renderIcon(icon)}
         <span>{text}</span>
@@ -49,8 +49,8 @@ const SidebarItem = ({ href, icon, text, onClick, tone = "default" }: SidebarIte
       href={href}
       className={`relative flex items-center justify-between rounded-lg px-4 py-3 transition-colors ${
         isActive
-          ? "bg-[#EC4899] text-white"
-          : "text-slate-600 hover:text-[#EC4899]"
+          ? "bg-[#3d4c6e] text-white"
+          : "text-slate-600 hover:text-[#3d4c6e]"
       }`}
     >
       <div className="flex items-center gap-2">
@@ -64,7 +64,7 @@ const SidebarItem = ({ href, icon, text, onClick, tone = "default" }: SidebarIte
         </span>
       </div>
       {isActive && <ArrowLeftIcon className="h-4 w-4 text-white" />}
-      {isActive && <span className="absolute -right-2 top-1/2 h-12 w-1 -translate-y-1/2 rounded-full bg-[#EC4899]" />}
+      {isActive && <span className="absolute -right-2 top-1/2 h-12 w-1 -translate-y-1/2 rounded-full bg-[#3d4c6e]" />}
     </Link>
   );
 };

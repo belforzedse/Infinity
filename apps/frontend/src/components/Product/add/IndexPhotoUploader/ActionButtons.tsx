@@ -26,7 +26,7 @@ const IndexPhotoUploaderActionButtons: React.FC<ActionButtonsProps> = ({
         <DeleteIcon className="h-6 w-6" />
       </button>
       <button
-        className="flex h-12 w-12 items-center justify-center rounded-xl bg-pink-500 text-white transition-colors hover:bg-pink-600"
+        className="flex h-12 w-12 items-center justify-center rounded-xl bg-infinity-primary text-white transition-colors hover:bg-infinity-primary"
         onClick={onEditClick}
       >
         <EditIcon className="h-6 w-6" />

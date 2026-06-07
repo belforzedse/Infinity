@@ -75,9 +75,9 @@ const PhotoUploaderImagePreview: React.FC<ImagePreviewProps> = ({
               className="absolute inset-0 flex items-center justify-center bg-black/0 transition-all duration-300 group-hover:bg-black/10 cursor-pointer"
             >
               <div className="flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                <div className="h-12 w-12 rounded-full bg-white/95 shadow-xl ring-2 ring-pink-200/50 transition-all duration-300 group-hover:scale-110">
+                <div className="h-12 w-12 rounded-full bg-white/95 shadow-xl ring-2 ring-infinity-primary-lighter/50 transition-all duration-300 group-hover:scale-110">
                   <svg
-                    className="relative left-[2px] top-1/2 h-5 w-5 -translate-y-1/2 text-pink-600"
+                    className="relative left-[2px] top-1/2 h-5 w-5 -translate-y-1/2 text-infinity-primary"
                     fill="currentColor"
                     viewBox="0 0 24 24"
                   >
@@ -120,7 +120,7 @@ const PhotoUploaderImagePreview: React.FC<ImagePreviewProps> = ({
     <button
       onClick={onRemove}
       aria-label="حذف رسانه"
-      className="absolute right-1 top-1 flex h-7 w-7 items-center justify-center rounded-full bg-pink-500 text-white shadow-sm transition-opacity hover:bg-pink-600 lg:h-8 lg:w-8 lg:opacity-0 lg:group-hover:opacity-100"
+      className="absolute right-1 top-1 flex h-7 w-7 items-center justify-center rounded-full bg-infinity-primary text-white shadow-sm transition-opacity hover:bg-infinity-primary lg:h-8 lg:w-8 lg:opacity-0 lg:group-hover:opacity-100"
     >
       <DeleteIcon className="h-4 w-4" />
     </button>

@@ -110,7 +110,7 @@ export default function ReserveGroupPage() {
     return (
       <UserContainer className="flex flex-col gap-6 py-6 lg:py-10" dir="rtl">
         <p className="text-slate-600">شناسه گروه رزرو نامعتبر است.</p>
-        <Link href="/orders" className="text-pink-600 hover:underline">
+        <Link href="/orders" className="text-infinity-primary hover:underline">
           بازگشت به سفارش‌ها
         </Link>
       </UserContainer>
@@ -121,7 +121,7 @@ export default function ReserveGroupPage() {
     <UserContainer className="flex flex-col gap-6 py-6 lg:py-10" dir="rtl">
       <StorefrontAccountShell contentClassName="flex flex-col gap-6">
           <nav className="flex items-center gap-2 text-sm text-slate-500">
-            <Link href="/orders" className="hover:text-pink-600">
+            <Link href="/orders" className="hover:text-infinity-primary">
               سفارش‌ها
             </Link>
             <ChevronRight className="h-4 w-4 rotate-180" />
@@ -159,7 +159,7 @@ export default function ReserveGroupPage() {
           ) : rows.length === 0 ? (
             <div className="rounded-lg bg-gray-50 p-8 text-center">
               <p className="text-gray-600">سفارشی در این گروه یافت نشد.</p>
-              <Link href="/orders" className="mt-4 inline-block text-pink-600 hover:underline">
+              <Link href="/orders" className="mt-4 inline-block text-infinity-primary hover:underline">
                 بازگشت به لیست سفارش‌ها
               </Link>
             </div>

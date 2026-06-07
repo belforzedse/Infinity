@@ -64,7 +64,7 @@ export default function RadioTextWithChips({
                     className={twMerge(
                       "rounded-md border border-slate-200 bg-slate-50 px-2 py-1 text-gray-400",
                       chip.value === chipsValue
-                        ? "border-actions-primary bg-pink-50 text-actions-primary"
+                        ? "border-actions-primary bg-infinity-primary-lighter/20 text-actions-primary"
                         : "",
                     )}
                     onClick={() => onChipsChange(chip.value)}

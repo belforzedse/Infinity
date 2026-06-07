@@ -36,7 +36,7 @@ export default function HeroPagination({
           aria-label="Next"
           onClick={onPrev}
           className={clsx(
-            "mx-1 mt-1 rounded-full p-1 text-[28px] text-pink-500 transition hover:bg-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300/50",
+            "mx-1 mt-1 rounded-full p-1 text-[28px] text-infinity-primary transition hover:bg-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary-lighter/50",
             arrowClassName,
           )}
         >
@@ -54,8 +54,8 @@ export default function HeroPagination({
             className={clsx(
               "h-1.5 rounded-full transition-all",
               i === index
-                ? "w-12 bg-pink-500/70 backdrop-blur-[0.2px] ring-[0.5px] ring-white/35"
-                : "w-4 bg-pink-500/20",
+                ? "w-12 bg-infinity-primary/70 backdrop-blur-[0.2px] ring-[0.5px] ring-white/35"
+                : "w-4 bg-infinity-primary/20",
               i === index ? dotActiveClassName : dotClassName,
             )}
           />
@@ -68,7 +68,7 @@ export default function HeroPagination({
           aria-label="Previous"
           onClick={onNext}
           className={clsx(
-            "mx-1 mt-1 rounded-full p-1 text-[28px] text-pink-500 transition hover:bg-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-300/50",
+            "mx-1 mt-1 rounded-full p-1 text-[28px] text-infinity-primary transition hover:bg-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary-lighter/50",
             arrowClassName,
           )}
         >

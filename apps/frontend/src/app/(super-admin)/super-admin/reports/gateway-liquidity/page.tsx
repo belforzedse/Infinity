@@ -68,7 +68,7 @@ export default function GatewayLiquidityReportPage() {
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium text-neutral-600">تاریخ شروع</label>
                 <DatePicker
-                  inputClass="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+                  inputClass="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-infinity-primary focus:border-transparent transition-all"
                   defaultValue={start}
                   onChange={(d: any) => setStart(normalizeDateInput(d, start))}
                 />
@@ -76,7 +76,7 @@ export default function GatewayLiquidityReportPage() {
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium text-neutral-600">تاریخ پایان</label>
                 <DatePicker
-                  inputClass="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+                  inputClass="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-infinity-primary focus:border-transparent transition-all"
                   defaultValue={end}
                   onChange={(d: any) => setEnd(normalizeDateInput(d, end))}
                 />
@@ -90,7 +90,7 @@ export default function GatewayLiquidityReportPage() {
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <div className="flex items-center gap-3">
-                <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-pink-500"></div>
+                <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-infinity-primary"></div>
                 <span className="text-neutral-600">در حال بارگذاری...</span>
               </div>
             </div>

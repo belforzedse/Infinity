@@ -55,9 +55,9 @@ const BlogProductCard: React.FC<BlogProductCardProps> = ({
     <div className={clsx("group relative w-[168px] flex-shrink-0", className)}>
       <Link
         href={productUrl}
-        className="block rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2"
+        className="block rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary focus-visible:ring-offset-2"
       >
-        <div className="interactive-card pressable flex h-full w-full flex-col rounded-2xl border border-slate-200 bg-white p-1 transition-all hover:border-pink-200 hover:shadow-md">
+        <div className="interactive-card pressable flex h-full w-full flex-col rounded-2xl border border-slate-200 bg-white p-1 transition-all hover:border-infinity-primary-lighter/60 hover:shadow-md">
           <div className="relative">
             <div className="relative mx-auto h-[140px] w-[152px] overflow-hidden rounded-xl">
               <BlurImage
@@ -81,7 +81,7 @@ const BlogProductCard: React.FC<BlogProductCardProps> = ({
               )}
 
               {discount && discount > 0 && (
-                <div className="absolute left-1 top-1 flex items-center rounded-bl-xl rounded-tr-xl bg-rose-600 px-2 py-0.5">
+                <div className="absolute left-1 top-1 flex items-center rounded-bl-xl rounded-tr-xl bg-infinity-primary px-2 py-0.5">
                   <span className="text-xs text-white">٪{discount} تخفیف</span>
                 </div>
               )}
@@ -110,7 +110,7 @@ const BlogProductCard: React.FC<BlogProductCardProps> = ({
             ) : (
               <div className="flex flex-col items-end gap-0.5">
                 {discountedPrice && discountedPrice > 0 && discountedPrice < price && (
-                  <span className="text-xs text-pink-600 font-medium">
+                  <span className="text-xs text-infinity-primary font-medium">
                     {faNum(discountedPrice)} تومان
                   </span>
                 )}
@@ -143,7 +143,7 @@ const BlogProductCard: React.FC<BlogProductCardProps> = ({
       >
         <HeartIcon
           className={`h-4 w-4 ${
-            isLiked ? "fill-pink-600 text-pink-600" : "stroke-neutral-500 text-neutral-500"
+            isLiked ? "fill-infinity-primary text-infinity-primary" : "stroke-neutral-500 text-neutral-500"
           }`}
           filled={isLiked}
         />

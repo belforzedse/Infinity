@@ -51,7 +51,7 @@ export default function ShareModalProductPreview({
         )}
 
         {hasDiscount && (
-          <span className="absolute left-1 top-1 rounded-full bg-rose-600 px-2 py-0.5 text-[10px] font-bold text-white">
+          <span className="absolute left-1 top-1 rounded-full bg-infinity-primary px-2 py-0.5 text-[10px] font-bold text-white">
             تخفیف
           </span>
         )}

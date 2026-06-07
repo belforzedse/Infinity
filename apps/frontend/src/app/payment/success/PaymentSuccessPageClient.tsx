@@ -99,7 +99,7 @@ function PaymentSuccessContent() {
       <StorefrontContainer className="py-10">
         <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-8">
           <div className="flex justify-center items-center h-40">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pink-500"></div>
+            <div className="h-12 w-12 animate-spin rounded-full border-2 border-slate-200 border-t-infinity-primary"></div>
           </div>
         </div>
       </StorefrontContainer>
@@ -187,7 +187,7 @@ function PaymentSuccessContent() {
           <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">
             <button
               onClick={handleViewOrder}
-              className="bg-pink-500 text-white py-3 px-6 rounded-lg text-center hover:bg-pink-600 transition-colors flex-1"
+              className="bg-infinity-primary text-white py-3 px-6 rounded-lg text-center hover:bg-infinity-primary transition-colors flex-1"
             >
               مشاهده جزئیات سفارش
             </button>
@@ -220,7 +220,7 @@ export default function PaymentSuccessPageClient() {
         <StorefrontContainer className="py-10">
           <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-8">
             <div className="flex justify-center items-center h-40">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pink-500"></div>
+              <div className="h-12 w-12 animate-spin rounded-full border-2 border-slate-200 border-t-infinity-primary"></div>
             </div>
           </div>
         </StorefrontContainer>

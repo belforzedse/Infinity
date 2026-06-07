@@ -336,13 +336,13 @@ export default function OrdersTabs() {
             value={searchTerm}
             onChange={(event) => handleSearchChange(event.target.value)}
             placeholder="جستجوی سفارش با شماره یا نام محصول"
-            className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pr-4 text-sm text-right text-slate-700 outline-none transition focus:border-pink-400 focus:ring-2 focus:ring-pink-200"
+            className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pr-4 text-sm text-right text-slate-700 outline-none transition focus:border-infinity-primary-light focus:ring-2 focus:ring-infinity-primary-lighter/60"
           />
           {searchTerm ? (
             <button
               type="button"
               onClick={clearSearch}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-pink-500 hover:text-pink-600"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-infinity-primary hover:text-infinity-primary"
             >
               پاک کردن
             </button>
@@ -359,7 +359,7 @@ export default function OrdersTabs() {
               setPage(1);
               loadOrders(1);
             }}
-            className="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-600 transition hover:border-pink-200 hover:text-pink-600"
+            className="flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-600 transition hover:border-infinity-primary-lighter/60 hover:text-infinity-primary"
           >
             <RefreshCcw className="h-4 w-4" />
             بروزرسانی

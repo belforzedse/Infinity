@@ -42,7 +42,7 @@ export default function AreaLineChart({
   xKey,
   yKey,
   height = 320,
-  color = "#ec4899", // pink-500
+  color = "#ec4899", // default chart series color
   valueFormatter = (v) => v.toLocaleString("fa-IR"),
 }: Props) {
   const id = React.useId();

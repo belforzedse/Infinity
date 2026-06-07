@@ -32,7 +32,7 @@ export default function ShareModalCopySection({
           type="button"
           onClick={onCopyText}
           disabled={!shareUrl}
-          className="text-xs font-semibold text-pink-600 transition hover:text-pink-700 disabled:opacity-60"
+          className="text-xs font-semibold text-infinity-primary transition hover:text-infinity-primary-dark disabled:opacity-60"
         >
           {copied === "text" ? "کپی شد" : "کپی متن پیام"}
         </button>
@@ -46,14 +46,14 @@ export default function ShareModalCopySection({
           dir="ltr"
           onClick={onSelectInput}
           placeholder={open ? "در حال آماده‌سازی لینک..." : ""}
-          className="h-12 w-full rounded-xl border border-gray-200 bg-white px-3 text-sm text-gray-800 outline-none ring-0 focus:border-pink-300"
+          className="h-12 w-full rounded-xl border border-gray-200 bg-white px-3 text-sm text-gray-800 outline-none ring-0 focus:border-infinity-primary-lighter"
           aria-label="لینک اشتراک‌گذاری"
         />
         <button
           type="button"
           onClick={onCopyLink}
           disabled={!shareUrl}
-          className="h-12 shrink-0 rounded-xl bg-pink-500 px-4 text-sm font-semibold text-white transition-colors hover:bg-pink-600 disabled:cursor-not-allowed disabled:opacity-60"
+          className="h-12 shrink-0 rounded-xl bg-infinity-primary px-4 text-sm font-semibold text-white transition-colors hover:bg-infinity-primary disabled:cursor-not-allowed disabled:opacity-60"
         >
           {copied === "link" ? "کپی شد" : "کپی"}
         </button>

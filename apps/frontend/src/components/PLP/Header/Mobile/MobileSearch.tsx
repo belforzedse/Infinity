@@ -220,7 +220,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
                   }}
                   inputMode="search"
                   enterKeyHint="search"
-                  className="text-[16px] leading-6 w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-pink-500 focus:ring-pink-500"
+                  className="text-[16px] leading-6 w-full rounded-lg border border-gray-300 px-4 py-2 text-gray-900 focus:border-infinity-primary focus:ring-infinity-primary"
                   placeholder="دنبال چی میگردی؟"
                   dir="rtl"
                 />
@@ -295,7 +295,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
                       trackSearch(searchQuery.trim(), "mobile_view_all");
                       router.push(getSearchHref(searchQuery.trim()));
                     }}
-                    className="pressable text-xs block w-full border-t border-white/70 bg-transparent px-3 py-2 text-right text-pink-700 transition-colors hover:bg-white/70"
+                    className="pressable text-xs block w-full border-t border-white/70 bg-transparent px-3 py-2 text-right text-infinity-primary-dark transition-colors hover:bg-white/70"
                   >
                     مشاهده همه نتایج
                   </button>
@@ -306,7 +306,7 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
             <div className="mt-4">
               <button
                 type="button"
-                className="pressable text-sm inline-flex justify-center rounded-full border border-transparent bg-pink-100 px-4 py-2 font-medium text-pink-900 hover:bg-pink-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2"
+                className="pressable text-sm inline-flex justify-center rounded-full border border-transparent bg-infinity-primary-lighter/30 px-4 py-2 font-medium text-infinity-primary-darker hover:bg-infinity-primary-lighter/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary focus-visible:ring-offset-2"
                 onClick={() => closeModal({ force: true })}
               >
                 بستن

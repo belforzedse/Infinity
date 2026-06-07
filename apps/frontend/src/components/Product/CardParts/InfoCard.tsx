@@ -1,13 +1,12 @@
 import React from "react";
 import GridIcon from "../Icons/GridIcon";
 import MoreIcon from "../Icons/MoreIcon";
-import HeartIcon from "../Icons/HeartIcon";
-import { faNum } from "@/utils/faNum";
 
 interface InfoCardProps {
   category: string;
   title: string;
-  likedCount: number;
+  /** Kept for API compatibility; view count is intentionally not displayed to customers. */
+  likedCount?: number;
   menuButtonRef: React.RefObject<HTMLButtonElement | null>;
   handleMenuToggle: (e: React.MouseEvent) => void;
   isMenuOpen: boolean;
@@ -16,7 +15,6 @@ interface InfoCardProps {
 export function InfoCard({
   category,
   title,
-  likedCount,
   menuButtonRef,
   handleMenuToggle,
   isMenuOpen,
@@ -33,26 +31,18 @@ export function InfoCard({
           <button
             ref={menuButtonRef}
             onClick={handleMenuToggle}
-            className="focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+            className="focus:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
             aria-label="منوی عملیات"
             aria-expanded={isMenuOpen}
             type="button"
           >
-            <MoreIcon className="h-6 w-6 text-pink-500" />
+            <MoreIcon className="h-6 w-6 text-infinity-primary" />
           </button>
         </div>
       </div>
 
       <div className="flex flex-col gap-0.5">
         <h3 className="text-xs line-clamp-1 text-neutral-800">{title}</h3>
-        {likedCount > 100 && (
-          <div className="flex items-center gap-0.5">
-            <HeartIcon className="h-2 w-2 text-pink-600" />
-            <span className="text-[10px] text-pink-600">
-              {faNum(likedCount)} نفر این محصول را پسندیدند!
-            </span>
-          </div>
-        )}
       </div>
 
       {children}

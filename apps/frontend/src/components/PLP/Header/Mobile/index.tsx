@@ -3,14 +3,11 @@
 import { useState, useEffect } from "react";
 import MobileMenu from "./MobileMenu";
 import MobileSearch from "./MobileSearch";
-import OrderTrackingIcon from "../../Icons/OrderTrackingIcon";
-import SearchIcon from "../../Icons/SearchIcon";
 import CartIcon from "../../Icons/CartIcon";
 import MenuIcon from "../../Icons/MenuIcon";
 import { StorefrontLogo } from "@repo/brand";
-import InfinitygramHeaderLink from "@/components/PLP/Header/InfinitygramHeaderLink";
 import { useCart } from "@/contexts/CartContext";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import MobileBackButton from "@/components/MobileBackButton";
 import { getMobileBackFallbackHref } from "@/utils/mobileBackNavigation";
 
@@ -21,7 +18,6 @@ export default function PLPMobileHeader({}: Props) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { totalItems, openDrawer } = useCart();
   const [isStandalone, setIsStandalone] = useState(false);
-  const router = useRouter();
   const pathname = usePathname();
   const backFallbackHref = getMobileBackFallbackHref(pathname);
 
@@ -30,7 +26,6 @@ export default function PLPMobileHeader({}: Props) {
       event.preventDefault();
       event.stopPropagation();
     }
-    // Delay opening to avoid mobile ghost-click closing the dialog immediately
     window.setTimeout(() => setIsSearchOpen(true), 0);
   };
 
@@ -38,12 +33,11 @@ export default function PLPMobileHeader({}: Props) {
     if (typeof window !== "undefined" && "matchMedia" in window) {
       const mq = window.matchMedia("(display-mode: standalone)");
       setIsStandalone(mq.matches);
-      
-      // Optional: listen for changes
+
       const handleChange = (e: MediaQueryListEvent) => {
         setIsStandalone(e.matches);
       };
-      
+
       if (mq.addEventListener) {
         mq.addEventListener("change", handleChange);
         return () => mq.removeEventListener("change", handleChange);
@@ -54,8 +48,6 @@ export default function PLPMobileHeader({}: Props) {
     }
   }, []);
 
-  // Search is handled within the MobileSearch modal
-
   return (
     <>
       {/* Safe area white bar for standalone mode */}
@@ -65,77 +57,64 @@ export default function PLPMobileHeader({}: Props) {
           style={{ height: "env(safe-area-inset-top)" }}
         />
       )}
-      <header
+      <div
         className="lg:hidden"
         style={{
-          paddingTop: "0.75rem",
           marginTop: isStandalone ? "env(safe-area-inset-top)" : "0",
         }}
       >
-      <div className="relative flex items-center justify-between bg-transparent px-4 py-3" dir="ltr">
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <div className="pointer-events-auto">
-            <StorefrontLogo width={92} height={58} />
-          </div>
-        </div>
-        <div className="relative z-10 flex w-32 items-center justify-start">
-          {backFallbackHref ? (
-            <MobileBackButton fallbackHref={backFallbackHref} />
-          ) : (
-            <button
-              onClick={() => router.push("/orders")}
-              className="flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-2"
-              aria-label="پیگیری سفارش"
-            >
-              <span className="text-xs font-medium text-neutral-800">پیگیری سفارش</span>
-              <OrderTrackingIcon className="text-neutral-800" />
-            </button>
-          )}
-        </div>
-
-        {/* Left Section */}
-        <div className="relative z-10 flex items-center justify-end gap-0.5 min-[520px]:gap-2">
-          <InfinitygramHeaderLink className="h-9 w-9 min-[390px]:h-10 min-[390px]:w-10" />
-          <button
-            onClick={openSearch}
-            className="hidden h-10 w-10 items-center justify-center rounded-full border border-slate-200 bg-white min-[520px]:flex"
-            aria-label="جستجو"
-          >
-            <SearchIcon className="text-neutral-800" />
-          </button>
-          <button
-            onClick={() => setIsMenuOpen(true)}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white min-[390px]:h-10 min-[390px]:w-10"
-            aria-label="فهرست"
-          >
-            <MenuIcon className="text-neutral-800" />
-          </button>
-
-          <button
-            onClick={openDrawer}
-            className="relative flex h-9 w-9 items-center justify-center rounded-full bg-pink-500 min-[390px]:h-10 min-[390px]:w-10"
-            aria-label="سبد خریدتان"
-          >
-            <CartIcon className="text-white" />
-            <div className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full border border-slate-200 bg-white">
-              <span className="text-xs text-pink-500">{totalItems}</span>
+        {/* Mobile header row — dir=ltr so left/right are screen-physical */}
+        <div
+          className="relative flex min-h-[4.25rem] items-center px-5 py-2 sm:px-6 lg:hidden"
+          dir="ltr"
+        >
+          {/* Absolutely-centered logo */}
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+            <div className="pointer-events-auto" dir="rtl">
+              <StorefrontLogo width={72} height={45} />
             </div>
-          </button>
+          </div>
+
+          {/* Physical LEFT: cart button */}
+          <div className="relative z-10 flex items-center justify-start">
+            <button
+              onClick={openDrawer}
+              className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-infinity-primary text-infinity-primary-foreground transition-colors hover:bg-infinity-primary-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-infinity-primary"
+              aria-label="سبد خریدتان"
+            >
+              <CartIcon className="text-white" />
+              {totalItems > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-infinity-primary-dark text-[10px] font-medium leading-none text-white">
+                  {totalItems > 9 ? "9+" : totalItems}
+                </span>
+              )}
+            </button>
+          </div>
+
+          {/* Physical RIGHT: menu + optional back button */}
+          <div className="relative z-10 ml-auto flex items-center gap-2">
+            <button
+              onClick={() => setIsMenuOpen(true)}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-neutral-700 transition-colors hover:bg-neutral-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-infinity-primary"
+              aria-label="فهرست"
+            >
+              <MenuIcon className="text-neutral-700" />
+            </button>
+
+            {backFallbackHref && (
+              <MobileBackButton fallbackHref={backFallbackHref} />
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Search Bar managed via MobileSearch modal */}
-
-      {/* Mobile Menu Modal */}
       <MobileMenu
         isOpen={isMenuOpen}
         onClose={() => setIsMenuOpen(false)}
         onSearchClick={openSearch}
       />
 
-      {/* Mobile Search Modal */}
       <MobileSearch isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
-    </header>
     </>
   );
 }

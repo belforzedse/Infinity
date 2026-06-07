@@ -81,7 +81,7 @@ export default function FeaturedCategorySection({
               fontWeight,
             }}
           >
-            <Sparkle className="h-5 w-5 shrink-0 text-pink-600 md:h-6 md:w-6" aria-hidden />
+            <Sparkle className="h-5 w-5 shrink-0 text-infinity-primary md:h-6 md:w-6" aria-hidden />
             <span>{heading}</span>
           </h2>
           {subtitle?.trim() && (
@@ -90,7 +90,7 @@ export default function FeaturedCategorySection({
         </div>
         <Link
           href={categoryHref}
-          className="text-foreground-primary inline-flex shrink-0 items-center gap-1 text-sm transition-colors hover:text-pink-600 md:text-base"
+          className="text-foreground-primary inline-flex shrink-0 items-center gap-1 text-sm transition-colors hover:text-infinity-primary md:text-base"
         >
           <span>{actionText}</span>
           <span aria-hidden className="text-lg leading-none">

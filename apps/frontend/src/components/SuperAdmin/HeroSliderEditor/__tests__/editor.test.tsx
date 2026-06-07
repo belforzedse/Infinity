@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import HeroSliderCustomizationPage from "@/app/(super-admin)/super-admin/settings/customization/hero-slider/page";
+import HeroSliderCustomizationPage from "@/app/(super-admin)/super-admin/customization/hero-slider/page";
 import SlideList from "@/components/SuperAdmin/HeroSliderEditor/SlideList";
 import type { HeroSliderPayload } from "@/types/super-admin/heroSlider";
 import { normalizeHeroSliderPayload } from "@/types/super-admin/heroSlider";

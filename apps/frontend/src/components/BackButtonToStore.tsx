@@ -20,8 +20,8 @@ interface Props {
  */
 export default function BackButtonToStore({ isResponsive = true }: Props) {
   const buttonClasses = isResponsive
-    ? "bg-pink-500 hover:bg-pink-600 text-white flex lg:flex-row flex-row-reverse items-center gap-1 py-2 lg:px-6 px-4 rounded-lg transition-colors"
-    : "bg-pink-500 hover:bg-pink-600 text-white flex flex-row items-center gap-1 py-2 lg:px-6 px-4 rounded-lg transition-colors";
+    ? "bg-infinity-primary hover:bg-infinity-primary text-white flex lg:flex-row flex-row-reverse items-center gap-1 py-2 lg:px-6 px-4 rounded-lg transition-colors"
+    : "bg-infinity-primary hover:bg-infinity-primary text-white flex flex-row items-center gap-1 py-2 lg:px-6 px-4 rounded-lg transition-colors";
 
   return (
     <Link href="/" className={buttonClasses}>

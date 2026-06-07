@@ -281,7 +281,7 @@ export default function FAQQuestionsPage() {
         <button
           type="button"
           onClick={openCreateModal}
-          className="flex items-center gap-2 rounded-lg bg-pink-500 px-4 py-2 text-sm text-white transition-colors hover:bg-pink-600"
+          className="flex items-center gap-2 rounded-lg bg-infinity-primary px-4 py-2 text-sm text-white transition-colors hover:bg-infinity-primary"
         >
           <Plus className="h-4 w-4" />
           سوال جدید
@@ -306,7 +306,7 @@ export default function FAQQuestionsPage() {
                   faq_category: e.target.value ? parseInt(e.target.value) : null,
                 })
               }
-              className="w-full rounded-xl border border-slate-100 bg-white px-4 py-2.5 text-sm text-neutral-600 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
+              className="w-full rounded-xl border border-slate-100 bg-white px-4 py-2.5 text-sm text-neutral-600 focus:border-infinity-primary focus:outline-none focus:ring-1 focus:ring-infinity-primary"
             >
               <option value="">انتخاب دسته‌بندی</option>
               {categories.map((cat) => (
@@ -327,7 +327,7 @@ export default function FAQQuestionsPage() {
                 setFormData({ ...formData, Question: e.target.value })
               }
               placeholder="متن سوال را وارد کنید"
-              className="w-full rounded-xl border border-slate-100 bg-white px-4 py-2.5 text-sm text-neutral-600 placeholder:text-slate-400 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
+              className="w-full rounded-xl border border-slate-100 bg-white px-4 py-2.5 text-sm text-neutral-600 placeholder:text-slate-400 focus:border-infinity-primary focus:outline-none focus:ring-1 focus:ring-infinity-primary"
             />
           </div>
           <div>
@@ -341,7 +341,7 @@ export default function FAQQuestionsPage() {
               }
               placeholder="متن پاسخ را وارد کنید"
               rows={6}
-              className="w-full rounded-xl border border-slate-100 bg-white px-4 py-2.5 text-sm text-neutral-600 placeholder:text-slate-400 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
+              className="w-full rounded-xl border border-slate-100 bg-white px-4 py-2.5 text-sm text-neutral-600 placeholder:text-slate-400 focus:border-infinity-primary focus:outline-none focus:ring-1 focus:ring-infinity-primary"
             />
           </div>
           <div className="flex gap-4">
@@ -359,7 +359,7 @@ export default function FAQQuestionsPage() {
                   })
                 }
                 placeholder="0"
-                className="w-full rounded-xl border border-slate-100 bg-white px-4 py-2.5 text-sm text-neutral-600 placeholder:text-slate-400 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
+                className="w-full rounded-xl border border-slate-100 bg-white px-4 py-2.5 text-sm text-neutral-600 placeholder:text-slate-400 focus:border-infinity-primary focus:outline-none focus:ring-1 focus:ring-infinity-primary"
               />
             </div>
             <div className="flex items-center gap-2 pt-8">
@@ -370,7 +370,7 @@ export default function FAQQuestionsPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, IsActive: e.target.checked })
                 }
-                className="h-4 w-4 rounded border-slate-300 text-pink-500 focus:ring-pink-500"
+                className="h-4 w-4 rounded border-slate-300 text-infinity-primary focus:ring-infinity-primary"
               />
               <label
                 htmlFor="isActive"
@@ -394,7 +394,7 @@ export default function FAQQuestionsPage() {
               type="button"
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className="flex items-center gap-2 rounded-lg bg-pink-500 px-4 py-2 text-sm text-white transition-colors hover:bg-pink-600 disabled:opacity-50"
+              className="flex items-center gap-2 rounded-lg bg-infinity-primary px-4 py-2 text-sm text-white transition-colors hover:bg-infinity-primary disabled:opacity-50"
             >
               {isSubmitting ? (
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -417,7 +417,7 @@ export default function FAQQuestionsPage() {
               placeholder="جستجو در سوالات..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full rounded-xl border border-slate-100 bg-white py-2.5 pr-10 pl-4 text-sm text-neutral-600 placeholder:text-slate-400 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
+              className="w-full rounded-xl border border-slate-100 bg-white py-2.5 pr-10 pl-4 text-sm text-neutral-600 placeholder:text-slate-400 focus:border-infinity-primary focus:outline-none focus:ring-1 focus:ring-infinity-primary"
             />
           </div>
           <div className="relative w-full md:w-48">
@@ -429,7 +429,7 @@ export default function FAQQuestionsPage() {
                   e.target.value ? parseInt(e.target.value) : null
                 )
               }
-              className="w-full rounded-xl border border-slate-100 bg-white py-2.5 pr-10 pl-4 text-sm text-neutral-600 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
+              className="w-full rounded-xl border border-slate-100 bg-white py-2.5 pr-10 pl-4 text-sm text-neutral-600 focus:border-infinity-primary focus:outline-none focus:ring-1 focus:ring-infinity-primary"
             >
               <option value="">همه دسته‌بندی‌ها</option>
               {categories.map((cat) => (

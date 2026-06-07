@@ -183,7 +183,7 @@ function PaymentCallbackContent() {
     <div className="flex min-h-screen flex-col items-center justify-center">
       {loading ? (
         <div className="p-10 text-center">
-          <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-t-2 border-pink-500"></div>
+          <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-2 border-slate-200 border-t-infinity-primary"></div>
           <p className="text-lg">در حال بررسی وضعیت پرداخت...</p>
           <p className="text-sm mt-2 text-gray-500">لطفا صفحه را نبندید</p>
         </div>
@@ -203,7 +203,7 @@ export default function PaymentCallback() {
       fallback={
         <div className="flex min-h-screen flex-col items-center justify-center">
           <div className="p-10 text-center">
-            <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-t-2 border-pink-500"></div>
+            <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-2 border-slate-200 border-t-infinity-primary"></div>
             <p className="text-lg">در حال بارگذاری...</p>
           </div>
         </div>

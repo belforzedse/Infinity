@@ -21,7 +21,7 @@ const BlogContentRenderer: React.FC<BlogContentRendererProps> = ({ content }) =>
     // No shortcodes, render normally
     return (
       <div
-        className="prose prose-md prose-neutral max-w-none prose-headings:font-bold prose-headings:text-neutral-900 prose-h1:text-4xl prose-h2:text-2xl prose-h3:text-xl prose-h4:text-md prose-p:text-neutral-700 prose-a:text-pink-600 prose-a:no-underline hover:prose-a:underline prose-pre:bg-slate-900 prose-img:rounded-xl"
+        className="prose prose-md prose-neutral max-w-none prose-headings:font-bold prose-headings:text-neutral-900 prose-h1:text-4xl prose-h2:text-2xl prose-h3:text-xl prose-h4:text-md prose-p:text-neutral-700 prose-a:text-infinity-primary prose-a:no-underline hover:prose-a:underline prose-pre:bg-slate-900 prose-img:rounded-xl"
         dangerouslySetInnerHTML={{
           __html: DOMPurify.sanitize(content),
         }}
@@ -71,7 +71,7 @@ const BlogContentRenderer: React.FC<BlogContentRendererProps> = ({ content }) =>
 
   return (
     <div
-      className="prose-lg prose-h4:text-md prose prose-neutral max-w-none prose-headings:font-bold prose-headings:text-neutral-900 prose-h1:text-4xl prose-h2:text-2xl prose-h3:text-xl prose-p:text-neutral-700 prose-a:text-pink-600 prose-a:no-underline hover:prose-a:underline prose-pre:bg-slate-900 prose-img:rounded-xl"
+      className="prose-lg prose-h4:text-md prose prose-neutral max-w-none prose-headings:font-bold prose-headings:text-neutral-900 prose-h1:text-4xl prose-h2:text-2xl prose-h3:text-xl prose-p:text-neutral-700 prose-a:text-infinity-primary prose-a:no-underline hover:prose-a:underline prose-pre:bg-slate-900 prose-img:rounded-xl"
       dir="rtl"
     >
       {segments.map((segment, index) => {

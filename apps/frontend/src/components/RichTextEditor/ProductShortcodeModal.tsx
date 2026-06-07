@@ -394,13 +394,13 @@ const ProductShortcodeModal: React.FC<ProductShortcodeModalProps> = ({
                   return (
                     <div
                       key={product.id}
-                      className={`relative ${isSelected ? "bg-pink-50" : ""}`}
+                      className={`relative ${isSelected ? "bg-infinity-primary-lighter/20" : ""}`}
                     >
                       <div className="absolute left-3 top-1/2 -translate-y-1/2 z-10">
                         <div
                           className={`flex h-5 w-5 items-center justify-center rounded border ${
                             isSelected
-                              ? "border-pink-500 bg-pink-500"
+                              ? "border-infinity-primary bg-infinity-primary"
                               : "border-neutral-300 bg-white"
                           }`}
                         >
@@ -442,7 +442,7 @@ const ProductShortcodeModal: React.FC<ProductShortcodeModalProps> = ({
                 setUrlError(null);
               }}
               placeholder="https://new.infinitycolor.co/pdp/product-slug&#10;یا&#10;/pdp/product-slug"
-              className="w-full rounded-lg border border-neutral-200 bg-white p-3 text-sm text-neutral-800 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
+              className="w-full rounded-lg border border-neutral-200 bg-white p-3 text-sm text-neutral-800 focus:border-infinity-primary focus:outline-none focus:ring-1 focus:ring-infinity-primary"
               rows={4}
               dir="ltr"
             />
@@ -464,7 +464,7 @@ const ProductShortcodeModal: React.FC<ProductShortcodeModalProps> = ({
           {selectedCount > 0 && (
             <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-3">
               <p className="text-sm text-neutral-600">
-                <span className="font-medium text-pink-600">{selectedCount}</span> محصول انتخاب شده
+                <span className="font-medium text-infinity-primary">{selectedCount}</span> محصول انتخاب شده
               </p>
             </div>
           )}
@@ -496,7 +496,7 @@ const ProductShortcodeModal: React.FC<ProductShortcodeModalProps> = ({
       <div className="mt-6 flex items-center justify-between border-t border-neutral-200 pt-4">
         <div className="text-sm text-neutral-600">
           {selectedCount > 0 ? (
-            <span className="font-medium text-pink-600">{selectedCount} محصول انتخاب شده</span>
+            <span className="font-medium text-infinity-primary">{selectedCount} محصول انتخاب شده</span>
           ) : (
             <span>هیچ محصولی انتخاب نشده</span>
           )}

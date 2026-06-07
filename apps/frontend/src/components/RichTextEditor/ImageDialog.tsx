@@ -191,7 +191,7 @@ const ImageDialog: React.FC<ImageDialogProps> = ({
               type="button"
               onClick={() => handleSelectMedia(file)}
               className={`flex flex-col items-center rounded-lg border bg-white p-2 text-xs transition ${
-                isSelected ? "border-pink-500 shadow-sm" : "border-neutral-200 hover:border-pink-200"
+                isSelected ? "border-infinity-primary shadow-sm" : "border-neutral-200 hover:border-infinity-primary-lighter/60"
               }`}
             >
               <div className="flex h-32 w-full items-center justify-center overflow-hidden rounded-md bg-neutral-50">
@@ -221,7 +221,7 @@ const ImageDialog: React.FC<ImageDialogProps> = ({
               type="button"
               onClick={() => setActiveTab(tab)}
               className={`flex-1 rounded-lg px-3 py-2 transition ${
-                activeTab === tab ? "bg-white text-pink-600 shadow-sm" : "text-neutral-500"
+                activeTab === tab ? "bg-white text-infinity-primary shadow-sm" : "text-neutral-500"
               }`}
             >
               {tab === "library" ? "کتابخانه رسانه" : "آدرس مستقیم"}
@@ -232,7 +232,7 @@ const ImageDialog: React.FC<ImageDialogProps> = ({
         {activeTab === "library" ? (
           <div className="space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <label className="inline-flex cursor-pointer items-center justify-center rounded-lg border border-dashed border-neutral-300 px-4 py-2 text-sm text-neutral-600 hover:border-pink-300">
+              <label className="inline-flex cursor-pointer items-center justify-center rounded-lg border border-dashed border-neutral-300 px-4 py-2 text-sm text-neutral-600 hover:border-infinity-primary-lighter">
                 <input
                   type="file"
                   accept="image/*"

@@ -16,6 +16,13 @@ html {
 
 :root {
   --header-offset: 88px;
+  /* Infinity primary brand palette (mirrors apps/social --infinity-primary) */
+  --infinity-primary: #3d4c6e;
+  --infinity-primary-foreground: #ffffff;
+  --infinity-primary-darker: #262f45;
+  --infinity-primary-dark: #33415e;
+  --infinity-primary-light: #566d97;
+  --infinity-primary-lighter: #aebfdb;
 }
 
 body {
@@ -34,8 +41,8 @@ body {
 }
 
 ::selection {
-  background: #ffe4f1; /* brand-tinted */
-  color: #53354c;
+  background: var(--infinity-primary-lighter); /* brand-tinted */
+  color: var(--infinity-primary-darker);
 }
 
 /* Accessible focus outlines on interactive elements */
@@ -44,7 +51,7 @@ a:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid #ec4899; /* matches scrollbar thumb */
+  outline: 2px solid var(--infinity-primary); /* matches scrollbar thumb */
   outline-offset: 2px;
   border-radius: 6px;
 }
@@ -61,7 +68,7 @@ textarea:focus-visible {
     display: none; /* Chrome, Safari and Opera */
   }
 
-  /* Neutral scrollbar for panels (e.g. customization editor) so they don't use accent pink */
+  /* Neutral scrollbar for panels (e.g. customization editor) so they don't use the brand accent */
   .scrollbar-neutral {
     scrollbar-color: #94a3b8 transparent; /* slate-400 */
   }
@@ -78,7 +85,7 @@ textarea:focus-visible {
 /* Custom Scrollbar Styles */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #ec4899 transparent;
+  scrollbar-color: var(--infinity-primary) transparent;
 }
 
 /* Chrome, Edge, and Safari */
@@ -92,14 +99,14 @@ textarea:focus-visible {
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #ec4899;
+  background-color: var(--infinity-primary);
   border-radius: 10px;
   border: 3px solid transparent;
   background-clip: content-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: #db2777;
+  background-color: var(--infinity-primary-dark);
 }
 
 :root {
@@ -380,7 +387,7 @@ textarea:focus-visible {
   select:focus-visible,
   textarea:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 2px rgba(236, 72, 153, 0.5);
+    box-shadow: 0 0 0 2px rgba(61, 76, 110, 0.5);
     border-color: rgb(244, 114, 182);
   }
 
@@ -445,10 +452,23 @@ textarea:focus-visible {
   }
 }
 
+@keyframes auth-loader-slide {
+  0% {
+    transform: translateX(-300%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}
+
 @layer utilities {
   /* Tap highlight tint for mobile */
   * {
-    -webkit-tap-highlight-color: rgba(236, 72, 153, 0.15);
+    -webkit-tap-highlight-color: rgba(61, 76, 110, 0.15);
+  }
+
+  .animate-auth-loader-slide {
+    animation: auth-loader-slide 1.2s ease-in-out infinite;
   }
 }
 
@@ -510,7 +530,7 @@ textarea:focus-visible {
     @apply prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline;
     /* Only apply font-bold to strong, not color - allow colors to be inherited or explicitly set */
     @apply prose-strong:font-bold;
-    @apply prose-code:text-pink-600 prose-code:bg-pink-50 prose-code:px-1 prose-code:py-0.5 prose-code:rounded;
+    @apply prose-code:text-infinity-primary-dark prose-code:bg-infinity-primary-lighter/30 prose-code:px-1 prose-code:py-0.5 prose-code:rounded;
     @apply prose-pre:bg-neutral-50 prose-pre:text-neutral-800 prose-pre:border prose-pre:border-neutral-200;
     @apply prose-blockquote:border-neutral-300 prose-blockquote:text-neutral-600 prose-blockquote:bg-neutral-50 prose-blockquote:italic;
     @apply prose-ul:list-disc prose-ol:list-decimal;

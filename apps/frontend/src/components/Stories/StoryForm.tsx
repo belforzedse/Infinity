@@ -120,7 +120,7 @@ export default function StoryForm({ initialValues, onSubmit, isLoading, submitLa
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="عنوان استوری..."
-            className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-pink-400 focus:outline-none focus:ring-1 focus:ring-pink-400"
+            className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:border-infinity-primary-light focus:outline-none focus:ring-1 focus:ring-infinity-primary-light"
             required
           />
         </div>
@@ -159,7 +159,7 @@ export default function StoryForm({ initialValues, onSubmit, isLoading, submitLa
               type="button"
               onClick={() => mediaInputRef.current?.click()}
               disabled={uploadingMedia}
-              className="flex w-full flex-col items-center gap-2 rounded-xl border-2 border-dashed border-slate-200 py-10 text-slate-400 transition-colors hover:border-pink-300 hover:text-pink-400"
+              className="flex w-full flex-col items-center gap-2 rounded-xl border-2 border-dashed border-slate-200 py-10 text-slate-400 transition-colors hover:border-infinity-primary-lighter hover:text-infinity-primary-light"
             >
               <Upload className="h-8 w-8" />
               <span className="text-sm">
@@ -202,7 +202,7 @@ export default function StoryForm({ initialValues, onSubmit, isLoading, submitLa
               type="button"
               onClick={() => thumbInputRef.current?.click()}
               disabled={uploadingThumb}
-              className="flex w-40 flex-col items-center gap-2 rounded-xl border-2 border-dashed border-slate-200 py-6 text-slate-400 hover:border-pink-300 hover:text-pink-400"
+              className="flex w-40 flex-col items-center gap-2 rounded-xl border-2 border-dashed border-slate-200 py-6 text-slate-400 hover:border-infinity-primary-lighter hover:text-infinity-primary-light"
             >
               <Upload className="h-6 w-6" />
               <span className="text-xs">{uploadingThumb ? "آپلود..." : "آپلود تصویر جلد"}</span>
@@ -241,7 +241,7 @@ export default function StoryForm({ initialValues, onSubmit, isLoading, submitLa
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full rounded-xl bg-pink-500 py-2.5 text-sm font-medium text-white transition-colors hover:bg-pink-600 disabled:opacity-60"
+            className="w-full rounded-xl bg-infinity-primary py-2.5 text-sm font-medium text-white transition-colors hover:bg-infinity-primary disabled:opacity-60"
           >
             {isLoading ? "در حال ذخیره..." : submitLabel}
           </button>
@@ -256,7 +256,7 @@ export default function StoryForm({ initialValues, onSubmit, isLoading, submitLa
             value={sortOrder}
             min={0}
             onChange={(e) => setSortOrder(Number(e.target.value))}
-            className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm focus:border-pink-400 focus:outline-none"
+            className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm focus:border-infinity-primary-light focus:outline-none"
           />
         </div>
       </div>

@@ -1,0 +1,39 @@
+---
+description: Frontend and package UI brand accent uses infinity-primary instead of pink.
+globs: apps/frontend/src/**/*.{ts,tsx,css},packages/**/*.{ts,tsx,css}
+alwaysApply: false
+---
+
+# Infinity Primary Theme
+
+- Use `infinity-primary` utilities for primary UI accents in storefront, super-admin, and shared packages.
+- Prefer `bg-infinity-primary`, `text-infinity-primary`, `border-infinity-primary`, and `ring-infinity-primary` for main actions, links, icons, and focus states.
+- Use `infinity-primary-light`, `infinity-primary-dark`, and `infinity-primary-lighter/*` for hover, active, and soft backgrounds.
+- Do not reintroduce `pink-*` utilities or mapped pink hex values for UI chrome.
+- Keep semantic exceptions: destructive red/rose states, blue `text-actions-link`, product color swatches, chart series palettes, and Infinitygram mobile bottom nav center button (social blue gradient + `/Infinity.svg`).
+
+## Loading UI (parity with `@repo/social`)
+
+Reference: [`apps/social/src/components/ui/SuspenseLoader.tsx`](apps/social/src/components/ui/SuspenseLoader.tsx)
+
+- **Page / suspense spinner:** `border-2 border-slate-200 border-t-infinity-primary` (size via `h-* w-*`).
+- **Spinner glow:** `bg-infinity-primary/10 blur-xl` behind the ring.
+- **Progress bar track:** `h-1.5 w-52 overflow-hidden rounded-full bg-neutral-100`.
+- **Progress bar fill:** `animate-auth-loader-slide rounded-full bg-gradient-to-r from-infinity-primary to-slate-400`.
+- **Keyframe:** `@keyframes auth-loader-slide` + `.animate-auth-loader-slide` in [`apps/frontend/src/app/globals.css`](apps/frontend/src/app/globals.css) (same as social).
+- **Route navigation bar:** [`NavigationProgress`](packages/ui/src/navigation-progress.tsx) — `bg-gradient-to-l from-[#334155] via-[#33415e] to-[#aebfdb]`.
+- **API fetch top bar:** [`TopProgressBar`](apps/frontend/src/components/ui/TopProgressBar.tsx) uses the same NavigationProgress gradient + `animate-auth-loader-slide`.
+- Do not use inline `style jsx` loader animations or pink/purple/rose bar gradients (`to-rose-300`, `via-purple-500`, etc.).
+
+## Decorative CTA gradients (social blue)
+
+For banners, 404 CTAs, wallet cards, and primary pill buttons outside `@repo/ui` Button:
+
+- **Default:** `bg-[linear-gradient(180deg,#566D97_0%,#98BDFF_100%)]`
+- **Hover overlay:** `bg-[linear-gradient(70.36deg,#3E5070_10.29%,#A0C2FF_74.27%)]`
+- **Text gradients:** `from-infinity-primary via-infinity-primary-light to-infinity-primary`
+- **Soft backgrounds:** `from-slate-50 via-infinity-primary-lighter/20 to-slate-100` (not `rose-50` / `rose-100`)
+
+## Sale badges
+
+Use `bg-infinity-primary` or `bg-infinity-primary-dark` for discount percentage badges — not `bg-rose-600`.

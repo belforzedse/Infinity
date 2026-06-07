@@ -53,7 +53,7 @@ export default function ShippingInfoCard({ order }: ShippingInfoCardProps) {
             href={`https://anipo.ir/checkconsignment/?code=${order.ShippingBarcode}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-xl border border-pink-100 bg-pink-50 px-4 py-3 text-center text-sm font-semibold text-pink-600 transition hover:bg-pink-100"
+            className="rounded-xl border border-infinity-primary-lighter/40 bg-infinity-primary-lighter/20 px-4 py-3 text-center text-sm font-semibold text-infinity-primary transition hover:bg-infinity-primary-lighter/30"
           >
             رهگیری مرسوله
           </Link>

@@ -38,7 +38,7 @@ describe("Text", () => {
 
     const element = screen.getByText("Link text");
     expect(element).toHaveClass("text-sm");
-    expect(element).toHaveClass("text-pink-500");
+    expect(element).toHaveClass("text-infinity-primary");
     expect(element).toHaveClass("cursor-pointer");
   });
 
@@ -88,14 +88,14 @@ describe("Text", () => {
 
     const element = screen.getByText("Disabled link");
     expect(element).toHaveClass("text-foreground-muted");
-    expect(element).not.toHaveClass("text-pink-500");
+    expect(element).not.toHaveClass("text-infinity-primary");
   });
 
   it("should have hover styles for enabled link", () => {
     render(<Text variant="link">Hover link</Text>);
 
     const element = screen.getByText("Hover link");
-    expect(element).toHaveClass("hover:text-pink-600");
+    expect(element).toHaveClass("hover:text-infinity-primary");
   });
 
   it("should render as span element", () => {

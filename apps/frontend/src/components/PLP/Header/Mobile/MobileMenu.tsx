@@ -132,9 +132,9 @@ export default function MobileMenu({ isOpen, onClose, onSearchClick }: Props) {
                             onSearchClick?.();
                             onClose();
                           }}
-                          className="pressable relative flex w-full items-center gap-2 rounded-lg px-5 py-3 text-right text-gray-700 transition-all hover:bg-white/70 hover:text-pink-600"
+                          className="pressable relative flex w-full items-center gap-2 rounded-lg px-5 py-3 text-right text-gray-700 transition-all hover:bg-white/70 hover:text-infinity-primary"
                         >
-                          <SearchIcon className="text-pink-500" />
+                          <SearchIcon className="text-infinity-primary" />
                           <span className="text-sm font-medium">جستجو</span>
                         </button>
                         {menuItems.slice(1).map((item) => {
@@ -144,7 +144,7 @@ export default function MobileMenu({ isOpen, onClose, onSearchClick }: Props) {
                             <Link
                               key={item.href}
                               href={item.href}
-                              className="pressable relative flex items-center gap-2 rounded-lg px-5 py-3 text-gray-700 transition-all hover:bg-white/70 hover:text-pink-600"
+                              className="pressable relative flex items-center gap-2 rounded-lg px-5 py-3 text-gray-700 transition-all hover:bg-white/70 hover:text-infinity-primary"
                               onClick={onClose}
                             >
                               <span className="text-sm font-medium">{item.label}</span>

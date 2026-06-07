@@ -33,7 +33,7 @@ export default function PDPHeroInfoFAQItem(props: Props) {
         >
           {hasHTML ? (
             <div
-              className="prose prose-sm prose-neutral max-w-none prose-headings:font-semibold prose-p:text-neutral-500 prose-p:leading-relaxed prose-a:text-pink-600 prose-a:no-underline hover:prose-a:underline"
+              className="prose prose-sm prose-neutral max-w-none prose-headings:font-semibold prose-p:text-neutral-500 prose-p:leading-relaxed prose-a:text-infinity-primary prose-a:no-underline hover:prose-a:underline"
               dir="rtl"
               dangerouslySetInnerHTML={{ __html: sanitizedContent }}
             />

@@ -71,7 +71,7 @@ export default function SlideList({
         <button
           type="button"
           onClick={onAddSlide}
-          className="inline-flex items-center gap-1 rounded-lg bg-pink-500 px-3 py-1.5 text-xs font-medium text-white hover:bg-pink-600"
+          className="inline-flex items-center gap-1 rounded-lg bg-infinity-primary px-3 py-1.5 text-xs font-medium text-white hover:bg-infinity-primary"
         >
           <Plus className="h-3.5 w-3.5" />
           افزودن اسلاید

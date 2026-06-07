@@ -43,10 +43,10 @@ export default function DetailsSection({
                 </div>
                 <button
                   onClick={() => setSelectedImage(null)}
-                  className="flex items-center gap-1 text-pink-600"
+                  className="flex items-center gap-1 text-infinity-primary"
                 >
                   <span className="text-[10px] leading-3">حذف برای همیشه</span>
-                  <DeleteIcon className="h-3 w-3 stroke-pink-600 text-pink-600" />
+                  <DeleteIcon className="h-3 w-3 stroke-infinity-primary text-infinity-primary" />
                 </button>
               </div>
             </div>
@@ -55,7 +55,7 @@ export default function DetailsSection({
           </div>
 
           <div className="flex justify-end">
-            <button className="text-xs w-24 rounded-lg bg-pink-500 p-2 text-white">
+            <button className="text-xs w-24 rounded-lg bg-infinity-primary p-2 text-white">
               درج در محصول
             </button>
           </div>
@@ -65,7 +65,7 @@ export default function DetailsSection({
           <p className="text-sm">هیچ تصویری انتخاب نشده است.</p>
           <button
             onClick={onPickFromLibrary}
-            className="rounded-lg border border-pink-200 px-4 py-2 text-sm text-pink-600 transition-colors hover:bg-pink-50"
+            className="rounded-lg border border-infinity-primary-lighter/60 px-4 py-2 text-sm text-infinity-primary transition-colors hover:bg-infinity-primary-lighter/20"
           >
             انتخاب از کتابخانه
           </button>
@@ -75,7 +75,7 @@ export default function DetailsSection({
         <div className="mt-4 flex justify-center">
           <button
             onClick={onPickFromLibrary}
-            className="rounded-lg border border-pink-200 px-4 py-2 text-sm text-pink-600 transition-colors hover:bg-pink-50"
+            className="rounded-lg border border-infinity-primary-lighter/60 px-4 py-2 text-sm text-infinity-primary transition-colors hover:bg-infinity-primary-lighter/20"
           >
             انتخاب تصویر دیگر
           </button>

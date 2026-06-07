@@ -52,7 +52,7 @@ export default function PaymentStatus({ orderId }: PaymentStatusProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center p-2">
-        <div className="h-5 w-5 animate-spin rounded-full border-2 border-pink-500 border-t-transparent"></div>
+        <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-200 border-t-infinity-primary"></div>
         <span className="text-sm mr-2 text-gray-500">در حال بررسی وضعیت پرداخت...</span>
       </div>
     );

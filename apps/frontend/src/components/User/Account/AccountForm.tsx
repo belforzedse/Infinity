@@ -129,7 +129,7 @@ export default function AccountForm() {
     return (
       <div className="flex flex-col gap-4 rounded-lg bg-white p-6 shadow-sm">
         <div className="flex items-center justify-center py-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-pink-600 border-t-transparent"></div>
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-infinity-primary"></div>
         </div>
       </div>
     );
@@ -141,7 +141,7 @@ export default function AccountForm() {
         <span className="text-lg font-medium text-red-600">خطا در بارگذاری اطلاعات کاربر</span>
         <button
           onClick={refetch}
-          className="w-fit rounded-lg bg-[#EC4899] px-6 py-2.5 text-sm font-medium text-white hover:bg-pink-600 transition-colors"
+          className="w-fit rounded-lg bg-[#3d4c6e] px-6 py-2.5 text-sm font-medium text-white hover:bg-infinity-primary transition-colors"
         >
           تلاش مجدد
         </button>
@@ -237,7 +237,7 @@ export default function AccountForm() {
         <div className="flex w-full justify-end border-t border-neutral-200 pt-6">
           <button
             type="submit"
-            className="flex items-center justify-center gap-2 rounded-lg bg-[#EC4899] px-8 py-3 text-sm font-medium text-white transition-all hover:bg-pink-600 disabled:cursor-not-allowed disabled:bg-pink-300 disabled:hover:bg-pink-300"
+            className="flex items-center justify-center gap-2 rounded-lg bg-[#3d4c6e] px-8 py-3 text-sm font-medium text-white transition-all hover:bg-infinity-primary disabled:cursor-not-allowed disabled:bg-infinity-primary-lighter disabled:hover:bg-infinity-primary-lighter"
             disabled={isSaving}
           >
             {isSaving ? (

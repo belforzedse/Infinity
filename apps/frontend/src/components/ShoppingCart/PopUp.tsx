@@ -34,7 +34,7 @@ function PopUp({ isOpen, onClose }: Props) {
             onClick={onClose}
             className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-200"
           >
-            <CloseIcon className="h-6 w-6 text-pink-600" />
+            <CloseIcon className="h-6 w-6 text-infinity-primary" />
           </button>
         </div>
 
@@ -58,7 +58,7 @@ function PopUp({ isOpen, onClose }: Props) {
                     <span className="text-sm text-neutral-400">شال و روسری</span>
                   </div>
                   <button>
-                    <DeleteIcon className="h-4 w-4 text-pink-600" />
+                    <DeleteIcon className="h-4 w-4 text-infinity-primary" />
                   </button>
                 </div>
                 <span className="text-xs text-neutral-800">شال چهار خونه موهر S00361</span>
@@ -85,7 +85,7 @@ function PopUp({ isOpen, onClose }: Props) {
           </button>
           <button
             onClick={onClose}
-            className="text-sm w-full rounded-lg bg-pink-500 py-2 text-white"
+            className="text-sm w-full rounded-lg bg-infinity-primary py-2 text-white"
           >
             تسویه حساب
           </button>

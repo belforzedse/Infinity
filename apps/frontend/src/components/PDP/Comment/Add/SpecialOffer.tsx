@@ -112,7 +112,7 @@ export default function PDPCommentAddSpecialOffer(props: Props) {
 
         <div className="flex items-center gap-2 self-end">
           {discountPrice > 0 && (
-            <span className="text-xl text-pink-600">
+            <span className="text-xl text-infinity-primary">
               {discountPrice.toLocaleString("fa-IR")} تومان
             </span>
           )}
@@ -130,7 +130,7 @@ export default function PDPCommentAddSpecialOffer(props: Props) {
 
         <button
           onClick={() => router.push("/cart")}
-          className="flex h-[49px] w-full items-center justify-center gap-2 rounded-[12px] border border-slate-100 bg-white text-[16px] hover:bg-actions-primary hover:text-white font-medium text-[#DB2777] transition-all active:scale-[0.98]"
+          className="flex h-[49px] w-full items-center justify-center gap-2 rounded-[12px] border border-slate-100 bg-white text-[16px] hover:bg-actions-primary hover:text-white font-medium text-[#33415e] transition-all active:scale-[0.98]"
         >
           <LookBasketIcon />
           <span>مشاهده سبد خرید</span>

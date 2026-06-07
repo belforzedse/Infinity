@@ -95,8 +95,8 @@ const BlogComments: React.FC<BlogCommentsProps> = ({ postId, comments: initialCo
           {/* Comment Header */}
           <div className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-pink-100">
-                <User className="h-5 w-5 text-pink-600" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-infinity-primary-lighter/30">
+                <User className="h-5 w-5 text-infinity-primary" />
               </div>
               <div>
                 <div className="font-medium text-neutral-900">
@@ -112,7 +112,7 @@ const BlogComments: React.FC<BlogCommentsProps> = ({ postId, comments: initialCo
             {!isReply && (
               <button
                 onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
-                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-pink-600 transition-colors hover:bg-pink-50"
+                className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-infinity-primary transition-colors hover:bg-infinity-primary-lighter/20"
               >
                 <Reply className="h-4 w-4" />
                 پاسخ
@@ -136,7 +136,7 @@ const BlogComments: React.FC<BlogCommentsProps> = ({ postId, comments: initialCo
                 <textarea
                   {...register("Content", { required: "متن پاسخ الزامی است" })}
                   rows={3}
-                  className="w-full resize-none rounded-xl border border-slate-100 bg-white px-4 py-3 text-sm text-neutral-600 placeholder:text-slate-400 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
+                  className="w-full resize-none rounded-xl border border-slate-100 bg-white px-4 py-3 text-sm text-neutral-600 placeholder:text-slate-400 focus:border-infinity-primary focus:outline-none focus:ring-1 focus:ring-infinity-primary"
                   placeholder="پاسخ خود را بنویسید..."
                 />
                 {errors.Content && (
@@ -147,7 +147,7 @@ const BlogComments: React.FC<BlogCommentsProps> = ({ postId, comments: initialCo
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="inline-flex items-center gap-2 rounded-lg bg-pink-500 px-4 py-2 text-sm text-white transition-colors hover:bg-pink-600 disabled:opacity-50"
+                  className="inline-flex items-center gap-2 rounded-lg bg-infinity-primary px-4 py-2 text-sm text-white transition-colors hover:bg-infinity-primary disabled:opacity-50"
                 >
                   <Send className="h-4 w-4" />
                   {isSubmitting ? "در حال ارسال..." : "ارسال پاسخ"}
@@ -210,8 +210,8 @@ const BlogComments: React.FC<BlogCommentsProps> = ({ postId, comments: initialCo
   return (
     <div className="rounded-2xl bg-white p-6 shadow-sm">
       <div className="mb-6 flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-pink-100">
-          <MessageSquare className="h-5 w-5 text-pink-600" />
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-infinity-primary-lighter/30">
+          <MessageSquare className="h-5 w-5 text-infinity-primary" />
         </div>
         <h3 className="text-lg font-semibold text-neutral-900">
           نظرات ({approvedComments.length})
@@ -229,7 +229,7 @@ const BlogComments: React.FC<BlogCommentsProps> = ({ postId, comments: initialCo
                 minLength: { value: 10, message: "نظر باید حداقل ۱۰ کاراکتر باشد" },
               })}
               rows={4}
-              className="w-full resize-none rounded-xl border border-slate-100 bg-white px-4 py-3 text-sm text-neutral-600 placeholder:text-slate-400 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
+              className="w-full resize-none rounded-xl border border-slate-100 bg-white px-4 py-3 text-sm text-neutral-600 placeholder:text-slate-400 focus:border-infinity-primary focus:outline-none focus:ring-1 focus:ring-infinity-primary"
               placeholder="نظر خود را در مورد این مقاله بنویسید..."
             />
             {errors.Content && (
@@ -241,7 +241,7 @@ const BlogComments: React.FC<BlogCommentsProps> = ({ postId, comments: initialCo
             <button
               type="submit"
               disabled={isSubmitting}
-              className="inline-flex items-center gap-2 rounded-lg bg-pink-500 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-pink-600 disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-lg bg-infinity-primary px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-infinity-primary disabled:opacity-50"
             >
               <Send className="h-4 w-4" />
               {isSubmitting ? "در حال ارسال..." : "ارسال نظر"}

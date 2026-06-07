@@ -35,7 +35,7 @@ export default function ShareButtonsGrid({
           url={shareUrl}
           title={shareText}
           separator=" "
-          className="flex h-14 items-center justify-center gap-2 rounded-2xl bg-white ring-1 ring-black/5 transition hover:ring-pink-200 disabled:opacity-60"
+          className="flex h-14 items-center justify-center gap-2 rounded-2xl bg-white ring-1 ring-black/5 transition hover:ring-infinity-primary-lighter/60 disabled:opacity-60"
           disabled={!shareUrl}
           onClick={onShareClick}
         >
@@ -46,7 +46,7 @@ export default function ShareButtonsGrid({
         <TelegramShareButton
           url={shareUrl}
           title={shareText}
-          className="flex h-14 items-center justify-center gap-2 rounded-2xl bg-white ring-1 ring-black/5 transition hover:ring-pink-200 disabled:opacity-60"
+          className="flex h-14 items-center justify-center gap-2 rounded-2xl bg-white ring-1 ring-black/5 transition hover:ring-infinity-primary-lighter/60 disabled:opacity-60"
           disabled={!shareUrl}
           onClick={onShareClick}
         >
@@ -57,7 +57,7 @@ export default function ShareButtonsGrid({
         <TwitterShareButton
           url={shareUrl}
           title={shareText}
-          className="flex h-14 items-center justify-center gap-2 rounded-2xl bg-white ring-1 ring-black/5 transition hover:ring-pink-200 disabled:opacity-60"
+          className="flex h-14 items-center justify-center gap-2 rounded-2xl bg-white ring-1 ring-black/5 transition hover:ring-infinity-primary-lighter/60 disabled:opacity-60"
           disabled={!shareUrl}
           onClick={onShareClick}
         >
@@ -67,7 +67,7 @@ export default function ShareButtonsGrid({
 
         <FacebookShareButton
           url={shareUrl}
-          className="flex h-14 items-center justify-center gap-2 rounded-2xl bg-white ring-1 ring-black/5 transition hover:ring-pink-200 disabled:opacity-60"
+          className="flex h-14 items-center justify-center gap-2 rounded-2xl bg-white ring-1 ring-black/5 transition hover:ring-infinity-primary-lighter/60 disabled:opacity-60"
           disabled={!shareUrl}
           onClick={onShareClick}
         >
@@ -79,7 +79,7 @@ export default function ShareButtonsGrid({
           url={shareUrl}
           title={productTitle}
           summary={shareText}
-          className="flex h-14 items-center justify-center gap-2 rounded-2xl bg-white ring-1 ring-black/5 transition hover:ring-pink-200 disabled:opacity-60"
+          className="flex h-14 items-center justify-center gap-2 rounded-2xl bg-white ring-1 ring-black/5 transition hover:ring-infinity-primary-lighter/60 disabled:opacity-60"
           disabled={!shareUrl}
           onClick={onShareClick}
         >
@@ -91,7 +91,7 @@ export default function ShareButtonsGrid({
           url={shareUrl}
           subject={productTitle}
           body={shareText}
-          className="flex h-14 items-center justify-center gap-2 rounded-2xl bg-white ring-1 ring-black/5 transition hover:ring-pink-200 disabled:opacity-60"
+          className="flex h-14 items-center justify-center gap-2 rounded-2xl bg-white ring-1 ring-black/5 transition hover:ring-infinity-primary-lighter/60 disabled:opacity-60"
           disabled={!shareUrl}
           onClick={onShareClick}
         >

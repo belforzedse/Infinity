@@ -160,7 +160,7 @@ export default function Page() {
         <h2 className="mb-4 text-xl font-bold text-neutral-900">فعالیت‌های کاربر</h2>
         {activitiesLoading ? (
           <div className="flex items-center justify-center py-8">
-            <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-pink-500"></div>
+            <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-infinity-primary"></div>
           </div>
         ) : userActivities.length === 0 ? (
           <p className="py-8 text-center text-neutral-500">فعالیتی یافت نشد</p>
@@ -185,7 +185,7 @@ export default function Page() {
                   {activity.ResourceType === "order" && activity.ResourceId && (
                     <Link
                       href={`/super-admin/orders/${activity.ResourceId}`}
-                      className="text-sm text-pink-600 hover:text-pink-700 hover:underline"
+                      className="text-sm text-infinity-primary hover:text-infinity-primary-dark hover:underline"
                     >
                       مشاهده سفارش
                     </Link>

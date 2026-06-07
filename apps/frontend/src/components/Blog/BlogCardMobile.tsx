@@ -39,9 +39,9 @@ const BlogCardMobile: React.FC<BlogCardMobileProps> = ({
     <article className={`group w-full min-w-0 ${className}`}>
       <Link
         href={`/${post.Slug}`}
-        className="block overflow-hidden rounded-2xl border-2 border-pink-100 bg-white transition-all duration-200 hover:border-pink-200 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2"
+        className="block overflow-hidden rounded-2xl border-2 border-infinity-primary-lighter/40 bg-white transition-all duration-200 hover:border-infinity-primary-lighter/60 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary focus-visible:ring-offset-2"
       >
-        <div className="relative aspect-[16/10] w-full overflow-hidden bg-gradient-to-br from-pink-50 to-pink-100">
+        <div className="relative aspect-[16/10] w-full overflow-hidden bg-gradient-to-br from-infinity-primary-lighter/20 to-infinity-primary-lighter/30">
           {imageUrl ? (
             <BlurImage
               src={imageUrl}

@@ -18,7 +18,7 @@ export default function WalletBalance() {
       <div
         className="flex h-[199px] w-full flex-col items-start gap-10 rounded-2xl p-5"
         style={{
-          background: "linear-gradient(66.02deg, #EC4899 0%, #F787BF 84.01%)",
+          background: "linear-gradient(66.02deg, #3d4c6e 0%, #98BDFF 84.01%)",
         }}
       >
         <span className="text-[20px] text-white">کیف پول اینفینیتی</span>
@@ -26,7 +26,7 @@ export default function WalletBalance() {
       </div>
 
       <button className="flex items-center gap-1">
-        <span className="text-base text-foreground-pink">افزایش موجودی</span>
+        <span className="text-base text-infinity-primary">افزایش موجودی</span>
         <CirculePlusIcon />
       </button>
     </div>

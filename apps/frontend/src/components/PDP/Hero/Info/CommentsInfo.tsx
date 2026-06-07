@@ -1,14 +1,14 @@
-import Image from "next/image";
 import StarIcon from "../../Icons/StarIcon";
 
 type Props = {
   commentCount: number;
   rateCount: number;
-  last24hoursSeenCount: number;
+  /** Kept for API compatibility; view count is intentionally not displayed to customers. */
+  last24hoursSeenCount?: number;
 };
 
 export default function PDPHeroInfoCommentsInfo(props: Props) {
-  const { commentCount, rateCount, last24hoursSeenCount } = props;
+  const { commentCount, rateCount } = props;
 
   return (
     <div className="flex flex-col md:flex-row md:items-center md:justify-between">
@@ -32,19 +32,6 @@ export default function PDPHeroInfoCommentsInfo(props: Props) {
           </>
         )}
       </div>
-
-      {last24hoursSeenCount > 100 && (
-        <div className="mt-2 flex items-center gap-1 md:mt-0">
-          <Image width={16} height={16} alt="eye icon" src="/images/icons/eye.png" />
-
-          <span className="text-sm text-foreground-primary md:text-xs">
-            محصول محبوب!
-            <span className="text-[#DB2777]"> {last24hoursSeenCount} نفر </span> در
-            <span className="text-[#DB2777]"> 24 ساعت </span>
-            گذشته آن را دیده اند!
-          </span>
-        </div>
-      )}
     </div>
   );
 }

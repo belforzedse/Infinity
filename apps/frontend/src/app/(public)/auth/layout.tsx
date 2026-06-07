@@ -51,7 +51,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   }, [router, searchParams, pathname]);
 
   return (
-    <main className="flex min-h-screen items-start justify-center bg-pink-50 p-4 md:items-center">
+    <main className="flex min-h-screen items-start justify-center bg-infinity-primary-lighter/20 p-4 md:items-center">
       <StorefrontContainer className="flex flex-col items-center justify-center gap-8 py-8 md:flex-row md:py-0">
         <div className="card w-full max-w-[630px] p-2">
           <div className="relative mx-auto max-w-[516px] px-2 py-4 md:py-6">

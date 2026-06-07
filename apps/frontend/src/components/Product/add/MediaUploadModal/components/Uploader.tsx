@@ -13,7 +13,7 @@ export default function Uploader({ dragActive, onDragOver, onDragLeave, onDrop }
       <div
         className={classNames(
           "flex h-full flex-col items-center justify-center rounded-lg",
-          dragActive ? "border-pink-500 bg-pink-50" : "border-gray-200",
+          dragActive ? "border-infinity-primary bg-infinity-primary-lighter/20" : "border-gray-200",
         )}
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
@@ -21,10 +21,10 @@ export default function Uploader({ dragActive, onDragOver, onDragLeave, onDrop }
       >
         <p className="text-sm mb-1 text-gray-600">برای بارگزاری، پرونده ها را بکشید</p>
         <p className="text-xs mb-1 text-gray-500">یا</p>
-        <button className="text-xs mb-2 rounded-xl bg-pink-500 px-5 py-1.5 text-white transition-colors hover:bg-pink-600">
+        <button className="text-xs mb-2 rounded-xl bg-infinity-primary px-5 py-1.5 text-white transition-colors hover:bg-infinity-primary">
           بارگزاری پرونده
         </button>
-        <p className="text-[10px] text-pink-500">حداکثر پرونده برای بارگزاری: 4 مگابایت.</p>
+        <p className="text-[10px] text-infinity-primary">حداکثر پرونده برای بارگزاری: 4 مگابایت.</p>
       </div>
     </div>
   );

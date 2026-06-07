@@ -102,14 +102,8 @@ describe("ProductCard", () => {
     expect(strikethrough).toHaveTextContent(`${faNum(100000)} تومان`);
   });
 
-  it("should render seen count when greater than 0", () => {
-    render(<ProductCard {...mockProps} seenCount={50} />);
-
-    expect(screen.getByText(/50 نفر در ۲۴ ساعت گذشته آن را دیده‌اند!/)).toBeInTheDocument();
-  });
-
-  it("should not render seen count when 0", () => {
-    render(<ProductCard {...mockProps} seenCount={0} />);
+  it("should never render the view (seen) count to customers", () => {
+    render(<ProductCard {...mockProps} seenCount={5000} />);
 
     expect(screen.queryByText(/نفر در ۲۴ ساعت گذشته/)).not.toBeInTheDocument();
   });

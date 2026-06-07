@@ -288,7 +288,7 @@ const UserSearchSection: React.FC<UserSearchSectionProps> = ({
 
       {/* Search Input */}
       <div ref={containerRef} className="relative">
-        <div className="relative flex w-full items-center justify-between rounded-[28px] border border-slate-200 bg-white py-2 pl-2 pr-4 shadow-sm focus-within:ring-2 focus-within:ring-pink-200">
+        <div className="relative flex w-full items-center justify-between rounded-[28px] border border-slate-200 bg-white py-2 pl-2 pr-4 shadow-sm focus-within:ring-2 focus-within:ring-infinity-primary-lighter/60">
           <div className="flex w-full items-center justify-between px-2">
             <input
               type="text"
@@ -314,7 +314,7 @@ const UserSearchSection: React.FC<UserSearchSectionProps> = ({
               aria-expanded={open}
             />
 
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-pink-500 shadow-sm">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-infinity-primary shadow-sm">
               <SearchIcon className="h-5 w-5 text-white" />
             </div>
           </div>

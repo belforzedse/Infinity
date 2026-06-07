@@ -41,7 +41,7 @@ export default function OrderSummaryCard() {
         {summary.map(({ label, value, emphasize }) => (
           <div key={label} className="flex items-center justify-between">
             <span className="text-xs font-medium text-slate-500">{label}</span>
-            <span className={emphasize ? "font-semibold text-pink-600" : ""}>{value}</span>
+            <span className={emphasize ? "font-semibold text-infinity-primary" : ""}>{value}</span>
           </div>
         ))}
       </div>
@@ -55,7 +55,7 @@ export default function OrderSummaryCard() {
 
       <Link
         href="/checkout"
-        className="mt-4 flex w-full items-center justify-center rounded-xl bg-pink-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-pink-600"
+        className="mt-4 flex w-full items-center justify-center rounded-xl bg-infinity-primary px-4 py-3 text-sm font-semibold text-white transition hover:bg-infinity-primary"
       >
         ادامه فرآیند خرید و تسویه حساب
       </Link>

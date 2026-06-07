@@ -138,7 +138,7 @@ export default function TemplatePreview({
                 onClick={() => onDeviceChange(d)}
                 className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
                   device === d
-                    ? "bg-pink-500 text-white"
+                    ? "bg-infinity-primary text-white"
                     : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                 }`}
               >
@@ -151,7 +151,7 @@ export default function TemplatePreview({
             </span>
           )}
           {slide && layouts && selectedSlotKey !== null && (
-            <span className="rounded-lg bg-pink-50 px-2.5 py-1 text-[11px] font-medium text-pink-700">
+            <span className="rounded-lg bg-infinity-primary-lighter/20 px-2.5 py-1 text-[11px] font-medium text-infinity-primary-dark">
               در حال ویرایش: {slotLabelMap[selectedSlotKey] ?? "اسلات"}
             </span>
           )}
@@ -242,9 +242,9 @@ export default function TemplatePreview({
                         }
 
                         [data-active-hero-field] [data-hero-edit-field]:hover {
-                          outline: 2px solid rgba(236, 72, 153, 0.85);
+                          outline: 2px solid rgba(61, 76, 110, 0.85);
                           outline-offset: 4px;
-                          background: rgba(236, 72, 153, 0.1);
+                          background: rgba(61, 76, 110, 0.1);
                           box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.7);
                         }
 
@@ -275,7 +275,7 @@ export default function TemplatePreview({
                         [data-active-hero-field="buttonLabel"] [data-slot-selected="true"] [data-hero-edit-field="buttonLabel"] {
                           outline: 2px solid rgb(236, 72, 153);
                           outline-offset: 4px;
-                          background: rgba(236, 72, 153, 0.12);
+                          background: rgba(61, 76, 110, 0.12);
                           box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.72);
                         }
                       `}</style>

@@ -1,15 +1,23 @@
 import React from "react";
 
-interface HomeIconProps {
-  isActive?: boolean;
-}
+type HomeIconProps = {
+  className?: string;
+};
 
-const HomeIcon: React.FC<HomeIconProps> = ({ isActive = false }) => {
+const HomeIcon: React.FC<HomeIconProps> = ({ className }) => {
   return (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      aria-hidden
+    >
       <path
-        d="M1 6.5L9 1L17 6.5V16C17 16.5304 16.7893 17.0391 16.4142 17.4142C16.0391 17.7893 15.5304 18 15 18H3C2.46957 18 1.96086 17.7893 1.58579 17.4142C1.21071 17.0391 1 16.5304 1 16V6.5Z"
-        stroke={isActive ? "#DB2777" : "#262626"}
+        d="M3 9.5L12 3L21 9.5V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9.5Z"
+        stroke="currentColor"
         strokeWidth="1.5"
       />
     </svg>

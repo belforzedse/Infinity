@@ -122,7 +122,7 @@ const BlogList: React.FC<BlogListProps> = ({
                 placeholder="جستجو در مقالات..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full rounded-xl border border-slate-100 bg-white py-3 pr-10 pl-4 text-sm text-neutral-600 placeholder:text-slate-400 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
+                className="w-full rounded-xl border border-slate-100 bg-white py-3 pr-10 pl-4 text-sm text-neutral-600 placeholder:text-slate-400 focus:border-infinity-primary focus:outline-none focus:ring-1 focus:ring-infinity-primary"
               />
             </div>
           </div>
@@ -136,7 +136,7 @@ const BlogList: React.FC<BlogListProps> = ({
                   onClick={() => setSelectedCategory("")}
                   className={`flex w-full items-center gap-2 rounded-xl px-3 py-2 text-right text-sm transition-colors ${
                     !selectedCategory
-                      ? "bg-pink-100 text-pink-700"
+                      ? "bg-infinity-primary-lighter/30 text-infinity-primary-dark"
                       : "text-neutral-700 hover:bg-slate-50"
                   }`}
                 >
@@ -149,7 +149,7 @@ const BlogList: React.FC<BlogListProps> = ({
                     onClick={() => setSelectedCategory(category.Slug)}
                     className={`flex w-full items-center gap-2 rounded-xl px-3 py-2 text-right text-sm transition-colors ${
                       selectedCategory === category.Slug
-                        ? "bg-pink-100 text-pink-700"
+                        ? "bg-infinity-primary-lighter/30 text-infinity-primary-dark"
                         : "text-neutral-700 hover:bg-slate-50"
                     }`}
                   >
@@ -172,7 +172,7 @@ const BlogList: React.FC<BlogListProps> = ({
                     onClick={() => setSelectedTag(selectedTag === tag.Slug ? "" : tag.Slug)}
                     className={`rounded-full px-3 py-1 text-sm transition-colors ${
                       selectedTag === tag.Slug
-                        ? "bg-pink-100 text-pink-700"
+                        ? "bg-infinity-primary-lighter/30 text-infinity-primary-dark"
                         : "bg-slate-100 text-neutral-600 hover:bg-slate-200"
                     }`}
                     style={
@@ -226,7 +226,7 @@ const BlogList: React.FC<BlogListProps> = ({
                     <div className="mb-3">
                       <Link
                         href={`/blog?category=${post.blog_category.Slug}`}
-                        className="inline-block rounded-full bg-pink-100 px-3 py-1 text-xs font-medium text-pink-700 transition-colors hover:bg-pink-200"
+                        className="inline-block rounded-full bg-infinity-primary-lighter/30 px-3 py-1 text-xs font-medium text-infinity-primary-dark transition-colors hover:bg-infinity-primary-lighter/50"
                       >
                         {post.blog_category.Name}
                       </Link>
@@ -237,7 +237,7 @@ const BlogList: React.FC<BlogListProps> = ({
                   <h2 className="mb-3 line-clamp-2 text-lg font-semibold text-neutral-900">
                     <Link
                       href={`/${post.Slug}`}
-                      className="transition-colors hover:text-pink-600"
+                      className="transition-colors hover:text-infinity-primary"
                     >
                       {post.Title}
                     </Link>
@@ -293,7 +293,7 @@ const BlogList: React.FC<BlogListProps> = ({
                   {/* Read More */}
                   <Link
                     href={`/${post.Slug}`}
-                    className="inline-flex items-center gap-1 text-sm font-medium text-pink-600 transition-colors hover:text-pink-700"
+                    className="inline-flex items-center gap-1 text-sm font-medium text-infinity-primary transition-colors hover:text-infinity-primary-dark"
                   >
                     ادامه مطلب
                     <ArrowLeft className="h-4 w-4" />

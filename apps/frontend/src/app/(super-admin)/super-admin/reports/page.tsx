@@ -5,27 +5,27 @@ export default function ReportsIndexPage() {
       <h1 className="text-xl font-bold">گزارش‌ها</h1>
       <ul className="list-disc space-y-2 pr-6">
         <li>
-          <Link className="text-pink-600" href="/super-admin/reports/traffic">
+          <Link className="text-infinity-primary" href="/super-admin/reports/traffic">
             گزارش ترافیک و رفتار کاربران
           </Link>
         </li>
         <li>
-          <Link className="text-pink-600" href="/super-admin/reports/liquidity">
+          <Link className="text-infinity-primary" href="/super-admin/reports/liquidity">
             گزارش مجموع نقدینگی در بازه
           </Link>
         </li>
         <li>
-          <Link className="text-pink-600" href="/super-admin/reports/product-sales">
+          <Link className="text-infinity-primary" href="/super-admin/reports/product-sales">
             گزارش فروش هر محصول
           </Link>
         </li>
         <li>
-          <Link className="text-pink-600" href="/super-admin/reports/gateway-liquidity">
+          <Link className="text-infinity-primary" href="/super-admin/reports/gateway-liquidity">
             گزارش مجموع نقدینگی هر درگاه
           </Link>
         </li>
         <li>
-          <Link className="text-pink-600" href="/super-admin/reports/admin-activity">
+          <Link className="text-infinity-primary" href="/super-admin/reports/admin-activity">
             گزارش ادمین ها
           </Link>
         </li>

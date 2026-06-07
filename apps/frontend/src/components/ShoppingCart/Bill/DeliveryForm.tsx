@@ -85,8 +85,8 @@ function ShoppingCartBillDeliveryForm({
             {totalPrice.toLocaleString()} تومان
           </span>
           <button className="flex items-center" type="button" onClick={openDrawer}>
-            <span className="text-sm text-nowrap text-pink-600 lg:text-xs">مشاهده سبد خرید</span>
-            <ChevronLeftIcon className="h-4 w-4 text-pink-600" />
+            <span className="text-sm text-nowrap text-infinity-primary lg:text-xs">مشاهده سبد خرید</span>
+            <ChevronLeftIcon className="h-4 w-4 text-infinity-primary" />
           </button>
         </div>
       </div>
@@ -97,7 +97,7 @@ function ShoppingCartBillDeliveryForm({
       >
         {loading ? (
           <div className="flex justify-center p-4">
-            <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-t-2 border-pink-500"></div>
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-slate-200 border-t-infinity-primary"></div>
           </div>
         ) : error ? (
           <div className="p-2 text-red-500">{error}</div>
@@ -154,7 +154,7 @@ function ShoppingCartBillDeliveryForm({
 
         <div className="flex items-center justify-between pt-2">
           <span className="text-lg text-neutral-800 lg:text-xl">قابل پرداخت</span>
-          <span className="text-2xl text-pink-600">{finalTotal.toLocaleString()} تومان</span>
+          <span className="text-2xl text-infinity-primary">{finalTotal.toLocaleString()} تومان</span>
         </div>
 
         {effectiveShipping > 0 && (

@@ -34,7 +34,7 @@ function ShoppingCart() {
 
           <button
             onClick={() => setSubmitOrderStep(SubmitOrderStep.Bill)}
-            className="text-sm w-fit rounded-lg bg-pink-500 px-6 py-2 text-white"
+            className="text-sm w-fit rounded-lg bg-infinity-primary px-6 py-2 text-white"
           >
             ادامه فرآیند خرید و تسویه حساب
           </button>

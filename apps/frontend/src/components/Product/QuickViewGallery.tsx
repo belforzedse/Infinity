@@ -29,7 +29,7 @@ export default function QuickViewGallery({
           type="button"
           onClick={onClose}
           aria-label="بستن"
-          className="absolute right-3 top-3 z-10 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/80 ring-1 ring-black/10 backdrop-blur transition hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500"
+          className="absolute right-3 top-3 z-10 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/80 ring-1 ring-black/10 backdrop-blur transition hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary"
         >
           <svg viewBox="0 0 20 20" className="h-5 w-5 text-gray-700" fill="currentColor" aria-hidden="true">
             <path
@@ -42,7 +42,7 @@ export default function QuickViewGallery({
 
         {/* Discount badge on image */}
         {hasDiscount && discountPercent && (
-          <div className="absolute left-3 top-3 z-10 rounded-full bg-rose-600 px-3 py-1 text-xs font-medium text-white shadow-sm">
+          <div className="absolute left-3 top-3 z-10 rounded-full bg-infinity-primary px-3 py-1 text-xs font-medium text-white shadow-sm">
             {faNum(discountPercent)}% تخفیف
           </div>
         )}
@@ -79,8 +79,8 @@ export default function QuickViewGallery({
                 onClick={() => onSelectIndex(index)}
                 className={[
                   "relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-2xl ring-1 transition",
-                  active ? "ring-pink-500" : "ring-black/10 hover:ring-pink-300",
-                  "focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500",
+                  active ? "ring-infinity-primary" : "ring-black/10 hover:ring-infinity-primary-lighter",
+                  "focus:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary",
                 ].join(" ")}
                 aria-label={`تصویر ${faNum(index + 1)}`}
                 aria-current={active ? "true" : "false"}

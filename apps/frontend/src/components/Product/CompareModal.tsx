@@ -106,7 +106,7 @@ export default function CompareModal(
       <div className="p-6 text-center">
         {status === "adding" && (
           <div className="flex flex-col items-center gap-4">
-            <div className="h-12 w-12 animate-spin rounded-full border-4 border-pink-500 border-t-transparent" />
+            <div className="h-12 w-12 animate-spin rounded-full border-2 border-slate-200 border-t-infinity-primary" />
             <p className="text-gray-700">در حال افزودن به لیست مقایسه...</p>
           </div>
         )}
@@ -199,7 +199,7 @@ export default function CompareModal(
             <button
               type="button"
               onClick={onClose}
-              className="mt-4 rounded-lg bg-pink-500 px-6 py-3 text-white transition-colors hover:bg-pink-600"
+              className="mt-4 rounded-lg bg-infinity-primary px-6 py-3 text-white transition-colors hover:bg-infinity-primary"
             >
               متوجه شدم
             </button>

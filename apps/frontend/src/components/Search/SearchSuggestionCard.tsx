@@ -54,7 +54,7 @@ const SearchSuggestionCard: FC<SearchSuggestionCardProps> = ({
     return parts.map((part, idx) =>
       part.toLowerCase() === lowerQuery
         ? (
-            <mark key={`${id}-${idx}`} className="bg-transparent px-0 text-pink-600">
+            <mark key={`${id}-${idx}`} className="bg-transparent px-0 text-infinity-primary">
               {part}
             </mark>
           )
@@ -67,7 +67,7 @@ const SearchSuggestionCard: FC<SearchSuggestionCardProps> = ({
       type="button"
       onClick={onClick}
       className={`pressable w-full border-b border-gray-100 p-3 text-right transition-colors last:border-b-0 ${
-        isActive ? "bg-pink-50" : "hover:bg-gray-50"
+        isActive ? "bg-infinity-primary-lighter/20" : "hover:bg-gray-50"
       }`}
       role="option"
       aria-selected={isActive}
@@ -123,7 +123,7 @@ const SearchSuggestionCard: FC<SearchSuggestionCardProps> = ({
                 <div className="flex items-center gap-2">
                   {isDiscounted && (
                     <>
-                      <span className="text-sm font-medium text-pink-600">
+                      <span className="text-sm font-medium text-infinity-primary">
                         {faNum(discountPrice)} تومان
                       </span>
                       <span className="text-xs text-gray-500 line-through">{faNum(price)}</span>
@@ -143,7 +143,7 @@ const SearchSuggestionCard: FC<SearchSuggestionCardProps> = ({
         {/* Discount Badge */}
         {showDiscount && (
           <div className="flex-shrink-0">
-            <div className="text-xs rounded-full bg-pink-500 px-2 py-1 text-white">
+            <div className="text-xs rounded-full bg-infinity-primary px-2 py-1 text-white">
               {faNum(discount ?? computedDiscount!)}%
             </div>
           </div>

@@ -83,7 +83,7 @@ export default function PDPCommentAdd(props: Props) {
           <button
             type="button"
             onClick={() => (user ? setIsModalOpen(true) : router.push("/auth"))}
-            className="flex w-full items-center justify-center gap-2 rounded-[12px] bg-[#DB2777] py-1 px-3 h-[49px] text-[16px] font-normal text-white transition-all hover:bg-[#DB2777]/90 active:scale-[0.98]"
+            className="flex w-full items-center justify-center gap-2 rounded-[12px] bg-[#33415e] py-1 px-3 h-[49px] text-[16px] font-normal text-white transition-all hover:bg-[#33415e]/90 active:scale-[0.98]"
           >
             <MessagesIcon />
             <span>افزودن نظر</span>

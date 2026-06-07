@@ -50,7 +50,7 @@ function ShoppingCartSuccessOrderSubmit() {
         <div className="flex gap-4">
           <button
             onClick={viewOrder}
-            className="text-base rounded-lg bg-pink-500 px-6 py-2 text-white lg:text-sm"
+            className="text-base rounded-lg bg-infinity-primary px-6 py-2 text-white lg:text-sm"
           >
             مشاهده سفارش
           </button>

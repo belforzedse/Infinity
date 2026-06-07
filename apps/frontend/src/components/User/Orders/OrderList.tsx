@@ -108,7 +108,7 @@ export default function OrderList({ className = "" }: OrderListProps) {
       return (
         <div className="rounded-lg bg-gray-50 p-8 text-center">
           <p className="text-gray-600">شما هنوز سفارشی ثبت نکرده‌اید.</p>
-          <Link href="/" className="mt-4 inline-block rounded-lg bg-pink-500 px-4 py-2 text-white">
+          <Link href="/" className="mt-4 inline-block rounded-lg bg-infinity-primary px-4 py-2 text-white">
             مشاهده محصولات
           </Link>
         </div>
@@ -153,7 +153,7 @@ export default function OrderList({ className = "" }: OrderListProps) {
             )}
             <div className="mt-3 flex justify-between border-t border-gray-100 pt-3 font-semibold">
               <span>مجموع:</span>
-              <span className="text-pink-600">
+              <span className="text-infinity-primary">
                 {order.order_items.reduce((sum, item) => sum + item.Count * item.PerAmount, 0) +
                   order.ShippingCost}{" "}
                 {/* prices formatted above with faNum */}
@@ -199,7 +199,7 @@ export default function OrderList({ className = "" }: OrderListProps) {
                 onClick={() => setPage(pageNum)}
                 className={`flex h-8 w-8 items-center justify-center rounded-md ${
                   page === pageNum
-                    ? "bg-pink-500 text-white"
+                    ? "bg-infinity-primary text-white"
                     : "border border-gray-300 hover:bg-gray-50"
                 }`}
               >
@@ -224,7 +224,7 @@ export default function OrderList({ className = "" }: OrderListProps) {
   if (loading && orders.length === 0) {
     return (
       <div className={`${className} flex justify-center p-8`}>
-        <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-t-2 border-pink-500"></div>
+        <div className="h-10 w-10 animate-spin rounded-full border-2 border-slate-200 border-t-infinity-primary"></div>
       </div>
     );
   }
@@ -249,7 +249,7 @@ export default function OrderList({ className = "" }: OrderListProps) {
 
       {loading && (
         <div className="mb-4 flex items-center">
-          <div className="ml-2 h-4 w-4 animate-spin rounded-full border-b-2 border-t-2 border-pink-500"></div>
+          <div className="ml-2 h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-infinity-primary"></div>
           <span className="text-sm text-gray-600">در حال بروزرسانی...</span>
         </div>
       )}

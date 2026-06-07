@@ -34,7 +34,7 @@ const CategoryModal: React.FC<CategoryModalProps> = ({ isOpen, onClose }) => {
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      closeIcon={<DeleteIcon className="text-pink-500" />}
+      closeIcon={<DeleteIcon className="text-infinity-primary" />}
       titleClassName="!justify-end"
       className="max-w-4xl lg:max-w-6xl"
     >

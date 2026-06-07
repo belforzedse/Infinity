@@ -25,7 +25,7 @@ This note documents several UX and infrastructure adjustments so future contribu
 
 ## Auth Return Buttons
 - File: `apps/frontend/src/components/Auth/ReturnButton.tsx`
-- Navigation buttons at `/auth/*` mimic the checkout “مشاهده سبد خرید” text link (pink text with chevron). Do not revert to boxed buttons without UX approval.
+- Navigation buttons at `/auth/*` mimic the checkout “مشاهده سبد خرید” text link (brand text with chevron). Do not revert to boxed buttons without UX approval.
 
 ## Gateway Log Visibility
 - File: `apps/frontend/src/components/SuperAdmin/Order/GatewayLogs.tsx`

@@ -135,9 +135,9 @@ export default function SuperAdminPage() {
             <Link
               key={action.label}
               href={action.href}
-              className="flex items-center gap-2 rounded-2xl border border-pink-100 bg-white px-4 py-3 text-sm font-semibold text-pink-600 transition hover:bg-pink-50"
+              className="flex items-center gap-2 rounded-2xl border border-infinity-primary-lighter/40 bg-white px-4 py-3 text-sm font-semibold text-infinity-primary transition hover:bg-infinity-primary-lighter/20"
             >
-              <span className="h-2 w-2 rounded-full bg-pink-500" aria-hidden />
+              <span className="h-2 w-2 rounded-full bg-infinity-primary" aria-hidden />
               {action.label}
             </Link>
           ))}

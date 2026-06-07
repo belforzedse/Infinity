@@ -283,7 +283,7 @@ export default function CategoryCarousel({ categories }: CategoryCarouselProps) 
           aria-label="View previous categories"
           onPointerDown={handlePointerDown("left")}
           onClick={handleClick("left")}
-          className="absolute left-2 top-1/2 z-10 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-pink-200 bg-white text-neutral-700 shadow-sm transition hover:bg-pink-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white md:flex"
+          className="absolute left-2 top-1/2 z-10 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-infinity-primary-lighter/60 bg-white text-neutral-700 shadow-sm transition hover:bg-infinity-primary-lighter/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white md:flex"
         >
           <ChevronLeftIcon />
         </button>
@@ -295,7 +295,7 @@ export default function CategoryCarousel({ categories }: CategoryCarouselProps) 
           aria-label="View next categories"
           onPointerDown={handlePointerDown("right")}
           onClick={handleClick("right")}
-          className="absolute right-2 top-1/2 z-10 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-pink-200 bg-white text-neutral-700 shadow-sm transition hover:bg-pink-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white md:flex"
+          className="absolute right-2 top-1/2 z-10 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-infinity-primary-lighter/60 bg-white text-neutral-700 shadow-sm transition hover:bg-infinity-primary-lighter/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white md:flex"
         >
           <ChevronRightIcon />
         </button>

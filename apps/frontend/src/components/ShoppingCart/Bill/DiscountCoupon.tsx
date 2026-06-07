@@ -98,7 +98,7 @@ function ShoppingCartBillDiscountCoupon({
             type="button"
             disabled={loading}
             onClick={handleApply}
-            className={`text-base h-9 text-nowrap rounded-lg bg-pink-500 px-6 text-white lg:h-[50px] ${
+            className={`text-base h-9 text-nowrap rounded-lg bg-infinity-primary px-6 text-white lg:h-[50px] ${
               loading ? "cursor-not-allowed opacity-70" : ""
             }`}
           >

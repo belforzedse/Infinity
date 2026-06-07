@@ -27,9 +27,9 @@ export default function FAQQuestionItem({
         </span>
         <div className="mr-3 flex-shrink-0">
           {isOpen ? (
-            <X className="h-5 w-5 text-pink-500" />
+            <X className="h-5 w-5 text-infinity-primary" />
           ) : (
-            <Plus className="h-5 w-5 text-pink-500" />
+            <Plus className="h-5 w-5 text-infinity-primary" />
           )}
         </div>
       </button>

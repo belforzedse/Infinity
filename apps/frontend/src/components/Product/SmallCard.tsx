@@ -138,7 +138,7 @@ const ProductSmallCard: React.FC<ProductSmallCardProps> = ({
       <article className={clsx("relative w-full min-w-0", className)}>
         <Link
           href={productUrl}
-          className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+          className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
           aria-label={`مشاهده جزئیات ${title}`}
         >
           <div className="flex h-[116px] flex-row gap-2 rounded-2xl border border-slate-200 bg-white p-2 md:w-full">
@@ -185,14 +185,14 @@ const ProductSmallCard: React.FC<ProductSmallCardProps> = ({
                   type="button"
                   onClick={handleToggleLike}
                   disabled={isLikeLoading}
-                  className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs text-neutral-700 transition-colors hover:bg-pink-50 hover:text-pink-600 disabled:cursor-wait disabled:opacity-50"
+                  className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs text-neutral-700 transition-colors hover:bg-infinity-primary-lighter/20 hover:text-infinity-primary disabled:cursor-wait disabled:opacity-50"
                   role="menuitem"
                   aria-label={isLiked ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها"}
                 >
                   <HeartIcon
                     className={clsx(
                       "h-4 w-4 transition-colors",
-                      isLiked ? "fill-pink-600 text-pink-600" : "text-neutral-400",
+                      isLiked ? "fill-infinity-primary text-infinity-primary" : "text-neutral-400",
                     )}
                     filled={isLiked}
                   />
@@ -205,7 +205,7 @@ const ProductSmallCard: React.FC<ProductSmallCardProps> = ({
                 <button
                   type="button"
                   onClick={handleQuickView}
-                  className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs text-neutral-700 transition-colors hover:bg-pink-50 hover:text-pink-600"
+                  className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs text-neutral-700 transition-colors hover:bg-infinity-primary-lighter/20 hover:text-infinity-primary"
                   role="menuitem"
                   aria-label="نمایش سریع"
                 >
@@ -219,7 +219,7 @@ const ProductSmallCard: React.FC<ProductSmallCardProps> = ({
                 <button
                   type="button"
                   onClick={handleShare}
-                  className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs text-neutral-700 transition-colors hover:bg-pink-50 hover:text-pink-600"
+                  className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs text-neutral-700 transition-colors hover:bg-infinity-primary-lighter/20 hover:text-infinity-primary"
                   role="menuitem"
                   aria-label="اشتراک‌گذاری"
                 >

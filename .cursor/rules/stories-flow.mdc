@@ -116,13 +116,13 @@ Endpoints are registered in `apps/frontend/src/constants/api.ts` → `ENDPOINTS.
 ## Homepage Integration
 
 `apps/frontend/src/app/(product)/page.tsx`:
-- `getStoriesForHome()` added to `Promise.all` block
-- `<StoriesRail stories={activeStories} />` renders after hero, before `<HomeProductSections>`
+- `getStoriesForHome()` fetches active stories for the homepage rail
+- `<StoriesRail stories={activeStories} />` renders **first** (above site GIF banner and hero slider), before `<HomeProductSections>`
 - Hidden when `activeStories.length === 0`
 
 `apps/frontend/src/components/Home/StoriesRail.tsx`:
-- Section header matches product carousels (`OffersListHomePage`): title + action link, `gap-3` layout
-- Title icon: [`InfinityGradientMark`](apps/frontend/src/components/Icons/InfinityGradientMark.tsx) — social app `Infinity.svg` paths with Instagram-style gradient (not `NewIcon`)
+- Section header: **`داستان ها`** title (social-style `font-peyda` heading, no logo) + **`برو به اینفینیتی گرام`** external link to `https://infinitygram.co`
+- Story scroller via `@repo/story-rail` (`SharedStoryRail`)
 
 ## Story Viewer Library
 

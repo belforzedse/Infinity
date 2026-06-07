@@ -177,7 +177,7 @@ function QuickViewError({ message, onRetry, onClose }: QuickViewErrorProps) {
         <button
           type="button"
           onClick={onRetry}
-          className="rounded-lg bg-pink-500 px-6 py-3 text-white transition-colors hover:bg-pink-600"
+          className="rounded-lg bg-infinity-primary px-6 py-3 text-white transition-colors hover:bg-infinity-primary"
         >
           تلاش مجدد
         </button>

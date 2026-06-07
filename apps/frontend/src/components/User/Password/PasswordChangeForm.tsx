@@ -120,7 +120,7 @@ export default function PasswordChangeForm() {
                 type="text"
                 value={formData.otp}
                 onChange={(e) => setFormData({ ...formData, otp: e.target.value })}
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-right text-foreground-primary focus:border-pink-500 focus:outline-none"
+                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-right text-foreground-primary focus:border-infinity-primary focus:outline-none"
                 placeholder="۶ کد دریافت شده"
                 dir="ltr"
               />
@@ -140,7 +140,7 @@ export default function PasswordChangeForm() {
               formData.newPassword !== formData.confirmPassword ||
               (otpSent && !formData.otp)
             }
-            className="gap-2 rounded-xl bg-[#EC4899] px-6 py-3 text-white transition hover:bg-[#EC4899]/90 disabled:cursor-not-allowed disabled:bg-gray-300"
+            className="gap-2 rounded-xl bg-[#3d4c6e] px-6 py-3 text-white transition hover:bg-[#3d4c6e]/90 disabled:cursor-not-allowed disabled:bg-gray-300"
           >
             {otpSent && <SaveIcon className="h-5 w-5 lg:h-6 lg:w-6" />}
             <span className="text-sm font-medium">

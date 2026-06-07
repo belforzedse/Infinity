@@ -87,7 +87,7 @@ export default function PDPCommentListItem({
               <button
                 type="button"
                 onClick={() => onReply?.(review.id)}
-                className="text-[#94A3B8] hover:text-[#DB2777] transition-colors"
+                className="text-[#94A3B8] hover:text-[#33415e] transition-colors"
               >
                 <ReplyIcon />
               </button>

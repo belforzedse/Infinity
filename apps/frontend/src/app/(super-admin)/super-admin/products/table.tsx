@@ -146,7 +146,7 @@ export const columns: ColumnDef<Product>[] = [
       return (
         <div className="flex flex-col">
           {discountPrice && (
-            <span className="font-medium text-pink-600">
+            <span className="font-medium text-infinity-primary">
               <SuperAdminTableCellSimplePrice price={discountPrice} />
             </span>
           )}
@@ -447,7 +447,7 @@ export const MobileTable = ({ data, enableSelection, selectedIds, onSelectionCha
 
                 <div className="flex shrink-0 flex-col text-left">
                   {priceInfo?.minDiscount && (
-                    <span className="text-xs font-medium text-pink-600">
+                    <span className="text-xs font-medium text-infinity-primary">
                       {priceFormatter(priceInfo.minDiscount, " تومان")}
                     </span>
                   )}

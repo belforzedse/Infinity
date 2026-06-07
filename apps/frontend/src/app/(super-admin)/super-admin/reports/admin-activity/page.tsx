@@ -351,7 +351,7 @@ export default function AdminActivityReportPage() {
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium text-neutral-600">تاریخ شروع</label>
                 <DatePicker
-                  inputClass="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+                  inputClass="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-infinity-primary focus:border-transparent transition-all"
                   defaultValue={start}
                   onChange={(d: any) => setStart(normalizeDateInput(d, start))}
                 />
@@ -359,7 +359,7 @@ export default function AdminActivityReportPage() {
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium text-neutral-600">تاریخ پایان</label>
                 <DatePicker
-                  inputClass="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+                  inputClass="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-infinity-primary focus:border-transparent transition-all"
                   defaultValue={end}
                   onChange={(d: any) => setEnd(normalizeDateInput(d, end))}
                 />
@@ -369,7 +369,7 @@ export default function AdminActivityReportPage() {
                 <select
                   value={selectedActionType}
                   onChange={(e) => setSelectedActionType(e.target.value)}
-                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-infinity-primary focus:border-transparent transition-all"
                 >
                   <option value="">همه</option>
                   <option value="Create">{actionTypeMap["Create"]}</option>
@@ -387,7 +387,7 @@ export default function AdminActivityReportPage() {
                 <select
                   value={selectedLogType}
                   onChange={(e) => setSelectedLogType(e.target.value)}
-                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+                  className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-infinity-primary focus:border-transparent transition-all"
                 >
                   <option value="All">همه</option>
                   <option value="Order">{logTypeMap["Order"]}</option>
@@ -409,7 +409,7 @@ export default function AdminActivityReportPage() {
                     <select
                       value={selectedUser}
                       onChange={(e) => setSelectedUser(e.target.value)}
-                      className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+                      className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-infinity-primary focus:border-transparent transition-all"
                     >
                       <option value="">همه ادمین‌ها</option>
                       {adminUsers.map((user) => (
@@ -423,7 +423,7 @@ export default function AdminActivityReportPage() {
                 <label className="inline-flex items-center gap-2 text-sm text-neutral-600">
                   <input
                     type="checkbox"
-                    className="h-4 w-4 rounded border-neutral-300 text-pink-600 focus:ring-pink-500"
+                    className="h-4 w-4 rounded border-neutral-300 text-infinity-primary focus:ring-infinity-primary"
                     checked={showSystemActivities}
                     onChange={(e) => setShowSystemActivities(e.target.checked)}
                   />
@@ -439,7 +439,7 @@ export default function AdminActivityReportPage() {
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <div className="flex items-center gap-3">
-                <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-pink-500"></div>
+                <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-infinity-primary"></div>
                 <span className="text-neutral-600">در حال بارگذاری...</span>
               </div>
             </div>
@@ -681,7 +681,7 @@ export default function AdminActivityReportPage() {
                                                       <td className="px-4 py-3 text-sm text-neutral-600">
                                                         <Link
                                                           href={`/super-admin/reports/admin-activity/${activity.id}`}
-                                                          className="text-pink-600 hover:text-pink-700 hover:underline font-medium"
+                                                          className="text-infinity-primary hover:text-infinity-primary-dark hover:underline font-medium"
                                                         >
                                                           {title}
                                                         </Link>
@@ -732,7 +732,7 @@ export default function AdminActivityReportPage() {
                                     <td className="px-6 py-3 text-sm text-neutral-600">
                                       <Link
                                         href={`/super-admin/reports/admin-activity/${activity.id}`}
-                                        className="text-pink-600 hover:text-pink-700 hover:underline font-medium"
+                                        className="text-infinity-primary hover:text-infinity-primary-dark hover:underline font-medium"
                                       >
                                         {title}
                                       </Link>

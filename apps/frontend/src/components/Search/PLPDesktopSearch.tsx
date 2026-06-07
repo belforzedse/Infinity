@@ -203,7 +203,7 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({ className = "" }) =
       className={[
         "relative rounded-[28px] border border-slate-50 bg-stone-50 shadow-sm",
         "transition-all duration-300 ease-out",
-        "focus-within:border-zinc-200 focus-within:ring-2 focus-within:ring-pink-200",
+        "focus-within:border-zinc-200 focus-within:ring-2 focus-within:ring-infinity-primary-lighter/60",
         isExpanded ? "w-[360px] lg:w-[420px]" : "w-[282px]",
         className,
       ].join(" ")}
@@ -211,7 +211,7 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({ className = "" }) =
       <div className="flex items-center gap-2 py-2 pl-2 pr-5" dir="ltr">
         <button
           type="submit"
-          className="flex h-8 w-9 shrink-0 items-center justify-center rounded-[28px] bg-pink-500 shadow-sm transition-transform duration-200 hover:scale-105 active:scale-95"
+          className="flex h-8 w-9 shrink-0 items-center justify-center rounded-[28px] bg-infinity-primary shadow-sm transition-transform duration-200 hover:scale-105 active:scale-95"
           aria-label="جستجو"
         >
           <SearchIcon className="h-5 w-5" />
@@ -274,7 +274,7 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({ className = "" }) =
                             trackSearch(term, "desktop_recent");
                             router.push(getSearchHref(term));
                           }}
-                          className="pressable text-xs rounded-full border border-slate-200 px-3 py-1 text-pink-600 hover:border-pink-300 hover:bg-pink-50"
+                          className="pressable text-xs rounded-full border border-slate-200 px-3 py-1 text-infinity-primary hover:border-infinity-primary-lighter hover:bg-infinity-primary-lighter/20"
                         >
                           {term}
                         </button>
@@ -295,7 +295,7 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({ className = "" }) =
                           trackSearch(term, "desktop_popular");
                           router.push(getSearchHref(term));
                         }}
-                        className="pressable text-xs rounded-full border border-slate-200 px-3 py-1 text-neutral-600 hover:border-pink-300 hover:bg-pink-50"
+                        className="pressable text-xs rounded-full border border-slate-200 px-3 py-1 text-neutral-600 hover:border-infinity-primary-lighter hover:bg-infinity-primary-lighter/20"
                       >
                         {term}
                       </button>
@@ -360,7 +360,7 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({ className = "" }) =
                       trackSearch(searchQuery.trim(), "desktop_view_all");
                       router.push(getSearchHref(searchQuery.trim()));
                     }}
-                    className="text-xs block w-full border-t border-slate-200 bg-white/0 px-3 py-2 text-right text-pink-600 hover:bg-slate-50"
+                    className="text-xs block w-full border-t border-slate-200 bg-white/0 px-3 py-2 text-right text-infinity-primary hover:bg-slate-50"
                   >
                     مشاهده همه نتایج
                   </button>

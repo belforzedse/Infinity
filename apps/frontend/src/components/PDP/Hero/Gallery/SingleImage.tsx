@@ -394,9 +394,9 @@ export default function PDPHeroGallerySingleImage(props: Props) {
                   aria-label="Play video"
                 >
                   <div className="group/video-play flex items-center justify-center">
-                    <div className="absolute h-20 w-20 rounded-full bg-white/95 backdrop-blur-md shadow-2xl ring-4 ring-pink-200/30 transition-all duration-300 group-hover/video-play:scale-110 group-hover/video-play:bg-white group-hover/video-play:ring-pink-400/50" />
+                    <div className="absolute h-20 w-20 rounded-full bg-white/95 backdrop-blur-md shadow-2xl ring-4 ring-infinity-primary-lighter/30 transition-all duration-300 group-hover/video-play:scale-110 group-hover/video-play:bg-white group-hover/video-play:ring-infinity-primary-light/50" />
                     <svg
-                      className="relative left-1 h-10 w-10 text-pink-600 transition-transform duration-300 group-hover/video-play:scale-110"
+                      className="relative left-1 h-10 w-10 text-infinity-primary transition-transform duration-300 group-hover/video-play:scale-110"
                       fill="currentColor"
                       viewBox="0 0 24 24"
                     >
@@ -472,7 +472,7 @@ export default function PDPHeroGallerySingleImage(props: Props) {
         )}
 
         {zoomHintVisible && (
-          <div className="pointer-events-none absolute bottom-4 left-4 z-30 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-pink-600 shadow-lg shadow-gray-200">
+          <div className="pointer-events-none absolute bottom-4 left-4 z-30 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-infinity-primary shadow-lg shadow-gray-200">
             {zoomScale > 1 ? "اسکرول پایین برای خارج شدن از زوم" : "اسکرول بالا برای زوم کردن"}
           </div>
         )}
@@ -492,7 +492,7 @@ export default function PDPHeroGallerySingleImage(props: Props) {
 
         {isLoading && !thumb && type === "video" ? (
           <div className="absolute inset-0 z-0 overflow-hidden rounded-3xl">
-            <div className="h-full w-full animate-pulse bg-gradient-to-br from-gray-100 via-pink-50/30 to-gray-100" />
+            <div className="h-full w-full animate-pulse bg-gradient-to-br from-gray-100 via-infinity-primary-lighter/30 to-gray-100" />
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" />
           </div>
         ) : null}

@@ -37,7 +37,7 @@ In `apps/frontend/src/constants/superAdminSidebar.tsx`, the stories item is a **
   id: "stories",
   label: "استوری‌ها",
   href: "/super-admin/stories",
-  icon: <FiPlayCircle className="h-5 w-5 text-pink-500" stroke="#EC4899" />,
+  icon: <FiPlayCircle className="h-5 w-5 text-infinity-primary" stroke="#3d4c6e" />,
   children: [
     { id: "stories-list", label: "لیست استوری‌ها", href: "/super-admin/stories" },
     { id: "stories-add",  label: "افزودن استوری",   href: "/super-admin/stories/add" },

@@ -69,7 +69,7 @@ const ShoppingCartDesktopTable: React.FC<Props> = ({ cartItems, className }) => 
                     <div className="flex flex-col gap-0.5 text-sm">
                       <Link
                         href={`/pdp/${item.slug}`}
-                        className="text-foreground-primary font-semibold hover:text-pink-600"
+                        className="text-foreground-primary font-semibold hover:text-infinity-primary"
                       >
                         {item.name}
                       </Link>
@@ -89,7 +89,7 @@ const ShoppingCartDesktopTable: React.FC<Props> = ({ cartItems, className }) => 
                       </span>
                     )}
                     <span
-                      className={hasDiscount ? "font-semibold text-pink-600" : "text-neutral-800"}
+                      className={hasDiscount ? "font-semibold text-infinity-primary" : "text-neutral-800"}
                     >
                       {formatPrice(item.price)}
                     </span>
@@ -110,7 +110,7 @@ const ShoppingCartDesktopTable: React.FC<Props> = ({ cartItems, className }) => 
                     <span
                       className={
                         hasDiscount
-                          ? "text-base font-semibold text-pink-600"
+                          ? "text-base font-semibold text-infinity-primary"
                           : "text-base text-neutral-800"
                       }
                     >

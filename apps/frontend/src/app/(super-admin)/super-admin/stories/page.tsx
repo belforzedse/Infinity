@@ -117,7 +117,7 @@ export default function StoriesPage() {
               placeholder="جستجو در عنوان..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm placeholder:text-slate-400 focus:border-pink-400 focus:outline-none focus:ring-1 focus:ring-pink-400"
+              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm placeholder:text-slate-400 focus:border-infinity-primary-light focus:outline-none focus:ring-1 focus:ring-infinity-primary-light"
             />
           </div>
           <div className="flex flex-wrap gap-2">
@@ -128,7 +128,7 @@ export default function StoriesPage() {
                 onClick={() => setActiveFilter(f)}
                 className={`rounded-lg px-3 py-1.5 text-sm transition-colors ${
                   activeFilter === f
-                    ? "bg-pink-500 text-white"
+                    ? "bg-infinity-primary text-white"
                     : "border border-slate-200 text-slate-600 hover:bg-slate-50"
                 }`}
               >

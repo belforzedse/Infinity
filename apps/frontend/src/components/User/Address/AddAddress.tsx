@@ -201,7 +201,7 @@ export default function AddAddress({ onAddressAdded, isOpen: externalIsOpen, onO
           onClick={() => setIsOpen(true)}
           className="text-primary-600 text-sm flex items-center gap-1 font-medium lg:text-base"
         >
-          <span className="text-foreground-pink text-sm lg:text-base">افزودن آدرس</span>
+          <span className="text-infinity-primary text-sm lg:text-base">افزودن آدرس</span>
           <CirculePlusIcon className="h-5 w-5" />
         </button>
       )}
@@ -309,7 +309,7 @@ export default function AddAddress({ onAddressAdded, isOpen: externalIsOpen, onO
             <button
               type="submit"
               disabled={loading || !selectedCity}
-              className={`hover:bg-[#db3172] text-sm flex w-full items-center justify-center gap-2 rounded-lg bg-[#f45a93] px-8 py-2 font-medium text-white transition-colors lg:w-fit ${
+              className={`hover:bg-[#33415e] text-sm flex w-full items-center justify-center gap-2 rounded-lg bg-[#3d4c6e] px-8 py-2 font-medium text-white transition-colors lg:w-fit ${
                 loading || !selectedCity ? "cursor-not-allowed opacity-70" : ""
               }`}
             >

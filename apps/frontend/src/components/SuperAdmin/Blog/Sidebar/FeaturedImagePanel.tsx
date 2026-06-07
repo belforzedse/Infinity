@@ -98,7 +98,7 @@ export default function FeaturedImagePanel({
       ) : (
         <div
           onClick={() => fileInputRef.current?.click()}
-          className="flex h-48 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 transition-colors hover:border-pink-300 hover:bg-pink-50"
+          className="flex h-48 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 transition-colors hover:border-infinity-primary-lighter hover:bg-infinity-primary-lighter/20"
         >
           <ImageIcon className="mb-2 h-8 w-8 text-slate-400" />
           <span className="text-sm text-slate-500">کلیک کنید یا تصویر را بکشید</span>
@@ -120,7 +120,7 @@ export default function FeaturedImagePanel({
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="flex items-center justify-end gap-1 text-xs text-pink-500 hover:text-pink-600"
+          className="flex items-center justify-end gap-1 text-xs text-infinity-primary hover:text-infinity-primary"
           disabled={isUploading}
         >
           <Plus className="h-4 w-4" />

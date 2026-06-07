@@ -329,7 +329,7 @@ function ShoppingCartBillInformationForm({ register, errors, control, setValue }
           type="button"
           onClick={handleAddAddress}
         >
-          <span className="text-xs text-pink-500">افزودن آدرس</span>
+          <span className="text-xs text-infinity-primary">افزودن آدرس</span>
           <CirculePlusIcon className="h-5 w-5" />
         </button>
       </div>
@@ -401,7 +401,7 @@ function ShoppingCartBillInformationForm({ register, errors, control, setValue }
           <input
             type="checkbox"
             id="saveAddress"
-            className="h-4 w-4 accent-pink-500"
+            className="h-4 w-4 accent-infinity-primary"
             {...register("saveAddress")}
           />
           <label htmlFor="saveAddress" className="text-sm text-neutral-700">
@@ -452,9 +452,9 @@ function ShoppingCartBillInformationForm({ register, errors, control, setValue }
         />
       </div>
 
-      <div className="flex items-center gap-1 rounded-lg bg-pink-50 p-4 lg:p-5">
+      <div className="flex items-center gap-1 rounded-lg bg-infinity-primary-lighter/20 p-4 lg:p-5">
         <CirculeInformationIcon className="h-6 w-6" />
-        <span className="text-sm text-pink-600 lg:text-base">
+        <span className="text-sm text-infinity-primary lg:text-base">
           برای دریافت فاکتور، بعد از دریافت سفارش به حساب کاربری و صفحه جزئیات سفارش سر بزنید
         </span>
       </div>

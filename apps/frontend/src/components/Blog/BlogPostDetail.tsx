@@ -70,7 +70,7 @@ const BlogPostDetail: React.FC<BlogPostDetailProps> = ({ post }) => {
       {/* Breadcrumb */}
       <div className="border-b border-slate-100 px-6 py-4">
         <nav className="flex items-center gap-2 text-sm text-neutral-600">
-          <Link href="/blog" className="transition-colors hover:text-pink-600">
+          <Link href="/blog" className="transition-colors hover:text-infinity-primary">
             وبلاگ
           </Link>
           <ChevronLeft className="h-4 w-4" />
@@ -78,7 +78,7 @@ const BlogPostDetail: React.FC<BlogPostDetailProps> = ({ post }) => {
             <>
               <Link
                 href={`/blog?category=${post.blog_category.Slug}`}
-                className="transition-colors hover:text-pink-600"
+                className="transition-colors hover:text-infinity-primary"
               >
                 {post.blog_category.Name}
               </Link>
@@ -98,7 +98,7 @@ const BlogPostDetail: React.FC<BlogPostDetailProps> = ({ post }) => {
           <div className="mb-4">
             <Link
               href={`/blog?category=${post.blog_category.Slug}`}
-              className="inline-flex items-center gap-2 rounded-full bg-pink-100 px-3 py-1 text-sm text-pink-700 transition-colors hover:bg-pink-200"
+              className="inline-flex items-center gap-2 rounded-full bg-infinity-primary-lighter/30 px-3 py-1 text-sm text-infinity-primary-dark transition-colors hover:bg-infinity-primary-lighter/50"
             >
               <FolderOpen className="h-4 w-4" />
               {post.blog_category.Name}
@@ -123,8 +123,8 @@ const BlogPostDetail: React.FC<BlogPostDetailProps> = ({ post }) => {
                     className="h-8 w-8 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-pink-100">
-                    <User className="h-4 w-4 text-pink-600" />
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-infinity-primary-lighter/30">
+                    <User className="h-4 w-4 text-infinity-primary" />
                   </div>
                 )}
                 <span className="font-medium">

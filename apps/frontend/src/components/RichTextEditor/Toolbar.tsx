@@ -64,7 +64,7 @@ const ToolbarButton: React.FC<{
     size="sm"
     className={`h-8 w-8 p-0 transition-all ${
       isActive
-        ? "bg-pink-600 text-white shadow-sm hover:bg-pink-700"
+        ? "bg-infinity-primary text-white shadow-sm hover:bg-infinity-primary-dark"
         : "hover:bg-neutral-100 hover:border-neutral-300"
     } ${disabled ? "opacity-50 cursor-not-allowed" : ""} ${className ?? ""}`}
   >
@@ -441,7 +441,7 @@ const RichTextToolbar: React.FC<ToolbarProps> = ({ editor, simplified = false })
               editor.chain().focus().setColor((event.target as HTMLInputElement).value).run()
             }
             value={editor.getAttributes("textStyle").color || "#000000"}
-            className="h-8 w-8 cursor-pointer rounded-lg border border-neutral-200 transition-colors hover:border-pink-400"
+            className="h-8 w-8 cursor-pointer rounded-lg border border-neutral-200 transition-colors hover:border-infinity-primary-light"
             title="انتخاب رنگ دلخواه"
           />
           {!simplified && (
@@ -469,7 +469,7 @@ const RichTextToolbar: React.FC<ToolbarProps> = ({ editor, simplified = false })
           <button
             type="button"
             onClick={() => editor.chain().focus().unsetColor().run()}
-            className="ml-1 flex h-6 w-6 items-center justify-center rounded-full border border-neutral-300 text-neutral-500 transition hover:border-pink-400 hover:text-pink-600"
+            className="ml-1 flex h-6 w-6 items-center justify-center rounded-full border border-neutral-300 text-neutral-500 transition hover:border-infinity-primary-light hover:text-infinity-primary"
             title="حذف رنگ"
           >
             <X size={12} />

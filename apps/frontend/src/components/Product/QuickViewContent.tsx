@@ -227,7 +227,7 @@ export default function QuickViewContent({
                 <button
                   type="button"
                   onClick={onViewFullDetails}
-                  className="flex-1 rounded-2xl bg-pink-500 px-5 py-3 text-sm font-medium text-white shadow-sm transition hover:bg-pink-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2"
+                  className="flex-1 rounded-2xl bg-infinity-primary px-5 py-3 text-sm font-medium text-white shadow-sm transition hover:bg-infinity-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary focus-visible:ring-offset-2"
                 >
                   مشاهده جزئیات کامل
                 </button>

@@ -83,7 +83,7 @@ export default function ImageUploadField({
     <div className="flex min-w-0 flex-col gap-3">
       <div
         className={`relative min-w-0 overflow-hidden rounded-2xl border border-dashed ${
-          isDragging ? "border-pink-400 bg-pink-50" : "border-slate-200 bg-slate-50"
+          isDragging ? "border-infinity-primary-light bg-infinity-primary-lighter/20" : "border-slate-200 bg-slate-50"
         }`}
         onDragOver={(e) => {
           e.preventDefault();
@@ -139,7 +139,7 @@ export default function ImageUploadField({
           type="button"
           onClick={() => fileInputRef.current?.click()}
           disabled={readOnly || isUploading}
-          className="inline-flex items-center gap-2 rounded-lg border border-pink-200 bg-white px-3 py-2 text-xs font-medium text-pink-600 transition hover:bg-pink-50 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex items-center gap-2 rounded-lg border border-infinity-primary-lighter/60 bg-white px-3 py-2 text-xs font-medium text-infinity-primary transition hover:bg-infinity-primary-lighter/20 disabled:cursor-not-allowed disabled:opacity-60"
         >
           <UploadCloud className="h-4 w-4" />
           {isUploading ? "در حال آپلود..." : "آپلود تصویر"}

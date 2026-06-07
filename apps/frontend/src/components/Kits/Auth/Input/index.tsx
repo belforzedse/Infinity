@@ -30,7 +30,7 @@ export default function AuthInput({
             "text-base text-foreground-muted",
             rightElement ? "pr-[4.5rem]" : "pr-4",
             leftElement ? "pl-12" : "pl-4",
-            "focus:outline-none focus:ring-2 focus:ring-pink-400",
+            "focus:outline-none focus:ring-2 focus:ring-infinity-primary-light",
             error && "border-red-500",
             className,
           )}

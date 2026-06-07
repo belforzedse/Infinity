@@ -141,7 +141,7 @@ export default function PLPPagination({
                 className={cn(
                   "flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium transition-colors",
                   isActive
-                    ? "bg-pink-500 text-white"
+                    ? "bg-infinity-primary text-white"
                     : "text-gray-700 hover:border-gray-400 hover:bg-gray-50",
                   disabled && "cursor-not-allowed opacity-60",
                 )}

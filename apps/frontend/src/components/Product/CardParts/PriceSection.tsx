@@ -17,7 +17,7 @@ export const PriceSection: FC<PriceSectionProps> = ({
   isAvailable,
 }) => {
   return (
-    <div className="mt-auto flex items-center justify-center rounded-[24px] bg-stone-100 px-3 py-2 transition-all duration-300 md:mt-1 md:group-hover:rounded-[32px] md:group-hover:bg-pink-500">
+    <div className="mt-auto flex items-center justify-center rounded-[24px] bg-stone-100 px-3 py-2 transition-all duration-300 md:mt-1 md:group-hover:rounded-[32px] md:group-hover:bg-infinity-primary">
       <div className="flex w-full items-center justify-between md:group-hover:justify-center">
         {!hasDiscount && isAvailable && (
           <span className="text-sm text-stone-500 md:group-hover:hidden">قیمت</span>
@@ -30,7 +30,7 @@ export const PriceSection: FC<PriceSectionProps> = ({
         ) : (
           <div className="flex flex-row flex-wrap items-center justify-start gap-3 text-left md:group-hover:justify-center md:group-hover:gap-4">
             {hasDiscount && discountPrice && (
-              <span className="whitespace-nowrap text-base text-pink-600 md:text-lg md:group-hover:text-xl md:group-hover:text-white">
+              <span className="whitespace-nowrap text-base text-infinity-primary md:text-lg md:group-hover:text-xl md:group-hover:text-white">
                 {faNum(discountPrice)} تومان
               </span>
             )}
@@ -38,7 +38,7 @@ export const PriceSection: FC<PriceSectionProps> = ({
             <span
               className={`${
                 hasDiscount
-                  ? "text-xs text-neutral-400 line-through md:group-hover:text-sm md:group-hover:text-pink-100 md:group-hover:no-underline"
+                  ? "text-xs text-neutral-400 line-through md:group-hover:text-sm md:group-hover:text-infinity-primary-lighter md:group-hover:no-underline"
                   : "whitespace-nowrap text-base text-neutral-700 md:text-lg md:group-hover:text-xl md:group-hover:text-white"
               }`}
             >

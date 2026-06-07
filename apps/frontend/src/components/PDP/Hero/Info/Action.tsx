@@ -333,7 +333,7 @@ export default function PDPHeroInfoAction({
           disabled={isLoading}
           aria-label={isLiked ? "حذف از علاقه‌مندی‌ها" : "افزودن به علاقه‌مندی‌ها"}
         >
-          <HeartIcon filled={isLiked} className={isLiked ? "text-pink-600" : "text-neutral-800"} />
+          <HeartIcon filled={isLiked} className={isLiked ? "text-infinity-primary" : "text-neutral-800"} />
         </button>
       </div>
 

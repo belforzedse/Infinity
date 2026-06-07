@@ -24,13 +24,13 @@ Figma: [desktop-model2](https://www.figma.com/design/x4y3qlCXNd3ZB6ocY09PPm/infi
 | Token | Value |
 |-------|--------|
 | Width | `282px` default; expands to `360px` / `lg:420px` on focus or open dropdown |
-| Motion | `transition-all duration-300`, `focus-within:ring-2 ring-pink-200`, `shadow-sm`, submit `hover:scale-105`, dropdown `animate-in fade-in slide-in-from-top-2` |
+| Motion | `transition-all duration-300`, `focus-within:ring-2 ring-infinity-primary-lighter/60`, `shadow-sm`, submit `hover:scale-105`, dropdown `animate-in fade-in slide-in-from-top-2` |
 | Radius | `28px` |
 | Fill | `bg-stone-50` + `border-slate-50` (search control only) |
 | Padding | `py-2 pl-2 pr-5` |
-| Submit | `h-8 w-9` pink pill, white search glyph |
+| Submit | `h-8 w-9` `bg-infinity-primary` pill, white search glyph |
 | Placeholder | 12px, `neutral-400` — «دنبال چی میگردی؟» |
-| Layout | `dir="ltr"` on inner row — pink search button on the **left**, RTL text input on the right |
+| Layout | `dir="ltr"` on inner row — brand search button on the **left**, RTL text input on the right |
 
 Suggestions dropdown: `min-w-[282px]`, existing PLP search API behavior unchanged.
 
@@ -38,14 +38,14 @@ Suggestions dropdown: `min-w-[282px]`, existing PLP search API behavior unchange
 
 - `gap-4` (16px), `flex-row-reverse` (cart toward outer edge, profile toward logo)
 - Hover: `hover:scale-105` / `active:scale-95` on icon controls
-- Cart: icon + **سبد خرید** label, `text-pink-500`, `text-xs`
+- Cart: icon + **سبد خرید** label, `text-infinity-primary`, `text-xs`
 - Dividers: `h-[20.5px] w-px bg-slate-200`
 - Wallet / orders / profile: `text-slate-400`, 24px icons
 
 ## Category nav (`DesktopNav`)
 
 - Row: `bg-stone-50`, `py-3`, `StorefrontContainer`, `gap-6` (24px)
-- Links: `text-sm`, inactive `text-neutral-800`, active pink pill unchanged
+- Links: `text-sm`, inactive `text-neutral-800`, active `infinity-primary` pill unchanged
 
 ## Mobile
 

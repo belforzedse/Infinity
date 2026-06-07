@@ -121,7 +121,7 @@ function SidebarNav({
               className={clsx(
                 "relative mb-2 flex items-center justify-between rounded-lg px-2 py-1.5 transition-colors duration-150",
                 "hover:bg-neutral-50",
-                isActive ? "bg-pink-50 text-pink-600" : "text-neutral-600",
+                isActive ? "bg-infinity-primary-lighter/20 text-infinity-primary" : "text-neutral-600",
                 isCollapsed && variant === "desktop" && "md:justify-center md:px-2",
               )}
               title={isCollapsed && variant === "desktop" ? item.label : undefined}
@@ -130,7 +130,7 @@ function SidebarNav({
                 <span
                   className={clsx(
                     activeEdgeClass(variant, "h-10"),
-                    "bg-gradient-to-b from-pink-600 to-pink-400",
+                    "bg-gradient-to-b from-infinity-primary to-infinity-primary-light",
                   )}
                 />
               )}
@@ -156,7 +156,7 @@ function SidebarNav({
                 "relative mb-2 flex items-center justify-between rounded-lg px-2 py-1.5",
                 "cursor-pointer transition-colors duration-150",
                 "hover:bg-neutral-50",
-                isActive && showLabels && "bg-pink-50 text-pink-600",
+                isActive && showLabels && "bg-infinity-primary-lighter/20 text-infinity-primary",
                 !isActive && "text-neutral-600",
                 isCollapsed && variant === "desktop" && "md:justify-center md:px-2",
               )}
@@ -180,7 +180,7 @@ function SidebarNav({
                   <span
                     className={clsx(
                       "text-sm font-medium",
-                      isActive ? "text-pink-600" : "text-neutral-600",
+                      isActive ? "text-infinity-primary" : "text-neutral-600",
                     )}
                   >
                     {item.label}
@@ -191,7 +191,7 @@ function SidebarNav({
                 <span
                   className={clsx(
                     activeEdgeClass(variant, "h-10"),
-                    "bg-gradient-to-b from-pink-600 to-pink-400",
+                    "bg-gradient-to-b from-infinity-primary to-infinity-primary-light",
                   )}
                 />
               )}
@@ -248,7 +248,7 @@ function SidebarNav({
                           onNavigate?.();
                         }}
                         className={clsx(
-                          "text-sm block px-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500",
+                          "text-sm block px-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary",
                           "transition-colors duration-150",
                           "relative pl-6 pr-2",
                           active
@@ -259,7 +259,7 @@ function SidebarNav({
                         {child.label}
                         {active && (
                           <span
-                            className={clsx(activeEdgeClass(variant, "h-8"), "bg-pink-500")}
+                            className={clsx(activeEdgeClass(variant, "h-8"), "bg-infinity-primary")}
                           />
                         )}
                       </Link>

@@ -7,7 +7,7 @@ export default function NavigationPage() {
   const router = useRouter();
 
   useEffect(() => {
-    router.push("/super-admin/settings/customization/navbar");
+    router.push("/super-admin/customization/navbar");
   }, [router]);
 
   return <div>در حال انتقال به صفحه سفارشی‌سازی ناوبری...</div>;

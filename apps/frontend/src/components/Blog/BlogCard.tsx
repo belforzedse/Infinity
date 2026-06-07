@@ -33,7 +33,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, priority = false, className =
     <article className={`group w-full max-w-none ${className}`}>
       <Link
         href={`/${post.Slug}`}
-        className="block rounded-3xl border-2 border-pink-100 bg-white p-2 transition-all duration-200 hover:border-pink-200 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2"
+        className="block rounded-3xl border-2 border-infinity-primary-lighter/40 bg-white p-2 transition-all duration-200 hover:border-infinity-primary-lighter/60 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary focus-visible:ring-offset-2"
       >
         {/* Featured Image */}
         <div className="relative mb-2 aspect-[304/260] w-full overflow-hidden rounded-[20px]">
@@ -48,7 +48,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ post, priority = false, className =
               loader={imageLoader}
             />
           ) : (
-            <div className="h-full w-full bg-gradient-to-br from-pink-50 to-pink-100" />
+            <div className="h-full w-full bg-gradient-to-br from-infinity-primary-lighter/20 to-infinity-primary-lighter/30" />
           )}
         </div>
 

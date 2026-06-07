@@ -118,7 +118,7 @@ export default function HomepageProductsPage() {
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="rounded-xl bg-pink-600 px-6 py-2.5 text-white transition hover:bg-pink-700 disabled:opacity-50"
+            className="rounded-xl bg-infinity-primary px-6 py-2.5 text-white transition hover:bg-infinity-primary-dark disabled:opacity-50"
           >
             {saving ? "در حال ذخیره..." : "ذخیره تغییرات"}
           </button>

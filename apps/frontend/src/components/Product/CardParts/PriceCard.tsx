@@ -23,7 +23,7 @@ export function PriceCard({
             <span
               className={`text-xs ${
                 discountedPrice && discountedPrice > 0 && discountedPrice < price
-                  ? "text-pink-600"
+                  ? "text-infinity-primary"
                   : "text-neutral-800"
               } font-medium`}
             >

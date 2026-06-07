@@ -141,7 +141,7 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-1">
           {title === "اینفینیتی مگ" ? (
-            <BookOpen className="h-6 w-6 text-pink-600 md:h-7 md:w-7" aria-hidden="true" />
+            <BookOpen className="h-6 w-6 text-infinity-primary md:h-7 md:w-7" aria-hidden="true" />
           ) : (
             <NewIcon />
           )}
@@ -166,7 +166,7 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({
           {/* View All Link */}
           <Link
             href={getViewAllHref()}
-            className="flex items-center gap-1 text-sm font-normal text-neutral-600 transition-colors hover:text-pink-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2"
+            className="flex items-center gap-1 text-sm font-normal text-neutral-600 transition-colors hover:text-infinity-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary focus-visible:ring-offset-2"
           >
             <span>{viewAllText}</span>
             <ArrowLeft className="h-4 w-4 md:h-5 md:w-5" aria-hidden="true" />
@@ -204,7 +204,7 @@ const BlogCarousel: React.FC<BlogCarouselProps> = ({
           <div className="mt-6 flex items-center justify-center">
             <Link
               href={getViewAllHref()}
-              className="flex items-center gap-2 rounded-full border-2 border-pink-100 bg-white px-6 py-3 text-sm font-medium text-neutral-800 transition-colors hover:bg-pink-50 hover:text-pink-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2"
+              className="flex items-center gap-2 rounded-full border-2 border-infinity-primary-lighter/40 bg-white px-6 py-3 text-sm font-medium text-neutral-800 transition-colors hover:bg-infinity-primary-lighter/20 hover:text-infinity-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary focus-visible:ring-offset-2"
             >
               <span>{viewAllText}</span>
               <ArrowLeft className="h-4 w-4" />

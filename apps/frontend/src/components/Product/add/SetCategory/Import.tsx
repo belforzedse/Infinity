@@ -110,12 +110,12 @@ const ImportCategorty = () => {
 
         <button
           type="submit"
-          className="text-xs mr-1 flex min-h-9 items-center justify-center gap-1 rounded-lg border border-pink-500 bg-pink-50 text-pink-500"
+          className="text-xs mr-1 flex min-h-9 items-center justify-center gap-1 rounded-lg border border-infinity-primary bg-infinity-primary-lighter/20 text-infinity-primary"
         >
           <span>{isCreateCategoryLoading ? "" : "افزودن"}</span>
           <PlusIcon
             className={classNames(
-              "h-3 w-3 text-pink-500",
+              "h-3 w-3 text-infinity-primary",
               isCreateCategoryLoading && "animate-spin",
             )}
           />

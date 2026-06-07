@@ -28,7 +28,7 @@ const BlogPagination: React.FC<BlogPaginationProps> = ({
       <button
         onClick={onPrev}
         disabled={current === 0}
-        className="flex h-8 w-8 items-center justify-center rounded-full border border-pink-200 bg-white text-pink-600 transition-colors hover:bg-pink-50 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-white"
+        className="flex h-8 w-8 items-center justify-center rounded-full border border-infinity-primary-lighter/60 bg-white text-infinity-primary transition-colors hover:bg-infinity-primary-lighter/20 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-white"
         aria-label="صفحه قبلی"
       >
         <ChevronRight className="h-4 w-4" />
@@ -38,7 +38,7 @@ const BlogPagination: React.FC<BlogPaginationProps> = ({
       <button
         onClick={onNext}
         disabled={current === total - 1}
-        className="flex h-8 w-8 items-center justify-center rounded-full border border-pink-200 bg-white text-pink-600 transition-colors hover:bg-pink-50 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-white"
+        className="flex h-8 w-8 items-center justify-center rounded-full border border-infinity-primary-lighter/60 bg-white text-infinity-primary transition-colors hover:bg-infinity-primary-lighter/20 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-white"
         aria-label="صفحه بعدی"
       >
         <ChevronLeft className="h-4 w-4" />

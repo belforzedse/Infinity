@@ -50,7 +50,7 @@ const IncreaseBalance = ({ chargeDisabled = false }: IncreaseBalanceProps) => {
       <button
         type="button"
         disabled={chargeDisabled}
-        className="flex w-full items-center justify-center gap-1 rounded-lg bg-pink-500 px-10 py-3 text-white disabled:cursor-not-allowed disabled:opacity-60 lg:w-fit"
+        className="flex w-full items-center justify-center gap-1 rounded-lg bg-infinity-primary px-10 py-3 text-white disabled:cursor-not-allowed disabled:opacity-60 lg:w-fit"
         onClick={async () => {
           if (chargeDisabled) return;
           try {

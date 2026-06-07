@@ -12,14 +12,14 @@ export default function PDPHeroNavigationButtons(props: Props) {
   return (
     <div className="flex gap-3">
       <button
-        className="pressable z-10 flex h-8 w-8 items-center justify-center rounded-full border border-pink-200 bg-white text-neutral-700 transition-colors hover:bg-pink-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+        className="pressable z-10 flex h-8 w-8 items-center justify-center rounded-full border border-infinity-primary-lighter/60 bg-white text-neutral-700 transition-colors hover:bg-infinity-primary-lighter/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
         onClick={goToNextImage}
       >
         <ChevronRightIcon />
       </button>
 
       <button
-        className="pressable z-10 flex h-8 w-8 items-center justify-center rounded-full border border-pink-200 bg-white text-neutral-700 transition-colors hover:bg-pink-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+        className="pressable z-10 flex h-8 w-8 items-center justify-center rounded-full border border-infinity-primary-lighter/60 bg-white text-neutral-700 transition-colors hover:bg-infinity-primary-lighter/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
         onClick={goToPreviousImage}
       >
         <ChevronLeftIcon />

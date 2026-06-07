@@ -59,7 +59,7 @@ export function ConsentManager() {
             </button>
             <button
               onClick={grantConsent}
-              className="px-6 py-2.5 text-sm rounded-lg bg-pink-600 font-medium text-white transition-colors hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2"
+              className="px-6 py-2.5 text-sm rounded-lg bg-infinity-primary font-medium text-white transition-colors hover:bg-infinity-primary-dark focus:outline-none focus:ring-2 focus:ring-infinity-primary focus:ring-offset-2"
               aria-label="پذیرش کوکی‌ها"
             >
               پذیرش

@@ -46,7 +46,7 @@ export default function PaymentStatusButton({ orderId, className = "" }: Payment
       <button
         onClick={checkStatus}
         disabled={loading}
-        className={`text-sm rounded-lg bg-pink-50 px-3 py-1 text-pink-700 transition-colors hover:bg-pink-100 ${
+        className={`text-sm rounded-lg bg-infinity-primary-lighter/20 px-3 py-1 text-infinity-primary-dark transition-colors hover:bg-infinity-primary-lighter/30 ${
           loading ? "cursor-wait opacity-70" : ""
         } ${className}`}
       >

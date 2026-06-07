@@ -72,7 +72,7 @@ export default function ReserveInfoCard({ order, onReleased }: Props) {
             type="button"
             onClick={handleRelease}
             disabled={isReleasing}
-            className="rounded-lg border border-pink-200 bg-white px-4 py-2 text-sm font-medium text-pink-600 transition hover:bg-pink-50 disabled:opacity-50"
+            className="rounded-lg border border-infinity-primary-lighter/60 bg-white px-4 py-2 text-sm font-medium text-infinity-primary transition hover:bg-infinity-primary-lighter/20 disabled:opacity-50"
           >
             {isReleasing ? "در حال پردازش..." : "ارسال الان"}
           </button>

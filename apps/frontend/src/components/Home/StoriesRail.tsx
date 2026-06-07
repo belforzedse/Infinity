@@ -4,7 +4,6 @@ import { useCallback } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { StoryRail as SharedStoryRail } from "@repo/story-rail";
-import InfinityGradientMark from "@/components/Icons/InfinityGradientMark";
 import type { Story } from "@/types/story";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useStoriesSeenState } from "@/hooks/useStoriesSeenState";
@@ -35,15 +34,14 @@ export default function StoriesRail({ stories }: StoriesRailProps) {
   return (
     <div className="flex min-w-0 w-full flex-col gap-3" dir="rtl">
       <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-1.5">
-          <InfinityGradientMark width={32} className="shrink-0" />
-          <span className="text-2xl text-foreground-primary md:text-3xl">اینفینیتی گرام</span>
-        </div>
+        <h2 className="font-peyda text-2xl font-bold leading-[21px] text-[#424242] md:text-3xl">
+          داستان ها
+        </h2>
         <Link
           href={INFINITYGRAM_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex shrink-0 items-center gap-1 text-sm font-normal text-neutral-600 transition-colors hover:text-pink-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2"
+          className="flex shrink-0 items-center gap-1 text-sm font-normal text-neutral-600 transition-colors hover:text-infinity-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary focus-visible:ring-offset-2"
         >
           <span>برو به اینفینیتی گرام</span>
           <ArrowLeft className="h-4 w-4 md:h-5 md:w-5" aria-hidden="true" />

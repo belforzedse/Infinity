@@ -72,7 +72,7 @@ export default function BlogLayout({ children }: { children: React.ReactNode }) 
   }, []);
 
   return (
-    <div dir="rtl" className="bg-white pb-[81px] antialiased lg:pb-0">
+    <div dir="rtl" className="bg-white pb-28 antialiased lg:pb-0">
       {/* Safe area white bar for standalone mode */}
       {isStandalone && (
         <div

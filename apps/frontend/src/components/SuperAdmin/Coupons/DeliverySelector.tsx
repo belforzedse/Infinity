@@ -68,7 +68,7 @@ export default function CouponDeliverySelector({ selected, onToggle }: DeliveryS
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         placeholder="جستجو در روش‌های ارسال..."
-        className="w-full rounded-xl border border-neutral-200 px-4 py-2 text-sm text-neutral-700 focus:border-pink-400 focus:ring-2 focus:ring-pink-100"
+        className="w-full rounded-xl border border-neutral-200 px-4 py-2 text-sm text-neutral-700 focus:border-infinity-primary-light focus:ring-2 focus:ring-infinity-primary-lighter/40"
       />
 
       <div className="mt-3 max-h-60 overflow-y-auto rounded-xl border border-neutral-100">
@@ -80,7 +80,7 @@ export default function CouponDeliverySelector({ selected, onToggle }: DeliveryS
             <label
               key={id}
               className={`flex cursor-pointer items-center justify-between border-b border-neutral-100 px-3 py-2 text-sm last:border-b-0 ${
-                active ? "bg-pink-50 text-pink-600" : "bg-white text-neutral-700"
+                active ? "bg-infinity-primary-lighter/20 text-infinity-primary" : "bg-white text-neutral-700"
               }`}
             >
               <span>{title}</span>

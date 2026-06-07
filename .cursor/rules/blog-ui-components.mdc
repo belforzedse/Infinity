@@ -16,7 +16,7 @@ The blog system uses a set of reusable UI components for displaying blog posts i
 Default/desktop blog post card with vertical layout.
 
 **Features:**
-- White background with thick pink border (`border-2 border-pink-100`)
+- White background with thick brand-tinted border (`border-2 border-infinity-primary-lighter/40`)
 - Featured image with aspect ratio `304:260`
 - "اینفینیتی" watermark overlay on image
 - Category and date metadata with visible icons (`text-neutral-400`)
@@ -128,7 +128,7 @@ interface BlogCategoryBannerProps {
   title="مد و پوشاک"
   subtitle="آخرین ترندها و نکات استایل"
   href="/blog?category=mod-o-poshak"
-  backgroundColor="bg-gradient-to-br from-rose-400 to-pink-600"
+  backgroundColor="bg-gradient-to-br from-infinity-primary to-infinity-primary-light"
   textColor="light"
   linkText="مشاهده دسته بندی"
   height="sm"
@@ -148,7 +148,7 @@ The `/blog` page follows this layout:
 ## Styling Guidelines
 
 ### Colors
-- Border: `border-pink-100` (hover: `border-pink-200`)
+- Border: `border-infinity-primary-lighter/40` (hover: `border-infinity-primary-lighter/60`)
 - Icons: `text-neutral-400`
 - Text: `text-neutral-700` (title), `text-neutral-400` (meta)
 - Watermark: `text-neutral-600` on `bg-white/80`

@@ -480,7 +480,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId, refreshK
             <button
               onClick={() => setBulkModalOpen(true)}
               disabled={selectedRows.length === 0}
-              className="rounded-lg bg-pink-500 px-4 py-2 text-white transition-colors hover:bg-pink-600 disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-lg bg-infinity-primary px-4 py-2 text-white transition-colors hover:bg-infinity-primary disabled:cursor-not-allowed disabled:opacity-60"
             >
               ویرایش گروهی
             </button>
@@ -789,7 +789,7 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId, refreshK
           </button>
           <button
             onClick={handleBulkUpdate}
-            className="rounded-lg bg-pink-400 px-4 py-2 text-white disabled:bg-pink-100 disabled:border-pink-200"
+            className="rounded-lg bg-infinity-primary-light px-4 py-2 text-white disabled:bg-infinity-primary-lighter/30 disabled:border-infinity-primary-lighter/60"
             disabled={isBulkSaving}
           >
             {isBulkSaving ? "در حال اعمال..." : "ثبت تغییرات"}

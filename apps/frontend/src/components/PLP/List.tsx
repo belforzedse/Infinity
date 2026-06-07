@@ -481,10 +481,10 @@ export default function PLPList({
                   key={`${filterEntry.key}-${filterEntry.label}`}
                   type="button"
                   onClick={filterEntry.onRemove}
-                  className="group flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs text-neutral-600 transition-colors hover:border-pink-300 hover:text-pink-600"
+                  className="group flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs text-neutral-600 transition-colors hover:border-infinity-primary-lighter hover:text-infinity-primary"
                 >
                   <span>{filterEntry.label}</span>
-                  <span className="text-base leading-none text-slate-400 transition-colors group-hover:text-pink-600">
+                  <span className="text-base leading-none text-slate-400 transition-colors group-hover:text-infinity-primary">
                     &times;
                   </span>
                 </button>
@@ -492,7 +492,7 @@ export default function PLPList({
               <button
                 type="button"
                 onClick={clearAllFilters}
-                className="text-xs font-medium text-pink-600 hover:text-pink-700"
+                className="text-xs font-medium text-infinity-primary hover:text-infinity-primary-dark"
               >
                 حذف همه
               </button>

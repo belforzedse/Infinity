@@ -24,7 +24,7 @@ export const VariationOverlay: FC<VariationOverlayProps> = ({
   return (
     <div className="absolute inset-x-0 -bottom-4 z-10 hidden translate-y-full bg-white/95 px-3 py-4 backdrop-blur-sm transition-transform duration-500 ease-out md:block md:group-hover:translate-y-0">
       <div className="mb-3 flex items-center justify-between">
-        <span className="text-[10px] text-pink-600">
+        <span className="text-[10px] text-infinity-primary">
           موجود در {faNum(colorsCount || validImagesCount)} رنگ بندی متفاوت!
         </span>
         <ColorSwatches

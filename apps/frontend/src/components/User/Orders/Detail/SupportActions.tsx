@@ -26,7 +26,7 @@ export default function SupportActions({ orderId, shippingBarcode }: SupportActi
         ) : null}
         <Link
           href="/contact"
-          className="rounded-xl border border-slate-200 px-4 py-2 text-slate-600 transition hover:border-pink-200 hover:text-pink-600"
+          className="rounded-xl border border-slate-200 px-4 py-2 text-slate-600 transition hover:border-infinity-primary-lighter/60 hover:text-infinity-primary"
         >
           تماس با پشتیبانی
         </Link>

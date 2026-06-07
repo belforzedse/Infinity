@@ -36,10 +36,10 @@ const RadioButton = React.forwardRef<HTMLInputElement, RadioButtonProps>(
             value={value}
             checked={checked}
             onChange={onChange}
-            className="peer h-5 w-5 cursor-pointer appearance-none rounded-full border-2 border-gray-300 transition-colors duration-200 checked:border-[#DB2777]"
+            className="peer h-5 w-5 cursor-pointer appearance-none rounded-full border-2 border-gray-300 transition-colors duration-200 checked:border-[#33415e]"
             {...props}
           />
-          <div className="absolute h-3 w-3 scale-0 rounded-full bg-[#DB2777] transition-transform duration-200 peer-checked:scale-100" />
+          <div className="absolute h-3 w-3 scale-0 rounded-full bg-[#33415e] transition-transform duration-200 peer-checked:scale-100" />
         </div>
         <span className="text-sm text-gray-800">{label}</span>
       </label>

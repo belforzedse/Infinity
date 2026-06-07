@@ -167,11 +167,11 @@ export default function Filter({
                 type="button"
                 aria-pressed={isActive}
                 onClick={() => handleSortToggle(option.value)}
-                className={`flex w-full items-center justify-between rounded-xl border px-4 py-2 text-sm font-semibold transition ${isActive ? "border-pink-500 bg-pink-50 text-pink-700" : "border-slate-200 bg-white text-neutral-700 hover:border-pink-200"}`}
+                className={`flex w-full items-center justify-between rounded-xl border px-4 py-2 text-sm font-semibold transition ${isActive ? "border-infinity-primary bg-infinity-primary-lighter/20 text-infinity-primary-dark" : "border-slate-200 bg-white text-neutral-700 hover:border-infinity-primary-lighter/60"}`}
               >
                 <span>{option.label}</span>
                 <span
-                  className={`h-4 w-4 rounded-full border transition ${isActive ? "border-pink-500 bg-pink-500" : "border-slate-300 bg-transparent"}`}
+                  className={`h-4 w-4 rounded-full border transition ${isActive ? "border-infinity-primary bg-infinity-primary" : "border-slate-300 bg-transparent"}`}
                 />
               </button>
             );
@@ -180,7 +180,7 @@ export default function Filter({
             <button
               type="button"
               onClick={handleSortClear}
-              className="text-xs text-right text-pink-600 underline-offset-2 hover:text-pink-700"
+              className="text-xs text-right text-infinity-primary underline-offset-2 hover:text-infinity-primary-dark"
             >
               حذف مرتب‌سازی
             </button>

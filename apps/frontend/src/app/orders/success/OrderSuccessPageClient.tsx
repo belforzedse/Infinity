@@ -61,7 +61,7 @@ export default function OrderSuccess() {
           <div className="flex w-full max-w-xs flex-col gap-4 sm:flex-row">
             <Link
               href="/orders"
-              className="rounded-lg bg-pink-500 px-6 py-3 text-center text-white transition-colors hover:bg-pink-600"
+              className="rounded-lg bg-infinity-primary px-6 py-3 text-center text-white transition-colors hover:bg-infinity-primary"
             >
               پیگیری سفارش
             </Link>

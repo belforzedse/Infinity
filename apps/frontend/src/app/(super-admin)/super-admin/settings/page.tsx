@@ -2,7 +2,7 @@
 
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
 import Link from "next/link";
-import { FiGrid, FiImage, FiMenu, FiSettings, FiSliders } from "react-icons/fi";
+import { FiSettings } from "react-icons/fi";
 
 const quickTiles = [
   {
@@ -12,42 +12,14 @@ const quickTiles = [
     icon: <FiSettings className="h-5 w-5" />,
     tone: "from-emerald-50 to-slate-50",
   },
-  {
-    title: "سفارشی‌سازی منو",
-    description: "منوی ناوبری را برای دسکتاپ و موبایل بچینید.",
-    href: "/super-admin/settings/customization/navbar",
-    icon: <FiMenu className="h-5 w-5" />,
-    tone: "from-pink-50 to-slate-50",
-  },
-  {
-    title: "بنرهای صفحه اصلی",
-    description: "دو بنر تبلیغاتی قبل از بخش بلاگ را تنظیم کنید.",
-    href: "/super-admin/settings/customization/home-banners",
-    icon: <FiImage className="h-5 w-5" />,
-    tone: "from-amber-50 to-slate-50",
-  },
-  {
-    title: "دسته‌بندی ویژه",
-    description: "بخش «شاید بپسندید» را با بنر و دسته‌بندی تنظیم کنید.",
-    href: "/super-admin/settings/customization/featured-category",
-    icon: <FiGrid className="h-5 w-5" />,
-    tone: "from-sky-50 to-slate-50",
-  },
-  {
-    title: "سفارشی‌سازی",
-    description: "مرکز شخصی‌سازی ظاهر و تجربه کاربری.",
-    href: "/super-admin/settings/customization",
-    icon: <FiSliders className="h-5 w-5" />,
-    tone: "from-amber-50 to-slate-50",
-  },
 ];
 
 export default function SettingsLandingPage() {
   return (
     <ContentWrapper title="تنظیمات">
-      <section className="rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-50 via-white to-pink-50 p-6 shadow-sm">
+      <section className="rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-50 via-white to-[#E8F3F4] p-6 shadow-sm">
         <div className="flex flex-col gap-2">
-          <span className="text-sm font-semibold text-pink-600">مرکز تنظیمات</span>
+          <span className="text-sm font-semibold text-[#4F8E92]">مرکز تنظیمات</span>
           <h1 className="text-2xl font-semibold text-slate-900">به‌روزرسانی‌های دقیق، نتایج سریع</h1>
           <p className="text-sm text-slate-600">
             بخش‌های مهم تنظیمات را به‌صورت متمرکز مدیریت کنید. از اینجا می‌توانید

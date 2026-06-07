@@ -81,7 +81,7 @@ export default function PDPCommentList({
                     setShowSortOptions(false);
                   }}
                   className={`w-full rounded-[8px] px-4 py-2 text-right text-[12px] transition-colors hover:bg-[#FAFAF9] ${
-                    sortOption === option ? "bg-pink-50 text-[#DB2777] font-medium" : "text-[#333333]"
+                    sortOption === option ? "bg-infinity-primary-lighter/20 text-[#33415e] font-medium" : "text-[#333333]"
                   }`}
                 >
                   {sortLabels[option as SortOption]}

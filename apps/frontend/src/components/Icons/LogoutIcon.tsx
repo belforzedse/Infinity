@@ -14,14 +14,14 @@ export default function LogoutIcon({ className }: IconProps) {
     >
       <path
         d="M14.7142 5.78564C17.3175 8.38898 17.3175 12.6106 14.7142 15.214C12.1109 17.8173 7.88921 17.8173 5.28587 15.214C2.68254 12.6106 2.68254 8.38898 5.28587 5.78564"
-        stroke="#EC4899"
+        stroke="#3d4c6e"
         strokeWidth="1.25"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <path
         d="M10 3.8335V10.5002"
-        stroke="#EC4899"
+        stroke="#3d4c6e"
         strokeWidth="1.25"
         strokeLinecap="round"
         strokeLinejoin="round"

@@ -141,8 +141,8 @@ export default function VerifyForgotPasswordForm({
 
           <AuthButton
             onClick={handleEditPhone}
-            className="border border-pink-600 !bg-transparent !text-pink-600 hover:!bg-pink-50"
-            icon={<EditIcon className="h-5 w-5 md:h-6 md:w-6" color="#db2777" />}
+            className="border border-infinity-primary !bg-transparent !text-infinity-primary hover:!bg-infinity-primary-lighter/20"
+            icon={<EditIcon className="h-5 w-5 md:h-6 md:w-6" color="#33415e" />}
           >
             ویرایش شماره همراه
           </AuthButton>

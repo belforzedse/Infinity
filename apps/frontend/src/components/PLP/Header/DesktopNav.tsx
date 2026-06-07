@@ -51,10 +51,10 @@ export default function PLPHeaderDesktopNav() {
               href={item.href}
               aria-current={isActive ? "page" : undefined}
               className={[
-                "pressable text-sm flex items-center underline-offset-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white",
+                "pressable text-sm flex items-center underline-offset-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white",
                 isActive
-                  ? "rounded-full bg-pink-50 px-3 py-1 text-pink-600"
-                  : "text-neutral-800 transition-colors hover:text-pink-500",
+                  ? "rounded-full bg-infinity-primary-lighter/20 px-3 py-1 text-infinity-primary"
+                  : "text-neutral-800 transition-colors hover:text-infinity-primary",
               ].join(" ")}
             >
               {item.label}

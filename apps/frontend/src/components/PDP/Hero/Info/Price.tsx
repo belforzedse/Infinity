@@ -20,7 +20,7 @@ export default function PDPHeroInfoPrice(props: Props) {
         ) : (
           <>
             {discountPrice ? (
-              <span className="text-xl text-pink-600">{faNum(discountPrice || price)} تومان</span>
+              <span className="text-xl text-infinity-primary">{faNum(discountPrice || price)} تومان</span>
             ) : null}
 
             <span

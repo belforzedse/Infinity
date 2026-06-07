@@ -277,7 +277,7 @@ export function StoriesViewerModal<TStory extends StoryRailStory = StoryRailStor
       classNames={{
         overlay: classNames?.overlay ?? "bg-black/95",
         progressBars: {
-          bar: { fill: classNames?.progressFill ?? "bg-gradient-to-r from-pink-400 to-pink-600" },
+          bar: { fill: classNames?.progressFill ?? "bg-gradient-to-r from-infinity-primary-light to-infinity-primary" },
         },
       }}
     />

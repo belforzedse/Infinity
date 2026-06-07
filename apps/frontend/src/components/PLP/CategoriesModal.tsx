@@ -47,7 +47,7 @@ export default function CategoriesModal({ isOpen, onClose }: CategoriesModalProp
               <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-right align-middle shadow-xl transition-all">
                 <Dialog.Title as="div" className="mb-4 flex items-center justify-between">
                   <h3 className="text-lg font-medium leading-6 text-gray-900">دسته بندی ها</h3>
-                  <button onClick={onClose} className="text-pink-500 hover:text-pink-600">
+                  <button onClick={onClose} className="text-infinity-primary hover:text-infinity-primary">
                     <DeleteIcon />
                   </button>
                 </Dialog.Title>

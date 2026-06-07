@@ -20,7 +20,7 @@ export default function PasswordStrength({ password }: PasswordStrengthProps) {
     if (index >= level) return "bg-slate-200";
     if (level === 4) return "bg-green-700";
     if (level === 3) return "bg-green-500";
-    return "bg-pink-500";
+    return "bg-infinity-primary";
   };
 
   const getHelperText = () => {

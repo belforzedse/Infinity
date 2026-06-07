@@ -72,7 +72,7 @@ export default function CartDrawerItem({ item }: CartDrawerItemProps) {
                 {item.originalPrice.toLocaleString()} {"\u062A\u0648\u0645\u0627\u0646"}
               </span>
             )}
-            <span className="text-sm font-semibold text-pink-600">
+            <span className="text-sm font-semibold text-infinity-primary">
               {item.price.toLocaleString()} {"\u062A\u0648\u0645\u0627\u0646"}
             </span>
             {item.discountPercentage && item.discountPercentage > 0 && (

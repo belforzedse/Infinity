@@ -32,7 +32,7 @@ const BreadCrumb = ({
           onClick={onClick}
           className={clsx(
             isNextStep
-              ? "rounded-lg bg-pink-500 p-2 text-white"
+              ? "rounded-lg bg-infinity-primary p-2 text-white"
               : "flex items-center gap-1 rounded-lg bg-background-secondary px-4 py-2",
           )}
         >

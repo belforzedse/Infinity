@@ -50,9 +50,9 @@ const variantClasses = {
   commerce: cx(
     shellLayout,
     surfacePseudoBase,
-    "text-white shadow-[0_4px_14px_rgba(219,39,119,0.2)]",
-    "before:bg-[linear-gradient(180deg,#EC4899_0%,#FB7185_100%)]",
-    "after:bg-[linear-gradient(70deg,#BE185D_8%,#F9A8D4_92%)]",
+    "text-white shadow-[0_4px_14px_rgba(57, 76, 110,0.2)]",
+    "before:bg-[linear-gradient(180deg,#3d4c6e_0%,#aebfdb_100%)]",
+    "after:bg-[linear-gradient(70deg,#33415e_8%,#aebfdb_92%)]",
   ),
   default: cx(
     shellLayout,

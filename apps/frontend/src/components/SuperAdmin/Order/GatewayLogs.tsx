@@ -74,7 +74,7 @@ export default function GatewayLogs({ orderId }: { orderId: number }) {
         <button
           type="button"
           onClick={() => setIsOpen((prev) => !prev)}
-          className="flex items-center gap-1 rounded-full border border-pink-100 px-3 py-1 text-xs font-medium text-pink-600 transition-colors hover:bg-pink-50"
+          className="flex items-center gap-1 rounded-full border border-infinity-primary-lighter/40 px-3 py-1 text-xs font-medium text-infinity-primary transition-colors hover:bg-infinity-primary-lighter/20"
         >
           {isOpen ? "بستن" : "مشاهده جزئیات"}
           <span className={`transition-transform ${isOpen ? "rotate-180" : ""}`}>

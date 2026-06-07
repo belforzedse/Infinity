@@ -46,7 +46,7 @@ export default function SortableSlideRow({
       className={`rounded-xl border p-3 ${
         orientation === "horizontal" ? "min-w-[250px] max-w-[250px] shrink-0" : ""
       } ${
-        isSelected ? "border-pink-400 bg-pink-50" : "border-slate-200 bg-white"
+        isSelected ? "border-infinity-primary-light bg-infinity-primary-lighter/20" : "border-slate-200 bg-white"
       }`}
     >
       <div className="flex items-center justify-between gap-2">

@@ -152,7 +152,7 @@ export default function BlogCommentsPage() {
                   : "#"
               }
               target="_blank"
-              className="truncate text-sm text-pink-600 transition-colors hover:text-pink-700 max-w-[150px]"
+              className="truncate text-sm text-infinity-primary transition-colors hover:text-infinity-primary-dark max-w-[150px]"
             >
               {row.original.blog_post.Title}
             </Link>
@@ -288,14 +288,14 @@ export default function BlogCommentsPage() {
               placeholder="جستجو در نظرات..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full rounded-xl border border-slate-100 bg-white py-2.5 pl-4 pr-10 text-sm text-neutral-600 placeholder:text-slate-400 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
+              className="w-full rounded-xl border border-slate-100 bg-white py-2.5 pl-4 pr-10 text-sm text-neutral-600 placeholder:text-slate-400 focus:border-infinity-primary focus:outline-none focus:ring-1 focus:ring-infinity-primary"
             />
           </div>
           <div className="sm:w-48">
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full appearance-none rounded-xl border border-slate-100 bg-white px-4 py-2.5 text-sm text-neutral-600 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
+              className="w-full appearance-none rounded-xl border border-slate-100 bg-white px-4 py-2.5 text-sm text-neutral-600 focus:border-infinity-primary focus:outline-none focus:ring-1 focus:ring-infinity-primary"
             >
               <option value="all">همه وضعیت‌ها</option>
               <option value="Pending">در انتظار</option>
@@ -334,7 +334,7 @@ export default function BlogCommentsPage() {
                 <Link
                   href={viewComment.blog_post.Slug ? `/blog/${viewComment.blog_post.Slug}` : "#"}
                   target="_blank"
-                  className="text-pink-600 hover:text-pink-700"
+                  className="text-infinity-primary hover:text-infinity-primary-dark"
                 >
                   {viewComment.blog_post.Title}
                 </Link>

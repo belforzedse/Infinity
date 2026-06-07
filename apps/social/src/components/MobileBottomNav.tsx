@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
 import { Bookmark, Home, Plus, Search, User } from "lucide-react";
 import { useCurrentUser } from "@/hooks/use-current-user";
+import { STOREFRONT_URL } from "@/config/site";
 
 const INFINITY_MARK_SRC = "/Infinity.svg";
 
@@ -117,8 +118,10 @@ export function MobileBottomNav() {
                 <Plus size={28} strokeWidth={1.5} className="text-white" aria-hidden />
               </Link>
             ) : (
-              <Link
-                href="/"
+              <a
+                href={STOREFRONT_URL}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex size-16 shrink-0 items-center justify-center rounded-full bg-infinity-primary shadow-[0_0_5.8px_rgba(0,0,0,0.09)]"
                 aria-label="خانه اینفینیتی"
               >
@@ -129,7 +132,7 @@ export function MobileBottomNav() {
                   height={49}
                   className="size-[49px] object-contain"
                 />
-              </Link>
+              </a>
             )}
             <NavTabLink
               href="/search"

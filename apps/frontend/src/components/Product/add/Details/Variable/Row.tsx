@@ -44,7 +44,7 @@ export const ProductVariableRow: React.FC<ProductVariableRowProps> = ({
       <td className="text-sm border-r border-slate-100 p-4 text-neutral-400">
         <div className="flex flex-col">
           {item.discountPrice && (
-            <span className="text-sm font-medium text-pink-600">
+            <span className="text-sm font-medium text-infinity-primary">
               {item.discountPrice.toLocaleString()} تومان
             </span>
           )}

@@ -84,7 +84,7 @@ export default function RecentOrders({ data, loading }: RecentOrdersProps) {
         </span>
         <Link
           href="/"
-          className="mx-auto rounded-lg bg-gradient-to-l from-pink-500 to-rose-500 px-5 py-2 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5 hover:shadow-lg"
+          className="mx-auto rounded-lg bg-[linear-gradient(180deg,#566D97_0%,#98BDFF_100%)] px-5 py-2 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5 hover:shadow-lg"
         >
           شروع خرید
         </Link>
@@ -96,7 +96,7 @@ export default function RecentOrders({ data, loading }: RecentOrdersProps) {
     <div className="flex flex-col gap-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
       <div className="flex items-center justify-between">
         <span className="text-sm font-semibold text-foreground-primary lg:text-base">آخرین سفارش‌ها</span>
-        <Link href="/orders" className="text-xs font-medium text-pink-500 hover:text-pink-600 lg:text-sm">
+        <Link href="/orders" className="text-xs font-medium text-infinity-primary hover:text-infinity-primary lg:text-sm">
           مشاهده همه
         </Link>
       </div>

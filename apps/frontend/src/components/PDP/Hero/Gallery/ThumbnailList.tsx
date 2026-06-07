@@ -149,7 +149,7 @@ export default function PDPHeroGalleryThumbnailList(props: Props) {
             onMouseEnter={() => preloadSrc(asset.src)}
             className={`relative aspect-[4/5] w-[84px] flex-shrink-0 cursor-pointer overflow-hidden rounded-2xl md:w-[112px] ${
               asset.id === selectedImage
-                ? "ring-2 ring-pink-500 shadow-lg"
+                ? "ring-2 ring-infinity-primary shadow-lg"
                 : "ring-1 ring-black/10"
             }`}
           >
@@ -176,9 +176,9 @@ export default function PDPHeroGalleryThumbnailList(props: Props) {
             {asset.type === "video" && (
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div className="group/video-thumb flex items-center justify-center transition-all duration-300">
-                  <div className="absolute h-12 w-12 rounded-full bg-white/95 backdrop-blur-sm shadow-lg ring-2 ring-pink-200/50 transition-all duration-300 group-hover/video-thumb:scale-110 group-hover/video-thumb:ring-pink-400/70 group-hover/video-thumb:shadow-xl" />
+                  <div className="absolute h-12 w-12 rounded-full bg-white/95 backdrop-blur-sm shadow-lg ring-2 ring-infinity-primary-lighter/50 transition-all duration-300 group-hover/video-thumb:scale-110 group-hover/video-thumb:ring-infinity-primary-light/70 group-hover/video-thumb:shadow-xl" />
                   <svg
-                    className="relative h-5 w-5 text-pink-600 transition-transform duration-300 group-hover/video-thumb:scale-110"
+                    className="relative h-5 w-5 text-infinity-primary transition-transform duration-300 group-hover/video-thumb:scale-110"
                     fill="currentColor"
                     viewBox="0 0 24 24"
                   >

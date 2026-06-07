@@ -194,7 +194,7 @@ export default function OffersListHomePage(props: Props) {
             {/* Desktop: navigate to PLP with appropriate filters */}
             <Link
               href={getPlpHref()}
-              className="text-sm hidden text-pink-600 underline-offset-4 transition-colors hover:text-pink-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white md:block"
+              className="text-sm hidden text-infinity-primary underline-offset-4 transition-colors hover:text-infinity-primary-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white md:block"
             >
               مشاهده همه
             </Link>
@@ -233,7 +233,7 @@ export default function OffersListHomePage(props: Props) {
             <div className="mt-4 flex items-center justify-center">
               <Link
                 href={getPlpHref()}
-                className="text-base flex items-center gap-1 text-foreground-primary underline-offset-4 transition-colors hover:text-pink-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                className="text-base flex items-center gap-1 text-foreground-primary underline-offset-4 transition-colors hover:text-infinity-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
               >
                 <span>مشاهده همه</span>
                 <ArrowLeftIcon />
@@ -267,7 +267,7 @@ export default function OffersListHomePage(props: Props) {
           <div className="mt-6 hidden items-center justify-center md:flex">
             <Link
               href={getPlpHref()}
-              className="pressable text-base flex items-center gap-1 rounded-full border border-pink-100 px-4 py-2 text-foreground-primary transition-colors hover:bg-pink-50 hover:text-pink-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+              className="pressable text-base flex items-center gap-1 rounded-full border border-infinity-primary-lighter/40 px-4 py-2 text-foreground-primary transition-colors hover:bg-infinity-primary-lighter/20 hover:text-infinity-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
             >
               <span>مشاهده محصولات بیشتر</span>
               <ArrowLeftIcon />

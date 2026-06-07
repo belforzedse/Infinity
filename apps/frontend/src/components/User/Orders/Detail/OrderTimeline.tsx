@@ -49,7 +49,7 @@ const getSeverityColor = (severity?: "info" | "success" | "warning" | "error"): 
     case "error":
       return "bg-red-500";
     default:
-      return "bg-pink-500";
+      return "bg-infinity-primary";
   }
 };
 
@@ -185,7 +185,7 @@ export default function OrderTimeline({ order, hideHeader, onEventsChange }: Ord
           {events.map((event) => (
             <li key={`${event.id}-${event.createdAt}`} className="relative">
               <span
-                className={`absolute -right-[31px] mt-1 h-4 w-4 rounded-full border-2 border-white shadow ring-2 ring-pink-100 ${getSeverityColor(event.severity)}`}
+                className={`absolute -right-[31px] mt-1 h-4 w-4 rounded-full border-2 border-white shadow ring-2 ring-infinity-primary-lighter/40 ${getSeverityColor(event.severity)}`}
               />
               <div className="flex flex-col gap-1 text-right">
                 <span className="text-sm font-medium text-foreground-primary">

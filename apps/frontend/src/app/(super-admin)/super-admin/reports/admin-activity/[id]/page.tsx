@@ -68,7 +68,7 @@ export default function AdminActivityDetailPage() {
       <ContentWrapper title="جزئیات فعالیت ادمین">
         <div className="flex items-center justify-center py-12">
           <div className="flex items-center gap-3">
-            <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-pink-500"></div>
+            <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-infinity-primary"></div>
             <span className="text-neutral-600">در حال بارگذاری...</span>
           </div>
         </div>
@@ -83,7 +83,7 @@ export default function AdminActivityDetailPage() {
           <p className="text-neutral-600">فعالیت یافت نشد</p>
           <Link
             href="/super-admin/reports/admin-activity"
-            className="mt-4 inline-block text-pink-600 hover:text-pink-700 hover:underline"
+            className="mt-4 inline-block text-infinity-primary hover:text-infinity-primary-dark hover:underline"
           >
             بازگشت به لیست فعالیت‌ها
           </Link>
@@ -120,7 +120,7 @@ export default function AdminActivityDetailPage() {
         {/* Back Button */}
         <Link
           href="/super-admin/reports/admin-activity"
-          className="inline-flex items-center gap-2 text-pink-600 hover:text-pink-700 hover:underline"
+          className="inline-flex items-center gap-2 text-infinity-primary hover:text-infinity-primary-dark hover:underline"
         >
           <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -165,7 +165,7 @@ export default function AdminActivityDetailPage() {
                   {resourceLink && (
                     <Link
                       href={resourceLink}
-                      className="mr-2 text-pink-600 hover:text-pink-700 hover:underline"
+                      className="mr-2 text-infinity-primary hover:text-infinity-primary-dark hover:underline"
                     >
                       (مشاهده #{activity.ResourceId})
                     </Link>

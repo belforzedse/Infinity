@@ -39,7 +39,7 @@ export default function MediaUploader({
             className={classNames(
               "text-sm border-b-2 pb-2 transition-colors",
               view === activeView
-                ? "border-pink-500 text-pink-500"
+                ? "border-infinity-primary text-infinity-primary"
                 : "border-transparent text-gray-500 hover:text-gray-700",
             )}
           >

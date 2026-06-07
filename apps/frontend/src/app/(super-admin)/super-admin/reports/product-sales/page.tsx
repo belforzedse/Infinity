@@ -209,7 +209,7 @@ export default function ProductSalesReportPage() {
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium text-neutral-600">تاریخ شروع</label>
                 <DatePicker
-                  inputClass="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+                  inputClass="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-infinity-primary focus:border-transparent transition-all"
                   defaultValue={start}
                   onChange={(d: any) => setStart(normalizeDateInput(d, start))}
                 />
@@ -217,7 +217,7 @@ export default function ProductSalesReportPage() {
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium text-neutral-600">تاریخ پایان</label>
                 <DatePicker
-                  inputClass="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+                  inputClass="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-infinity-primary focus:border-transparent transition-all"
                   defaultValue={end}
                   onChange={(d: any) => setEnd(normalizeDateInput(d, end))}
                 />
@@ -231,7 +231,7 @@ export default function ProductSalesReportPage() {
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <div className="flex items-center gap-3">
-                <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-pink-500"></div>
+                <div className="h-6 w-6 animate-spin rounded-full border-b-2 border-infinity-primary"></div>
                 <span className="text-neutral-600">در حال بارگذاری...</span>
               </div>
             </div>
@@ -353,7 +353,7 @@ export default function ProductSalesReportPage() {
                       <select
                         value={showTop}
                         onChange={(e) => setShowTop(Number(e.target.value))}
-                        className="text-sm rounded-lg border border-neutral-300 px-3 py-1 focus:border-transparent focus:ring-2 focus:ring-pink-500"
+                        className="text-sm rounded-lg border border-neutral-300 px-3 py-1 focus:border-transparent focus:ring-2 focus:ring-infinity-primary"
                       >
                         <option value={10}>۱۰ محصول برتر</option>
                         <option value={15}>۱۵ محصول برتر</option>
@@ -397,7 +397,7 @@ export default function ProductSalesReportPage() {
                           onClick={() => setChartType(key as ChartType)}
                           className={`text-sm rounded-md px-3 py-1 font-medium transition-colors ${
                             chartType === key
-                              ? "bg-white text-pink-600 shadow-sm"
+                              ? "bg-white text-infinity-primary shadow-sm"
                               : "text-neutral-600 hover:text-neutral-900"
                           }`}
                         >

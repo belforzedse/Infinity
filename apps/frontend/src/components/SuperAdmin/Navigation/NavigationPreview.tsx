@@ -49,7 +49,7 @@ export default function NavigationPreview({ product_categories }: Props) {
               key={item.key}
               href={item.href}
               prefetch={item.href === "/"}
-              className="pressable text-foreground-primary flex items-center text-sm underline-offset-4 transition-colors hover:text-pink-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+              className="pressable text-foreground-primary flex items-center text-sm underline-offset-4 transition-colors hover:text-infinity-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
               onClick={(e) => e.preventDefault()}
             >
               {item.label}

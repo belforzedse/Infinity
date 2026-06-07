@@ -108,7 +108,7 @@ export default function CategoryAppearancePanel({
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="flex h-44 w-full flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 transition-colors hover:border-pink-300 hover:bg-pink-50"
+            className="flex h-44 w-full flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 transition-colors hover:border-infinity-primary-lighter hover:bg-infinity-primary-lighter/20"
           >
             <ImageIcon className="mb-2 h-8 w-8 text-slate-400" />
             <span className="text-sm text-slate-500">بارگذاری تصویر دسته‌بندی</span>
@@ -128,7 +128,7 @@ export default function CategoryAppearancePanel({
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-1 text-xs text-pink-500 hover:text-pink-600"
+            className="flex items-center gap-1 text-xs text-infinity-primary hover:text-infinity-primary"
             disabled={isUploading}
           >
             <Plus className="h-4 w-4" />
@@ -157,7 +157,7 @@ export default function CategoryAppearancePanel({
                 onColorChange(isValidHex(normalizedColor) ? normalizedColor : lastColor);
               }
             }}
-            className="h-4 w-4 rounded border-slate-300 text-pink-600 focus:ring-pink-500"
+            className="h-4 w-4 rounded border-slate-300 text-infinity-primary focus:ring-infinity-primary"
           />
           <label htmlFor="category-no-color" className="text-sm text-neutral-700">
             بدون رنگ
@@ -183,7 +183,7 @@ export default function CategoryAppearancePanel({
                 color={colorPickerValue}
                 onChange={(value) => onColorChange(value)}
                 aria-label="کد رنگ"
-                className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm uppercase focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500/30"
+                className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm uppercase focus:border-infinity-primary focus:outline-none focus:ring-1 focus:ring-infinity-primary/30"
               />
             </div>
           </>

@@ -432,8 +432,8 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                           className="h-14 w-14 rounded-full object-cover"
                         />
                       ) : (
-                        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-pink-100">
-                          <span className="text-lg font-medium text-pink-600">
+                        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-infinity-primary-lighter/30">
+                          <span className="text-lg font-medium text-infinity-primary">
                             {authorInitial}
                           </span>
                         </div>
@@ -463,7 +463,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                     </div>
                     <Link
                       href={`/blog?category=${post.blog_category.Slug}`}
-                      className="inline-flex items-center gap-2 rounded-xl bg-pink-50 px-4 py-2 text-sm font-medium text-pink-700 transition-colors hover:bg-pink-100"
+                      className="inline-flex items-center gap-2 rounded-xl bg-infinity-primary-lighter/20 px-4 py-2 text-sm font-medium text-infinity-primary-dark transition-colors hover:bg-infinity-primary-lighter/30"
                     >
                       <FolderOpen className="h-4 w-4" />
                       {post.blog_category.Name}

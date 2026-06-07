@@ -75,7 +75,7 @@ export default function ShoppingCartMobileProductCard({ cartItem }: Props) {
               <span className="text-xs text-neutral-500 line-through">
                 {formatPrice(cartItem.originalPrice)}
               </span>
-              <span className="text-base font-semibold text-pink-600">
+              <span className="text-base font-semibold text-infinity-primary">
                 {formatPrice(cartItem.price)}
               </span>
             </>
@@ -106,7 +106,7 @@ export default function ShoppingCartMobileProductCard({ cartItem }: Props) {
               <span className="text-xs text-neutral-500 line-through">
                 {formatPrice(cartItem.originalPrice * cartItem.quantity)}
               </span>
-              <span className="text-base font-semibold text-pink-600">
+              <span className="text-base font-semibold text-infinity-primary">
                 {formatPrice(cartItem.price * cartItem.quantity)}
               </span>
             </>

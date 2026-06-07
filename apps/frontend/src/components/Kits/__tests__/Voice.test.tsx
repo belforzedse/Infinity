@@ -109,7 +109,7 @@ describe("Voice", () => {
 
     const progressBars = container.querySelectorAll(".w-0\\.5");
     const activeBars = Array.from(progressBars).filter((bar) =>
-      bar.className.includes("bg-pink-500"),
+      bar.className.includes("bg-infinity-primary"),
     );
 
     expect(activeBars.length).toBeGreaterThan(0);

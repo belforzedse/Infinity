@@ -82,6 +82,21 @@ export const routes: RouteInfo[] = [
     description: "Manage coupons",
   },
   {
+    name: "Super Admin - Customization",
+    path: "/super-admin/customization",
+    description: "Manage site customization",
+  },
+  {
+    name: "Super Admin - Identity Hub",
+    path: "/super-admin/customization/visual-identity",
+    description: "Manage site identity, stores, social links, contact numbers and FAQ",
+  },
+  {
+    name: "Super Admin - Personalization",
+    path: "/super-admin/customization/personalization",
+    description: "Manage homepage banners, navigation and hero customization",
+  },
+  {
     name: "Super Admin - FAQ Categories",
     path: "/super-admin/faq/categories",
     description: "Manage FAQ categories",

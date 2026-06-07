@@ -23,20 +23,21 @@ import {
   FiEdit3,
   FiMessageSquare,
   FiPlayCircle,
+  FiSliders,
 } from "react-icons/fi";
 
 // Create a styled layout/menu icons (unused definitions removed)
-const RarMenu = () => <FiMenu className="h-5 w-5 text-pink-500" stroke="#EC4899" />;
+const RarMenu = () => <FiMenu className="h-5 w-5 text-infinity-primary" stroke="#3d4c6e" />;
 //Create a styled club icon
-const _MultiUsersIcon = () => <FiUsers className="h-5 w-5 text-pink-500" stroke="#EC4899" />;
+const _MultiUsersIcon = () => <FiUsers className="h-5 w-5 text-infinity-primary" stroke="#3d4c6e" />;
 
 //Create a styled Pages icon
-const _PagesIcon = () => <FiLayers className="h-5 w-5 text-pink-500" stroke="#EC4899" />;
+const _PagesIcon = () => <FiLayers className="h-5 w-5 text-infinity-primary" stroke="#3d4c6e" />;
 
-const BellIcon = () => <FiBell className="h-5 w-5 text-pink-500" stroke="#EC4899" />;
-const ChartIcon = () => <FiBarChart className="h-5 w-5 text-pink-500" stroke="#EC4899" />;
+const BellIcon = () => <FiBell className="h-5 w-5 text-infinity-primary" stroke="#3d4c6e" />;
+const ChartIcon = () => <FiBarChart className="h-5 w-5 text-infinity-primary" stroke="#3d4c6e" />;
 
-const _CacheIcon = () => <FiDatabase className="h-5 w-5 text-pink-500" stroke="#EC4899" />;
+const _CacheIcon = () => <FiDatabase className="h-5 w-5 text-infinity-primary" stroke="#3d4c6e" />;
 
 type SidebarChild = {
   id: string;
@@ -60,6 +61,24 @@ const superAdminSidebar: SidebarItem[] = [
     href: "/super-admin/",
     icon: <DashboardIcon />,
     children: [],
+  },
+  {
+    id: "customization",
+    label: "شخصی‌سازی",
+    href: "/super-admin/customization",
+    icon: <FiSliders className="h-5 w-5 text-infinity-primary" stroke="#3d4c6e" />,
+    children: [
+      {
+        id: "customization-visual-identity",
+        label: "هویت بصری",
+        href: "/super-admin/customization/visual-identity",
+      },
+      {
+        id: "customization-personalization",
+        label: "شخصی‌سازی",
+        href: "/super-admin/customization/personalization",
+      },
+    ],
   },
   {
     id: "manage-products",
@@ -152,7 +171,7 @@ const superAdminSidebar: SidebarItem[] = [
     id: "stories",
     label: "استوری‌ها",
     href: "/super-admin/stories",
-    icon: <FiPlayCircle className="h-5 w-5 text-pink-500" stroke="#EC4899" />,
+    icon: <FiPlayCircle className="h-5 w-5 text-infinity-primary" stroke="#3d4c6e" />,
     children: [
       {
         id: "stories-list",
@@ -311,21 +330,6 @@ const superAdminSidebar: SidebarItem[] = [
         label: "تنظیمات عمومی",
         href: "/super-admin/settings/general",
       },
-      {
-        id: "settings-navbar",
-        label: "سفارشی‌سازی منو",
-        href: "/super-admin/settings/customization/navbar",
-      },
-      {
-        id: "settings-home-banners",
-        label: "بنرهای صفحه اصلی",
-        href: "/super-admin/settings/customization/home-banners",
-      },
-      {
-        id: "settings-hero-slider",
-        label: "اسلایدر هیرو",
-        href: "/super-admin/settings/customization/hero-slider",
-      },
     ],
   },
   // {
@@ -354,12 +358,12 @@ const superAdminSidebar: SidebarItem[] = [
   //   id: "seo",
   //   label: "سئو",
   //   href: "/super-admin/SEO",
-  //   icon: <FiGlobe className="h-5 w-5 text-pink-500" stroke="#EC4899" />,
+  //   icon: <FiGlobe className="h-5 w-5 text-infinity-primary" stroke="#3d4c6e" />,
   //   children: [],
   // },
 ];
 
-const STORE_MANAGER_HIDDEN_PARENT_IDS = new Set(["users", "reports", "shipping", "settings", "blog"]);
+const STORE_MANAGER_HIDDEN_PARENT_IDS = new Set(["users", "reports", "shipping", "settings", "blog", "customization"]);
 const STORE_MANAGER_HIDDEN_CHILD_IDS = new Set(["product-comments", "admin-activity"]);
 
 const cloneWithFilteredChildren = (item: SidebarItem) => {
@@ -409,42 +413,42 @@ export const getSidebarItemsForRole = (roleName?: string | null): SidebarItem[] 
         id: "blog-posts",
         label: "مدیریت پست‌ها",
         href: "/super-admin/blog/posts",
-        icon: <FiFileText className="h-5 w-5 text-pink-500" stroke="#EC4899" />,
+        icon: <FiFileText className="h-5 w-5 text-infinity-primary" stroke="#3d4c6e" />,
         children: [],
       },
       {
         id: "blog-categories",
         label: "دسته‌بندی‌ها",
         href: "/super-admin/blog/categories",
-        icon: <FiLayers className="h-5 w-5 text-pink-500" stroke="#EC4899" />,
+        icon: <FiLayers className="h-5 w-5 text-infinity-primary" stroke="#3d4c6e" />,
         children: [],
       },
       {
         id: "blog-category-banners",
         label: "بنر دسته‌بندی‌ها",
         href: "/super-admin/blog/categories/banners",
-        icon: <FiEdit3 className="h-5 w-5 text-pink-500" stroke="#EC4899" />,
+        icon: <FiEdit3 className="h-5 w-5 text-infinity-primary" stroke="#3d4c6e" />,
         children: [],
       },
       {
         id: "blog-tags",
         label: "برچسب‌ها",
         href: "/super-admin/blog/tags",
-        icon: <FiTag className="h-5 w-5 text-pink-500" stroke="#EC4899" />,
+        icon: <FiTag className="h-5 w-5 text-infinity-primary" stroke="#3d4c6e" />,
         children: [],
       },
       {
         id: "blog-authors",
         label: "نویسندگان",
         href: "/super-admin/blog/authors",
-        icon: <FiUsers className="h-5 w-5 text-pink-500" stroke="#EC4899" />,
+        icon: <FiUsers className="h-5 w-5 text-infinity-primary" stroke="#3d4c6e" />,
         children: [],
       },
       {
         id: "blog-comments",
         label: "مدیریت نظرات",
         href: "/super-admin/blog/comments",
-        icon: <FiMessageSquare className="h-5 w-5 text-pink-500" stroke="#EC4899" />,
+        icon: <FiMessageSquare className="h-5 w-5 text-infinity-primary" stroke="#3d4c6e" />,
         children: [],
       },
     ];

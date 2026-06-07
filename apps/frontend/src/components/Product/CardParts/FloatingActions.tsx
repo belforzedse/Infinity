@@ -21,7 +21,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
   onShare,
 }) => {
   const buttonBaseClass =
-    "pressable luxury-glass-chip flex h-7 w-7 md:h-8 md:w-8 items-center justify-center rounded-full text-neutral-500 ring-1 ring-white/60 transition-all hover:text-pink-600 hover:shadow-[0_10px_24px_rgba(236,72,153,0.18)] touch-manipulation";
+    "pressable luxury-glass-chip flex h-7 w-7 md:h-8 md:w-8 items-center justify-center rounded-full text-neutral-500 ring-1 ring-white/60 transition-all hover:text-infinity-primary hover:shadow-[0_10px_24px_rgba(61, 76, 110,0.18)] touch-manipulation";
 
   return (
     <div
@@ -42,7 +42,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
       >
         <HeartIcon
           className={`h-3.5 w-3.5 transition-colors md:h-4 md:w-4 ${
-            isLiked ? "fill-pink-600 text-pink-600" : "text-neutral-500"
+            isLiked ? "fill-infinity-primary text-infinity-primary" : "text-neutral-500"
           }`}
           filled={isLiked}
         />

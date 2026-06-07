@@ -216,7 +216,7 @@ export default function ProductColorsPage() {
         <button
           type="button"
           onClick={() => openModal()}
-          className="text-sm rounded-xl bg-pink-500 px-4 py-2 text-white transition-colors hover:bg-pink-600"
+          className="text-sm rounded-xl bg-infinity-primary px-4 py-2 text-white transition-colors hover:bg-infinity-primary"
         >
           افزودن رنگ جدید
         </button>
@@ -229,7 +229,7 @@ export default function ProductColorsPage() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="جستجو بر اساس نام یا کد رنگ"
-            className="text-sm w-full rounded-lg border border-slate-200 px-3 py-2 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500/30"
+            className="text-sm w-full rounded-lg border border-slate-200 px-3 py-2 focus:border-infinity-primary focus:outline-none focus:ring-1 focus:ring-infinity-primary/30"
           />
           <div className="flex items-center gap-2">
             <button
@@ -356,7 +356,7 @@ export default function ProductColorsPage() {
                               colorCode: shouldAutoCheck ? "#ffffff" : prev.colorCode,
                             }));
                           }}
-                          className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500/30"
+                          className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-infinity-primary focus:outline-none focus:ring-1 focus:ring-infinity-primary/30"
                           placeholder="مثلاً سرمه‌ای ملایم"
                         />
                       </div>
@@ -374,7 +374,7 @@ export default function ProductColorsPage() {
                               colorCode: e.target.checked ? "#ffffff" : prev.colorCode
                             }))
                           }
-                          className="h-4 w-4 rounded border-slate-300 text-pink-600 focus:ring-pink-500"
+                          className="h-4 w-4 rounded border-slate-300 text-infinity-primary focus:ring-infinity-primary"
                         />
                         <label htmlFor="noColorCheckbox" className="text-sm text-neutral-700 cursor-pointer">
                           بدون رنگ
@@ -400,7 +400,7 @@ export default function ProductColorsPage() {
                               color={modalState.colorCode}
                               onChange={handleColorChange}
                               aria-label="کد رنگ"
-                              className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm uppercase focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500/30"
+                              className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm uppercase focus:border-infinity-primary focus:outline-none focus:ring-1 focus:ring-infinity-primary/30"
                             />
                           </div>
                         </>
@@ -455,7 +455,7 @@ export default function ProductColorsPage() {
                                     onClick={() => handleColorChange(color)}
                                     className={`h-8 w-8 rounded-lg border-2 transition-all ${
                                       modalState.colorCode.toLowerCase() === color.toLowerCase()
-                                        ? "border-pink-500 ring-2 ring-pink-300 ring-offset-1"
+                                        ? "border-infinity-primary ring-2 ring-infinity-primary-lighter ring-offset-1"
                                         : "border-slate-200 hover:border-slate-300"
                                     }`}
                                     style={{ backgroundColor: color }}
@@ -498,7 +498,7 @@ export default function ProductColorsPage() {
                       onClick={handleSaveColor}
                       disabled={saving}
                       className={`rounded-lg px-6 py-2 text-sm font-medium text-white transition-colors ${
-                        saving ? "bg-pink-300 cursor-not-allowed" : "bg-pink-600 hover:bg-pink-700"
+                        saving ? "bg-infinity-primary-lighter cursor-not-allowed" : "bg-infinity-primary hover:bg-infinity-primary-dark"
                       }`}
                     >
                       {saving ? "در حال ذخیره..." : "ذخیره"}

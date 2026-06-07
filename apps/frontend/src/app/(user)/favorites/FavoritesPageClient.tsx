@@ -134,7 +134,7 @@ export default function FavoritesPage() {
           <section className="flex flex-col gap-5 rounded-2xl border border-slate-200 bg-white px-4 py-4 shadow-sm lg:px-6 lg:py-6">
             {loading ? (
               <div className="flex justify-center p-8">
-                <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-t-2 border-pink-500"></div>
+                <div className="h-10 w-10 animate-spin rounded-full border-2 border-slate-200 border-t-infinity-primary"></div>
               </div>
             ) : error ? (
               <div className="rounded-lg bg-gray-50 p-8 text-center">

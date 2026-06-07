@@ -142,7 +142,7 @@ export default function OrderCard({
                 type="button"
                 onClick={() => onReleaseReserve(orderId)}
                 disabled={isReleasingReserve}
-                className="text-xs rounded-lg border border-pink-200 px-2 py-1 text-pink-600 transition hover:bg-pink-50 disabled:opacity-50"
+                className="text-xs rounded-lg border border-infinity-primary-lighter/60 px-2 py-1 text-infinity-primary transition hover:bg-infinity-primary-lighter/20 disabled:opacity-50"
               >
                 {isReleasingReserve ? "در حال پردازش..." : "ارسال الان"}
               </button>
@@ -161,7 +161,7 @@ export default function OrderCard({
             <button
               type="button"
               onClick={onViewDetails}
-              className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1 text-xs text-slate-600 transition hover:border-pink-200 hover:text-pink-600"
+              className="flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1 text-xs text-slate-600 transition hover:border-infinity-primary-lighter/60 hover:text-infinity-primary"
             >
               <Eye className="h-4 w-4" />
               <span>جزئیات</span>
@@ -170,7 +170,7 @@ export default function OrderCard({
               href={detailHref}
               prefetch={false}
               onClick={onOpenFullDetails}
-              className="text-xs rounded-lg border border-pink-100 px-3 py-1 text-pink-600 transition hover:bg-pink-50"
+              className="text-xs rounded-lg border border-infinity-primary-lighter/40 px-3 py-1 text-infinity-primary transition hover:bg-infinity-primary-lighter/20"
             >
               مشاهده کامل
             </Link>

@@ -65,7 +65,7 @@ export function SlotEditorContent({
             ویرایش اسلات
           </span>
           {activeLabel ? (
-            <span className="rounded-md bg-pink-50 px-2 py-1 text-[11px] font-medium text-pink-700">
+            <span className="rounded-md bg-infinity-primary-lighter/20 px-2 py-1 text-[11px] font-medium text-infinity-primary-dark">
               در حال ویرایش متن: {activeLabel}
             </span>
           ) : null}
@@ -84,7 +84,7 @@ export function SlotEditorContent({
         [data-hero-editor-active="true"] {
           border-color: rgb(236, 72, 153) !important;
           background: rgb(253, 242, 248) !important;
-          box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.22) !important;
+          box-shadow: 0 0 0 3px rgba(61, 76, 110, 0.22) !important;
         }
       `}</style>
       <div className="min-h-0 flex-1 overflow-y-auto">

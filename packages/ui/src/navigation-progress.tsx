@@ -162,7 +162,7 @@ export function NavigationProgress() {
       aria-busy={phase !== "done"}
     >
       <div
-        className="h-full bg-gradient-to-l from-[#334155] via-[#db2777] to-[#fb7185] shadow-[0_0_10px_rgba(219,39,119,0.55)]"
+        className="h-full bg-gradient-to-l from-[#334155] via-[#33415e] to-[#aebfdb] shadow-[0_0_10px_rgba(57, 76, 110,0.55)]"
         style={barStyle}
       />
     </div>

@@ -241,7 +241,7 @@ export default function EditBlogPostPage() {
   if (isFetching) {
     return (
       <div className="flex h-96 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-pink-500 border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-infinity-primary border-t-transparent" />
       </div>
     );
   }
@@ -307,7 +307,7 @@ export default function EditBlogPostPage() {
                   {...register("Excerpt")}
                   rows={3}
                   placeholder="خلاصه‌ای از پست برای نمایش در لیست‌ها..."
-                  className="w-full rounded-xl border border-slate-100 bg-white px-4 py-3 text-sm text-neutral-600 placeholder:text-slate-400 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
+                  className="w-full rounded-xl border border-slate-100 bg-white px-4 py-3 text-sm text-neutral-600 placeholder:text-slate-400 focus:border-infinity-primary focus:outline-none focus:ring-1 focus:ring-infinity-primary"
                 />
               </div>
 
@@ -323,7 +323,7 @@ export default function EditBlogPostPage() {
                       type="text"
                       {...register("MetaTitle")}
                       placeholder="عنوان برای موتورهای جستجو"
-                      className="w-full rounded-xl border border-slate-100 bg-white px-4 py-3 text-sm text-neutral-600 placeholder:text-slate-400 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
+                      className="w-full rounded-xl border border-slate-100 bg-white px-4 py-3 text-sm text-neutral-600 placeholder:text-slate-400 focus:border-infinity-primary focus:outline-none focus:ring-1 focus:ring-infinity-primary"
                     />
                     <p className="mt-1 text-xs text-slate-400">حداکثر 60 کاراکتر</p>
                   </div>
@@ -336,7 +336,7 @@ export default function EditBlogPostPage() {
                       {...register("MetaDescription")}
                       rows={2}
                       placeholder="توضیحات برای موتورهای جستجو"
-                      className="w-full rounded-xl border border-slate-100 bg-white px-4 py-3 text-sm text-neutral-600 placeholder:text-slate-400 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
+                      className="w-full rounded-xl border border-slate-100 bg-white px-4 py-3 text-sm text-neutral-600 placeholder:text-slate-400 focus:border-infinity-primary focus:outline-none focus:ring-1 focus:ring-infinity-primary"
                     />
                     <p className="mt-1 text-xs text-slate-400">حداکثر 160 کاراکتر</p>
                   </div>
@@ -349,7 +349,7 @@ export default function EditBlogPostPage() {
                       type="text"
                       {...register("Keywords")}
                       placeholder="کلمات کلیدی را با کاما جدا کنید"
-                      className="w-full rounded-xl border border-slate-100 bg-white px-4 py-3 text-sm text-neutral-600 placeholder:text-slate-400 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
+                      className="w-full rounded-xl border border-slate-100 bg-white px-4 py-3 text-sm text-neutral-600 placeholder:text-slate-400 focus:border-infinity-primary focus:outline-none focus:ring-1 focus:ring-infinity-primary"
                     />
                   </div>
                 </div>

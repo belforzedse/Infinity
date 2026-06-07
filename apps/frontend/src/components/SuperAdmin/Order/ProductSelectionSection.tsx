@@ -113,13 +113,13 @@ const ProductSelectionSection: React.FC<ProductSelectionSectionProps> = ({
               className={classNames(
               "text-sm relative border-b-2 pb-2 transition-colors",
               view === activeView
-                ? "border-pink-500 text-pink-500"
+                ? "border-infinity-primary text-infinity-primary"
                 : "border-transparent text-slate-500 hover:text-slate-700",
             )}
           >
             {view}
             {view === ProductViewEnum.SELECTED_PRODUCTS && selectedItems.length > 0 && (
-              <span className="absolute -top-1 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-pink-500 text-xs text-white">
+              <span className="absolute -top-1 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-infinity-primary text-xs text-white">
                 {selectedItems.length}
               </span>
             )}

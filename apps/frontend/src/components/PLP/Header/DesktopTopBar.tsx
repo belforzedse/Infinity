@@ -1,6 +1,5 @@
 import { StorefrontLogo } from "@repo/brand";
 import DesktopHeaderActions from "@/components/PLP/Header/DesktopActions";
-import InfinitygramHeaderLink from "@/components/PLP/Header/InfinitygramHeaderLink";
 import PLPDesktopSearch from "@/components/Search/PLPDesktopSearch";
 import { StorefrontContainer } from "@/components/storefront";
 
@@ -19,8 +18,7 @@ export default function PLPDesktopHeaderTopBar() {
           <div className="justify-self-center">
             <StorefrontLogo width={92} height={58} />
           </div>
-          <div className="flex items-center gap-3 justify-self-end">
-            <InfinitygramHeaderLink />
+          <div className="flex items-center justify-self-end">
             <PLPDesktopSearch />
           </div>
         </div>

@@ -43,8 +43,8 @@ export function EditableSlot({
       <div
         className={`pointer-events-none absolute inset-0 z-20 rounded-lg transition-all duration-200 ring-inset ${
           selected
-            ? "ring-2 ring-pink-500"
-            : "ring-1 ring-transparent group-hover:ring-2 group-hover:ring-pink-400/60 group-focus:ring-2 group-focus:ring-pink-400/60"
+            ? "ring-2 ring-infinity-primary"
+            : "ring-1 ring-transparent group-hover:ring-2 group-hover:ring-infinity-primary-light/60 group-focus:ring-2 group-focus:ring-infinity-primary-light/60"
         }`}
         aria-hidden
       />

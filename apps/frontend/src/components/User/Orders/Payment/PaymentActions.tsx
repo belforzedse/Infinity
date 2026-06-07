@@ -16,7 +16,7 @@ export default function PaymentActions({
       <button
         type="button"
         onClick={handleBackToCart}
-        className="w-full bg-pink-500 text-white py-3 px-6 rounded-lg text-center hover:bg-pink-600 transition-colors"
+        className="w-full bg-infinity-primary text-white py-3 px-6 rounded-lg text-center hover:bg-infinity-primary transition-colors"
       >
         بازگشت به سبد خرید
       </button>

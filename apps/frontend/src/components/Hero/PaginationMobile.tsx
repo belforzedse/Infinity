@@ -34,7 +34,7 @@ export default function PaginationMobile({
           aria-label="Previous"
           onClick={onPrev}
           className={clsx(
-            "text-lg mx-1 rounded-full p-1 text-pink-500 transition hover:bg-pink-50",
+            "text-lg mx-1 rounded-full p-1 text-infinity-primary transition hover:bg-infinity-primary-lighter/20",
             arrowClassName,
           )}
         >
@@ -52,8 +52,8 @@ export default function PaginationMobile({
             className={clsx(
               "rounded-full transition-all",
               i === index
-                ? (dotActiveClassName ?? "h-1.5 w-5 bg-pink-600")
-                : (dotClassName ?? "h-1.5 w-1.5 bg-pink-200"),
+                ? (dotActiveClassName ?? "h-1.5 w-5 bg-infinity-primary")
+                : (dotClassName ?? "h-1.5 w-1.5 bg-infinity-primary-lighter/50"),
             )}
           />
         ))}
@@ -65,7 +65,7 @@ export default function PaginationMobile({
           aria-label="Next"
           onClick={onNext}
           className={clsx(
-            "text-lg mx-1 rounded-full p-1 text-pink-500 transition hover:bg-pink-50",
+            "text-lg mx-1 rounded-full p-1 text-infinity-primary transition hover:bg-infinity-primary-lighter/20",
             arrowClassName,
           )}
         >

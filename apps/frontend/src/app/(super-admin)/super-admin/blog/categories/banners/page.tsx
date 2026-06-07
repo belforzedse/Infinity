@@ -68,7 +68,7 @@ function BannerField({
         value={value || ""}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-pink-400"
+        className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-infinity-primary-light"
       />
     </div>
   );
@@ -205,7 +205,7 @@ export default function BlogCategoryBannersPage() {
           type="button"
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center gap-2 rounded-lg bg-pink-500 px-4 py-2 text-sm text-white transition-colors hover:bg-pink-600 disabled:opacity-60"
+          className="flex items-center gap-2 rounded-lg bg-infinity-primary px-4 py-2 text-sm text-white transition-colors hover:bg-infinity-primary disabled:opacity-60"
         >
           <Save className="h-4 w-4" />
           {saving ? "در حال ذخیره..." : "ذخیره همه تغییرات"}
@@ -269,7 +269,7 @@ export default function BlogCategoryBannersPage() {
                   }
                   placeholder="تمامی مقالات و محتوای آموزشی ما را مشاهده کنید"
                   rows={3}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-pink-400"
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-infinity-primary-light"
                 />
               </div>
             </div>
@@ -355,7 +355,7 @@ export default function BlogCategoryBannersPage() {
                     }
                     placeholder="توضیح کوتاه برای بنر این دسته‌بندی"
                     rows={3}
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-pink-400"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-infinity-primary-light"
                   />
                 </div>
               </div>

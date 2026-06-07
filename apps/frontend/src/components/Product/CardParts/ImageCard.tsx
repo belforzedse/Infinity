@@ -27,7 +27,7 @@ export function ImageCard({
   return (
     <div className="relative h-[100px] w-24">
       {discount && discount > 0 && (
-        <div className="text-xs absolute left-0 top-0 z-10 rounded-br-xl rounded-tl-xl bg-rose-600 px-2 py-0.5 text-white">
+        <div className="text-xs absolute left-0 top-0 z-10 rounded-br-xl rounded-tl-xl bg-infinity-primary px-2 py-0.5 text-white">
           ٪{discount}
         </div>
       )}

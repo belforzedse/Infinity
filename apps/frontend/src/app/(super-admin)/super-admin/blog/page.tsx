@@ -88,8 +88,8 @@ export default function BlogDashboard() {
       title: "مجموع پست‌ها",
       value: stats.posts,
       icon: FileText,
-      color: "bg-pink-100",
-      iconColor: "text-pink-600",
+      color: "bg-infinity-primary-lighter/30",
+      iconColor: "text-infinity-primary",
       href: "/super-admin/blog/posts",
     },
     {
@@ -140,7 +140,7 @@ export default function BlogDashboard() {
       description: "ایجاد پست جدید برای وبلاگ",
       href: "/super-admin/blog/posts/add",
       icon: FileText,
-      color: "bg-pink-500",
+      color: "bg-infinity-primary",
     },
     {
       title: "مدیریت دسته‌بندی‌ها",
@@ -198,7 +198,7 @@ export default function BlogDashboard() {
                 <Link
                   key={index}
                   href={action.href}
-                  className="flex items-center gap-3 rounded-xl border border-slate-100 p-3 transition-colors hover:border-pink-200 hover:bg-pink-50"
+                  className="flex items-center gap-3 rounded-xl border border-slate-100 p-3 transition-colors hover:border-infinity-primary-lighter/60 hover:bg-infinity-primary-lighter/20"
                 >
                   <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${action.color}`}>
                     <action.icon className="h-5 w-5 text-white" />
@@ -221,7 +221,7 @@ export default function BlogDashboard() {
               <h3 className="text-lg font-medium text-neutral-800">آخرین پست‌ها</h3>
               <Link
                 href="/super-admin/blog/posts"
-                className="text-sm text-pink-500 hover:text-pink-600"
+                className="text-sm text-infinity-primary hover:text-infinity-primary"
               >
                 مشاهده همه
               </Link>
@@ -229,7 +229,7 @@ export default function BlogDashboard() {
 
             {loading ? (
               <div className="flex h-48 items-center justify-center">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-pink-500 border-t-transparent" />
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-infinity-primary border-t-transparent" />
               </div>
             ) : recentPosts.length === 0 ? (
               <div className="flex h-48 flex-col items-center justify-center text-center">
@@ -237,7 +237,7 @@ export default function BlogDashboard() {
                 <p className="text-neutral-600">هنوز پستی ایجاد نشده است</p>
                 <Link
                   href="/super-admin/blog/posts/add"
-                  className="mt-3 flex items-center gap-2 rounded-lg bg-pink-500 px-4 py-2 text-sm text-white transition-colors hover:bg-pink-600"
+                  className="mt-3 flex items-center gap-2 rounded-lg bg-infinity-primary px-4 py-2 text-sm text-white transition-colors hover:bg-infinity-primary"
                 >
                   <Plus className="h-4 w-4" />
                   اولین پست خود را ایجاد کنید
@@ -249,7 +249,7 @@ export default function BlogDashboard() {
                   <Link
                     key={post.id}
                     href={`/super-admin/blog/posts/${post.id}/edit`}
-                    className="flex items-center gap-4 rounded-xl border border-slate-100 p-3 transition-colors hover:border-pink-200 hover:bg-pink-50"
+                    className="flex items-center gap-4 rounded-xl border border-slate-100 p-3 transition-colors hover:border-infinity-primary-lighter/60 hover:bg-infinity-primary-lighter/20"
                   >
                     <div className="flex-1">
                       <p className="font-medium text-neutral-800">{post.Title}</p>

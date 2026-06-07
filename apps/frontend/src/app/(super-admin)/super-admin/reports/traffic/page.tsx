@@ -238,7 +238,7 @@ export default function TrafficReportPage() {
                     id="auto-refresh-select"
                     value={String(autoRefreshSeconds)}
                     onChange={(event) => setAutoRefreshSeconds(Number(event.target.value))}
-                    className="rounded-lg border border-neutral-300 px-3 py-2 text-sm transition-all focus:border-transparent focus:ring-2 focus:ring-pink-500"
+                    className="rounded-lg border border-neutral-300 px-3 py-2 text-sm transition-all focus:border-transparent focus:ring-2 focus:ring-infinity-primary"
                   >
                     <option value="5">هر ۵ ثانیه</option>
                     <option value="15">هر ۱۵ ثانیه</option>
@@ -252,7 +252,7 @@ export default function TrafficReportPage() {
                   type="button"
                   onClick={handleManualRefresh}
                   disabled={refreshingNow}
-                  className="rounded-lg bg-pink-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-pink-700 disabled:cursor-not-allowed disabled:bg-pink-300"
+                  className="rounded-lg bg-infinity-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-infinity-primary-dark disabled:cursor-not-allowed disabled:bg-infinity-primary-lighter"
                 >
                   {refreshingNow ? "در حال بروزرسانی..." : "بروزرسانی فوری"}
                 </button>
@@ -264,7 +264,7 @@ export default function TrafficReportPage() {
                 <label className="text-sm font-medium text-neutral-600">تاریخ شروع</label>
                 <DatePicker
                   defaultValue={start}
-                  inputClass="w-full rounded-lg border border-neutral-300 px-3 py-2 transition-all focus:border-transparent focus:ring-2 focus:ring-pink-500"
+                  inputClass="w-full rounded-lg border border-neutral-300 px-3 py-2 transition-all focus:border-transparent focus:ring-2 focus:ring-infinity-primary"
                   onChange={(value: any) => setStart(normalizeDateInput(value, start))}
                 />
               </div>
@@ -272,7 +272,7 @@ export default function TrafficReportPage() {
                 <label className="text-sm font-medium text-neutral-600">تاریخ پایان</label>
                 <DatePicker
                   defaultValue={end}
-                  inputClass="w-full rounded-lg border border-neutral-300 px-3 py-2 transition-all focus:border-transparent focus:ring-2 focus:ring-pink-500"
+                  inputClass="w-full rounded-lg border border-neutral-300 px-3 py-2 transition-all focus:border-transparent focus:ring-2 focus:ring-infinity-primary"
                   onChange={(value: any) => setEnd(normalizeDateInput(value, end))}
                 />
               </div>
@@ -341,7 +341,7 @@ export default function TrafficReportPage() {
               <MetricCard
                 title="درآمد (تومان)"
                 value={dashboard?.ecommerce.revenue || 0}
-                tone="pink"
+                tone="brand"
               />
             </div>
 
@@ -531,7 +531,7 @@ function MetricCard({
   title: string;
   value: number | string;
   suffix?: string;
-  tone: "blue" | "green" | "purple" | "orange" | "emerald" | "pink";
+  tone: "blue" | "green" | "purple" | "orange" | "emerald" | "brand";
 }) {
   const toneClass: Record<string, string> = {
     blue: "from-blue-50 to-cyan-50 text-blue-700",
@@ -539,7 +539,7 @@ function MetricCard({
     purple: "from-purple-50 to-indigo-50 text-purple-700",
     orange: "from-orange-50 to-amber-50 text-orange-700",
     emerald: "from-emerald-50 to-teal-50 text-emerald-700",
-    pink: "from-pink-50 to-rose-50 text-pink-700",
+    brand: "from-infinity-primary-lighter/20 to-infinity-primary-lighter/30 text-infinity-primary-dark",
   };
 
   return (
@@ -580,7 +580,7 @@ function RealtimeMetric({
             {deltaText}
           </span>
         ) : null}
-        <span className="text-lg font-semibold text-pink-600">{faNum(value)}</span>
+        <span className="text-lg font-semibold text-infinity-primary">{faNum(value)}</span>
       </div>
     </div>
   );

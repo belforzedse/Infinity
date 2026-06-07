@@ -215,7 +215,7 @@ export default function PWAInstallPrompt() {
       <div className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl rtl:text-right animate-in fade-in slide-in-from-bottom-4 duration-500">
         {/* Icon/Logo */}
         <div className="mb-4 flex justify-center">
-          <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-500 to-pink-600 shadow-lg">
+          <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-infinity-primary to-infinity-primary shadow-lg">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-12 w-12 text-white"
@@ -252,7 +252,7 @@ export default function PWAInstallPrompt() {
               <>
                 <li className="flex items-start gap-2 rtl:flex-row-reverse">
                   <svg
-                    className="h-5 w-5 flex-shrink-0 text-pink-600 mt-0.5"
+                    className="h-5 w-5 flex-shrink-0 text-infinity-primary mt-0.5"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -268,7 +268,7 @@ export default function PWAInstallPrompt() {
                 </li>
                 <li className="flex items-start gap-2 rtl:flex-row-reverse">
                   <svg
-                    className="h-5 w-5 flex-shrink-0 text-pink-600 mt-0.5"
+                    className="h-5 w-5 flex-shrink-0 text-infinity-primary mt-0.5"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -284,7 +284,7 @@ export default function PWAInstallPrompt() {
                 </li>
                 <li className="flex items-start gap-2 rtl:flex-row-reverse">
                   <svg
-                    className="h-5 w-5 flex-shrink-0 text-pink-600 mt-0.5"
+                    className="h-5 w-5 flex-shrink-0 text-infinity-primary mt-0.5"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -303,7 +303,7 @@ export default function PWAInstallPrompt() {
               <>
                 <li className="flex items-start gap-2 rtl:flex-row-reverse">
                   <svg
-                    className="h-5 w-5 flex-shrink-0 text-pink-600 mt-0.5"
+                    className="h-5 w-5 flex-shrink-0 text-infinity-primary mt-0.5"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -319,7 +319,7 @@ export default function PWAInstallPrompt() {
                 </li>
                 <li className="flex items-start gap-2 rtl:flex-row-reverse">
                   <svg
-                    className="h-5 w-5 flex-shrink-0 text-pink-600 mt-0.5"
+                    className="h-5 w-5 flex-shrink-0 text-infinity-primary mt-0.5"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -335,7 +335,7 @@ export default function PWAInstallPrompt() {
                 </li>
                 <li className="flex items-start gap-2 rtl:flex-row-reverse">
                   <svg
-                    className="h-5 w-5 flex-shrink-0 text-pink-600 mt-0.5"
+                    className="h-5 w-5 flex-shrink-0 text-infinity-primary mt-0.5"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -358,7 +358,7 @@ export default function PWAInstallPrompt() {
         <ul className="mb-6 space-y-2 text-sm text-gray-600">
           <li className="flex items-center gap-2 rtl:flex-row-reverse">
             <svg
-              className="h-5 w-5 flex-shrink-0 text-pink-600"
+              className="h-5 w-5 flex-shrink-0 text-infinity-primary"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -374,7 +374,7 @@ export default function PWAInstallPrompt() {
           </li>
           <li className="flex items-center gap-2 rtl:flex-row-reverse">
             <svg
-              className="h-5 w-5 flex-shrink-0 text-pink-600"
+              className="h-5 w-5 flex-shrink-0 text-infinity-primary"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -390,7 +390,7 @@ export default function PWAInstallPrompt() {
           </li>
           <li className="flex items-center gap-2 rtl:flex-row-reverse">
             <svg
-              className="h-5 w-5 flex-shrink-0 text-pink-600"
+              className="h-5 w-5 flex-shrink-0 text-infinity-primary"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -411,14 +411,14 @@ export default function PWAInstallPrompt() {
           {isIOS ? (
             <button
               onClick={handleDismiss}
-              className="w-full transform rounded-xl bg-pink-600 px-6 py-3 font-semibold text-white shadow-lg transition-colors hover:scale-[1.02] hover:bg-pink-700 hover:shadow-xl active:scale-[0.98]"
+              className="w-full transform rounded-xl bg-infinity-primary px-6 py-3 font-semibold text-white shadow-lg transition-colors hover:scale-[1.02] hover:bg-infinity-primary-dark hover:shadow-xl active:scale-[0.98]"
             >
               متوجه شدم
             </button>
           ) : (
             <button
               onClick={handleInstallClick}
-              className="w-full transform rounded-xl bg-pink-600 px-6 py-3 font-semibold text-white shadow-lg transition-colors hover:scale-[1.02] hover:bg-pink-700 hover:shadow-xl active:scale-[0.98]"
+              className="w-full transform rounded-xl bg-infinity-primary px-6 py-3 font-semibold text-white shadow-lg transition-colors hover:scale-[1.02] hover:bg-infinity-primary-dark hover:shadow-xl active:scale-[0.98]"
             >
               نصب اپلیکیشن
             </button>

@@ -178,7 +178,7 @@ function PaymentFailureContent() {
           <div className="w-full max-w-md">
             <button
               onClick={handleContinueShopping}
-              className="w-full bg-pink-500 text-white py-3 px-6 rounded-lg text-center hover:bg-pink-600 transition-colors"
+              className="w-full bg-infinity-primary text-white py-3 px-6 rounded-lg text-center hover:bg-infinity-primary transition-colors"
             >
               بازگشت به صفحه اصلی
             </button>

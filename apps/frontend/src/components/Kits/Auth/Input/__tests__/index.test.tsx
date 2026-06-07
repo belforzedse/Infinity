@@ -118,7 +118,7 @@ describe("AuthInput", () => {
     render(<AuthInput />);
 
     const input = screen.getByRole("textbox");
-    expect(input).toHaveClass("focus:outline-none", "focus:ring-2", "focus:ring-pink-400");
+    expect(input).toHaveClass("focus:outline-none", "focus:ring-2", "focus:ring-infinity-primary-light");
   });
 
   it("should handle controlled input", () => {

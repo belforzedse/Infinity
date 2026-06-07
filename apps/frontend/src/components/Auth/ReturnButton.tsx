@@ -29,10 +29,10 @@ export default function AuthReturnButton({ href, label, preserveRedirect = false
       <button
         type="button"
         onClick={handleClick}
-        className="group inline-flex items-center gap-1 text-sm font-medium text-pink-600 transition-colors hover:text-pink-500 focus:outline-none"
+        className="group inline-flex items-center gap-1 text-sm font-medium text-infinity-primary transition-colors hover:text-infinity-primary focus:outline-none"
       >
         <span>{label}</span>
-        <ChevronLeftIcon className="h-4 w-4 text-pink-600 transition-colors group-hover:text-pink-500" />
+        <ChevronLeftIcon className="h-4 w-4 text-infinity-primary transition-colors group-hover:text-infinity-primary" />
       </button>
     </div>
   );

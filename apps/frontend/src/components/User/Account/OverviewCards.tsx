@@ -95,7 +95,7 @@ export default function OverviewCards({ data, loading, error, onRetry }: Overvie
           key={card.id}
           className={cn(
             "flex flex-col gap-3 rounded-2xl border border-slate-100 bg-white p-4 text-right shadow-sm transition-transform hover:-translate-y-0.5 hover:shadow-md",
-            card.highlight && "border-pink-200 bg-pink-50/60",
+            card.highlight && "border-infinity-primary-lighter/60 bg-infinity-primary-lighter/60",
           )}
         >
           <span className="text-xs font-medium text-slate-500 lg:text-sm">{card.label}</span>

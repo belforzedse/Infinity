@@ -683,7 +683,7 @@ function ShoppingCartBillForm({}: Props) {
       {error && <div className="rounded-lg bg-red-50 p-3 text-red-600">{error}</div>}
 
       {activeReserve && mergeChoice === null && (
-        <div className="rounded-lg border border-pink-200 bg-pink-50/50 p-4">
+        <div className="rounded-lg border border-infinity-primary-lighter/60 bg-infinity-primary-lighter/50 p-4">
           <p className="mb-3 text-sm font-medium text-neutral-800">
             شما یک سفارش رزروی فعال دارید ({activeReserve.orderCount} سفارش). آیا می‌خواهید به آن
             اضافه کنید؟
@@ -696,7 +696,7 @@ function ShoppingCartBillForm({}: Props) {
                 if (isSubmitting) return;
                 setMergeChoice("merge");
               }}
-              className="rounded-lg bg-pink-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-pink-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-lg bg-infinity-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-infinity-primary-dark disabled:cursor-not-allowed disabled:opacity-50"
             >
               اضافه به سفارش رزروی (بدون هزینه ارسال)
             </button>
@@ -729,7 +729,7 @@ function ShoppingCartBillForm({}: Props) {
               <p className="text-neutral-800">
                 اقلام فعلی به سفارش رزروی شما اضافه می‌شوند. هزینه ارسال از قبل پرداخت شده است.
               </p>
-              <p className="mt-2 text-lg font-medium text-pink-600">
+              <p className="mt-2 text-lg font-medium text-infinity-primary">
                 قابل پرداخت:{" "}
                 {Math.max(0, totalPrice - (discountPreview?.discount ?? 0)).toLocaleString()} تومان
               </p>
@@ -779,7 +779,7 @@ function ShoppingCartBillForm({}: Props) {
             type="submit"
             disabled={isSubmitting}
             className={
-              "text-xl w-full text-nowrap rounded-lg bg-pink-500 py-3 text-white lg:text-base lg:py-4 " +
+              "text-xl w-full text-nowrap rounded-lg bg-infinity-primary py-3 text-white lg:text-base lg:py-4 " +
               (isSubmitting ? "cursor-not-allowed opacity-70" : "")
             }
           >

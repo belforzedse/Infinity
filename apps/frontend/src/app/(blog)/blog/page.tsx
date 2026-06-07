@@ -193,7 +193,7 @@ export default async function BlogPage({
 
   return (
     <div className="min-h-screen bg-slate-50" dir="rtl">
-      <div className="bg-gradient-to-b from-pink-50 to-slate-50 py-12 md:py-16">
+      <div className="bg-gradient-to-b from-infinity-primary-lighter/20 to-slate-50 py-12 md:py-16">
         <div className="container mx-auto px-4 text-center">
           <h1 className="mb-4 text-3xl font-bold text-neutral-900 md:text-5xl">اینفینیتی مگ</h1>
           <p className="mx-auto max-w-2xl text-base text-neutral-600 md:text-lg">

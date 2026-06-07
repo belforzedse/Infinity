@@ -93,7 +93,7 @@ export const viewport: Viewport = {
   maximumScale: 5,
   userScalable: true,
   viewportFit: "cover",
-  themeColor: "#ec4899", // Pink theme color for mobile browsers
+  themeColor: "#3d4c6e", // Infinity primary theme color for mobile browsers
 };
 
 export default async function RootLayout({
@@ -164,7 +164,7 @@ export default async function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content={siteName} />
         <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="theme-color" content="#ec4899" />
+        <meta name="theme-color" content="#3d4c6e" />
 
         {/* Apple Touch Icons */}
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
@@ -186,7 +186,7 @@ export default async function RootLayout({
         {/* Skip to main content link for keyboard users */}
         <a
           href="#main-content"
-          className="sr-only fixed right-0 top-0 z-[9999] rounded-b-lg bg-pink-600 px-4 py-2 text-white focus:not-sr-only"
+          className="sr-only fixed right-0 top-0 z-[9999] rounded-b-lg bg-infinity-primary px-4 py-2 text-white focus:not-sr-only"
         >
           رفتن به محتوای اصلی
         </a>

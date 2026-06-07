@@ -20,7 +20,7 @@ export default function LoginActions({ onForgotPassword, onOtpLogin }: LoginActi
       <div className="mt-5 flex flex-col-reverse gap-5 md:flex-row-reverse">
         <AuthButton
           onClick={onForgotPassword}
-          className="border border-pink-600 !bg-transparent !text-pink-600 hover:!bg-pink-50"
+          className="border border-infinity-primary !bg-transparent !text-infinity-primary hover:!bg-infinity-primary-lighter/20"
           icon={<CodeIcon className="h-5 w-5 md:h-6 md:w-6" />}
         >
           فراموشی رمز عبور
@@ -28,7 +28,7 @@ export default function LoginActions({ onForgotPassword, onOtpLogin }: LoginActi
 
         <AuthButton
           onClick={onOtpLogin}
-          className="border border-pink-600 !bg-transparent !text-pink-600 hover:!bg-pink-50"
+          className="border border-infinity-primary !bg-transparent !text-infinity-primary hover:!bg-infinity-primary-lighter/20"
           icon={<OtpIcon className="h-5 w-5 md:h-6 md:w-6" />}
         >
           ورود با رمز یکبار مصرف

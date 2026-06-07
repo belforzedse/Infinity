@@ -163,7 +163,7 @@ const TableBuilderDialog: React.FC<TableBuilderDialogProps> = ({ isOpen, onClose
           </div>
           <button
             onClick={handleSave}
-            className="rounded-lg bg-pink-600 px-4 py-2 text-sm text-white hover:bg-pink-700"
+            className="rounded-lg bg-infinity-primary px-4 py-2 text-sm text-white hover:bg-infinity-primary-dark"
           >
             درج در محتوا
           </button>
@@ -184,7 +184,7 @@ const TableBuilderDialog: React.FC<TableBuilderDialogProps> = ({ isOpen, onClose
                     <div className="flex items-center justify-between gap-2">
                       {editingColumn === column.key ? (
                         <input
-                          className="w-full rounded border border-slate-300 px-2 py-1 text-sm focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
+                          className="w-full rounded border border-slate-300 px-2 py-1 text-sm focus:border-infinity-primary focus:outline-none focus:ring-1 focus:ring-infinity-primary"
                           defaultValue={column.title}
                           autoFocus
                           onBlur={(e) => updateColumnTitle(column.key, e.target.value.trim() || column.title)}
@@ -193,7 +193,7 @@ const TableBuilderDialog: React.FC<TableBuilderDialogProps> = ({ isOpen, onClose
                         <button
                           type="button"
                           onClick={() => setEditingColumn(column.key)}
-                          className="text-right text-sm text-slate-600 hover:text-pink-600"
+                          className="text-right text-sm text-slate-600 hover:text-infinity-primary"
                         >
                           {columnTitleMap[column.key]}
                         </button>
@@ -218,7 +218,7 @@ const TableBuilderDialog: React.FC<TableBuilderDialogProps> = ({ isOpen, onClose
                     <input
                       value={row.label}
                       onChange={(e) => updateRowValue(rowIndex, "label", e.target.value)}
-                      className="w-full rounded border border-slate-200 px-2 py-1 text-sm focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
+                      className="w-full rounded border border-slate-200 px-2 py-1 text-sm focus:border-infinity-primary focus:outline-none focus:ring-1 focus:ring-infinity-primary"
                       placeholder="عنوان ردیف"
                     />
                   </td>
@@ -227,7 +227,7 @@ const TableBuilderDialog: React.FC<TableBuilderDialogProps> = ({ isOpen, onClose
                       <input
                         value={row[column.key] || ""}
                         onChange={(e) => updateRowValue(rowIndex, column.key, e.target.value)}
-                        className="w-full rounded border border-slate-200 px-2 py-1 text-sm focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
+                        className="w-full rounded border border-slate-200 px-2 py-1 text-sm focus:border-infinity-primary focus:outline-none focus:ring-1 focus:ring-infinity-primary"
                         placeholder="مقدار"
                       />
                     </td>

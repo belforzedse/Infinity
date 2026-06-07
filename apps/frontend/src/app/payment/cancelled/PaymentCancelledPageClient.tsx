@@ -153,7 +153,7 @@ function PaymentCancelledContent() {
           <div className="w-full max-w-md">
             <button
               onClick={handleContinueShopping}
-              className="w-full rounded-lg bg-pink-500 px-6 py-3 text-center text-white transition-colors hover:bg-pink-600"
+              className="w-full rounded-lg bg-infinity-primary px-6 py-3 text-center text-white transition-colors hover:bg-infinity-primary"
             >
               بازگشت به صفحه اصلی
             </button>

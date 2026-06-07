@@ -101,12 +101,12 @@ export default function ScrollToTop() {
       type="button"
       onClick={onClick}
       className={[
-        "fixed right-4 z-[60] rounded-full text-pink-600",
+        "fixed right-4 z-[60] rounded-full text-infinity-primary",
         "shadow-elevated transition-[opacity,transform] duration-300 ease-out motion-reduce:transition-none",
         // liquid glass gradient
-        "bg-gradient-to-br from-pink-50/70 to-white/70 ring-1 ring-white/60 saturate-150 backdrop-blur-xl",
-        "hover:from-pink-50/80 hover:to-white/80 active:scale-95",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ec4899] focus-visible:ring-offset-2 focus-visible:ring-offset-white",
+        "bg-gradient-to-br from-infinity-primary-lighter/70 to-white/70 ring-1 ring-white/60 saturate-150 backdrop-blur-xl",
+        "hover:from-infinity-primary-lighter/80 hover:to-white/80 active:scale-95",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3d4c6e] focus-visible:ring-offset-2 focus-visible:ring-offset-white",
         visible ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-3 opacity-0",
       ].join(" ")}
       style={{ bottom: `calc(${btnBottom}px + env(safe-area-inset-bottom))` }}
@@ -123,7 +123,7 @@ export default function ScrollToTop() {
             cx={size / 2}
             cy={size / 2}
             r={r}
-            stroke="rgba(236,72,153,0.2)"
+            stroke="rgba(61, 76, 110,0.2)"
             strokeWidth={stroke}
             fill="transparent"
           />
@@ -131,7 +131,7 @@ export default function ScrollToTop() {
             cx={size / 2}
             cy={size / 2}
             r={r}
-            stroke="#ec4899"
+            stroke="#3d4c6e"
             strokeLinecap="round"
             strokeWidth={stroke}
             fill="transparent"

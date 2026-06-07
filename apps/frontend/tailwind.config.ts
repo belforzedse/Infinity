@@ -16,8 +16,16 @@ export default {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			actions: {
-  				primary: '#EC4899',
+  				primary: '#3d4c6e',
   				link: '#2563EB'
+  			},
+  			'infinity-primary': {
+  				DEFAULT: '#3d4c6e',
+  				foreground: '#ffffff',
+  				darker: '#262f45',
+  				dark: '#33415e',
+  				light: '#566d97',
+  				lighter: '#aebfdb'
   			},
   			card: {
   				DEFAULT: 'hsl(var(--card))',

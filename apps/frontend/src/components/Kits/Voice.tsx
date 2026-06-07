@@ -45,7 +45,7 @@ const Voice: React.FC<VoiceProps> = ({ onPlay, className, audioSrc }) => {
     >
       <button
         onClick={handlePlay}
-        className="flex h-8 w-8 items-center justify-center rounded-full bg-pink-500"
+        className="flex h-8 w-8 items-center justify-center rounded-full bg-infinity-primary"
         disabled={!audioDuration}
       >
         {playing ? <PauseIcon /> : <PlayIcon />}
@@ -65,7 +65,7 @@ const Voice: React.FC<VoiceProps> = ({ onPlay, className, audioSrc }) => {
           <div
             key={i}
             className={`w-0.5 rounded-full transition-all duration-200 ${
-              i < getProgress() ? "bg-pink-500" : "bg-slate-300"
+              i < getProgress() ? "bg-infinity-primary" : "bg-slate-300"
             } ${i % 3 === 0 ? "h-6" : i % 2 === 0 ? "h-4" : "h-2"}`}
           />
         ))}

@@ -35,13 +35,13 @@ export default function SuperAdminError({
         <div className="space-y-3">
           <button
             onClick={reset}
-            className="w-full rounded-lg bg-pink-600 px-6 py-3 font-medium text-white transition-colors hover:bg-pink-700 active:scale-95"
+            className="w-full rounded-lg bg-infinity-primary px-6 py-3 font-medium text-white transition-colors hover:bg-infinity-primary-dark active:scale-95"
           >
             تلاش دوباره
           </button>
 
           <Link href="/super-admin" className="block">
-            <button className="w-full rounded-lg border border-pink-200 px-6 py-3 font-medium text-pink-600 transition-colors hover:bg-pink-50 active:scale-95">
+            <button className="w-full rounded-lg border border-infinity-primary-lighter/60 px-6 py-3 font-medium text-infinity-primary transition-colors hover:bg-infinity-primary-lighter/20 active:scale-95">
               بازگشت به داشبورد
             </button>
           </Link>

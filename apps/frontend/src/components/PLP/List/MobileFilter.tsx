@@ -116,7 +116,7 @@ export default function PLPListMobileFilter({
                   >
                     <PLPButton
                       text="اعمال فیلتر ها"
-                      className="!text-base flex w-full items-center justify-center bg-pink-500 text-white"
+                      className="!text-base flex w-full items-center justify-center bg-infinity-primary text-white"
                       onClick={handleClose}
                     />
                   </footer>

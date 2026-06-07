@@ -18,11 +18,11 @@ function ReserveShipping({ checked, onChange, disabled }: Props) {
           checked={checked}
           onChange={(e) => onChange(e.target.checked)}
           disabled={disabled}
-          className="mt-1 h-4 w-4 rounded border-slate-300 text-pink-600 focus:ring-pink-500"
+          className="mt-1 h-4 w-4 rounded border-slate-300 text-infinity-primary focus:ring-infinity-primary"
         />
         <div className="flex flex-col gap-1">
           <span className="flex items-center gap-2 font-medium text-neutral-800">
-            <Clock className="h-4 w-4 text-pink-500" />
+            <Clock className="h-4 w-4 text-infinity-primary" />
             ارسال رزروی
           </span>
           <span className="text-sm text-neutral-600">

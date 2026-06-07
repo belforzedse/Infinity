@@ -106,7 +106,7 @@ const ColorSwatches: React.FC<ColorSwatchesProps> = ({
             </div>
             <div
               className={clsx(
-                "relative rounded-full border border-white bg-gradient-to-r from-pink-600 to-pink-400 shadow-sm overflow-hidden",
+                "relative rounded-full border border-white bg-gradient-to-r from-infinity-primary to-infinity-primary-light shadow-sm overflow-hidden",
                 isSmall ? "h-4 w-4" : "h-5 w-5 border-2"
               )}
               style={{ zIndex: 2 }}

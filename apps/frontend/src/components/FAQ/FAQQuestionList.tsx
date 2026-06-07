@@ -69,16 +69,16 @@ export default function FAQQuestionList({
     <div className="space-y-4">
       {/* Support Message Banner */}
       {showSupportMessage && (
-        <div className="relative rounded-xl bg-pink-50 p-4 pr-10">
+        <div className="relative rounded-xl bg-infinity-primary-lighter/20 p-4 pr-10">
           <button
             type="button"
             onClick={() => setShowSupportMessage(false)}
-            className="absolute right-2 top-2 text-pink-500 hover:text-pink-600"
+            className="absolute right-2 top-2 text-infinity-primary hover:text-infinity-primary"
             aria-label="بستن پیام"
           >
             <X className="h-4 w-4" />
           </button>
-          <p className="text-sm text-pink-800">
+          <p className="text-sm text-infinity-primary-dark">
             اگر باز هم سوالی داشتید، تیم پشتیبانی ما همیشه آماده راهنمایی هست.
           </p>
         </div>

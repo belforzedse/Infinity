@@ -69,7 +69,7 @@ function ShoppingCartBillPaymentGateway({
     helper: (
       <a
         href="/wallet"
-        className="text-sm inline-block cursor-pointer rounded-md bg-pink-500 px-4 py-2 font-medium text-white transition-colors hover:bg-pink-600"
+        className="text-sm inline-block cursor-pointer rounded-md bg-infinity-primary px-4 py-2 font-medium text-white transition-colors hover:bg-infinity-primary"
       >
         شارژ کیف پول
       </a>
@@ -98,7 +98,7 @@ function ShoppingCartBillPaymentGateway({
           onClick={() => onChange(snappay.id)}
           className={classNames(
             "flex w-full flex-row items-center justify-between gap-4 rounded-lg border border-stone-50 bg-stone-50 py-4 pr-4 transition-opacity duration-300 lg:gap-6 lg:p-2",
-            selected === snappay.id && "!border-pink-600",
+            selected === snappay.id && "!border-infinity-primary",
           )}
           type="button"
         >
@@ -127,7 +127,7 @@ function ShoppingCartBillPaymentGateway({
               onClick={() => onChange(saman.id)}
               className={classNames(
                 "flex w-full flex-col items-center gap-2 text-nowrap rounded-lg border border-stone-50 bg-stone-50 p-4",
-                selected === saman.id && "!border-pink-600",
+                selected === saman.id && "!border-infinity-primary",
               )}
               type="button"
             >
@@ -149,7 +149,7 @@ function ShoppingCartBillPaymentGateway({
               onClick={() => onChange(mellat.id)}
               className={classNames(
                 "flex w-full flex-col items-center gap-2 text-nowrap rounded-lg border border-stone-50 bg-stone-50 p-4",
-                selected === mellat.id && "!border-pink-600",
+                selected === mellat.id && "!border-infinity-primary",
               )}
               type="button"
             >
@@ -171,7 +171,7 @@ function ShoppingCartBillPaymentGateway({
               onClick={() => onChange(zarinpal.id)}
               className={classNames(
                 "flex w-full flex-col items-center gap-2 text-nowrap rounded-lg border border-stone-50 bg-stone-50 p-4",
-                selected === zarinpal.id && "!border-pink-600",
+                selected === zarinpal.id && "!border-infinity-primary",
               )}
               type="button"
             >
@@ -195,7 +195,7 @@ function ShoppingCartBillPaymentGateway({
               onMouseLeave={() => setWalletHovered(false)}
               className={classNames(
                 "flex w-full flex-col items-center gap-2 text-nowrap rounded-lg border border-stone-50 bg-stone-50 p-4 transition-opacity duration-300",
-                selected === wallet.id && "!border-pink-600",
+                selected === wallet.id && "!border-infinity-primary",
                 wallet.disabled && !walletHovered && "cursor-not-allowed opacity-50",
                 wallet.disabled && walletHovered && "cursor-pointer opacity-100",
               )}
@@ -215,7 +215,7 @@ function ShoppingCartBillPaymentGateway({
                 <div className="flex w-full flex-col items-center gap-3 pt-3 text-center">
                   <div className="flex flex-col items-center gap-2">
                     <span className="text-xs text-neutral-600">موجودی:</span>
-                    <span className="text-xl font-bold text-pink-500">
+                    <span className="text-xl font-bold text-infinity-primary">
                       {Math.round(walletBalanceIrr / 10).toLocaleString()} تومان
                     </span>
                   </div>

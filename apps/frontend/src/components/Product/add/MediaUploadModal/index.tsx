@@ -69,7 +69,7 @@ export default function MediaUploadModal({ isOpen, onClose }: MediaUploadModalPr
       isOpen={isOpen}
       onClose={onClose}
       className="max-w-7xl !bg-slate-50"
-      closeIcon={<DeleteIcon className="text-pink-500" />}
+      closeIcon={<DeleteIcon className="text-infinity-primary" />}
       titleClassName="!justify-end"
     >
       <div className="grid h-full min-h-[600px] grid-cols-5 gap-3">

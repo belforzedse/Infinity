@@ -41,8 +41,8 @@ export default function QuickViewVariationSelector({
                   aria-pressed={active}
                   className={[
                     "relative h-10 w-10 rounded-full ring-1 transition",
-                    active ? "ring-pink-500" : "ring-black/10 hover:ring-pink-300",
-                    "focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500",
+                    active ? "ring-infinity-primary" : "ring-black/10 hover:ring-infinity-primary-lighter",
+                    "focus:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary",
                   ].join(" ")}
                   style={{ backgroundColor: color.colorCode }}
                 >
@@ -90,12 +90,12 @@ export default function QuickViewVariationSelector({
                   className={[
                     "rounded-2xl px-4 py-2 text-sm ring-1 transition",
                     active
-                      ? "bg-pink-50 text-pink-700 ring-pink-200"
-                      : "bg-white text-gray-700 ring-black/10 hover:bg-pink-50/50 hover:ring-pink-200",
+                      ? "bg-infinity-primary-lighter/20 text-infinity-primary-dark ring-infinity-primary-lighter/60"
+                      : "bg-white text-gray-700 ring-black/10 hover:bg-infinity-primary-lighter/50 hover:ring-infinity-primary-lighter/60",
                     disabled
                       ? "cursor-not-allowed opacity-50 hover:bg-white hover:ring-black/10"
                       : "",
-                    "focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500",
+                    "focus:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary",
                   ].join(" ")}
                 >
                   {size.title}

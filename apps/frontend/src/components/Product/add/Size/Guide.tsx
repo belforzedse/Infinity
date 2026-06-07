@@ -44,7 +44,7 @@ const SizeGuide: React.FC<SizeGuideProps> = ({ onNewTemplate }) => {
             />
 
             <div
-              className="absolute left-0 top-1 flex cursor-pointer items-center gap-1 text-pink-500"
+              className="absolute left-0 top-1 flex cursor-pointer items-center gap-1 text-infinity-primary"
               onClick={onNewTemplate}
             >
               <span className="text-sm">قالب جدید</span>

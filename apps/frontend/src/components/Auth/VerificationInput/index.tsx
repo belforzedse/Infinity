@@ -84,7 +84,7 @@ export default function VerificationInput({ length = 6, onChange }: Verification
           ref={(el) => {
             inputs.current[index] = el;
           }}
-          className="text-2xl aspect-square w-[18%] rounded-[10px] bg-slate-200 text-center transition-all hover:bg-slate-100 focus:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-pink-400"
+          className="text-2xl aspect-square w-[18%] rounded-[10px] bg-slate-200 text-center transition-all hover:bg-slate-100 focus:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-infinity-primary-light"
           style={{
             caretColor: "transparent",
             direction: "ltr",

@@ -153,7 +153,7 @@ export default function OrderDetailsDrawer({ order, isOpen, onClose }: OrderDeta
                           href={`https://anipo.ir/checkconsignment/?code=${order.ShippingBarcode}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="rounded-full border border-pink-200 px-3 py-1 text-xs text-pink-600 transition hover:bg-pink-50"
+                          className="rounded-full border border-infinity-primary-lighter/60 px-3 py-1 text-xs text-infinity-primary transition hover:bg-infinity-primary-lighter/20"
                         >
                           رهگیری مرسوله
                         </Link>

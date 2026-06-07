@@ -44,7 +44,7 @@ export default function FAQCategorySidebar({
               onClick={() => handleCategoryClick(category.id)}
               className={`w-full rounded-lg px-4 py-3 text-right transition-colors ${
                 isActive
-                  ? "bg-pink-500 text-white"
+                  ? "bg-infinity-primary text-white"
                   : "bg-slate-50 text-neutral-700 hover:bg-slate-100"
               }`}
             >

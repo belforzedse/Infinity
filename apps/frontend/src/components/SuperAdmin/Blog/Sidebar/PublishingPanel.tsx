@@ -48,7 +48,7 @@ export default function PublishingPanel({
             <select
               value={status}
               onChange={(e) => onStatusChange(e.target.value as "Draft" | "Published" | "Scheduled")}
-              className="w-full appearance-none rounded-xl border border-slate-100 bg-white px-4 py-3 pr-10 text-xs text-neutral-500 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
+              className="w-full appearance-none rounded-xl border border-slate-100 bg-white px-4 py-3 pr-10 text-xs text-neutral-500 focus:border-infinity-primary focus:outline-none focus:ring-1 focus:ring-infinity-primary"
               disabled={isLoading}
             >
               {statusOptions.map((option) => (
@@ -68,7 +68,7 @@ export default function PublishingPanel({
             <select
               value={visibility}
               onChange={(e) => onVisibilityChange?.(e.target.value as "public" | "private")}
-              className="w-full appearance-none rounded-xl border border-slate-100 bg-white px-4 py-3 pr-10 text-xs text-neutral-500 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
+              className="w-full appearance-none rounded-xl border border-slate-100 bg-white px-4 py-3 pr-10 text-xs text-neutral-500 focus:border-infinity-primary focus:outline-none focus:ring-1 focus:ring-infinity-primary"
               disabled={isLoading}
             >
               {visibilityOptions.map((option) => (
@@ -111,7 +111,7 @@ export default function PublishingPanel({
           type="button"
           onClick={onPublish}
           disabled={isLoading}
-          className="flex h-9 flex-1 items-center justify-center gap-2 rounded-md bg-pink-500 px-4 text-sm font-medium text-white transition-colors hover:bg-pink-600 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex h-9 flex-1 items-center justify-center gap-2 rounded-md bg-infinity-primary px-4 text-sm font-medium text-white transition-colors hover:bg-infinity-primary disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isLoading ? (
             <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />

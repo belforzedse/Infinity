@@ -129,7 +129,7 @@ function MainCategorySelector({ isEditMode = false }: MainCategorySelectorProps)
         >
           <div className="relative">
             <Combobox.Input
-              className="w-full rounded-lg border border-slate-100 px-3 py-3 text-sm text-right text-neutral-600 focus:border-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-500/20"
+              className="w-full rounded-lg border border-slate-100 px-3 py-3 text-sm text-right text-neutral-600 focus:border-infinity-primary focus:outline-none focus:ring-2 focus:ring-infinity-primary/20"
               onChange={(event) => {
                 setSearchQuery(event.target.value);
                 // Clear selection when user starts typing
@@ -185,7 +185,7 @@ function MainCategorySelector({ isEditMode = false }: MainCategorySelectorProps)
 
       <button
         onClick={() => setIsCategoryModalOpen(true)}
-        className="mb-3 flex w-full items-center justify-center gap-1 rounded-xl bg-pink-500 py-2 text-white transition-colors"
+        className="mb-3 flex w-full items-center justify-center gap-1 rounded-xl bg-infinity-primary py-2 text-white transition-colors"
       >
         <span className="text-sm">افزودن دسته بندی جدید</span>
         <PlusIcon />

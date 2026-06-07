@@ -123,7 +123,7 @@ export default function VerifyForgotPasswordPage() {
     <Suspense
       fallback={
         <div className="mx-auto w-full p-8 text-center">
-          <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-t-2 border-pink-500"></div>
+          <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-2 border-slate-200 border-t-infinity-primary"></div>
           <p className="text-lg">در حال بارگذاری...</p>
         </div>
       }

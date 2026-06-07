@@ -255,7 +255,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
               type="button"
               onClick={() => setViewMode("visual")}
               className={`rounded-md px-3 py-1 ${
-                viewMode === "visual" ? "bg-pink-100 text-pink-600" : "text-neutral-500"
+                viewMode === "visual" ? "bg-infinity-primary-lighter/30 text-infinity-primary" : "text-neutral-500"
               }`}
             >
               دیداری
@@ -264,7 +264,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
               type="button"
               onClick={() => setViewMode("code")}
               className={`rounded-md px-3 py-1 ${
-                viewMode === "code" ? "bg-pink-100 text-pink-600" : "text-neutral-500"
+                viewMode === "code" ? "bg-infinity-primary-lighter/30 text-infinity-primary" : "text-neutral-500"
               }`}
             >
               کد
@@ -287,7 +287,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
             value={codeValue}
             onChange={(e) => handleCodeChange(e.target.value)}
             dir="ltr"
-            className="min-h-[150px] w-full rounded-md border border-neutral-200 bg-neutral-50 p-3 font-mono text-xs text-neutral-700 focus:border-pink-500 focus:outline-none focus:ring-1 focus:ring-pink-500"
+            className="min-h-[150px] w-full rounded-md border border-neutral-200 bg-neutral-50 p-3 font-mono text-xs text-neutral-700 focus:border-infinity-primary focus:outline-none focus:ring-1 focus:ring-infinity-primary"
             disabled={readOnly}
             placeholder="<p>...</p>"
           />

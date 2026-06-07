@@ -22,7 +22,7 @@ export default function Gallery({ images, onSelect, selectedImages }: GalleryPro
             "group relative aspect-square cursor-pointer overflow-hidden rounded-lg",
             "border-2",
             selectedImages.includes(image.id)
-              ? "border-pink-500"
+              ? "border-infinity-primary"
               : "border-transparent hover:border-gray-300",
           )}
           onClick={() => onSelect(image.id)}
