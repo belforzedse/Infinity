@@ -11,6 +11,15 @@ export type HeroTracking = {
   custom: Record<string, string>;
 };
 
+export type HeroTextStyle = {
+  color: string;
+  fontFamily: string;
+  fontSize: string;
+  fontWeight: string;
+  lineHeight: string;
+  letterSpacing: string;
+};
+
 export type HeroSlideSchedule = {
   timezone: "Asia/Tehran";
   startAtUtc?: string;
