@@ -86,10 +86,10 @@ function ProductSectionsFallback() {
 
 function CategoryCarouselFallback() {
   return (
-    <section>
-      <div className="scrollbar-hide grid auto-cols-[124px] grid-flow-col gap-2 overflow-hidden pb-4 lg:auto-cols-[calc((100%_-_60px)_/_6)] lg:gap-3">
-        {[...Array(6)].map((_, index) => (
-          <div key={index} className="flex flex-col items-center gap-2">
+    <section className="relative left-1/2 right-1/2 -mx-[50vw] w-screen overflow-hidden">
+      <div className="flex gap-3 py-3">
+        {[...Array(8)].map((_, index) => (
+          <div key={index} className="flex w-[116px] shrink-0 flex-col items-center gap-2 lg:w-[180px]">
             <SkeletonBlock className="h-[116px] w-[116px] rounded-full lg:aspect-[227/310] lg:h-auto lg:w-full lg:rounded-3xl" />
             <SkeletonText tone="light" className="h-4 w-16" />
           </div>
@@ -173,7 +173,7 @@ async function CategorySection() {
   if (parentCategories.length === 0) return null;
 
   return (
-    <section>
+    <section className="relative left-1/2 right-1/2 -mx-[50vw] w-screen overflow-hidden">
       <CategoryCarousel categories={parentCategories} />
     </section>
   );

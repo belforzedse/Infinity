@@ -105,12 +105,12 @@ function DesktopCategoryPortrait({
           sizes="(min-width: 1280px) calc(100vw/6), (min-width: 900px) calc(100vw/5), (min-width: 768px) calc(100vw/4), calc(100vw/3)"
         />
         <div
-          className="absolute inset-x-0 bottom-0 flex items-end justify-center px-4 pb-4 pt-20 backdrop-blur-[3px]"
+          className="absolute inset-x-0 bottom-0 flex items-end justify-center px-4 pb-4 pt-10 backdrop-blur-[3px]"
           style={{
             background:
-              "linear-gradient(to top, rgba(83, 52, 32, 0.92) 0%, rgba(83, 52, 32, 0.5) 45%, rgba(83, 52, 32, 0) 100%)",
-            maskImage: "linear-gradient(to top, black 55%, transparent 100%)",
-            WebkitMaskImage: "linear-gradient(to top, black 55%, transparent 100%)",
+              "linear-gradient(to top, rgba(83, 52, 32, 0.92) 0%, rgba(83, 52, 32, 0.45) 40%, rgba(83, 52, 32, 0) 100%)",
+            maskImage: "linear-gradient(to top, black 45%, transparent 82%)",
+            WebkitMaskImage: "linear-gradient(to top, black 45%, transparent 82%)",
           }}
         >
           <span className="w-full text-center text-xl font-normal text-white">{label}</span>
