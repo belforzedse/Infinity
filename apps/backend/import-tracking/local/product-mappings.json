@@ -10,5 +10,29 @@
     "createdAt": "2025-06-30T09:00:13.000Z",
     "updatedAt": "2026-05-12T19:05:41.000Z",
     "rating": "0.00"
+  },
+  "637504": {
+    "strapiId": 7,
+    "importedAt": "2026-06-08T07:48:48.532Z",
+    "name": "شال پلیسه s00157",
+    "slug": "%d8%b4%d8%a7%d9%84-%d9%be%d9%84%db%8c%d8%b3%d9%87-s00157",
+    "importedSlug": "شال-پلیسه-s00157",
+    "type": "variable",
+    "status": "publish",
+    "createdAt": "2024-04-24T20:54:20.000Z",
+    "updatedAt": "2026-05-28T20:45:18.000Z",
+    "rating": "0.00"
+  },
+  "637612": {
+    "strapiId": 6,
+    "importedAt": "2026-06-08T07:49:38.420Z",
+    "name": "شال پلیسه ماهی S00159",
+    "slug": "fish-pleated-shawl-s00159",
+    "importedSlug": "fish-pleated-shawl-s00159",
+    "type": "variable",
+    "status": "publish",
+    "createdAt": "2024-04-25T06:53:41.000Z",
+    "updatedAt": "2026-04-01T23:57:11.000Z",
+    "rating": "0.00"
   }
 }
