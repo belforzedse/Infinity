@@ -27,16 +27,14 @@ export default function HeroPagination({
   arrowClassName,
 }: HeroPaginationProps) {
   return (
-    <div
-      className={clsx("glass-pill flex items-center gap-2 px-2 py-1", className)}
-    >
+    <div className={clsx("glass-pill flex items-center gap-1.5 px-1.5 py-0.5", className)}>
       {showArrows && (
         <button
           type="button"
           aria-label="Next"
           onClick={onNext}
           className={clsx(
-            "mx-1 mt-1 rounded-full p-1 text-[28px] text-infinity-primary transition hover:bg-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary-lighter/50",
+            "mx-0.5 mt-0.5 rounded-full p-0.5 text-[24px] leading-none text-infinity-primary transition hover:bg-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary-lighter/50",
             arrowClassName,
           )}
         >
@@ -54,7 +52,7 @@ export default function HeroPagination({
             className={clsx(
               "h-1.5 rounded-full transition-all",
               i === index
-                ? "w-12 bg-infinity-primary/70 backdrop-blur-[0.2px] ring-[0.5px] ring-white/35"
+                ? "w-12 bg-infinity-primary/70 ring-[0.5px] ring-white/35 backdrop-blur-[0.2px]"
                 : "w-4 bg-infinity-primary/20",
               i === index ? dotActiveClassName : dotClassName,
             )}
@@ -68,7 +66,7 @@ export default function HeroPagination({
           aria-label="Previous"
           onClick={onPrev}
           className={clsx(
-            "mx-1 mt-1 rounded-full p-1 text-[28px] text-infinity-primary transition hover:bg-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary-lighter/50",
+            "mx-0.5 mt-0.5 rounded-full p-0.5 text-[24px] leading-none text-infinity-primary transition hover:bg-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary-lighter/50",
             arrowClassName,
           )}
         >
