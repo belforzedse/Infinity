@@ -98,15 +98,12 @@ export async function POST(request: NextRequest) {
     }
 
     if (type === "hero-slider") {
-      // Hero slider is shown on the home page; revalidate root
-      revalidatePath("/");
-      revalidateTag("site-settings", "max");
+      revalidateTag("hero-slider", "max");
 
       return NextResponse.json({
         revalidated: true,
         now: Date.now(),
-        paths: ["/"],
-        tags: ["site-settings"],
+        tags: ["hero-slider"],
       });
     }
 

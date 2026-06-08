@@ -17,7 +17,10 @@ import PageContainer from "@/components/layout/PageContainer";
 import { OrganizationSchema } from "@/components/SEO/OrganizationSchema";
 import { SITE_NAME, SITE_URL } from "@/config/site";
 import type { HomePromoBanner } from "@/components/Home/PromoBanners";
-import { getPublicSuperAdminSettings } from "@/services/super-admin/settings/public";
+import {
+  getPublicSuperAdminSettings,
+  getPublicHeroSlider,
+} from "@/services/super-admin/settings/public";
 import HomeProductSections from "./HomeProductSections";
 import CategoryCarousel from "@/components/Categories/CategoryCarousel";
 import SiteGifBanner from "@/components/Home/SiteGifBanner";
@@ -191,7 +194,10 @@ async function BlogSection() {
 }
 
 export default async function Home() {
-  const homepageSettings = await getPublicSuperAdminSettings();
+  const [homepageSettings, heroSlider] = await Promise.all([
+    getPublicSuperAdminSettings(),
+    getPublicHeroSlider(),
+  ]);
 
   const promoBanners = [
     {
@@ -235,7 +241,7 @@ export default async function Home() {
       mobileHeight: homepageSettings.homeBannerTwoMobileHeight,
     },
   ];
-  const heroFromCms = mapCmsHeroSliderToBannerSlides(homepageSettings.homeHeroSliderPublished);
+  const heroFromCms = mapCmsHeroSliderToBannerSlides(heroSlider.published);
 
   return (
     <>

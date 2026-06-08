@@ -15,6 +15,7 @@ import {
   publishHeroSliderDraft,
   updateHeroSliderDraft,
 } from "@/services/super-admin/settings/hero-slider";
+import { revalidateHeroSliderCache } from "@/actions/revalidate-hero-slider";
 
 function normalizeSlideOrder(slides: HeroSlideConfig[]): HeroSlideConfig[] {
   return slides.map((slide, index) => ({
@@ -178,6 +179,7 @@ export function useHeroSliderEditor() {
       const response = await publishHeroSliderDraft();
       setPublished(response.published);
       setMeta(response.meta);
+      await revalidateHeroSliderCache();
       toast.success("اسلایدر هیرو منتشر شد");
     } catch (error) {
       console.error(error);

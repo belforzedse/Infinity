@@ -13,7 +13,7 @@ import {
   getGifPromoPreviewProducts,
   getProductSummariesByIds,
 } from "@/services/super-admin/product/get";
-import { fetchFeaturedCategoryOptions } from "@/app/(super-admin)/super-admin/customization/featured-category/config";
+import { fetchFeaturedCategoryOptions } from "@/app/(super-admin)/super-admin/settings/customization/featured-category/config";
 import type {
   HomeGifPromoAssignment,
   SuperAdminSettings,
