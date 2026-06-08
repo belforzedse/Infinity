@@ -193,13 +193,13 @@ export function SocialPostCard({
   const isLightActionTone = actionTone === "light";
   const actionTextClass = clsx(
     ACTION_TEXT_CLASS,
-    isLightActionTone && "text-white/55",
+    isLightActionTone && "text-white/85",
   );
   const secondaryIconColor = isLightActionTone
-    ? "rgba(255,255,255,0.55)"
+    ? "rgba(255,255,255,0.85)"
     : ICON_SECONDARY;
   const secondaryIconHoverClass = isLightActionTone
-    ? "hover:text-white/85"
+    ? "hover:text-white"
     : "hover:text-zinc-700";
 
   const [heartBurstKey, setHeartBurstKey] = useState(0);
