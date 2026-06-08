@@ -496,6 +496,88 @@ textarea:focus-visible {
       box-shadow: 0 12px 30px rgba(15, 23, 42, 0.075);
     }
   }
+
+  .heart-burst-target {
+    position: relative;
+  }
+  .heart-burst-target::before {
+    content: "";
+    position: absolute;
+    inset: -7px;
+    border-radius: 9999px;
+    border: 1px solid rgba(213, 41, 83, 0.45);
+    background: radial-gradient(circle, rgba(213, 41, 83, 0.2) 0%, rgba(213, 41, 83, 0) 62%);
+    opacity: 0;
+    transform: scale(0.72);
+    pointer-events: none;
+  }
+  .heart-burst-target.animate-heart-burst::before {
+    animation: infinity-heart-ring 520ms var(--ease-velvet, cubic-bezier(0.23, 1, 0.32, 1)) both;
+  }
+  .animate-heart-burst {
+    animation: infinity-heart-burst 520ms var(--ease-velvet, cubic-bezier(0.23, 1, 0.32, 1)) both;
+  }
+  .animate-shake {
+    animation: infinity-shake 360ms var(--ease-crystal, cubic-bezier(0.4, 0, 0.2, 1)) both;
+  }
+}
+
+@keyframes infinity-heart-burst {
+  0% {
+    transform: scale(1);
+  }
+  15% {
+    transform: scale(1.35);
+  }
+  30% {
+    transform: scale(0.92);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes infinity-heart-ring {
+  0% {
+    opacity: 0;
+    transform: scale(0.72);
+  }
+  24% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.8);
+  }
+}
+
+@keyframes infinity-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  15% {
+    transform: translateX(-5px);
+  }
+  30% {
+    transform: translateX(5px);
+  }
+  45% {
+    transform: translateX(-4px);
+  }
+  60% {
+    transform: translateX(4px);
+  }
+  75% {
+    transform: translateX(-2px);
+  }
+  90% {
+    transform: translateX(2px);
+  }
 }
 
 

@@ -37,7 +37,6 @@ interface RawProductCategory {
   attributes?: {
     Title?: string;
     Slug?: string;
-    Color?: string | null;
     isMainCategory?: boolean | null;
     featured?: boolean | null;
     Image?: CategoryImageField | null;
@@ -58,7 +57,6 @@ export interface ProductCategorySummary {
   id: number;
   name: string;
   slug: string;
-  color: string | null;
   imageUrl: string | null;
   imageAlt: string;
   imageWidth?: number | null;
@@ -102,8 +100,8 @@ const resolveCategoryImage = (image?: CategoryImageField | null) => {
 
   const formats = attrs.formats || undefined;
   const url =
-    formats?.medium?.url ||
     formats?.large?.url ||
+    formats?.medium?.url ||
     formats?.small?.url ||
     formats?.thumbnail?.url ||
     attrs.url ||
@@ -115,14 +113,6 @@ const resolveCategoryImage = (image?: CategoryImageField | null) => {
     width: attrs.width ?? null,
     height: attrs.height ?? null,
   };
-};
-
-const normalizeHexColor = (value?: string | null): string | null => {
-  const trimmed = value?.trim();
-  if (!trimmed) return null;
-  if (/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(trimmed)) return trimmed;
-  if (/^([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(trimmed)) return `#${trimmed}`;
-  return trimmed;
 };
 
 function dedupeCategoriesById(categories: ProductCategorySummary[]): ProductCategorySummary[] {
@@ -141,9 +131,8 @@ export async function getProductCategories(
   params.set("sort", options.sort || "Title:asc");
   params.append("fields[0]", "Title");
   params.append("fields[1]", "Slug");
-  params.append("fields[2]", "Color");
-  params.append("fields[3]", "isMainCategory");
-  params.append("fields[4]", "featured");
+  params.append("fields[2]", "isMainCategory");
+  params.append("fields[3]", "featured");
   params.append("populate[0]", "Image");
   params.append("populate[1]", "parent");
 
@@ -223,7 +212,6 @@ export async function getProductCategories(
         const attrs = item.attributes || item;
         const name = attrs.Title || attrs.Slug || String(item.id);
         const slug = attrs.Slug || String(item.id);
-        const color = normalizeHexColor(attrs.Color);
         const parentId = attrs.parent?.data?.id ?? null;
         const isMainCategory = Boolean(attrs.isMainCategory);
         const image = resolveCategoryImage(attrs.Image);
@@ -234,7 +222,6 @@ export async function getProductCategories(
           id: item.id,
           name,
           slug,
-          color,
           imageUrl: image.url,
           imageAlt: image.alt || name,
           imageWidth: image.width,

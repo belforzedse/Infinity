@@ -1,38 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
-import Image from "next/image";
 import Reveal from "@/components/Reveal";
 import ChevronLeftIcon from "@/components/PDP/Icons/ChevronLeftIcon";
 import ChevronRightIcon from "@/components/PDP/Icons/ChevronRightIcon";
+import CategoryCard from "@/components/Categories/CategoryCard";
 import type { ProductCategorySummary } from "@/services/product/categories";
-import { CATEGORY_IMAGE_PLACEHOLDER } from "@/constants/placeholders";
-import { getCategoryPlpHref } from "@/utils/plpRoutes";
 
 interface CategoryCarouselProps {
   categories: ProductCategorySummary[];
 }
-
-const normalizeHexColor = (value?: string | null) => {
-  const trimmed = value?.trim();
-  if (!trimmed) return null;
-  if (/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(trimmed)) return trimmed;
-  if (/^([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(trimmed)) return `#${trimmed}`;
-  return trimmed;
-};
-
-const getCategoryColor = (color?: string | null) => {
-  const normalized = normalizeHexColor(color);
-  return normalized || "#f8fafc";
-};
-const isLocalImageUrl = (src: string) =>
-  src.startsWith("http://localhost") ||
-  src.startsWith("https://localhost") ||
-  src.startsWith("http://127.0.0.1") ||
-  src.startsWith("https://127.0.0.1") ||
-  src.startsWith("http://[::1]") ||
-  src.startsWith("https://[::1]");
 
 type RtlScrollType = "default" | "negative" | "reverse";
 
@@ -206,75 +183,18 @@ export default function CategoryCarousel({ categories }: CategoryCarouselProps) 
         ref={scrollRef}
         className="scrollbar-hide grid snap-x snap-mandatory auto-cols-[calc(100%/3)] grid-flow-col items-stretch gap-4 overflow-x-auto scroll-smooth pb-4 md:auto-cols-[calc(100%/4)] md:gap-6 min-[900px]:auto-cols-[calc(100%/5)] xl:auto-cols-[calc(100%/6)] xl:gap-0"
       >
-        {categories.map((category, index) => {
-          const imageSrc = category.imageUrl || CATEGORY_IMAGE_PLACEHOLDER;
-          const label = category.name || category.slug;
-          const bgColor = getCategoryColor(category.color);
-          const useUnoptimizedImage = isLocalImageUrl(imageSrc);
-
-          return (
-            <Link
-              key={category.id}
-              href={getCategoryPlpHref(category.slug)}
-              className="group flex w-full flex-shrink-0 snap-start flex-col items-center text-center"
-              aria-label={label}
-              data-carousel-item
-              style={{ scrollSnapStop: "always" }}
-            >
-              <Reveal
-                delay={index * 50}
-                className="hidden w-full lg:block"
-                variant="fade-up"
-                duration={300}
-              >
-                <div className="relative h-[340px] w-full overflow-hidden border border-slate-100 transition-transform duration-300 group-hover:-translate-y-0.5">
-                  <div
-                    className="flex h-full w-full items-center justify-center"
-                    style={{ backgroundColor: bgColor }}
-                  >
-                    <Image
-                      src={imageSrc}
-                      alt={category.imageAlt || label}
-                      width={category.imageWidth || 220}
-                      height={category.imageHeight || 260}
-                      unoptimized={useUnoptimizedImage}
-                      className="max-h-[230px] w-auto object-contain drop-shadow-md"
-                      loading="lazy"
-                      sizes="(min-width: 1280px) calc(100vw/6), (min-width: 900px) calc(100vw/5), (min-width: 768px) calc(100vw/4), calc(100vw/3)"
-                    />
-                  </div>
-                  <span className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-xl bg-white px-3 py-1.5 text-base font-medium shadow-[0_10px_20px_rgba(0,0,0,0.15)]">
-                    {label}
-                  </span>
-                </div>
-              </Reveal>
-
-              <Reveal
-                delay={index * 30}
-                className="flex w-full flex-col items-center lg:hidden"
-                variant="fade-up"
-                duration={400}
-              >
-                <div
-                  className="flex h-24 w-24 items-center justify-center rounded-full p-4 transition-transform group-hover:scale-105 md:h-28 md:w-28"
-                  style={{ backgroundColor: bgColor }}
-                >
-                  <Image
-                    src={imageSrc}
-                    alt={category.imageAlt || label}
-                    width={80}
-                    height={80}
-                    unoptimized={useUnoptimizedImage}
-                    className="h-16 w-auto md:h-20"
-                    loading="lazy"
-                    sizes="80px"
-                  />
-                </div>
-                <span className="mt-2 text-center text-sm font-medium md:text-base">{label}</span>
-              </Reveal>
-            </Link>
-          );
-        })}
+        {categories.map((category, index) => (
+          <div
+            key={category.id}
+            className="w-full flex-shrink-0 snap-start"
+            data-carousel-item
+            style={{ scrollSnapStop: "always" }}
+          >
+            <Reveal delay={index * 50} variant="fade-up" duration={300}>
+              <CategoryCard category={category} size="carousel" />
+            </Reveal>
+          </div>
+        ))}
       </div>
 
       {hasOverflow && canScrollLeft && (

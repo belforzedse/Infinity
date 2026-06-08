@@ -23,7 +23,6 @@ export default function AddCategoryPage() {
   useEditorRedirect();
 
   const [categoryImage, setCategoryImage] = useState<CategoryImageValue | undefined>();
-  const [categoryColor, setCategoryColor] = useState("");
 
   const handleSubmit = async (formData: ProductCategoryForm) => {
     const title = formData.Title?.trim();
@@ -37,7 +36,6 @@ export default function AddCategoryPage() {
     const payload: CategoryData = {
       Title: title,
       Slug: slug,
-      Color: categoryColor.trim() || null,
       Image: categoryImage?.id ?? null,
     };
 
@@ -63,12 +61,7 @@ export default function AddCategoryPage() {
       data={createEmptyCategoryFormData()}
       onSubmit={handleSubmit}
       customSidebar={
-        <CategoryAppearancePanel
-          image={categoryImage}
-          onImageChange={setCategoryImage}
-          color={categoryColor}
-          onColorChange={setCategoryColor}
-        />
+        <CategoryAppearancePanel image={categoryImage} onImageChange={setCategoryImage} />
       }
     />
   );

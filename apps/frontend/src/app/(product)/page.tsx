@@ -20,6 +20,9 @@ import type { HomePromoBanner } from "@/components/Home/PromoBanners";
 import { getPublicSuperAdminSettings } from "@/services/super-admin/settings/public";
 import HomeProductSections from "./HomeProductSections";
 import SiteGifBanner from "@/components/Home/SiteGifBanner";
+import InfinitygramSection, {
+  InfinitygramSectionSkeleton,
+} from "@/components/Home/InfinitygramSection";
 import { SkeletonBlock, SkeletonMedia, SkeletonText } from "@repo/ui/skeleton";
 import type { SuperAdminSettings } from "@/types/super-admin/settings";
 
@@ -255,6 +258,10 @@ export default async function Home() {
           homepageSettings={homepageSettings}
           promoBanners={promoBanners}
         />
+      </Suspense>
+
+      <Suspense fallback={<InfinitygramSectionSkeleton />}>
+        <InfinitygramSection />
       </Suspense>
 
       <Suspense fallback={<BlogSectionFallback />}>

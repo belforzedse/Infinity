@@ -28,6 +28,7 @@
     "@repo/api": "workspace:*",
     "@repo/brand": "workspace:*",
     "@repo/fonts": "workspace:*",
+    "@repo/social-posts": "workspace:*",
     "@repo/story-rail": "workspace:*",
     "@repo/ui": "workspace:*",
     "@dnd-kit/core": "6.3.1",

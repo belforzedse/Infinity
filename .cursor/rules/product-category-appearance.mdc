@@ -1,0 +1,45 @@
+---
+description: Product category single-image appearance, shared CategoryCard, and deprecated Color field. Use when changing category cards, carousel, or super-admin category editor.
+globs:
+alwaysApply: false
+---
+
+# Product Category Appearance
+
+## Data model
+
+Strapi `product-category` fields used for storefront cards:
+
+| Field | Status | Usage |
+|-------|--------|-------|
+| `Image` | Active | Single full-bleed category photo |
+| `Color` | **Deprecated** | Kept in schema/DB for rollback; not fetched or edited in UI |
+
+Child categories have `Image` stripped in `lifecycles.ts` (parent-only appearance).
+
+## Shared component
+
+Use [`CategoryCard`](apps/frontend/src/components/Categories/CategoryCard.tsx) for all storefront category tiles:
+
+- **Proportion:** `aspect-[227/310]`, `rounded-3xl`
+- **Image:** `next/image` `fill` + `object-cover`
+- **Label:** bottom gradient overlay + white centered text (Figma node `21:1985`)
+- **Sizes:** `carousel` (default) | `compact` (bottom-nav sheet)
+- **Responsive:** Mobile (`<lg`) — same image clipped in a circle (`rounded-full`, `object-cover`), label below. Desktop (`lg+`) — full-bleed portrait card with gradient overlay label.
+
+[`CategoryCarousel`](apps/frontend/src/components/Categories/CategoryCarousel.tsx) wraps cards in RTL-aware horizontal scroll; do not duplicate card styling elsewhere.
+
+## API / types
+
+- Storefront: `getProductCategories()` → `ProductCategorySummary` (no `color` field)
+- Image format preference: `large` → `medium` → `small` → `thumbnail` → raw `url`
+- Super-admin create/update: send `Image` only (omit `Color`)
+
+## Super-admin
+
+- [`CategoryAppearancePanel`](apps/frontend/src/app/(super-admin)/super-admin/products/categories/CategoryAppearancePanel.tsx): image upload/preview only
+- List preview cards in [`table.tsx`](apps/frontend/src/app/(super-admin)/super-admin/products/categories/table.tsx) use `object-cover` + gradient label
+
+## Migration
+
+Existing categories reuse their current `Image` media. No automated migration. Admins may re-upload cover-friendly photos where old assets were small cutouts for `object-contain`.

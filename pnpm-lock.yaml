@@ -171,6 +171,9 @@ importers:
       '@repo/fonts':
         specifier: workspace:*
         version: link:../../packages/fonts
+      '@repo/social-posts':
+        specifier: workspace:*
+        version: link:../../packages/social-posts
       '@repo/story-rail':
         specifier: workspace:*
         version: link:../../packages/story-rail
@@ -484,6 +487,9 @@ importers:
       '@repo/fonts':
         specifier: workspace:*
         version: link:../../packages/fonts
+      '@repo/social-posts':
+        specifier: workspace:*
+        version: link:../../packages/social-posts
       '@repo/story-rail':
         specifier: workspace:*
         version: link:../../packages/story-rail
@@ -579,6 +585,9 @@ importers:
         specifier: '>=18'
         version: 19.2.5(react@19.2.5)
     devDependencies:
+      '@types/node':
+        specifier: 20.17.30
+        version: 20.17.30
       '@types/react':
         specifier: 19.2.14
         version: 19.2.14
@@ -597,6 +606,37 @@ importers:
       next:
         specifier: 16.2.4
         version: 16.2.4(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(babel-plugin-macros@3.1.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+      typescript:
+        specifier: 5.8.3
+        version: 5.8.3
+
+  packages/social-posts:
+    dependencies:
+      '@repo/api':
+        specifier: workspace:*
+        version: link:../api
+      clsx:
+        specifier: 2.1.1
+        version: 2.1.1
+      lucide-react:
+        specifier: 0.542.0
+        version: 0.542.0(react@19.2.5)
+      next:
+        specifier: '>=16'
+        version: 16.2.4(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(babel-plugin-macros@3.1.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+      react:
+        specifier: '>=19'
+        version: 19.2.5
+      react-dom:
+        specifier: '>=19'
+        version: 19.2.5(react@19.2.5)
+    devDependencies:
+      '@types/react':
+        specifier: 19.2.14
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: 19.2.3
+        version: 19.2.3(@types/react@19.2.14)
       typescript:
         specifier: 5.8.3
         version: 5.8.3

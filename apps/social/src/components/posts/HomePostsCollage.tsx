@@ -160,6 +160,7 @@ export function HomePostsCollage({
                   widthMode="fluid"
                   imageSrc={post.imageSrc}
                   imageAlt={post.imageAlt}
+                  previewMedia={post.previewMedia}
                   likesCount={likeCounts[post.id] ?? post.likesCount}
                   commentsCount={post.commentsCount}
                   isLiked={Boolean(liked[post.id])}
@@ -192,6 +193,7 @@ export function HomePostsCollage({
                     className="w-full"
                     imageSrc={post.imageSrc}
                     imageAlt={post.imageAlt}
+                    previewMedia={post.previewMedia}
                     likesCount={likeCounts[post.id] ?? post.likesCount}
                     commentsCount={post.commentsCount}
                     isLiked={Boolean(liked[post.id])}
@@ -218,6 +220,7 @@ export function HomePostsCollage({
                   className="w-full"
                   imageSrc={post.imageSrc}
                   imageAlt={post.imageAlt}
+                  previewMedia={post.previewMedia}
                   likesCount={likeCounts[post.id] ?? post.likesCount}
                   commentsCount={post.commentsCount}
                   isLiked={Boolean(liked[post.id])}

@@ -8,7 +8,6 @@ export interface CategoryDetail {
     Title: string;
     Slug: string;
     Parent?: string | null;
-    Color?: string | null;
     Image?: {
       data?: {
         id: number;

@@ -2,8 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
+import CategoryCard from "@/components/Categories/CategoryCard";
 import HomeIcon from "./Icons/HomeIcon";
 import CategoryIcon from "./Icons/CategoryIcon";
 import BasketIcon from "./Icons/BasketIcon";
@@ -12,8 +12,6 @@ import { useCart } from "@/contexts/CartContext";
 import { hapticButton } from "@/utils/haptics";
 import { ALLOWED_HOME_NAV_CATEGORY_NAME_SUBSTRINGS } from "@/constants/categories";
 import { useProductCategories } from "@/hooks/useProductCategories";
-import { CATEGORY_IMAGE_PLACEHOLDER } from "@/constants/placeholders";
-import { getCategoryPlpHref } from "@/utils/plpRoutes";
 
 const INFINITY_MARK_SRC = "/Infinity.svg";
 
@@ -137,7 +135,7 @@ const PLPBottomNavigation = () => {
         <div className="pointer-events-auto mx-5 mb-3 pb-[env(safe-area-inset-bottom)]">
           <nav
             aria-label="ناوبری اصلی"
-            className="flex flex-col items-start gap-[10px] rounded-[20px] bg-white pt-[10px] px-[30px] pb-[5px] shadow-[0_4px_19px_rgba(57,57,57,0.05)]"
+            className="flex flex-col items-start gap-[10px] rounded-[20px] bg-white px-[30px] pb-[5px] pt-[10px] shadow-[0_4px_19px_rgba(57,57,57,0.05)]"
             dir="ltr"
           >
             <div className="flex h-16 w-full flex-row items-center justify-between gap-[33px]">
@@ -245,35 +243,15 @@ const PLPBottomNavigation = () => {
                 </div>
               )}
               {!isLoadingCategories &&
-                categories.map((category) => {
-                  const imageSrc = category.imageUrl || CATEGORY_IMAGE_PLACEHOLDER;
-                  const label = category.name || category.slug;
-                  const bgColor = category.color?.trim() || "#f8fafc";
-
-                  return (
-                    <Link
-                      key={category.id}
-                      href={getCategoryPlpHref(category.slug)}
-                      onClick={closeCategories}
-                      className="pressable flex flex-col items-center gap-2"
-                    >
-                      <div
-                        className="relative h-20 w-20 overflow-hidden rounded-full"
-                        style={{ backgroundColor: bgColor }}
-                      >
-                        <Image
-                          src={imageSrc}
-                          alt={category.imageAlt || label}
-                          fill
-                          className="object-contain p-4"
-                          sizes="80px"
-                          loading="lazy"
-                        />
-                      </div>
-                      <span className="text-xs">{label}</span>
-                    </Link>
-                  );
-                })}
+                categories.map((category) => (
+                  <CategoryCard
+                    key={category.id}
+                    category={category}
+                    size="compact"
+                    onClick={closeCategories}
+                    className="pressable"
+                  />
+                ))}
             </div>
           </div>
         </div>

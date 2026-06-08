@@ -6,7 +6,6 @@ export interface CategoryData {
   Title: string;
   Slug: string;
   Parent?: string;
-  Color?: string | null;
   Image?: number | null;
 }
 

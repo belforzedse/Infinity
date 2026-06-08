@@ -53,13 +53,21 @@ function buildDemoPosts(): HomeFeedPost[] {
       const seed = variant === "xl" ? `ig-xl-${ix}` : `ig-sm-${ix}`;
       const alt = variant === "xl" ? "پست نمونه — ایکس‌لارج" : "پست نمونه — اسمال";
       const { widthPx, imageHeightPx } = POST_CARD_LAYOUTS[variant];
+      const imageSrc = buildPicsumSrc(seed, widthPx, imageHeightPx);
+      const imageAlt = `${alt} (${ix})`;
       out.push({
         id: `demo-${c}-r${slot.rowStart}-c${slot.colStart}-${ix}`,
         slug: `demo-post-${ix}`,
         title: variant === "xl" ? "اصالت در عین سادگی" : "استایل روزمره اینفینیتی",
         desktopVariant: variant,
-        imageSrc: buildPicsumSrc(seed, widthPx, imageHeightPx),
-        imageAlt: `${alt} (${ix})`,
+        imageSrc,
+        imageAlt,
+        previewMedia: {
+          id: `demo-${ix}-cover`,
+          url: imageSrc,
+          alternativeText: imageAlt,
+          mime: "image/jpeg",
+        },
         media: [
           {
             id: `demo-${ix}-1`,

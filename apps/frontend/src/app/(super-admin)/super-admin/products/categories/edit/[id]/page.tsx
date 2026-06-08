@@ -36,7 +36,6 @@ export default function EditCategoryPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [categoryImage, setCategoryImage] = useState<CategoryImageValue | undefined>();
-  const [categoryColor, setCategoryColor] = useState("");
 
   useEffect(() => {
     if (!categoryId) return;
@@ -108,6 +107,7 @@ export default function EditCategoryPage() {
         const imageData = payload.attributes?.Image?.data;
         const imageAttributes = imageData?.attributes;
         const imageUrl =
+          imageAttributes?.formats?.large?.url ||
           imageAttributes?.formats?.medium?.url ||
           imageAttributes?.formats?.small?.url ||
           imageAttributes?.formats?.thumbnail?.url ||
@@ -115,7 +115,6 @@ export default function EditCategoryPage() {
         setCategoryImage(
           imageUrl && imageData?.id ? { id: imageData.id, url: imageUrl } : undefined,
         );
-        setCategoryColor(payload.attributes?.Color ?? "");
       } catch (error: any) {
         if (!isMounted) return;
 
@@ -160,7 +159,6 @@ export default function EditCategoryPage() {
     const payload: CategoryData = {
       Title: title,
       Slug: slug,
-      Color: categoryColor.trim() || null,
       Image: categoryImage?.id ?? null,
     };
 
@@ -209,12 +207,7 @@ export default function EditCategoryPage() {
       data={initialData}
       onSubmit={handleSubmit}
       customSidebar={
-        <CategoryAppearancePanel
-          image={categoryImage}
-          onImageChange={setCategoryImage}
-          color={categoryColor}
-          onColorChange={setCategoryColor}
-        />
+        <CategoryAppearancePanel image={categoryImage} onImageChange={setCategoryImage} />
       }
     />
   );

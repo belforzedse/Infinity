@@ -1,14 +1,10 @@
 "use client";
 
-import React from "react";
-import Image from "next/image";
-import Link from "next/link";
+import React, { Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment } from "react";
 import DeleteIcon from "@/components/Kits/Icons/DeleteIcon";
-import { CATEGORY_IMAGE_PLACEHOLDER } from "@/constants/placeholders";
+import CategoryCard from "@/components/Categories/CategoryCard";
 import { useProductCategories } from "@/hooks/useProductCategories";
-import { getCategoryPlpHref } from "@/utils/plpRoutes";
 
 interface CategoriesModalProps {
   isOpen: boolean;
@@ -64,35 +60,14 @@ export default function CategoriesModal({ isOpen, onClose }: CategoriesModalProp
                     </div>
                   )}
                   {!isLoading &&
-                    categories.map((category) => {
-                      const imageSrc = category.imageUrl || CATEGORY_IMAGE_PLACEHOLDER;
-                      const label = category.name || category.slug;
-                      const bgColor = category.color?.trim() || "#f8fafc";
-
-                      return (
-                        <Link
-                          key={category.id}
-                          href={getCategoryPlpHref(category.slug)}
-                          prefetch={false}
-                          onClick={onClose}
-                          className="flex flex-col items-center gap-2"
-                        >
-                          <div
-                            className="flex h-20 w-20 items-center justify-center rounded-full p-4"
-                            style={{ backgroundColor: bgColor }}
-                          >
-                            <Image
-                              src={imageSrc}
-                              alt={category.imageAlt || label}
-                              width={48}
-                              height={48}
-                              className="h-12 w-12 object-contain"
-                            />
-                          </div>
-                          <span className="text-sm text-gray-800">{label}</span>
-                        </Link>
-                      );
-                    })}
+                    categories.map((category) => (
+                      <CategoryCard
+                        key={category.id}
+                        category={category}
+                        size="compact"
+                        onClick={onClose}
+                      />
+                    ))}
                 </div>
               </Dialog.Panel>
             </Transition.Child>

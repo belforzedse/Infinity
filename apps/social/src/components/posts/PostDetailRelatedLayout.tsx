@@ -145,6 +145,7 @@ export function PostDetailRelatedLayout({ post, relatedPosts }: PostDetailRelate
                 widthMode="fluid"
                 imageSrc={relatedPost.imageSrc}
                 imageAlt={relatedPost.imageAlt}
+                previewMedia={relatedPost.previewMedia}
                 likesCount={likeCounts[relatedPost.id] ?? relatedPost.likesCount}
                 commentsCount={relatedPost.commentsCount}
                 isLiked={Boolean(liked[relatedPost.id])}

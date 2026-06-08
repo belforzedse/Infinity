@@ -18,6 +18,7 @@
     "@repo/api": "workspace:*",
     "@repo/brand": "workspace:*",
     "@repo/fonts": "workspace:*",
+    "@repo/social-posts": "workspace:*",
     "@repo/story-rail": "workspace:*",
     "@repo/ui": "workspace:*",
     "@tiptap/extension-color": "3.11.0",
