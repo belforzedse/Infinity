@@ -66,7 +66,7 @@ export default function InfinitygramSectionClient({ posts }: InfinitygramSection
   let xlCount = 0, smCount = 0;
   const visiblePosts = posts.filter((post) => {
     if (post.desktopVariant === "xl" && xlCount < 2) { xlCount++; return true; }
-    if (post.desktopVariant === "sm" && smCount < 6) { smCount++; return true; }
+    if (post.desktopVariant === "sm" && smCount < 4) { smCount++; return true; }
     return false;
   });
   const mobileVisiblePosts = visiblePosts.filter((post) => post.desktopVariant === "sm");
