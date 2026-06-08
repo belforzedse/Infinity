@@ -82,10 +82,8 @@ export default function InfinitygramSectionClient({ posts }: InfinitygramSection
             id="home-infinitygram-heading"
             className="flex items-center gap-2 text-right font-peyda-fanum text-3xl font-normal leading-[37px] text-white"
           >
+            <img src="/infinitygram-icon.svg" alt="" width={32} height={32} className="block shrink-0" />
             <span>از اینفینیتی‌گرام خرید کن</span>
-            <span className="inline-flex size-6 items-center justify-center rounded-md bg-[#D52953] text-white shadow-sm">
-              <img src="/Infinity.svg" alt="" width={18} height={18} className="block" />
-            </span>
           </h2>
 
           <Link
