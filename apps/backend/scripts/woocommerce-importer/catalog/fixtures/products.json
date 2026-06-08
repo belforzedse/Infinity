@@ -1,0 +1,57 @@
+[
+  {
+    "id": 101,
+    "name": "کیف دستی چرم",
+    "slug": "%da%a9%db%8c%d9%81-%d8%af%d8%b3%d8%aa%db%8c",
+    "type": "variable",
+    "status": "publish",
+    "description": "<p>کیف دستی با کیفیت</p>",
+    "short_description": "",
+    "weight": "0.5",
+    "average_rating": "4.5",
+    "rating_count": 12,
+    "regular_price": "1000000",
+    "sale_price": "850000",
+    "categories": [
+      { "id": 5, "name": "کیف" },
+      { "id": 9, "name": "اکسسوری" }
+    ],
+    "images": [
+      { "src": "https://cdn.example.com/bag-1.jpg", "alt": "front" },
+      { "src": "https://cdn.example.com/bag-2.jpg", "alt": "back" }
+    ],
+    "variations": [201, 202]
+  },
+  {
+    "id": 102,
+    "name": "شال ساده",
+    "slug": "plain-scarf",
+    "type": "simple",
+    "status": "publish",
+    "description": "",
+    "short_description": "شال نخی",
+    "weight": "",
+    "regular_price": "300000",
+    "sale_price": "",
+    "manage_stock": true,
+    "stock_quantity": 7,
+    "stock_status": "instock",
+    "categories": [{ "id": 5, "name": "کیف" }],
+    "images": [{ "src": "https://cdn.example.com/scarf.jpg", "alt": "scarf" }],
+    "variations": []
+  },
+  {
+    "id": 103,
+    "name": "محصول بدون قیمت",
+    "slug": "no-price-product",
+    "type": "simple",
+    "status": "draft",
+    "regular_price": "",
+    "sale_price": "",
+    "price": "",
+    "stock_status": "outofstock",
+    "categories": [],
+    "images": [],
+    "variations": []
+  }
+]

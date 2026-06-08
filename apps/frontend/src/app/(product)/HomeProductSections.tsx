@@ -11,6 +11,18 @@ import {
 import type { ProductSmallCardProps } from "@/components/Product/SmallCard";
 import type { SuperAdminSettings } from "@/types/super-admin/settings";
 
+const NEWEST_BACKGROUND_ELLIPSES = [
+  "right-[-8%] top-[-18%] h-[230px] w-[390px] bg-[#E2EBFE] md:h-[300px] md:w-[520px]",
+  "right-[22%] top-[8%] h-[180px] w-[320px] bg-[#E2EBFE] md:h-[240px] md:w-[430px]",
+  "left-[18%] bottom-[-24%] h-[220px] w-[410px] bg-[#E2EBFE] md:h-[290px] md:w-[560px]",
+  "right-[6%] bottom-[-16%] h-[210px] w-[360px] bg-[#FFFEED] md:h-[280px] md:w-[500px]",
+  "left-[36%] top-[-20%] h-[190px] w-[340px] bg-[#FFFEED] md:h-[260px] md:w-[460px]",
+  "left-[-10%] top-[18%] h-[240px] w-[420px] bg-[#FFFEED] md:h-[320px] md:w-[570px]",
+  "left-[-4%] bottom-[8%] h-[190px] w-[340px] bg-[#FFF3E3] md:h-[270px] md:w-[470px]",
+  "left-[46%] bottom-[-20%] h-[200px] w-[380px] bg-[#FFF3E3] md:h-[280px] md:w-[520px]",
+  "right-[44%] top-[30%] h-[170px] w-[310px] bg-[#FFF3E3] md:h-[230px] md:w-[440px]",
+] as const;
+
 /** Streamed block: heavy product sections so shell can send first and reduce server blocking. */
 export default async function HomeProductSections({
   featuredCategorySlug,
@@ -60,16 +72,32 @@ export default async function HomeProductSections({
   return (
     <>
       {/* 1. جدیدترین ها (Newest) */}
-      <section className="space-y-10">
-        <div className="hidden space-y-10 md:block">
-          <Reveal variant="fade-up" duration={700}>
-            <OffersListHomePage icon={<NewIcon />} title="جدیدترین ها" products={newProducts} />
-          </Reveal>
+      <section
+        data-home-section="newest-products"
+        className="relative left-1/2 right-1/2 -mx-[50vw] w-screen overflow-hidden"
+      >
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-[-96px] z-0 overflow-hidden blur-[58px] sm:blur-[68px] lg:blur-[82px]"
+        >
+          {NEWEST_BACKGROUND_ELLIPSES.map((ellipseClass, index) => (
+            <span key={index} className={`absolute rounded-full opacity-[0.85] ${ellipseClass}`} />
+          ))}
         </div>
-        <div className="space-y-10 md:hidden">
-          <Reveal variant="blur-up" duration={1500}>
-            <OffersListHomePage icon={<NewIcon />} title="جدیدترین ها" products={newProducts} />
-          </Reveal>
+
+        <div className="relative z-10 mx-auto flex min-h-[360px] w-full max-w-[1360px] items-center px-2 py-8 sm:px-5 md:min-h-[430px] md:py-10 lg:min-h-[510px] lg:px-[60px] lg:py-0">
+          <div className="w-full min-w-0">
+            <div className="hidden space-y-10 md:block">
+              <Reveal variant="fade-up" duration={700}>
+                <OffersListHomePage icon={<NewIcon />} title="جدیدترین ها" products={newProducts} />
+              </Reveal>
+            </div>
+            <div className="space-y-10 md:hidden">
+              <Reveal variant="blur-up" duration={1500}>
+                <OffersListHomePage icon={<NewIcon />} title="جدیدترین ها" products={newProducts} />
+              </Reveal>
+            </div>
+          </div>
         </div>
       </section>
 

@@ -1,0 +1,41 @@
+[
+  {
+    "id": 201,
+    "parent_id": 101,
+    "sku": "BAG-RED-M",
+    "status": "publish",
+    "regular_price": "1000000",
+    "sale_price": "850000",
+    "on_sale": true,
+    "manage_stock": true,
+    "stock_quantity": 5,
+    "stock_status": "instock",
+    "attributes": [
+      { "name": "رنگ", "option": "قرمز" },
+      { "name": "سایز", "option": "M" }
+    ]
+  },
+  {
+    "id": 202,
+    "parent_id": 101,
+    "sku": "",
+    "status": "publish",
+    "regular_price": "",
+    "sale_price": "950000",
+    "on_sale": true,
+    "manage_stock": false,
+    "stock_status": "instock",
+    "attributes": [{ "name": "Color", "option": "آبی" }]
+  },
+  {
+    "id": 203,
+    "parent_id": 101,
+    "sku": "BAG-NOPRICE",
+    "status": "publish",
+    "regular_price": "",
+    "sale_price": "",
+    "price": "",
+    "stock_status": "instock",
+    "attributes": []
+  }
+]

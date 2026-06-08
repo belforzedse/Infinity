@@ -32,7 +32,9 @@
       "Bash(echo \"=== Infinitycolor top-level ===\"; ls /d/projects/Infinitycolor; echo \"=== pandaak top-level ===\"; ls /d/projects/pandaak)",
       "Bash(cd /d/projects && diff -rq Infinitycolor/apps/frontend/src pandaak/apps/frontend/src \\\\ *)",
       "Bash(cd /d/projects && diff -rq Infinitycolor/packages pandaak/packages \\\\ *)",
-      "Bash(^-\")"
+      "Bash(^-\")",
+      "Bash(mkdir -p ~/.claude/plans)",
+      "Bash(node -e \"console.log\\('sharp?', require\\('fs'\\).existsSync\\('node_modules/sharp'\\)\\); console.log\\('axios?', require\\('fs'\\).existsSync\\('node_modules/axios'\\)\\); console.log\\('commander?', require\\('fs'\\).existsSync\\('node_modules/commander'\\)\\)\")"
     ],
     "deny": [],
     "ask": []

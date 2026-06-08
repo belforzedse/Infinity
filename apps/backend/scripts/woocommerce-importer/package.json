@@ -36,7 +36,10 @@
     "catalog-sync:dry-run": "node catalog-sync.js dry-run",
     "catalog-sync": "node catalog-sync.js sync",
     "catalog-sync:verify": "node catalog-sync.js verify",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "catalog:dry-run": "node catalog/cli.js dry-run",
+    "catalog:sync": "node catalog/cli.js sync",
+    "catalog:verify": "node catalog/cli.js verify",
+    "test": "node --test catalog/__tests__/*.test.js"
   },
   "keywords": [
     "woocommerce",
