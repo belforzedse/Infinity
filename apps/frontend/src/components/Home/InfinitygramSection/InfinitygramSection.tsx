@@ -1,7 +1,7 @@
 import { getSocialFeedPosts } from "@repo/social-posts";
 import InfinitygramSectionClient from "./InfinitygramSectionClient";
 
-const HOME_INFINITYGRAM_LIMIT = 8;
+const HOME_INFINITYGRAM_LIMIT = 20;
 
 export default async function InfinitygramSection() {
   const posts = await getSocialFeedPosts({

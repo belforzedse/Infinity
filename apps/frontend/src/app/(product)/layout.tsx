@@ -107,7 +107,7 @@ export default function ProductLayout({ children }: { children: React.ReactNode 
   }, []);
 
   return (
-    <div dir="rtl" className="bg-background pb-28 antialiased lg:pb-0">
+    <div dir="rtl" className="bg-background pb-28 antialiased lg:pb-0 [overflow-x:clip]">
       {/* Safe area white bar for standalone mode */}
       {isStandalone && (
         <div

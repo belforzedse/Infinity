@@ -63,7 +63,12 @@ function PostCard({
 }
 
 export default function InfinitygramSectionClient({ posts }: InfinitygramSectionClientProps) {
-  const visiblePosts = posts.slice(0, 8);
+  let xlCount = 0, smCount = 0;
+  const visiblePosts = posts.filter((post) => {
+    if (post.desktopVariant === "xl" && xlCount < 2) { xlCount++; return true; }
+    if (post.desktopVariant === "sm" && smCount < 6) { smCount++; return true; }
+    return false;
+  });
 
   return (
     <section

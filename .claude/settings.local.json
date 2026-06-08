@@ -31,7 +31,8 @@
       "Read(//d/projects/pandaak/apps/**)",
       "Bash(echo \"=== Infinitycolor top-level ===\"; ls /d/projects/Infinitycolor; echo \"=== pandaak top-level ===\"; ls /d/projects/pandaak)",
       "Bash(cd /d/projects && diff -rq Infinitycolor/apps/frontend/src pandaak/apps/frontend/src \\\\ *)",
-      "Bash(cd /d/projects && diff -rq Infinitycolor/packages pandaak/packages \\\\ *)"
+      "Bash(cd /d/projects && diff -rq Infinitycolor/packages pandaak/packages \\\\ *)",
+      "Bash(^-\")"
     ],
     "deny": [],
     "ask": []
