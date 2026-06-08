@@ -4,23 +4,25 @@ import OffersListHomePage from "@/components/PDP/OffersListHomePage";
 import Reveal from "@/components/Reveal";
 import FeaturedCategorySection from "@/components/Home/FeaturedCategorySection";
 import HomePromoBanners, { type HomePromoBanner } from "@/components/Home/PromoBanners";
+import HomeGifPromoSection from "@/components/Home/HomeGifPromoSection";
 import {
   getHomepageSections,
   getFeaturedCategoryProductsByRating,
+  getGifPromoProducts,
 } from "@/services/product/homepage";
 import type { ProductSmallCardProps } from "@/components/Product/SmallCard";
 import type { SuperAdminSettings } from "@/types/super-admin/settings";
 
 const NEWEST_BACKGROUND_ELLIPSES = [
-  "right-[-8%] top-[-18%] h-[230px] w-[390px] bg-[#E2EBFE] motion-safe:animate-[newest-ellipse-float-a_12s_ease-in-out_infinite] md:h-[300px] md:w-[520px]",
-  "right-[22%] top-[8%] h-[180px] w-[320px] bg-[#E2EBFE] motion-safe:animate-[newest-ellipse-float-b_14s_ease-in-out_infinite] md:h-[240px] md:w-[430px]",
-  "left-[18%] bottom-[-24%] h-[220px] w-[410px] bg-[#E2EBFE] motion-safe:animate-[newest-ellipse-float-c_13s_ease-in-out_infinite] md:h-[290px] md:w-[560px]",
-  "right-[6%] bottom-[-16%] h-[210px] w-[360px] bg-[#FFFEED] motion-safe:animate-[newest-ellipse-float-b_15s_ease-in-out_infinite] md:h-[280px] md:w-[500px]",
-  "left-[36%] top-[-20%] h-[190px] w-[340px] bg-[#FFFEED] motion-safe:animate-[newest-ellipse-float-c_12.5s_ease-in-out_infinite] md:h-[260px] md:w-[460px]",
-  "left-[-10%] top-[18%] h-[240px] w-[420px] bg-[#FFFEED] motion-safe:animate-[newest-ellipse-float-a_16s_ease-in-out_infinite] md:h-[320px] md:w-[570px]",
-  "left-[-4%] bottom-[8%] h-[190px] w-[340px] bg-[#FFF3E3] motion-safe:animate-[newest-ellipse-float-c_14.5s_ease-in-out_infinite] md:h-[270px] md:w-[470px]",
-  "left-[46%] bottom-[-20%] h-[200px] w-[380px] bg-[#FFF3E3] motion-safe:animate-[newest-ellipse-float-a_13.5s_ease-in-out_infinite] md:h-[280px] md:w-[520px]",
-  "right-[44%] top-[30%] h-[170px] w-[310px] bg-[#FFF3E3] motion-safe:animate-[newest-ellipse-float-b_12.75s_ease-in-out_infinite] md:h-[230px] md:w-[440px]",
+  "right-[-8%] top-[-18%] h-[230px] w-[390px] bg-[#E2EBFE] motion-safe:animate-[newest-ellipse-float-a_6.5s_ease-in-out_infinite] md:h-[300px] md:w-[520px]",
+  "right-[22%] top-[8%] h-[180px] w-[320px] bg-[#E2EBFE] motion-safe:animate-[newest-ellipse-float-b_7.25s_ease-in-out_infinite] md:h-[240px] md:w-[430px]",
+  "left-[18%] bottom-[-24%] h-[220px] w-[410px] bg-[#E2EBFE] motion-safe:animate-[newest-ellipse-float-c_6.75s_ease-in-out_infinite] md:h-[290px] md:w-[560px]",
+  "right-[6%] bottom-[-16%] h-[210px] w-[360px] bg-[#FFFEED] motion-safe:animate-[newest-ellipse-float-b_7.75s_ease-in-out_infinite] md:h-[280px] md:w-[500px]",
+  "left-[36%] top-[-20%] h-[190px] w-[340px] bg-[#FFFEED] motion-safe:animate-[newest-ellipse-float-c_6.25s_ease-in-out_infinite] md:h-[260px] md:w-[460px]",
+  "left-[-10%] top-[18%] h-[240px] w-[420px] bg-[#FFFEED] motion-safe:animate-[newest-ellipse-float-a_8.25s_ease-in-out_infinite] md:h-[320px] md:w-[570px]",
+  "left-[-4%] bottom-[8%] h-[190px] w-[340px] bg-[#FFF3E3] motion-safe:animate-[newest-ellipse-float-c_7.5s_ease-in-out_infinite] md:h-[270px] md:w-[470px]",
+  "left-[46%] bottom-[-20%] h-[200px] w-[380px] bg-[#FFF3E3] motion-safe:animate-[newest-ellipse-float-a_6.85s_ease-in-out_infinite] md:h-[280px] md:w-[520px]",
+  "right-[44%] top-[30%] h-[170px] w-[310px] bg-[#FFF3E3] motion-safe:animate-[newest-ellipse-float-b_7s_ease-in-out_infinite] md:h-[230px] md:w-[440px]",
 ] as const;
 
 /** Streamed block: heavy product sections so shell can send first and reduce server blocking. */
@@ -35,14 +37,16 @@ export default async function HomeProductSections({
   homepageSettings?: SuperAdminSettings;
   promoBanners?: HomePromoBanner[];
 }) {
-  const [{ discounted, new: newProducts, favorites }, featuredCategoryProducts] = await Promise.all(
-    [
+  const [{ discounted, new: newProducts, favorites }, featuredCategoryProducts, gifPromoProducts] =
+    await Promise.all([
       getHomepageSections(homepageSettings),
       featuredCategorySlug && featuredCategoryBannerImage
         ? getFeaturedCategoryProductsByRating(featuredCategorySlug, 6)
         : Promise.resolve([]),
-    ],
-  );
+      homepageSettings
+        ? getGifPromoProducts(homepageSettings)
+        : Promise.resolve({ slot1: [], slot2: [] }),
+    ]);
 
   const featuredCategorySmallProducts: ProductSmallCardProps[] = featuredCategoryProducts
     .filter((p) => Boolean(p.images?.[0]))
@@ -78,10 +82,13 @@ export default async function HomeProductSections({
       >
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-[-72px] z-0 overflow-hidden blur-[36px] sm:blur-[42px] lg:blur-[48px]"
+          className="pointer-events-none absolute inset-[-160px] z-0 overflow-hidden blur-[74.5px]"
         >
           {NEWEST_BACKGROUND_ELLIPSES.map((ellipseClass, index) => (
-            <span key={index} className={`absolute rounded-full opacity-[0.85] ${ellipseClass}`} />
+            <span
+              key={index}
+              className={`absolute rounded-full opacity-[0.85] will-change-transform ${ellipseClass}`}
+            />
           ))}
         </div>
 
@@ -137,6 +144,25 @@ export default async function HomeProductSections({
             />
           </Reveal>
         </section>
+      )}
+
+      {homepageSettings?.homeGifPromoEnabled && (
+        <Reveal variant="fade-up" duration={700}>
+          <HomeGifPromoSection
+            slots={[
+              {
+                id: "slot-1",
+                imageUrl: homepageSettings.homeGifPromoSlot1Image,
+                products: gifPromoProducts.slot1,
+              },
+              {
+                id: "slot-2",
+                imageUrl: homepageSettings.homeGifPromoSlot2Image,
+                products: gifPromoProducts.slot2,
+              },
+            ]}
+          />
+        </Reveal>
       )}
 
       {hasPromoBanners && (

@@ -103,6 +103,11 @@ const superAdminSidebar: SidebarItem[] = [
         href: "/super-admin/products/homepage",
       },
       {
+        id: "homepage-gif-promo-products",
+        label: "محصولات کمپین گیف",
+        href: "/super-admin/products/gif-promo",
+      },
+      {
         id: "product-categories",
         label: "دسته بندی ها",
         href: "/super-admin/products/categories",

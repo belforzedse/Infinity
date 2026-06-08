@@ -3,6 +3,9 @@ import { ENDPOINTS, IMAGE_BASE_URL } from "@/constants/api";
 import type { ApiResponse } from "@/types/api";
 import { paramCreator } from "@/utils/paramCreator";
 import type { TagAttributes } from "./tag/get";
+import type { HomeGifPromoAssignment } from "@/types/super-admin/settings";
+import type { ProductCardProps } from "@/components/Product/Card";
+import { formatProductsToCardProps } from "@/services/product/product";
 
 type PopulateObject = {
   [key: string]: boolean | PopulateObject;
@@ -127,4 +130,44 @@ export async function getProductSummariesByIds(ids: number[]): Promise<ProductSu
   });
   withOrder.sort((a: any, b: any) => a.order - b.order);
   return withOrder.map(({ id, title, image }: any) => ({ id, title, image }));
+}
+
+export async function getGifPromoPreviewProducts(
+  assignment: HomeGifPromoAssignment,
+): Promise<ProductCardProps[]> {
+  const params = new URLSearchParams();
+  params.set("view", "card");
+  params.set("filters[Status][$eq]", "Active");
+  params.set("filters[removedAt][$null]", "true");
+  params.set("filters[product_variations][Price][$gte]", "1");
+  params.set("filters[product_variations][product_stock][Count][$gt]", "0");
+  params.set("pagination[withCount]", "false");
+
+  if (assignment.mode === "manual") {
+    const ids = assignment.productIds.slice(0, 4);
+    if (ids.length === 0) return [];
+    ids.forEach((id, index) => params.set(`filters[id][$in][${index}]`, String(id)));
+    params.set("pagination[limit]", String(Math.max(ids.length, 4)));
+
+    const res = (await apiClient.get(`${ENDPOINTS.PRODUCT.PRODUCT}?${params.toString()}`, {
+      cache: "no-store",
+    })) as any;
+    const list = formatProductsToCardProps(res?.data ?? []);
+    const order = new Map(ids.map((id, index) => [id, index]));
+    return list
+      .sort((a, b) => (order.get(a.id) ?? 999) - (order.get(b.id) ?? 999))
+      .slice(0, 4);
+  }
+
+  const categorySlug = assignment.categorySlug.trim();
+  if (!categorySlug) return [];
+
+  params.set("filters[product_main_category][Slug][$eq]", categorySlug);
+  params.set("sort[0]", "createdAt:desc");
+  params.set("pagination[limit]", "4");
+
+  const res = (await apiClient.get(`${ENDPOINTS.PRODUCT.PRODUCT}?${params.toString()}`, {
+    cache: "no-store",
+  })) as any;
+  return formatProductsToCardProps(res?.data ?? []).slice(0, 4);
 }

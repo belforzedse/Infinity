@@ -2872,6 +2872,19 @@ export interface ApiSettingsSettings extends Schema.SingleType {
     homeFeaturedCategoryTextColor: Attribute.String & Attribute.DefaultTo<"#111827">;
     homeFeaturedCategoryTextSize: Attribute.Integer & Attribute.DefaultTo<30>;
     homeFeaturedCategoryTitle: Attribute.String & Attribute.DefaultTo<"">;
+    homeGifPromoEnabled: Attribute.Boolean & Attribute.DefaultTo<false>;
+    homeGifPromoSlot1Assignment: Attribute.JSON &
+      Attribute.DefaultTo<{
+        mode: "manual";
+        productIds: [];
+      }>;
+    homeGifPromoSlot1Image: Attribute.String & Attribute.DefaultTo<"">;
+    homeGifPromoSlot2Assignment: Attribute.JSON &
+      Attribute.DefaultTo<{
+        mode: "manual";
+        productIds: [];
+      }>;
+    homeGifPromoSlot2Image: Attribute.String & Attribute.DefaultTo<"">;
     homeHeroSliderDraft: Attribute.JSON & Attribute.DefaultTo<{}>;
     homeHeroSliderMeta: Attribute.JSON & Attribute.DefaultTo<{}>;
     homeHeroSliderPublished: Attribute.JSON & Attribute.DefaultTo<{}>;

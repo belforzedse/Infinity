@@ -69,6 +69,11 @@ const PUBLIC_SETTINGS_FIELDS = [
   "siteGifImage",
   "siteGifLinkHref",
   "siteGifAltText",
+  "homeGifPromoEnabled",
+  "homeGifPromoSlot1Image",
+  "homeGifPromoSlot2Image",
+  "homeGifPromoSlot1Assignment",
+  "homeGifPromoSlot2Assignment",
   "createdAt",
   "updatedAt",
 ];

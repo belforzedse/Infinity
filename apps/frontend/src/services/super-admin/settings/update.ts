@@ -175,6 +175,21 @@ export async function updateSuperAdminSettings(
   if (settings.siteGifAltText !== undefined) {
     data.siteGifAltText = settings.siteGifAltText;
   }
+  if (settings.homeGifPromoEnabled !== undefined) {
+    data.homeGifPromoEnabled = settings.homeGifPromoEnabled;
+  }
+  if (settings.homeGifPromoSlot1Image !== undefined) {
+    data.homeGifPromoSlot1Image = settings.homeGifPromoSlot1Image;
+  }
+  if (settings.homeGifPromoSlot2Image !== undefined) {
+    data.homeGifPromoSlot2Image = settings.homeGifPromoSlot2Image;
+  }
+  if (settings.homeGifPromoSlot1Assignment !== undefined) {
+    data.homeGifPromoSlot1Assignment = settings.homeGifPromoSlot1Assignment;
+  }
+  if (settings.homeGifPromoSlot2Assignment !== undefined) {
+    data.homeGifPromoSlot2Assignment = settings.homeGifPromoSlot2Assignment;
+  }
 
   if (Object.keys(data).length === 0) return null;
 

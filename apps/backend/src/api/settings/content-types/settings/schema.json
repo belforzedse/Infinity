@@ -290,6 +290,37 @@
       "type": "string",
       "default": "",
       "description": "Alt text for the site GIF banner (accessibility / SEO)."
+    },
+    "homeGifPromoEnabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Show the two-slot GIF promotion section on the homepage."
+    },
+    "homeGifPromoSlot1Image": {
+      "type": "string",
+      "default": "",
+      "description": "Strapi upload path or URL for homepage GIF promotion slot 1."
+    },
+    "homeGifPromoSlot2Image": {
+      "type": "string",
+      "default": "",
+      "description": "Strapi upload path or URL for homepage GIF promotion slot 2."
+    },
+    "homeGifPromoSlot1Assignment": {
+      "type": "json",
+      "default": {
+        "mode": "manual",
+        "productIds": []
+      },
+      "description": "Product assignment for homepage GIF promotion slot 1."
+    },
+    "homeGifPromoSlot2Assignment": {
+      "type": "json",
+      "default": {
+        "mode": "manual",
+        "productIds": []
+      },
+      "description": "Product assignment for homepage GIF promotion slot 2."
     }
   }
 }

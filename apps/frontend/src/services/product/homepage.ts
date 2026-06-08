@@ -6,6 +6,10 @@ import { formatProductsToCardProps } from "./product";
 import { parseStockCount, productTitleMatchesKeywords } from "@/utils/product";
 import logger from "@/utils/logger";
 import { getPublicSuperAdminSettings } from "@/services/super-admin/settings/public";
+import type {
+  HomeGifPromoAssignment,
+  SuperAdminSettings,
+} from "@/types/super-admin/settings";
 
 const PRODUCT_CARD_VIEW = "view=card";
 
@@ -87,6 +91,62 @@ export const getProductsByIds = async (ids: number[]): Promise<ProductCardProps[
     logger.error("[Homepage] getProductsByIds error:", error as any);
     return [];
   }
+};
+
+export const getGifPromoProductsForSlot = async (
+  assignment: HomeGifPromoAssignment,
+): Promise<ProductCardProps[]> => {
+  if (assignment.mode === "manual") {
+    return getProductsByIds(assignment.productIds).then((products) => products.slice(0, 4));
+  }
+
+  const categorySlug = assignment.categorySlug.trim();
+  if (!categorySlug) return [];
+
+  const params = new URLSearchParams();
+  params.append("view", "card");
+  params.append("filters[Status][$eq]", "Active");
+  params.append("filters[removedAt][$null]", "true");
+  params.append("filters[product_main_category][Slug][$eq]", categorySlug);
+  params.append("filters[product_variations][Price][$gte]", "1");
+  params.append("filters[product_variations][product_stock][Count][$gt]", "0");
+  params.append("sort[0]", "createdAt:desc");
+  params.append("pagination[limit]", "4");
+  params.append("pagination[withCount]", "false");
+
+  try {
+    const response = await fetch(
+      `${getStrapiServerUrl()}${ENDPOINTS.PRODUCT.PRODUCT}?${params.toString()}`,
+      HOMEPAGE_FETCH_OPTIONS,
+    ).then((res) => res.json());
+
+    return formatProductsToCardProps((response as { data?: unknown[] })?.data ?? []).slice(0, 4);
+  } catch (error) {
+    logger.error("[Homepage] getGifPromoProductsForSlot error:", error as any);
+    return [];
+  }
+};
+
+export const getGifPromoProducts = async (
+  settings: SuperAdminSettings,
+): Promise<{
+  slot1: ProductCardProps[];
+  slot2: ProductCardProps[];
+}> => {
+  if (!settings.homeGifPromoEnabled) {
+    return { slot1: [], slot2: [] };
+  }
+
+  const [slot1, slot2] = await Promise.all([
+    settings.homeGifPromoSlot1Image.trim()
+      ? getGifPromoProductsForSlot(settings.homeGifPromoSlot1Assignment)
+      : Promise.resolve([]),
+    settings.homeGifPromoSlot2Image.trim()
+      ? getGifPromoProductsForSlot(settings.homeGifPromoSlot2Assignment)
+      : Promise.resolve([]),
+  ]);
+
+  return { slot1, slot2 };
 };
 
 /**

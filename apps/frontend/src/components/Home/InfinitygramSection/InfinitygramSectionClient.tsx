@@ -103,7 +103,7 @@ export default function InfinitygramSectionClient({ posts }: InfinitygramSection
             href={INFINITYGRAM_URL}
             target={EXTERNAL_LINK_PROPS.target}
             rel={EXTERNAL_LINK_PROPS.rel}
-            className="pressable hidden shrink-0 items-center justify-center rounded-full border border-white px-5 py-2 text-sm font-semibold uppercase tracking-[0.08em] text-white transition-colors hover:bg-white hover:text-[#252220] sm:inline-flex"
+            className="pressable hidden shrink-0 items-center justify-center rounded-full border-2 border-white px-5 py-2 text-sm font-medium uppercase tracking-[0.08em] text-white transition-colors hover:bg-white hover:text-[#252220] sm:inline-flex"
           >
             <span>FOLLOW</span>
           </Link>
@@ -147,7 +147,7 @@ export default function InfinitygramSectionClient({ posts }: InfinitygramSection
           href={INFINITYGRAM_URL}
           target={EXTERNAL_LINK_PROPS.target}
           rel={EXTERNAL_LINK_PROPS.rel}
-          className="pressable mx-auto mt-5 flex w-fit items-center justify-center rounded-full border border-white px-5 py-2 text-sm font-semibold uppercase tracking-[0.08em] text-white transition-colors hover:bg-white hover:text-[#252220] sm:hidden"
+          className="pressable mx-auto mt-5 flex w-fit items-center justify-center rounded-full border-2 border-white px-5 py-2 text-sm font-medium uppercase tracking-[0.08em] text-white transition-colors hover:bg-white hover:text-[#252220] sm:hidden"
         >
           <span>FOLLOW</span>
         </Link>

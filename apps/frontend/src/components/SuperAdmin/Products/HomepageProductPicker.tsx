@@ -18,6 +18,7 @@ interface HomepageProductPickerProps {
   productSummaries: ProductSummary[];
   onProductsChange: (ids: number[]) => void;
   onProductAdded?: (product: ProductSummary) => void;
+  maxProducts?: number;
 }
 
 type OrderItem = {
@@ -45,6 +46,7 @@ export default function HomepageProductPicker({
   productSummaries,
   onProductsChange,
   onProductAdded,
+  maxProducts,
 }: HomepageProductPickerProps) {
   const summaryMap = useMemo(() => {
     const m = new Map<number, ProductSummary>();
@@ -65,6 +67,7 @@ export default function HomepageProductPicker({
 
   const handleProductSelect = (product: Product) => {
     if (selectedProductIds.includes(product.id)) return;
+    if (maxProducts && selectedProductIds.length >= maxProducts) return;
     onProductsChange([...selectedProductIds, product.id]);
     onProductAdded?.({
       id: product.id,
@@ -96,15 +99,22 @@ export default function HomepageProductPicker({
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-lg font-semibold text-neutral-800">{title}</h3>
         <span className="rounded-full bg-slate-100 px-3 py-1 text-xs text-slate-600">
-          {selectedProductIds.length} محصول
+          {selectedProductIds.length}
+          {maxProducts ? ` / ${maxProducts}` : ""} محصول
         </span>
       </div>
 
-      <ProductSearch
-        onProductSelect={handleProductSelect}
-        selectedItems={selectedItems}
-        enableVariationSelection={false}
-      />
+      {maxProducts && selectedProductIds.length >= maxProducts ? (
+        <div className="rounded-xl border border-amber-100 bg-amber-50 p-3 text-sm text-amber-700">
+          حداکثر {maxProducts} محصول انتخاب شده است.
+        </div>
+      ) : (
+        <ProductSearch
+          onProductSelect={handleProductSelect}
+          selectedItems={selectedItems}
+          enableVariationSelection={false}
+        />
+      )}
 
       {selectedProductIds.length > 0 && (
         <div className="mt-4">

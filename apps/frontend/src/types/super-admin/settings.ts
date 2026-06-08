@@ -15,6 +15,18 @@ export type BlogCategoryBannerOrderItem = {
 export type HomePromoTextAlign = "right" | "center" | "left";
 export type HomePromoContentPosition = "top" | "center" | "bottom";
 export type HomeBannerImageFit = "cover" | "contain";
+export type HomeGifPromoAssignmentMode = "manual" | "category";
+export type HomeGifPromoAssignment =
+  | {
+      mode: "manual";
+      productIds: number[];
+      categorySlug?: "";
+    }
+  | {
+      mode: "category";
+      categorySlug: string;
+      productIds?: [];
+    };
 
 const normalizeString = (value: unknown): string => (typeof value === "string" ? value : "");
 
@@ -66,6 +78,27 @@ export const normalizeHomepageProductIds = (value: unknown): number[] => {
     result.push(id);
   }
   return result;
+};
+
+export const normalizeHomeGifPromoAssignment = (
+  value: unknown,
+): HomeGifPromoAssignment => {
+  const source = value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+  const mode = source.mode === "category" ? "category" : "manual";
+
+  if (mode === "category") {
+    return {
+      mode: "category",
+      categorySlug: normalizeString(source.categorySlug).trim(),
+      productIds: [],
+    };
+  }
+
+  return {
+    mode: "manual",
+    productIds: normalizeHomepageProductIds(source.productIds).slice(0, 4),
+    categorySlug: "",
+  };
 };
 
 export type SuperAdminSettings = {
@@ -136,6 +169,11 @@ export type SuperAdminSettings = {
   siteGifImage: string;
   siteGifLinkHref: string;
   siteGifAltText: string;
+  homeGifPromoEnabled: boolean;
+  homeGifPromoSlot1Image: string;
+  homeGifPromoSlot2Image: string;
+  homeGifPromoSlot1Assignment: HomeGifPromoAssignment;
+  homeGifPromoSlot2Assignment: HomeGifPromoAssignment;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -208,6 +246,11 @@ export const defaultSettings = (): SuperAdminSettings => ({
   siteGifImage: "",
   siteGifLinkHref: "",
   siteGifAltText: "",
+  homeGifPromoEnabled: false,
+  homeGifPromoSlot1Image: "",
+  homeGifPromoSlot2Image: "",
+  homeGifPromoSlot1Assignment: { mode: "manual", productIds: [], categorySlug: "" },
+  homeGifPromoSlot2Assignment: { mode: "manual", productIds: [], categorySlug: "" },
   createdAt: new Date(),
   updatedAt: new Date(),
 });
@@ -300,6 +343,15 @@ export const normalizeSuperAdminSettings = (
   siteGifImage: normalizeString(data?.siteGifImage),
   siteGifLinkHref: normalizeString(data?.siteGifLinkHref),
   siteGifAltText: normalizeString(data?.siteGifAltText),
+  homeGifPromoEnabled: Boolean(data?.homeGifPromoEnabled),
+  homeGifPromoSlot1Image: normalizeString(data?.homeGifPromoSlot1Image),
+  homeGifPromoSlot2Image: normalizeString(data?.homeGifPromoSlot2Image),
+  homeGifPromoSlot1Assignment: normalizeHomeGifPromoAssignment(
+    data?.homeGifPromoSlot1Assignment,
+  ),
+  homeGifPromoSlot2Assignment: normalizeHomeGifPromoAssignment(
+    data?.homeGifPromoSlot2Assignment,
+  ),
   createdAt: new Date(data?.createdAt || Date.now()),
   updatedAt: new Date(data?.updatedAt || Date.now()),
 });

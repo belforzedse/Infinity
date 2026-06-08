@@ -35,6 +35,12 @@ const tiles = [
     href: "/super-admin/customization/site-gif",
     icon: <FiFilm className="h-5 w-5" />,
   },
+  {
+    title: "کمپین گیف صفحه اصلی",
+    description: "دو گیف تبلیغاتی بخش محصول محور صفحه اصلی را مدیریت کنید.",
+    href: "/super-admin/customization/gif-promo",
+    icon: <FiFilm className="h-5 w-5" />,
+  },
 ];
 
 export default function PersonalizationPage() {
