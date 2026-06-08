@@ -69,12 +69,13 @@ export default function InfinitygramSectionClient({ posts }: InfinitygramSection
     if (post.desktopVariant === "sm" && smCount < 6) { smCount++; return true; }
     return false;
   });
+  const mobileVisiblePosts = visiblePosts.filter((post) => post.desktopVariant === "sm");
 
   return (
     <section
       dir="rtl"
       aria-labelledby="home-infinitygram-heading"
-      className="relative left-1/2 w-screen -translate-x-1/2 overflow-hidden bg-[#252220] text-white"
+      className="overflow-hidden bg-[#252220] text-white"
     >
       <div className="mx-auto w-full max-w-[1360px] px-2 py-8 sm:px-5 lg:px-[60px] lg:py-10">
         <div className="mb-6 flex items-center justify-between gap-4">
@@ -116,7 +117,7 @@ export default function InfinitygramSectionClient({ posts }: InfinitygramSection
           className="grid w-full min-w-0 grid-flow-dense grid-cols-2 gap-x-2 gap-y-2 sm:grid-cols-3 md:grid-cols-4 min-[900px]:grid-cols-5 lg:hidden"
           dir="ltr"
         >
-          {visiblePosts.map((post) => {
+          {mobileVisiblePosts.map((post) => {
             const variant = toMobilePostCardVariant(post.desktopVariant);
 
             return (

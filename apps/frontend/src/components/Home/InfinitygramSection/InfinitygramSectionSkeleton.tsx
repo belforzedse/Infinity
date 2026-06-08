@@ -22,7 +22,7 @@ export default function InfinitygramSectionSkeleton() {
   return (
     <section
       dir="rtl"
-      className="relative left-1/2 w-screen -translate-x-1/2 overflow-hidden bg-[#252220]"
+      className="overflow-hidden bg-[#252220]"
       aria-busy="true"
     >
       <div className="mx-auto w-full max-w-[1360px] px-2 py-8 sm:px-5 lg:px-[60px] lg:py-10">

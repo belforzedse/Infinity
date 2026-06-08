@@ -247,51 +247,55 @@ export default async function Home() {
   const heroFromCms = mapCmsHeroSliderToBannerSlides(homepageSettings.homeHeroSliderPublished);
 
   return (
-    <PageContainer variant="wide" className="space-y-4 pb-16 pt-8">
-      {/* JSON-LD Organization Schema for SEO */}
-      <OrganizationSchema />
+    <>
+      <PageContainer variant="wide" className="space-y-4 pb-4 pt-8">
+        {/* JSON-LD Organization Schema for SEO */}
+        <OrganizationSchema />
 
-      <Suspense fallback={<StoriesRailFallback />}>
-        <StoriesSection />
-      </Suspense>
+        <Suspense fallback={<StoriesRailFallback />}>
+          <StoriesSection />
+        </Suspense>
 
-      <SiteGifBanner
-        enabled={homepageSettings.siteGifEnabled}
-        imageUrl={homepageSettings.siteGifImage}
-        linkHref={homepageSettings.siteGifLinkHref}
-        altText={homepageSettings.siteGifAltText}
-      />
-
-      <section className="space-y-0">
-        <Reveal variant="zoom-in" duration={650}>
-          <HeroBannerSlider
-            slides={heroFromCms.slides}
-            autoplayInterval={heroFromCms.autoplayIntervalMs}
-            autoplayEligibility={heroFromCms.autoplayEligibility}
-          />
-        </Reveal>
-      </section>
-
-      <Suspense fallback={<CategoryCarouselFallback />}>
-        <CategorySection />
-      </Suspense>
-
-      <Suspense fallback={<ProductSectionsFallback />}>
-        <ProductSectionsBlock
-          featuredCategorySlug={featuredCategorySlug}
-          featuredCategoryBannerImage={featuredCategoryBannerImage}
-          homepageSettings={homepageSettings}
-          promoBanners={promoBanners}
+        <SiteGifBanner
+          enabled={homepageSettings.siteGifEnabled}
+          imageUrl={homepageSettings.siteGifImage}
+          linkHref={homepageSettings.siteGifLinkHref}
+          altText={homepageSettings.siteGifAltText}
         />
-      </Suspense>
+
+        <section className="space-y-0">
+          <Reveal variant="zoom-in" duration={650}>
+            <HeroBannerSlider
+              slides={heroFromCms.slides}
+              autoplayInterval={heroFromCms.autoplayIntervalMs}
+              autoplayEligibility={heroFromCms.autoplayEligibility}
+            />
+          </Reveal>
+        </section>
+
+        <Suspense fallback={<CategoryCarouselFallback />}>
+          <CategorySection />
+        </Suspense>
+
+        <Suspense fallback={<ProductSectionsFallback />}>
+          <ProductSectionsBlock
+            featuredCategorySlug={featuredCategorySlug}
+            featuredCategoryBannerImage={featuredCategoryBannerImage}
+            homepageSettings={homepageSettings}
+            promoBanners={promoBanners}
+          />
+        </Suspense>
+      </PageContainer>
 
       <Suspense fallback={<InfinitygramSectionSkeleton />}>
         <InfinitygramSection />
       </Suspense>
 
-      <Suspense fallback={<BlogSectionFallback />}>
-        <BlogSection />
-      </Suspense>
-    </PageContainer>
+      <PageContainer variant="wide" className="pb-16 pt-4">
+        <Suspense fallback={<BlogSectionFallback />}>
+          <BlogSection />
+        </Suspense>
+      </PageContainer>
+    </>
   );
 }
