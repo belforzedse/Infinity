@@ -39,6 +39,7 @@
     "catalog:dry-run": "node catalog/cli.js dry-run",
     "catalog:sync": "node catalog/cli.js sync",
     "catalog:verify": "node catalog/cli.js verify",
+    "catalog:tui": "node catalog/tui.js",
     "test": "node --test catalog/__tests__/*.test.js"
   },
   "keywords": [

@@ -11,10 +11,11 @@ type Props = {
   icon: React.ReactNode;
   title: string;
   products: ProductCardProps[];
+  hideBottomViewMore?: boolean;
 };
 
 export default function OffersListHomePage(props: Props) {
-  const { icon, title, products } = props;
+  const { icon, title, products, hideBottomViewMore = false } = props;
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const [currentPage, setCurrentPage] = useState(0);
@@ -171,7 +172,7 @@ export default function OffersListHomePage(props: Props) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1">
             {icon}
-            <span className="text-2xl text-foreground-primary md:text-3xl">{title}</span>
+            <span className="text-foreground-primary text-2xl md:text-3xl">{title}</span>
           </div>
 
           <div className="flex items-center gap-2">
@@ -184,7 +185,7 @@ export default function OffersListHomePage(props: Props) {
 
             {/* Desktop pagination indicator */}
             {totalPages > 1 && (
-              <div className="text-xs hidden items-center gap-1 text-neutral-500 md:flex">
+              <div className="hidden items-center gap-1 text-xs text-neutral-500 md:flex">
                 <span>{currentPage + 1}</span>
                 <span>/</span>
                 <span>{totalPages}</span>
@@ -194,7 +195,7 @@ export default function OffersListHomePage(props: Props) {
             {/* Desktop: navigate to PLP with appropriate filters */}
             <Link
               href={getPlpHref()}
-              className="text-sm hidden text-infinity-primary underline-offset-4 transition-colors hover:text-infinity-primary-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white md:block"
+              className="hidden text-sm text-infinity-primary underline-offset-4 transition-colors hover:text-infinity-primary-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white md:block"
             >
               مشاهده همه
             </Link>
@@ -233,7 +234,7 @@ export default function OffersListHomePage(props: Props) {
             <div className="mt-4 flex items-center justify-center">
               <Link
                 href={getPlpHref()}
-                className="text-base flex items-center gap-1 text-foreground-primary underline-offset-4 transition-colors hover:text-infinity-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                className="text-foreground-primary flex items-center gap-1 text-base underline-offset-4 transition-colors hover:text-infinity-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
               >
                 <span>مشاهده همه</span>
                 <ArrowLeftIcon />
@@ -263,11 +264,11 @@ export default function OffersListHomePage(props: Props) {
         </div>
 
         {/* Desktop view more button */}
-        {!isShowAllProducts && products.length > 5 && (
+        {!hideBottomViewMore && !isShowAllProducts && products.length > 5 && (
           <div className="mt-6 hidden items-center justify-center md:flex">
             <Link
               href={getPlpHref()}
-              className="pressable text-base flex items-center gap-1 rounded-full border border-infinity-primary-lighter/40 px-4 py-2 text-foreground-primary transition-colors hover:bg-infinity-primary-lighter/20 hover:text-infinity-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+              className="pressable text-foreground-primary flex items-center gap-1 rounded-full border border-infinity-primary-lighter/40 px-4 py-2 text-base transition-colors hover:bg-infinity-primary-lighter/20 hover:text-infinity-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
             >
               <span>مشاهده محصولات بیشتر</span>
               <ArrowLeftIcon />
