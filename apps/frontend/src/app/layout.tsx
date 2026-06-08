@@ -70,16 +70,16 @@ export async function generateMetadata(): Promise<Metadata> {
       },
     },
     robots: {
-    index: true,
-    follow: true,
-    googleBot: {
       index: true,
       follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-video-preview": -1,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+      },
     },
-  },
     verification: {
       google: "l6i1v4-mkeaMxCGEXenzCdyBdhipiZdHuyiaIE011Kg",
     },
@@ -170,7 +170,7 @@ export default async function RootLayout({
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
         <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
       </head>
-      <body className={`${peydaFanum.className} bg-white antialiased`}>
+      <body className={`${peydaFanum.className} bg-background antialiased`}>
         <NavigationProgress />
 
         {/* Organization Schema for SEO (driven by site identity, with fallbacks) */}

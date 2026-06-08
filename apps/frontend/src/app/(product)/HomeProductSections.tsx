@@ -4,36 +4,33 @@ import OffersListHomePage from "@/components/PDP/OffersListHomePage";
 import Reveal from "@/components/Reveal";
 import FeaturedCategorySection from "@/components/Home/FeaturedCategorySection";
 import HomePromoBanners, { type HomePromoBanner } from "@/components/Home/PromoBanners";
-import CategoryCarousel from "@/components/Categories/CategoryCarousel";
 import {
   getHomepageSections,
   getFeaturedCategoryProductsByRating,
 } from "@/services/product/homepage";
 import type { ProductSmallCardProps } from "@/components/Product/SmallCard";
-import type { ProductCategorySummary } from "@/services/product/categories";
 import type { SuperAdminSettings } from "@/types/super-admin/settings";
 
 /** Streamed block: heavy product sections so shell can send first and reduce server blocking. */
 export default async function HomeProductSections({
   featuredCategorySlug,
   featuredCategoryBannerImage,
-  mainCategories,
   homepageSettings,
   promoBanners,
 }: {
   featuredCategorySlug: string;
   featuredCategoryBannerImage: string;
-  mainCategories: ProductCategorySummary[];
   homepageSettings?: SuperAdminSettings;
   promoBanners?: HomePromoBanner[];
 }) {
-  const [{ discounted, new: newProducts, favorites }, featuredCategoryProducts] =
-    await Promise.all([
+  const [{ discounted, new: newProducts, favorites }, featuredCategoryProducts] = await Promise.all(
+    [
       getHomepageSections(homepageSettings),
       featuredCategorySlug && featuredCategoryBannerImage
         ? getFeaturedCategoryProductsByRating(featuredCategorySlug, 6)
         : Promise.resolve([]),
-    ]);
+    ],
+  );
 
   const featuredCategorySmallProducts: ProductSmallCardProps[] = featuredCategoryProducts
     .filter((p) => Boolean(p.images?.[0]))
@@ -76,32 +73,17 @@ export default async function HomeProductSections({
         </div>
       </section>
 
-      {/* 2. Category carousel */}
-      {mainCategories.length > 0 && (
-        <section className="space-y-6">
-          <CategoryCarousel categories={mainCategories} />
-        </section>
-      )}
-
       {/* 3. محبوب ترین ها (Most popular) */}
       {favorites.length > 0 && (
         <section className="space-y-10">
           <div className="hidden md:block">
             <Reveal variant="fade-up" duration={700}>
-              <OffersListHomePage
-                icon={<NewIcon />}
-                title="محبوب ترین ها"
-                products={favorites}
-              />
+              <OffersListHomePage icon={<NewIcon />} title="محبوب ترین ها" products={favorites} />
             </Reveal>
           </div>
           <div className="md:hidden">
             <Reveal variant="blur-up" duration={1500}>
-              <OffersListHomePage
-                icon={<NewIcon />}
-                title="محبوب ترین ها"
-                products={favorites}
-              />
+              <OffersListHomePage icon={<NewIcon />} title="محبوب ترین ها" products={favorites} />
             </Reveal>
           </div>
         </section>

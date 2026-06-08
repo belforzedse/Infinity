@@ -19,6 +19,7 @@ import { SITE_NAME, SITE_URL } from "@/config/site";
 import type { HomePromoBanner } from "@/components/Home/PromoBanners";
 import { getPublicSuperAdminSettings } from "@/services/super-admin/settings/public";
 import HomeProductSections from "./HomeProductSections";
+import CategoryCarousel from "@/components/Categories/CategoryCarousel";
 import SiteGifBanner from "@/components/Home/SiteGifBanner";
 import InfinitygramSection, {
   InfinitygramSectionSkeleton,
@@ -49,7 +50,7 @@ async function getLatestBlogPosts() {
     const response = await blogService.getBlogPosts({
       pageSize: 8,
       status: "Published",
-      sort: "PublishedAt:desc"
+      sort: "PublishedAt:desc",
     });
     return response.data || [];
   } catch (error) {
@@ -74,6 +75,21 @@ function ProductSectionsFallback() {
       <div className="grid min-w-0 grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {[...Array(8)].map((_, index) => (
           <SkeletonMedia key={index} aspect="250 / 270" className="rounded-lg" />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function CategoryCarouselFallback() {
+  return (
+    <section>
+      <div className="scrollbar-hide grid auto-cols-[124px] grid-flow-col gap-2 overflow-hidden pb-4 lg:auto-cols-[calc((100%_-_60px)_/_6)] lg:gap-3">
+        {[...Array(6)].map((_, index) => (
+          <div key={index} className="flex flex-col items-center gap-2">
+            <SkeletonBlock className="h-[116px] w-[116px] rounded-full lg:aspect-[227/310] lg:h-auto lg:w-full lg:rounded-3xl" />
+            <SkeletonText tone="light" className="h-4 w-16" />
+          </div>
         ))}
       </div>
     </section>
@@ -138,6 +154,17 @@ async function ProductSectionsBlock({
   homepageSettings: SuperAdminSettings;
   promoBanners: HomePromoBanner[];
 }) {
+  return (
+    <HomeProductSections
+      featuredCategorySlug={featuredCategorySlug}
+      featuredCategoryBannerImage={featuredCategoryBannerImage}
+      homepageSettings={homepageSettings}
+      promoBanners={promoBanners}
+    />
+  );
+}
+
+async function CategorySection() {
   const parentCategories = await getProductCategories({
     mainOnly: true,
     sort: "Title:asc",
@@ -146,14 +173,12 @@ async function ProductSectionsBlock({
     revalidate: 90,
   });
 
+  if (parentCategories.length === 0) return null;
+
   return (
-    <HomeProductSections
-      featuredCategorySlug={featuredCategorySlug}
-      featuredCategoryBannerImage={featuredCategoryBannerImage}
-      mainCategories={parentCategories}
-      homepageSettings={homepageSettings}
-      promoBanners={promoBanners}
-    />
+    <section>
+      <CategoryCarousel categories={parentCategories} />
+    </section>
   );
 }
 
@@ -165,11 +190,7 @@ async function BlogSection() {
   return (
     <section>
       <Reveal variant="fade-up" duration={700}>
-        <BlogCarousel
-          posts={latestBlogPosts}
-          title="اینفینیتی مگ"
-          viewAllHref="/blog"
-        />
+        <BlogCarousel posts={latestBlogPosts} title="اینفینیتی مگ" viewAllHref="/blog" />
       </Reveal>
     </section>
   );
@@ -250,6 +271,10 @@ export default async function Home() {
           />
         </Reveal>
       </section>
+
+      <Suspense fallback={<CategoryCarouselFallback />}>
+        <CategorySection />
+      </Suspense>
 
       <Suspense fallback={<ProductSectionsFallback />}>
         <ProductSectionsBlock

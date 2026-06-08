@@ -1,7 +1,7 @@
 /* Syntax highlighting for code blocks */
-@import 'highlight.js/styles/github.css';
+@import "highlight.js/styles/github.css";
 /* Instagram-style Stories viewer */
-@import 'react-instagram-stories/styles.css';
+@import "react-instagram-stories/styles.css";
 
 @tailwind base;
 @tailwind components;
@@ -10,7 +10,7 @@
 html {
   scroll-behavior: smooth;
   scroll-padding-top: var(--header-offset, 88px);
-  background-color: white; /* White background for web app */
+  background-color: #f9faff;
   scrollbar-gutter: stable;
 }
 
@@ -26,7 +26,7 @@ html {
 }
 
 body {
-  background-color: white; /* Page content background */
+  background-color: #f9faff;
   min-height: 100vh;
 }
 
@@ -423,7 +423,7 @@ textarea:focus-visible {
     box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.25);
   }
   :root {
-    --background: 0 0% 100%;
+    --background: 230 100% 99.2%;
     --foreground: 0 0% 3.9%;
     --card: 0 0% 100%;
     --card-foreground: 0 0% 3.9%;
@@ -605,8 +605,6 @@ textarea:focus-visible {
   }
 }
 
-
-
 @layer base {
   * {
     @apply border-border;
@@ -623,24 +621,24 @@ textarea:focus-visible {
     @apply prose-headings:text-right;
 
     /* Lists */
-    @apply prose-ul:mr-6 prose-ol:mr-6;
+    @apply prose-ol:mr-6 prose-ul:mr-6;
 
     /* Blockquotes */
-    @apply prose-blockquote:border-r-4 prose-blockquote:border-l-0 prose-blockquote:pr-4 prose-blockquote:pl-0;
+    @apply prose-blockquote:border-l-0 prose-blockquote:border-r-4 prose-blockquote:pl-0 prose-blockquote:pr-4;
   }
 
   /* Ensure proper styling for all prose elements */
   .prose {
     @apply prose-slate;
     @apply prose-headings:font-semibold prose-headings:text-neutral-800;
-    @apply prose-p:text-neutral-700 prose-p:leading-relaxed;
+    @apply prose-p:leading-relaxed prose-p:text-neutral-700;
     @apply prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline;
     /* Only apply font-bold to strong, not color - allow colors to be inherited or explicitly set */
     @apply prose-strong:font-bold;
-    @apply prose-code:text-infinity-primary-dark prose-code:bg-infinity-primary-lighter/30 prose-code:px-1 prose-code:py-0.5 prose-code:rounded;
-    @apply prose-pre:bg-neutral-50 prose-pre:text-neutral-800 prose-pre:border prose-pre:border-neutral-200;
-    @apply prose-blockquote:border-neutral-300 prose-blockquote:text-neutral-600 prose-blockquote:bg-neutral-50 prose-blockquote:italic;
-    @apply prose-ul:list-disc prose-ol:list-decimal;
+    @apply prose-code:rounded prose-code:bg-infinity-primary-lighter/30 prose-code:px-1 prose-code:py-0.5 prose-code:text-infinity-primary-dark;
+    @apply prose-pre:border prose-pre:border-neutral-200 prose-pre:bg-neutral-50 prose-pre:text-neutral-800;
+    @apply prose-blockquote:border-neutral-300 prose-blockquote:bg-neutral-50 prose-blockquote:italic prose-blockquote:text-neutral-600;
+    @apply prose-ol:list-decimal prose-ul:list-disc;
     @apply prose-li:text-neutral-700;
     @apply prose-hr:border-neutral-300;
     @apply prose-table:text-sm;
@@ -679,7 +677,7 @@ textarea:focus-visible {
   }
 
   .prose table tbody td {
-    @apply border-t border-slate-200 border-l px-4 py-3 text-sm text-neutral-600;
+    @apply border-l border-t border-slate-200 px-4 py-3 text-sm text-neutral-600;
   }
 
   .prose table tbody td:first-child {
@@ -724,7 +722,8 @@ textarea:focus-visible {
 
   /* Smooth video transitions */
   video {
-    transition: opacity 500ms cubic-bezier(0.4, 0, 0.2, 1),
-                transform 500ms cubic-bezier(0.4, 0, 0.2, 1);
+    transition:
+      opacity 500ms cubic-bezier(0.4, 0, 0.2, 1),
+      transform 500ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 }

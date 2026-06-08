@@ -27,19 +27,21 @@ const isLocalImageUrl = (src: string) =>
   src.startsWith("http://[::1]") ||
   src.startsWith("https://[::1]");
 
-const mobileCircleSize: Record<CategoryCardSize, { circle: string; label: string; imageSizes: string }> =
-  {
-    carousel: {
-      circle: "h-[88px] w-[88px] sm:h-24 sm:w-24",
-      label: "mt-2 text-sm font-medium text-foreground-primary",
-      imageSizes: "(max-width: 640px) 88px, 96px",
-    },
-    compact: {
-      circle: "h-20 w-20",
-      label: "mt-1.5 text-xs font-medium text-foreground-primary",
-      imageSizes: "80px",
-    },
-  };
+const mobileCircleSize: Record<
+  CategoryCardSize,
+  { circle: string; label: string; imageSizes: string }
+> = {
+  carousel: {
+    circle: "h-[116px] w-[116px]",
+    label: "mt-2 text-sm font-medium text-foreground-primary",
+    imageSizes: "116px",
+  },
+  compact: {
+    circle: "h-20 w-20",
+    label: "mt-1.5 text-xs font-medium text-foreground-primary",
+    imageSizes: "80px",
+  },
+};
 
 function MobileCategoryCircle({
   imageSrc,

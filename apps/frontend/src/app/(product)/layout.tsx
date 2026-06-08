@@ -52,9 +52,10 @@ export default function ProductLayout({ children }: { children: React.ReactNode 
 
   React.useEffect(() => {
     updateHeaderOffset();
-    const header = typeof window !== "undefined"
-      ? document.querySelector<HTMLElement>("[data-main-header]")
-      : null;
+    const header =
+      typeof window !== "undefined"
+        ? document.querySelector<HTMLElement>("[data-main-header]")
+        : null;
 
     const resizeObserver =
       header && typeof ResizeObserver !== "undefined"
@@ -106,11 +107,11 @@ export default function ProductLayout({ children }: { children: React.ReactNode 
   }, []);
 
   return (
-    <div dir="rtl" className="bg-white pb-28 antialiased lg:pb-0">
+    <div dir="rtl" className="bg-background pb-28 antialiased lg:pb-0">
       {/* Safe area white bar for standalone mode */}
       {isStandalone && (
         <div
-          className="fixed left-0 right-0 top-0 z-[60] bg-white"
+          className="fixed left-0 right-0 top-0 z-[60] bg-background"
           data-safe-area-top
           style={{ height: "env(safe-area-inset-top)" }}
         />
@@ -153,9 +154,7 @@ export default function ProductLayout({ children }: { children: React.ReactNode 
         </Suspense>
       </div>
 
-      <main id="content">
-        {children}
-      </main>
+      <main id="content">{children}</main>
 
       <footer>
         <Footer />

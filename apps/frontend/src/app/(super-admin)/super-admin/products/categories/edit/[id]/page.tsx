@@ -5,17 +5,12 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { extractErrorMessage, translateErrorMessage } from "@/lib/errorTranslations";
-import {
-  getCategoryFormConfig,
-  type ProductCategoryForm,
-} from "../../categoryFormConfig";
+import { getCategoryFormConfig, type ProductCategoryForm } from "../../categoryFormConfig";
 import { getCategoryById } from "@/services/super-admin/product/category/get";
 import { updateCategory } from "@/services/super-admin/product/category/update";
 import type { CategoryData } from "@/services/super-admin/product/category/create";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
-import CategoryAppearancePanel, {
-  type CategoryImageValue,
-} from "../../CategoryAppearancePanel";
+import CategoryAppearancePanel, { type CategoryImageValue } from "../../CategoryAppearancePanel";
 
 export default function EditCategoryPage() {
   const router = useRouter();
@@ -107,11 +102,11 @@ export default function EditCategoryPage() {
         const imageData = payload.attributes?.Image?.data;
         const imageAttributes = imageData?.attributes;
         const imageUrl =
+          imageAttributes?.url ||
           imageAttributes?.formats?.large?.url ||
           imageAttributes?.formats?.medium?.url ||
           imageAttributes?.formats?.small?.url ||
-          imageAttributes?.formats?.thumbnail?.url ||
-          imageAttributes?.url;
+          imageAttributes?.formats?.thumbnail?.url;
         setCategoryImage(
           imageUrl && imageData?.id ? { id: imageData.id, url: imageUrl } : undefined,
         );
@@ -173,7 +168,10 @@ export default function EditCategoryPage() {
     } catch (error: any) {
       console.error("Failed to update category:", error);
       const rawErrorMessage = extractErrorMessage(error);
-      const message = translateErrorMessage(rawErrorMessage, "به‌روزرسانی دسته‌بندی با خطا مواجه شد");
+      const message = translateErrorMessage(
+        rawErrorMessage,
+        "به‌روزرسانی دسته‌بندی با خطا مواجه شد",
+      );
       toast.error(message);
     }
   };

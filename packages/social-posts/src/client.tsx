@@ -1,6 +1,12 @@
 "use client";
 
-import { type CSSProperties, type ReactNode, useEffect, useRef, useState } from "react";
+import {
+  type CSSProperties,
+  type ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Bookmark, Heart, Layers2, MessageCircle, Video } from "lucide-react";
@@ -22,6 +28,7 @@ export {
 } from "./index";
 
 export type SocialPostCardWidthMode = "fixed" | "fluid";
+export type SocialPostCardActionTone = "default" | "light";
 
 export type SocialPostCardProps = {
   variant: PostCardVariant;
@@ -36,6 +43,8 @@ export type SocialPostCardProps = {
   onComment?: () => void;
   onSave?: () => void;
   href?: string;
+  linkTarget?: string;
+  linkRel?: string;
   overlay?: ReactNode;
   className?: string;
   widthMode?: SocialPostCardWidthMode;
@@ -43,6 +52,7 @@ export type SocialPostCardProps = {
   shakeKey?: number;
   mediaClassName?: string;
   linkAriaLabel?: string;
+  actionTone?: SocialPostCardActionTone;
 };
 
 const ACTION_TEXT_CLASS =
@@ -88,7 +98,11 @@ function CardImage({
   );
 }
 
-export function SocialPostOverlayBadge({ type }: { type: Exclude<SocialFeedCardOverlay, null> }) {
+export function SocialPostOverlayBadge({
+  type,
+}: {
+  type: Exclude<SocialFeedCardOverlay, null>;
+}) {
   const shell =
     "inline-flex items-center justify-center rounded-lg bg-black/[0.14] p-0.5 shadow-sm backdrop-blur-[7px]";
 
@@ -96,7 +110,13 @@ export function SocialPostOverlayBadge({ type }: { type: Exclude<SocialFeedCardO
     return (
       <div className={shell} aria-hidden>
         <span className="inline-flex size-5 items-center justify-center rounded-full bg-infinity-primary shadow-[0_0_2px_rgba(0,0,0,0.09)]">
-          <img src="/Infinity.svg" alt="" width={15} height={15} className="block" />
+          <img
+            src="/Infinity.svg"
+            alt=""
+            width={15}
+            height={15}
+            className="block"
+          />
         </span>
       </div>
     );
@@ -106,7 +126,10 @@ export function SocialPostOverlayBadge({ type }: { type: Exclude<SocialFeedCardO
     return (
       <div className={shell} aria-hidden>
         <span className="flex size-6 items-center justify-center text-white">
-          <Video className="size-[13px] stroke-white text-white" strokeWidth={1.5} />
+          <Video
+            className="size-[13px] stroke-white text-white"
+            strokeWidth={1.5}
+          />
         </span>
       </div>
     );
@@ -115,7 +138,10 @@ export function SocialPostOverlayBadge({ type }: { type: Exclude<SocialFeedCardO
   return (
     <div className={shell} aria-hidden>
       <span className="flex size-6 items-center justify-center text-white">
-        <Layers2 className="size-[13px] stroke-white text-white" strokeWidth={1.5} />
+        <Layers2
+          className="size-[13px] stroke-white text-white"
+          strokeWidth={1.5}
+        />
       </span>
     </div>
   );
@@ -134,6 +160,8 @@ export function SocialPostCard({
   onComment,
   onSave,
   href,
+  linkTarget,
+  linkRel,
   overlay,
   className,
   widthMode = "fixed",
@@ -141,6 +169,7 @@ export function SocialPostCard({
   shakeKey,
   mediaClassName,
   linkAriaLabel,
+  actionTone = "default",
 }: SocialPostCardProps) {
   const layout = POST_CARD_LAYOUTS[variant];
   const { widthPx, imageHeightPx, columnGapPx } = layout;
@@ -153,9 +182,25 @@ export function SocialPostCard({
         : fluidMaxWidthCapPx(variant)
     : null;
 
-  const activeMedia = previewMedia ?? { id: "cover", url: imageSrc, alternativeText: imageAlt, mime: "image/*" };
+  const activeMedia = previewMedia ?? {
+    id: "cover",
+    url: imageSrc,
+    alternativeText: imageAlt,
+    mime: "image/*",
+  };
   const likesLabel = formatCountLabel(likesCount);
   const commentsLabel = formatCountLabel(commentsCount);
+  const isLightActionTone = actionTone === "light";
+  const actionTextClass = clsx(
+    ACTION_TEXT_CLASS,
+    isLightActionTone && "text-white/55",
+  );
+  const secondaryIconColor = isLightActionTone
+    ? "rgba(255,255,255,0.55)"
+    : ICON_SECONDARY;
+  const secondaryIconHoverClass = isLightActionTone
+    ? "hover:text-white/85"
+    : "hover:text-zinc-700";
 
   const [heartBurstKey, setHeartBurstKey] = useState(0);
   const prevIsLiked = useRef(isLiked);
@@ -189,7 +234,10 @@ export function SocialPostCard({
     el.classList.remove("animate-shake");
     void el.offsetHeight;
     el.classList.add("animate-shake");
-    const id = window.setTimeout(() => el.classList.remove("animate-shake"), 400);
+    const id = window.setTimeout(
+      () => el.classList.remove("animate-shake"),
+      400,
+    );
     return () => window.clearTimeout(id);
   }, [shakeKey]);
 
@@ -222,14 +270,22 @@ export function SocialPostCard({
       data-variant={variant}
     >
       <div
-        className={clsx("relative isolate overflow-hidden rounded-[20px] bg-zinc-100", mediaClassName)}
+        className={clsx(
+          "relative isolate overflow-hidden rounded-[20px] bg-zinc-100",
+          mediaClassName,
+        )}
         style={mediaStyle}
       >
         {href ? (
           <Link
             href={href}
+            target={linkTarget}
+            rel={linkRel}
             className="absolute inset-0 z-[1] rounded-[20px] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400/70"
-            aria-label={linkAriaLabel ?? (imageAlt ? `مشاهده پست ${imageAlt}` : "مشاهده پست")}
+            aria-label={
+              linkAriaLabel ??
+              (imageAlt ? `مشاهده پست ${imageAlt}` : "مشاهده پست")
+            }
           />
         ) : null}
         {isVideoMedia(activeMedia) ? (
@@ -254,21 +310,42 @@ export function SocialPostCard({
           aria-hidden
         />
         {overlay != null ? (
-          <div className="pointer-events-none absolute left-3 top-2 z-10">{overlay}</div>
+          <div className="pointer-events-none absolute left-3 top-2 z-10">
+            {overlay}
+          </div>
         ) : null}
       </div>
 
-      <div dir="ltr" className="flex w-full flex-row items-center justify-between px-1" aria-label="اقدامات پست">
+      <div
+        dir="ltr"
+        className="flex w-full flex-row items-center justify-between px-1"
+        aria-label="اقدامات پست"
+      >
         <button
           type="button"
           onClick={onSave}
-          className="pressable inline-flex size-9 shrink-0 items-center justify-center rounded-lg text-[#94A3B8] outline-none transition-colors hover:text-zinc-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400/70 disabled:pointer-events-none disabled:opacity-40"
+          className={clsx(
+            "pressable inline-flex size-9 shrink-0 items-center justify-center rounded-lg outline-none transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400/70 disabled:pointer-events-none disabled:opacity-40",
+            secondaryIconHoverClass,
+          )}
+          style={{ color: secondaryIconColor }}
           aria-label={isSaved ? "حذف از ذخیره‌ها" : "ذخیره پست"}
           aria-pressed={isSaved}
           disabled={!onSave}
         >
-          <span key={saveAnimKey} className={clsx("inline-flex shrink-0", saveAnimKey > 0 && "animate-pop")}>
-            <Bookmark size={20} strokeWidth={1.5} className={clsx(isSaved && "fill-current")} aria-hidden />
+          <span
+            key={saveAnimKey}
+            className={clsx(
+              "inline-flex shrink-0",
+              saveAnimKey > 0 && "animate-pop",
+            )}
+          >
+            <Bookmark
+              size={20}
+              strokeWidth={1.5}
+              className={clsx(isSaved && "fill-current")}
+              aria-hidden
+            />
           </span>
         </button>
 
@@ -276,39 +353,63 @@ export function SocialPostCard({
           <button
             type="button"
             onClick={onComment}
-            className="pressable inline-flex h-9 shrink-0 flex-row items-center gap-1 rounded-lg px-1 text-[#94A3B8] outline-none transition-colors hover:text-zinc-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400/70 disabled:pointer-events-none disabled:opacity-40"
+            className={clsx(
+              "pressable inline-flex h-9 shrink-0 flex-row items-center gap-1 rounded-lg px-1 outline-none transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400/70 disabled:pointer-events-none disabled:opacity-40",
+              secondaryIconHoverClass,
+            )}
+            style={{ color: secondaryIconColor }}
             aria-label="نظرات"
             disabled={!onComment}
           >
-            {commentsLabel != null ? <span className={clsx(ACTION_TEXT_CLASS, "order-1")}>{commentsLabel}</span> : null}
-            <MessageCircle size={20} strokeWidth={1.5} className="order-2 shrink-0" aria-hidden />
+            {commentsLabel != null ? (
+              <span className={clsx(actionTextClass, "order-1")}>
+                {commentsLabel}
+              </span>
+            ) : null}
+            <MessageCircle
+              size={20}
+              strokeWidth={1.5}
+              className="order-2 shrink-0"
+              aria-hidden
+            />
           </button>
 
           <button
             ref={likeButtonRef}
             type="button"
             onClick={onLike}
-            className="pressable inline-flex h-9 shrink-0 flex-row items-center gap-1 rounded-lg px-1 outline-none transition-colors hover:text-zinc-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400/70 disabled:pointer-events-none disabled:opacity-40"
-            style={isLiked ? { color: HEART_FILL } : { color: ICON_SECONDARY }}
+            className={clsx(
+              "pressable inline-flex h-9 shrink-0 flex-row items-center gap-1 rounded-lg px-1 outline-none transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-400/70 disabled:pointer-events-none disabled:opacity-40",
+              secondaryIconHoverClass,
+            )}
+            style={
+              isLiked ? { color: HEART_FILL } : { color: secondaryIconColor }
+            }
             aria-label={isLiked ? "لغو پسند" : "پسندیدن"}
             aria-pressed={isLiked}
             disabled={!onLike}
           >
             {likesLabel != null ? (
-              <span key={`likes-${likesLabel}`} className={clsx(ACTION_TEXT_CLASS, "order-1 animate-fade-up")}>
+              <span
+                key={`likes-${likesLabel}`}
+                className={clsx(actionTextClass, "order-1 animate-fade-up")}
+              >
                 {likesLabel}
               </span>
             ) : null}
             <span
               key={`heart-${heartBurstKey}`}
-              className={clsx("heart-burst-target order-2 inline-flex shrink-0", heartBurstKey > 0 && "animate-heart-burst")}
+              className={clsx(
+                "heart-burst-target order-2 inline-flex shrink-0",
+                heartBurstKey > 0 && "animate-heart-burst",
+              )}
             >
               <Heart
                 size={20}
                 strokeWidth={1.5}
                 className={clsx(heartBurstKey > 0 && "animate-pop")}
                 fill={isLiked ? HEART_FILL : "none"}
-                stroke={isLiked ? HEART_STROKE : ICON_SECONDARY}
+                stroke={isLiked ? HEART_STROKE : secondaryIconColor}
                 aria-hidden
               />
             </span>

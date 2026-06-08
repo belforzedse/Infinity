@@ -26,15 +26,15 @@ export default function CategoryAppearancePanel({ image, onImageChange }: Props)
 
     setIsUploading(true);
     try {
-      const uploaded = await uploadFile(file);
+      const uploaded = await uploadFile(file, { highQuality: true });
       if (uploaded && uploaded.length > 0) {
         const img = uploaded[0];
         const bestUrl =
+          img.url ||
           img.formats?.large?.url ||
           img.formats?.medium?.url ||
           img.formats?.small?.url ||
-          img.formats?.thumbnail?.url ||
-          img.url;
+          img.formats?.thumbnail?.url;
         onImageChange({ id: img.id, url: bestUrl });
         toast.success("تصویر دسته‌بندی با موفقیت بارگذاری شد");
       } else {
