@@ -69,9 +69,7 @@ export default async function HomeProductSections({
     Boolean(featuredCategorySlug) &&
     Boolean(featuredCategoryBannerImage) &&
     featuredCategorySmallProducts.length > 0;
-  const hasPromoBanners = promoBanners?.some(
-    (banner) => banner.imageUrl?.trim() && banner.title?.trim(),
-  );
+  const hasPromoBanners = promoBanners?.some((banner) => Boolean(banner.imageUrl?.trim()));
 
   return (
     <>

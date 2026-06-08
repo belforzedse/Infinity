@@ -409,9 +409,7 @@ export default function HomeBannersSettingsPage() {
     [data],
   );
 
-  const hasVisibleBanner = banners.some(
-    (banner) => banner.imageUrl?.trim() && banner.title?.trim(),
-  );
+  const hasVisibleBanner = banners.some((banner) => Boolean(banner.imageUrl?.trim()));
 
   const patchData = (patch: Partial<SuperAdminSettings>) => {
     setData((current) => (current ? { ...current, ...patch } : current));
