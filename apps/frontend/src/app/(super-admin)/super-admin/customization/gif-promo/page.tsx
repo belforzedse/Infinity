@@ -141,6 +141,7 @@ export default function GifPromoCustomizationPage() {
                 <ImageUploadField
                   value={data.homeGifPromoSlot1Image}
                   onChange={(value) => patchData({ homeGifPromoSlot1Image: value })}
+                  preferOriginal
                   helper={<>ابعاد پیشنهادی: 329.5×564 پیکسل</>}
                 />
                 <button
@@ -156,6 +157,7 @@ export default function GifPromoCustomizationPage() {
                 <ImageUploadField
                   value={data.homeGifPromoSlot2Image}
                   onChange={(value) => patchData({ homeGifPromoSlot2Image: value })}
+                  preferOriginal
                   helper={<>ابعاد پیشنهادی: 329.5×564 پیکسل</>}
                 />
                 <button

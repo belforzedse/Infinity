@@ -53,6 +53,7 @@ export type UploadFileOptions = {
 
 async function compressImageToWebP(file: File, options?: UploadFileOptions): Promise<File> {
   if (!file.type.startsWith("image/")) return file;
+  if (file.type === "image/gif") return file;
 
   const highQuality = options?.highQuality === true;
   if (highQuality && file.size <= 20 * 1024 * 1024) {
