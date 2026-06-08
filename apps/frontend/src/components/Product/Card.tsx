@@ -200,8 +200,8 @@ const ProductCard: FC<ProductCardProps> = ({
                 />
               )}
 
-              {/* Badges */}
-              <div className="absolute left-1 right-1 top-1 flex items-center justify-end">
+              {/* Badges — physical right; avoid justify-end in RTL (aligns to visual left) */}
+              <div className="absolute right-1 top-1 z-10">
                 <DiscountBadge discount={saleDiscountPercent} />
               </div>
 

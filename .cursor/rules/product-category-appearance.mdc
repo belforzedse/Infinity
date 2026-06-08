@@ -23,7 +23,7 @@ Use [`CategoryCard`](apps/frontend/src/components/Categories/CategoryCard.tsx) f
 
 - **Proportion:** `aspect-[227/310]`, `rounded-3xl`
 - **Image:** `next/image` `fill` + `object-cover`
-- **Label:** bottom gradient overlay + white centered text (Figma node `21:1985`)
+- **Label:** bottom gradient overlay + `backdrop-blur-[2px]` only (avoid `backdrop-blur-md` — strong blur caused a bright arc) + white centered text (Figma node `21:1985`)
 - **Sizes:** `carousel` (default) | `compact` (bottom-nav sheet)
 - **Responsive:** Mobile (`<lg`) — same image clipped in a circle (`rounded-full`, `object-cover`), label below. Desktop (`lg+`) — full-bleed portrait card with gradient overlay label.
 

@@ -181,7 +181,7 @@ export default function CategoryCarousel({ categories }: CategoryCarouselProps) 
     <div className="relative">
       <div
         ref={scrollRef}
-        className="scrollbar-hide grid snap-x snap-mandatory auto-cols-[calc(100%/3)] grid-flow-col items-stretch gap-4 overflow-x-auto scroll-smooth pb-4 md:auto-cols-[calc(100%/4)] md:gap-6 min-[900px]:auto-cols-[calc(100%/5)] xl:auto-cols-[calc(100%/6)] xl:gap-0"
+        className="scrollbar-hide grid snap-x snap-mandatory auto-cols-[calc(100%/3)] grid-flow-col items-stretch gap-4 overflow-x-auto scroll-smooth pb-4 md:auto-cols-[calc(100%/4)] md:gap-6 min-[900px]:auto-cols-[calc(100%/5)] xl:auto-cols-[calc(100%/6)] xl:gap-6"
       >
         {categories.map((category, index) => (
           <div

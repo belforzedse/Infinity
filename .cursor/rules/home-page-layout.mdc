@@ -57,6 +57,6 @@ The Home Page is structured as follows:
 - [`ProductCard`](apps/frontend/src/components/Product/Card.tsx): `w-full min-w-0`; image `aspect-[3/4]` on mobile, `aspect-[250/270]` from `md+` — scales inside grid cells; shell `rounded-2xl border-slate-100`, image `rounded-xl`. See [product-card.mdc](product-card.mdc).
 
 ### Category carousel
-- [`CategoryCarousel`](apps/frontend/src/components/Categories/CategoryCarousel.tsx): single full-bleed image cards via shared [`CategoryCard`](apps/frontend/src/components/Categories/CategoryCard.tsx) (`aspect-[227/310]`, gradient label); desktop tiles step `3 → 4 → 5 → 6` columns at `md`, `min-[900px]`, `xl` (not 6 columns immediately at `lg`). See [product-category-appearance.mdc](product-category-appearance.mdc).
+- [`CategoryCarousel`](apps/frontend/src/components/Categories/CategoryCarousel.tsx): single full-bleed image cards via shared [`CategoryCard`](apps/frontend/src/components/Categories/CategoryCard.tsx) (`aspect-[227/310]`, gradient label); desktop tiles step `3 → 4 → 5 → 6` columns at `md`, `min-[900px]`, `xl`; horizontal `gap-4` / `gap-6` at all breakpoints (including `xl`). See [product-category-appearance.mdc](product-category-appearance.mdc).
 
 

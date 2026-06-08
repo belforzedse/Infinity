@@ -208,10 +208,10 @@ const ParentCategoryCard = ({
             )}
 
             <div
-              className="absolute inset-x-0 bottom-0 flex items-end justify-center px-4 pb-4 pt-8 backdrop-blur-md"
+              className="absolute inset-x-0 bottom-0 flex items-end justify-center px-4 pb-4 pt-14 backdrop-blur-[2px]"
               style={{
                 background:
-                  "linear-gradient(0deg, rgba(83, 52, 32, 1) 0%, rgba(214, 179, 142, 0) 100%)",
+                  "linear-gradient(to top, rgba(83, 52, 32, 0.92) 0%, rgba(83, 52, 32, 0.5) 45%, rgba(83, 52, 32, 0) 100%)",
               }}
             >
               <span className="w-full truncate text-center text-sm font-normal text-white">
