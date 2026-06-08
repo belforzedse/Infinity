@@ -321,6 +321,44 @@
         "productIds": []
       },
       "description": "Product assignment for homepage GIF promotion slot 2."
+    },
+    "homeCustomSectionEnabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Show the custom editorial section between the GIF promo and promo banners."
+    },
+    "homeCustomSectionTitle": {
+      "type": "string",
+      "default": "",
+      "description": "Display title for the custom editorial section."
+    },
+    "homeCustomSectionAssignment": {
+      "type": "json",
+      "default": {
+        "mode": "manual",
+        "productIds": []
+      },
+      "description": "Product assignment for the custom editorial section (manual IDs or category slug)."
+    },
+    "homeWeeklyPicksEnabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Show the «منتخب‌های این هفته» section after the promo banners."
+    },
+    "homeWeeklyPicksProductIds": {
+      "type": "json",
+      "default": [],
+      "description": "Curated product IDs for the «منتخب‌های این هفته» homepage section."
+    },
+    "homeEveryoneFollowsEnabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Show the «همه دنبالشَن» section before the Infinitygram section."
+    },
+    "homeEveryoneFollowsProductIds": {
+      "type": "json",
+      "default": [],
+      "description": "Curated product IDs for the «همه دنبالشَن» homepage section."
     }
   }
 }

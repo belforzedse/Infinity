@@ -74,6 +74,13 @@ const PUBLIC_SETTINGS_FIELDS = [
   "homeGifPromoSlot2Image",
   "homeGifPromoSlot1Assignment",
   "homeGifPromoSlot2Assignment",
+  "homeCustomSectionEnabled",
+  "homeCustomSectionTitle",
+  "homeCustomSectionAssignment",
+  "homeWeeklyPicksEnabled",
+  "homeWeeklyPicksProductIds",
+  "homeEveryoneFollowsEnabled",
+  "homeEveryoneFollowsProductIds",
   "createdAt",
   "updatedAt",
 ];

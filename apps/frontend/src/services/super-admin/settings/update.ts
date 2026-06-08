@@ -190,6 +190,27 @@ export async function updateSuperAdminSettings(
   if (settings.homeGifPromoSlot2Assignment !== undefined) {
     data.homeGifPromoSlot2Assignment = settings.homeGifPromoSlot2Assignment;
   }
+  if (settings.homeCustomSectionEnabled !== undefined) {
+    data.homeCustomSectionEnabled = settings.homeCustomSectionEnabled;
+  }
+  if (settings.homeCustomSectionTitle !== undefined) {
+    data.homeCustomSectionTitle = settings.homeCustomSectionTitle;
+  }
+  if (settings.homeCustomSectionAssignment !== undefined) {
+    data.homeCustomSectionAssignment = settings.homeCustomSectionAssignment;
+  }
+  if (settings.homeWeeklyPicksEnabled !== undefined) {
+    data.homeWeeklyPicksEnabled = settings.homeWeeklyPicksEnabled;
+  }
+  if (settings.homeWeeklyPicksProductIds !== undefined) {
+    data.homeWeeklyPicksProductIds = settings.homeWeeklyPicksProductIds;
+  }
+  if (settings.homeEveryoneFollowsEnabled !== undefined) {
+    data.homeEveryoneFollowsEnabled = settings.homeEveryoneFollowsEnabled;
+  }
+  if (settings.homeEveryoneFollowsProductIds !== undefined) {
+    data.homeEveryoneFollowsProductIds = settings.homeEveryoneFollowsProductIds;
+  }
 
   if (Object.keys(data).length === 0) return null;
 

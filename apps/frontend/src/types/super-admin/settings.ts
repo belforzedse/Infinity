@@ -101,6 +101,27 @@ export const normalizeHomeGifPromoAssignment = (
   };
 };
 
+export const normalizeHomeProductSectionAssignment = (
+  value: unknown,
+): HomeGifPromoAssignment => {
+  const source = value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+  const mode = source.mode === "category" ? "category" : "manual";
+
+  if (mode === "category") {
+    return {
+      mode: "category",
+      categorySlug: normalizeString(source.categorySlug).trim(),
+      productIds: [],
+    };
+  }
+
+  return {
+    mode: "manual",
+    productIds: normalizeHomepageProductIds(source.productIds),
+    categorySlug: "",
+  };
+};
+
 export type SuperAdminSettings = {
   id: number;
   filterPublicProductsByTitle: boolean;
@@ -174,6 +195,13 @@ export type SuperAdminSettings = {
   homeGifPromoSlot2Image: string;
   homeGifPromoSlot1Assignment: HomeGifPromoAssignment;
   homeGifPromoSlot2Assignment: HomeGifPromoAssignment;
+  homeCustomSectionEnabled: boolean;
+  homeCustomSectionTitle: string;
+  homeCustomSectionAssignment: HomeGifPromoAssignment;
+  homeWeeklyPicksEnabled: boolean;
+  homeWeeklyPicksProductIds: number[];
+  homeEveryoneFollowsEnabled: boolean;
+  homeEveryoneFollowsProductIds: number[];
   createdAt: Date;
   updatedAt: Date;
 };
@@ -251,6 +279,13 @@ export const defaultSettings = (): SuperAdminSettings => ({
   homeGifPromoSlot2Image: "",
   homeGifPromoSlot1Assignment: { mode: "manual", productIds: [], categorySlug: "" },
   homeGifPromoSlot2Assignment: { mode: "manual", productIds: [], categorySlug: "" },
+  homeCustomSectionEnabled: false,
+  homeCustomSectionTitle: "",
+  homeCustomSectionAssignment: { mode: "manual", productIds: [], categorySlug: "" },
+  homeWeeklyPicksEnabled: false,
+  homeWeeklyPicksProductIds: [],
+  homeEveryoneFollowsEnabled: false,
+  homeEveryoneFollowsProductIds: [],
   createdAt: new Date(),
   updatedAt: new Date(),
 });
@@ -352,6 +387,15 @@ export const normalizeSuperAdminSettings = (
   homeGifPromoSlot2Assignment: normalizeHomeGifPromoAssignment(
     data?.homeGifPromoSlot2Assignment,
   ),
+  homeCustomSectionEnabled: Boolean(data?.homeCustomSectionEnabled),
+  homeCustomSectionTitle: normalizeString(data?.homeCustomSectionTitle),
+  homeCustomSectionAssignment: normalizeHomeProductSectionAssignment(
+    data?.homeCustomSectionAssignment,
+  ),
+  homeWeeklyPicksEnabled: Boolean(data?.homeWeeklyPicksEnabled),
+  homeWeeklyPicksProductIds: normalizeHomepageProductIds(data?.homeWeeklyPicksProductIds),
+  homeEveryoneFollowsEnabled: Boolean(data?.homeEveryoneFollowsEnabled),
+  homeEveryoneFollowsProductIds: normalizeHomepageProductIds(data?.homeEveryoneFollowsProductIds),
   createdAt: new Date(data?.createdAt || Date.now()),
   updatedAt: new Date(data?.updatedAt || Date.now()),
 });

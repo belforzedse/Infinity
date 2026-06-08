@@ -37,7 +37,7 @@ function PromoSlot({ slot }: { slot: HomeGifPromoSlot }) {
   if (!imageUrl || products.length === 0) return null;
 
   return (
-    <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-[minmax(190px,42vw)_minmax(0,1fr)] lg:grid-cols-[329.5px_minmax(0,240px)]">
+    <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-[minmax(190px,42vw)_minmax(0,1fr)] lg:grid-cols-[329.5px_1fr]">
       {/* gif first → renders on the RIGHT in RTL */}
       <div className="relative min-h-[360px] w-full overflow-hidden rounded-[24px] bg-slate-100 sm:min-h-[480px] lg:h-[564px] lg:min-h-0">
         {/* eslint-disable-next-line @next/next/no-img-element -- GIF animation requires native img */}

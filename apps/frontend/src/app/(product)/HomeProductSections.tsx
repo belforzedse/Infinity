@@ -2,15 +2,14 @@ import NewIcon from "@/components/PDP/Icons/NewIcon";
 import OffIcon from "@/components/PDP/Icons/OffIcon";
 import OffersListHomePage from "@/components/PDP/OffersListHomePage";
 import Reveal from "@/components/Reveal";
-import FeaturedCategorySection from "@/components/Home/FeaturedCategorySection";
 import HomePromoBanners, { type HomePromoBanner } from "@/components/Home/PromoBanners";
 import HomeGifPromoSection from "@/components/Home/HomeGifPromoSection";
 import {
   getHomepageSections,
-  getFeaturedCategoryProductsByRating,
   getGifPromoProducts,
+  getHomeSectionProducts,
+  getProductsByIds,
 } from "@/services/product/homepage";
-import type { ProductSmallCardProps } from "@/components/Product/SmallCard";
 import type { SuperAdminSettings } from "@/types/super-admin/settings";
 
 const NEWEST_BACKGROUND_ELLIPSES = [
@@ -27,48 +26,34 @@ const NEWEST_BACKGROUND_ELLIPSES = [
 
 /** Streamed block: heavy product sections so shell can send first and reduce server blocking. */
 export default async function HomeProductSections({
-  featuredCategorySlug,
-  featuredCategoryBannerImage,
   homepageSettings,
   promoBanners,
 }: {
-  featuredCategorySlug: string;
-  featuredCategoryBannerImage: string;
   homepageSettings?: SuperAdminSettings;
   promoBanners?: HomePromoBanner[];
 }) {
-  const [{ discounted, new: newProducts, favorites }, featuredCategoryProducts, gifPromoProducts] =
-    await Promise.all([
-      getHomepageSections(homepageSettings),
-      featuredCategorySlug && featuredCategoryBannerImage
-        ? getFeaturedCategoryProductsByRating(featuredCategorySlug, 6)
-        : Promise.resolve([]),
-      homepageSettings
-        ? getGifPromoProducts(homepageSettings)
-        : Promise.resolve({ slot1: [], slot2: [] }),
-    ]);
+  const [
+    { discounted, new: newProducts, favorites },
+    gifPromoProducts,
+    customSectionProducts,
+    weeklyPicksProducts,
+    everyoneFollowsProducts,
+  ] = await Promise.all([
+    getHomepageSections(homepageSettings),
+    homepageSettings
+      ? getGifPromoProducts(homepageSettings)
+      : Promise.resolve({ slot1: [], slot2: [] }),
+    homepageSettings?.homeCustomSectionEnabled
+      ? getHomeSectionProducts(homepageSettings.homeCustomSectionAssignment)
+      : Promise.resolve([]),
+    homepageSettings?.homeWeeklyPicksEnabled && (homepageSettings.homeWeeklyPicksProductIds.length > 0)
+      ? getProductsByIds(homepageSettings.homeWeeklyPicksProductIds)
+      : Promise.resolve([]),
+    homepageSettings?.homeEveryoneFollowsEnabled && (homepageSettings.homeEveryoneFollowsProductIds.length > 0)
+      ? getProductsByIds(homepageSettings.homeEveryoneFollowsProductIds)
+      : Promise.resolve([]),
+  ]);
 
-  const featuredCategorySmallProducts: ProductSmallCardProps[] = featuredCategoryProducts
-    .filter((p) => Boolean(p.images?.[0]))
-    .slice(0, 6)
-    .map((product) => ({
-      id: product.id,
-      slug: product.slug,
-      title: product.title,
-      category: product.category,
-      likedCount: product.seenCount || 0,
-      price: product.price,
-      discountedPrice: product.discountPrice,
-      discount: product.discount,
-      image: product.images[0] || "",
-      isAvailable: product.isAvailable,
-      colorsCount: product.colorsCount,
-      colorCodes: product.colorCodes,
-    }));
-  const hasFeaturedCategorySection =
-    Boolean(featuredCategorySlug) &&
-    Boolean(featuredCategoryBannerImage) &&
-    featuredCategorySmallProducts.length > 0;
   const hasPromoBanners = promoBanners?.some((banner) => Boolean(banner.imageUrl?.trim()));
 
   return (
@@ -163,6 +148,18 @@ export default async function HomeProductSections({
         </Reveal>
       )}
 
+      {homepageSettings?.homeCustomSectionEnabled && customSectionProducts.length > 0 && (
+        <section>
+          <Reveal variant="fade-up" duration={700}>
+            <OffersListHomePage
+              icon={<NewIcon />}
+              title={homepageSettings.homeCustomSectionTitle || "بخش ویژه"}
+              products={customSectionProducts}
+            />
+          </Reveal>
+        </section>
+      )}
+
       {hasPromoBanners && (
         <section>
           <Reveal variant="fade-up" duration={700}>
@@ -171,25 +168,25 @@ export default async function HomeProductSections({
         </section>
       )}
 
-      {hasFeaturedCategorySection && (
+      {homepageSettings?.homeWeeklyPicksEnabled && weeklyPicksProducts.length > 0 && (
         <section>
           <Reveal variant="fade-up" duration={700}>
-            <FeaturedCategorySection
-              bannerImageUrl={featuredCategoryBannerImage}
-              categorySlug={featuredCategorySlug}
-              products={featuredCategorySmallProducts}
-              title={homepageSettings?.homeFeaturedCategoryTitle}
-              subtitle={homepageSettings?.homeFeaturedCategorySubtitle}
-              ctaText={homepageSettings?.homeFeaturedCategoryCtaText}
-              ctaHref={homepageSettings?.homeFeaturedCategoryCtaHref}
-              textColor={homepageSettings?.homeFeaturedCategoryTextColor}
-              textSize={homepageSettings?.homeFeaturedCategoryTextSize}
-              fontWeight={homepageSettings?.homeFeaturedCategoryFontWeight}
-              bannerBackgroundColor={homepageSettings?.homeFeaturedCategoryBannerBackgroundColor}
-              bannerImageFit={homepageSettings?.homeFeaturedCategoryBannerImageFit}
-              bannerImagePosition={homepageSettings?.homeFeaturedCategoryBannerImagePosition}
-              desktopBannerHeight={homepageSettings?.homeFeaturedCategoryDesktopBannerHeight}
-              mobileBannerHeight={homepageSettings?.homeFeaturedCategoryMobileBannerHeight}
+            <OffersListHomePage
+              icon={<NewIcon />}
+              title="منتخب‌های این هفته"
+              products={weeklyPicksProducts}
+            />
+          </Reveal>
+        </section>
+      )}
+
+      {homepageSettings?.homeEveryoneFollowsEnabled && everyoneFollowsProducts.length > 0 && (
+        <section>
+          <Reveal variant="fade-up" duration={700}>
+            <OffersListHomePage
+              icon={<NewIcon />}
+              title="همه دنبالشَن"
+              products={everyoneFollowsProducts}
             />
           </Reveal>
         </section>

@@ -144,20 +144,14 @@ async function StoriesSection() {
 }
 
 async function ProductSectionsBlock({
-  featuredCategorySlug,
-  featuredCategoryBannerImage,
   homepageSettings,
   promoBanners,
 }: {
-  featuredCategorySlug: string;
-  featuredCategoryBannerImage: string;
   homepageSettings: SuperAdminSettings;
   promoBanners: HomePromoBanner[];
 }) {
   return (
     <HomeProductSections
-      featuredCategorySlug={featuredCategorySlug}
-      featuredCategoryBannerImage={featuredCategoryBannerImage}
       homepageSettings={homepageSettings}
       promoBanners={promoBanners}
     />
@@ -241,9 +235,6 @@ export default async function Home() {
       mobileHeight: homepageSettings.homeBannerTwoMobileHeight,
     },
   ];
-  const featuredCategorySlug = homepageSettings.homeFeaturedCategorySlug?.trim() || "";
-  const featuredCategoryBannerImage =
-    homepageSettings.homeFeaturedCategoryBannerImage?.trim() || "";
   const heroFromCms = mapCmsHeroSliderToBannerSlides(homepageSettings.homeHeroSliderPublished);
 
   return (
@@ -279,8 +270,6 @@ export default async function Home() {
 
         <Suspense fallback={<ProductSectionsFallback />}>
           <ProductSectionsBlock
-            featuredCategorySlug={featuredCategorySlug}
-            featuredCategoryBannerImage={featuredCategoryBannerImage}
             homepageSettings={homepageSettings}
             promoBanners={promoBanners}
           />
