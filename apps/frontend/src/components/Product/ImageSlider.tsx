@@ -22,7 +22,7 @@ const ImageSlider: FC<ImageSliderProps> = ({
   isAvailable = true,
 }) => {
   const validImages = images.filter(
-    (img) => img && typeof img === "string" && img.trim() !== ""
+    (img) => img && typeof img === "string" && img.trim() !== "",
   );
   const coverImage = validImages[0];
 
@@ -32,7 +32,7 @@ const ImageSlider: FC<ImageSliderProps> = ({
 
   return (
     <div
-      className="relative h-full w-full overflow-hidden rounded-[21px]"
+      className="relative h-full w-full overflow-hidden rounded-xl"
       role="img"
       aria-label={!isAvailable ? `محصول ${title} ناموجود است` : undefined}
     >
@@ -41,7 +41,7 @@ const ImageSlider: FC<ImageSliderProps> = ({
           src={coverImage}
           alt={title}
           fill
-          className={`select-none object-cover transition-all duration-500 md:group-hover:scale-[1.025] ${
+          className={`select-none object-cover transition-all duration-500 md:group-hover:scale-[1.02] md:group-focus-within:scale-[1.02] ${
             !isAvailable ? "opacity-60 saturate-[0.4] blur-sm" : ""
           }`}
           sizes="(max-width: 640px) 45vw, (max-width: 1024px) 33vw, 25vw"
@@ -59,7 +59,7 @@ const ImageSlider: FC<ImageSliderProps> = ({
           aria-label="محصول ناموجود است"
         >
           <div className="rounded-full bg-neutral-800/70 px-4 py-1.5 shadow-xl backdrop-blur-md ring-1 ring-white/20">
-            <span className="text-sm font-bold text-white tracking-wider">ناموجود</span>
+            <span className="text-sm font-bold tracking-wider text-white">ناموجود</span>
           </div>
         </div>
       )}

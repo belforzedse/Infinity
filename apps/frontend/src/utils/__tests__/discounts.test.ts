@@ -1,6 +1,7 @@
 import {
   parseNumber,
   computeDiscountForVariation,
+  computeSaleDiscountPercent,
   hasActiveDiscount,
   applyDiscountToProductCard,
   type DiscountComputationResult,
@@ -29,6 +30,40 @@ describe("parseNumber", () => {
     expect(parseNumber("abc")).toBeUndefined();
     expect(parseNumber(NaN)).toBeUndefined();
     expect(parseNumber(Infinity)).toBeUndefined();
+  });
+});
+
+describe("computeSaleDiscountPercent", () => {
+  it("should return undefined when there is no valid sale", () => {
+    expect(computeSaleDiscountPercent(100000)).toBeUndefined();
+    expect(computeSaleDiscountPercent(100000, 100000)).toBeUndefined();
+    expect(computeSaleDiscountPercent(100000, 0)).toBeUndefined();
+    expect(computeSaleDiscountPercent(100000, 120000)).toBeUndefined();
+  });
+
+  it("should use discount prop when provided", () => {
+    expect(computeSaleDiscountPercent(100000, 80000, 20)).toBe(20);
+  });
+
+  it("should compute percent from prices when discount prop is missing", () => {
+    expect(computeSaleDiscountPercent(100000, 75000)).toBe(25);
+  });
+});
+
+describe("computeSaleDiscountPercent", () => {
+  it("returns undefined when there is no valid discount", () => {
+    expect(computeSaleDiscountPercent(100000)).toBeUndefined();
+    expect(computeSaleDiscountPercent(100000, 100000)).toBeUndefined();
+    expect(computeSaleDiscountPercent(100000, 0)).toBeUndefined();
+    expect(computeSaleDiscountPercent(100000, 120000)).toBeUndefined();
+  });
+
+  it("uses discount prop when provided", () => {
+    expect(computeSaleDiscountPercent(100000, 80000, 20)).toBe(20);
+  });
+
+  it("computes percent from prices when discount prop is missing", () => {
+    expect(computeSaleDiscountPercent(100000, 75000)).toBe(25);
   });
 });
 

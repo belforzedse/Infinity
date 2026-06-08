@@ -218,6 +218,31 @@ textarea:focus-visible {
   }
 }
 
+/* Product card overlays — Figma glass chips */
+.product-card-glass-chip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  background: rgba(0, 0, 0, 0.14);
+  -webkit-backdrop-filter: blur(3.65px);
+  backdrop-filter: blur(3.65px);
+  border-radius: 8px;
+}
+
+.product-card-color-badge {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 4px 8px 4px 6px;
+  gap: 4px;
+  min-height: 20px;
+  background: rgba(0, 0, 0, 0.14);
+  -webkit-backdrop-filter: blur(3.65px);
+  backdrop-filter: blur(3.65px);
+  border-radius: 6px;
+}
+
 .glass-chip {
   border-radius: 9999px;
   box-shadow:

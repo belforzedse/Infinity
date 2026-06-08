@@ -74,16 +74,24 @@ describe("ProductCard", () => {
     expect(screen.getByText(`${faNum(100000)} تومان`)).toBeInTheDocument();
   });
 
-  it("should render discount badge when discount is provided", () => {
-    render(<ProductCard {...mockProps} discount={20} />);
+  it("should render discount badge when product is on sale", () => {
+    render(
+      <ProductCard {...mockProps} price={100000} discountPrice={80000} discount={20} />,
+    );
 
-    expect(screen.getByText("٪20 تخفیف")).toBeInTheDocument();
+    expect(screen.getByText(`${faNum(20)}٪ تخفیف`)).toBeInTheDocument();
   });
 
-  it("should not render discount badge when no discount", () => {
+  it("should not render discount badge when no sale", () => {
     render(<ProductCard {...mockProps} />);
 
     expect(screen.queryByText(/تخفیف/)).not.toBeInTheDocument();
+  });
+
+  it("should compute discount percent from prices when discount prop is missing", () => {
+    render(<ProductCard {...mockProps} price={100000} discountPrice={75000} />);
+
+    expect(screen.getByText(`${faNum(25)}٪ تخفیف`)).toBeInTheDocument();
   });
 
   it("should render discounted price correctly", () => {
@@ -108,16 +116,16 @@ describe("ProductCard", () => {
     expect(screen.queryByText(/نفر در ۲۴ ساعت گذشته/)).not.toBeInTheDocument();
   });
 
-  it("should render color count badge when provided", () => {
-    render(<ProductCard {...mockProps} colorsCount={3} />);
+  it("should always render the color badge", () => {
+    const { container } = render(<ProductCard {...mockProps} />);
 
-    expect(screen.getByText("3+")).toBeInTheDocument();
+    expect(container.querySelector('[role="img"][aria-label="پیش‌نمایش رنگ"]')).toBeInTheDocument();
   });
 
-  it("should not render color count badge when not provided", () => {
-    render(<ProductCard {...mockProps} />);
+  it("should show remaining color count when colorsCount is provided", () => {
+    render(<ProductCard {...mockProps} colorsCount={3} colorCodes={["#111111", "#222222"]} />);
 
-    expect(screen.queryByText("3+")).not.toBeInTheDocument();
+    expect(screen.getAllByText(`+${faNum(1)}`).length).toBeGreaterThanOrEqual(1);
   });
 
   it("should show unavailable message when product is not available", () => {
@@ -145,12 +153,11 @@ describe("ProductCard", () => {
   it("should render favorite button with correct aria-label", () => {
     render(<ProductCard {...mockProps} />);
 
-    const button = screen.getByLabelText("Add to favorites");
+    const button = screen.getByLabelText("افزودن به علاقه‌مندی‌ها");
     expect(button).toBeInTheDocument();
   });
 
   it("should show different aria-label when liked", () => {
-    const useProductLike = require("@/hooks/useProductLike").default;
     useProductLike.mockReturnValue({
       isLiked: true,
       isLoading: false,
@@ -159,11 +166,10 @@ describe("ProductCard", () => {
 
     render(<ProductCard {...mockProps} />);
 
-    expect(screen.getByLabelText("Remove from favorites")).toBeInTheDocument();
+    expect(screen.getByLabelText("حذف از علاقه‌مندی‌ها")).toBeInTheDocument();
   });
 
   it("should disable favorite button when loading", () => {
-    const useProductLike = require("@/hooks/useProductLike").default;
     useProductLike.mockReturnValue({
       isLiked: false,
       isLoading: true,
@@ -172,13 +178,12 @@ describe("ProductCard", () => {
 
     render(<ProductCard {...mockProps} />);
 
-    const button = screen.getByLabelText("Add to favorites");
+    const button = screen.getByLabelText("افزودن به علاقه‌مندی‌ها");
     expect(button).toBeDisabled();
   });
 
   it("should call toggleLike when favorite button is clicked", () => {
     const mockToggleLike = jest.fn();
-    const useProductLike = require("@/hooks/useProductLike").default;
     useProductLike.mockReturnValue({
       isLiked: false,
       isLoading: false,
@@ -187,7 +192,7 @@ describe("ProductCard", () => {
 
     render(<ProductCard {...mockProps} />);
 
-    const button = screen.getByLabelText("Add to favorites");
+    const button = screen.getByLabelText("افزودن به علاقه‌مندی‌ها");
     fireEvent.click(button);
 
     expect(mockToggleLike).toHaveBeenCalled();
@@ -219,9 +224,11 @@ describe("ProductCard", () => {
       expect(getLazySecondaryMediaByProductId).toHaveBeenCalledTimes(1);
     });
 
-    const slider = screen.getByTestId("image-slider");
-    expect(slider).toHaveAttribute("data-image-count", "3");
-    expect(slider).toHaveAttribute("data-images", "/image1.jpg,/image2.jpg,/image3.jpg");
+    await waitFor(() => {
+      const slider = screen.getByTestId("image-slider");
+      expect(slider).toHaveAttribute("data-image-count", "3");
+      expect(slider).toHaveAttribute("data-images", "/image1.jpg,/image2.jpg,/image3.jpg");
+    });
   });
 
   it("should not request lazy media when product already has multiple images", () => {

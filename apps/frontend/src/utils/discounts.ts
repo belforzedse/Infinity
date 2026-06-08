@@ -242,6 +242,21 @@ export const hasActiveDiscount = (
   return !!result && result.discountAmount > 0 && result.finalPrice < result.basePrice;
 };
 
+export const computeSaleDiscountPercent = (
+  price: number,
+  discountPrice?: number,
+  discount?: number,
+): number | undefined => {
+  const hasDiscount = Boolean(discountPrice && discountPrice > 0 && discountPrice < price);
+  if (!hasDiscount) return undefined;
+
+  if (discount !== undefined && discount > 0) {
+    return Math.round(discount);
+  }
+
+  return Math.round(((price - discountPrice!) / price) * 100);
+};
+
 export const applyDiscountToProductCard = (
   product: ProductCardProps,
   discount: DiscountComputationResult | null,

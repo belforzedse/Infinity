@@ -1,4 +1,5 @@
 import React from "react";
+import { faNum } from "@/utils/faNum";
 
 interface PriceCardProps {
   isAvailable?: boolean;
@@ -11,32 +12,30 @@ export function PriceCard({
   price,
   discountedPrice,
 }: PriceCardProps): React.JSX.Element {
+  const hasDiscount = Boolean(
+    discountedPrice && discountedPrice > 0 && discountedPrice < price,
+  );
+
   return (
-    <div className="rounded-lg bg-stone-100 px-3 py-1 md:p-1">
-      <div className="flex justify-between md:justify-center">
-        <div className="text-xs text-neutral-500 md:hidden">قیمت</div>
+    <div className="min-h-[36px] rounded-[14px] bg-stone-100 px-3 py-2">
+      <div className="flex min-w-0 items-center justify-between gap-2">
+        <span className="shrink-0 text-xs text-neutral-500">قیمت</span>
 
         {!isAvailable ? (
           <span className="text-xs font-medium text-red-600">ناموجود</span>
         ) : (
-          <div className="flex items-center justify-end gap-1 md:justify-center">
+          <div className="flex min-w-0 items-center justify-end gap-1.5">
             <span
-              className={`text-xs ${
-                discountedPrice && discountedPrice > 0 && discountedPrice < price
-                  ? "text-infinity-primary"
-                  : "text-neutral-800"
-              } font-medium`}
+              className={`truncate text-xs font-medium ${
+                hasDiscount ? "text-infinity-primary" : "text-neutral-800"
+              }`}
             >
-              {(discountedPrice && discountedPrice > 0 && discountedPrice < price
-                ? discountedPrice
-                : price
-              )?.toLocaleString()}{" "}
-              تومان
+              {faNum(hasDiscount ? discountedPrice! : price)} تومان
             </span>
 
-            {discountedPrice && discountedPrice > 0 && discountedPrice < price && (
-              <span className="text-[10px] text-neutral-400 line-through">
-                {price?.toLocaleString()} تومان
+            {hasDiscount && (
+              <span className="shrink-0 text-[10px] text-neutral-400 line-through">
+                {faNum(price)} تومان
               </span>
             )}
           </div>
@@ -45,4 +44,3 @@ export function PriceCard({
     </div>
   );
 }
-

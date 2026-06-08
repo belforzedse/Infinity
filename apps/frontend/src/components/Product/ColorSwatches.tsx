@@ -1,5 +1,6 @@
 import React from "react";
 import clsx from "clsx";
+import { faNum } from "@/utils/faNum";
 
 export type ColorSwatch = string | { code: string; name?: string };
 
@@ -13,8 +14,6 @@ interface ColorSwatchesProps {
 
 const HEX_COLOR_PATTERN =
   /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
-const FALLBACK_COLOR = "#CBD5E1";
-const FALLBACK_LABEL = "Fallback color";
 
 const isValidColor = (value: string): boolean => {
   const trimmed = value.trim();
@@ -29,56 +28,52 @@ const ColorSwatches: React.FC<ColorSwatchesProps> = ({
   colorCodes,
   colorsCount,
   className,
-  maxVisible = 3,
+  maxVisible = 2,
   size = "md",
 }) => {
-  if (!colorsCount || colorsCount <= 0) return null;
-
   const isSmall = size === "sm";
+  const validCodes =
+    colorCodes?.filter((color) => {
+      const rawCode = typeof color === "string" ? color : color.code;
+      return rawCode && isValidColor(rawCode);
+    }) ?? [];
+
+  const totalCount = colorsCount && colorsCount > 0 ? colorsCount : validCodes.length;
+  const visibleSwatches = validCodes.slice(0, maxVisible);
+  const remaining =
+    totalCount > visibleSwatches.length ? totalCount - visibleSwatches.length : 0;
 
   return (
     <div
-      className={clsx(
-        "flex items-center backdrop-blur-sm shadow-md",
-        isSmall
-          ? "gap-1 rounded-xl bg-stone-50/90 px-1.5 py-0.5"
-          : "gap-1.5 rounded-2xl bg-stone-50/90 px-2 py-1",
-        className
-      )}
+      className={clsx("product-card-color-badge", isSmall ? "gap-1" : "gap-1.5", className)}
+      role="img"
+      aria-label={
+        totalCount > 0
+          ? `${faNum(totalCount)} رنگ`
+          : "پیش‌نمایش رنگ"
+      }
     >
-      <span
-        className={clsx(
-          "font-bold text-neutral-800",
-          isSmall ? "text-xs" : "text-sm"
-        )}
-      >
-        {colorsCount > 9 ? "9+" : colorsCount}
-      </span>
       <div
         className={clsx(
           "flex items-center rtl:space-x-reverse",
-          isSmall ? "-space-x-1.5" : "-space-x-2"
+          isSmall ? "-space-x-1" : "-space-x-1.5",
         )}
       >
-        {colorCodes && colorCodes.length > 0 ? (
-          colorCodes.slice(0, maxVisible).map((color, index) => {
+        {visibleSwatches.length > 0 ? (
+          visibleSwatches.map((color, index) => {
             const rawCode = typeof color === "string" ? color : color.code;
-            const rawLabel = typeof color === "string" ? color : color.name ?? color.code;
-            const isValid = isValidColor(rawCode);
-            const validCode = isValid ? rawCode.trim() : FALLBACK_COLOR;
-            const label = isValid ? rawLabel : FALLBACK_LABEL;
+            const rawLabel = typeof color === "string" ? color : (color.name ?? color.code);
+            const validCode = rawCode.trim();
 
             return (
               <div
-                key={`${rawCode}-${index}`}
+                key={`${validCode}-${index}`}
                 className={clsx(
-                  "relative rounded-full border border-white shadow-sm overflow-hidden",
-                  isSmall ? "h-4 w-4" : "h-5 w-5 border-2"
+                  "relative overflow-hidden rounded-full border border-white shadow-sm",
+                  isSmall ? "h-3.5 w-3.5" : "h-4 w-4",
                 )}
                 style={{ backgroundColor: validCode, zIndex: maxVisible - index }}
-                role="img"
-                aria-label={label}
-                title={label}
+                title={rawLabel}
               >
                 <div
                   className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-white/40"
@@ -91,13 +86,11 @@ const ColorSwatches: React.FC<ColorSwatchesProps> = ({
           <>
             <div
               className={clsx(
-                "relative rounded-full border border-white bg-gradient-to-r from-blue-600 to-blue-400 shadow-sm overflow-hidden",
-                isSmall ? "h-4 w-4" : "h-5 w-5 border-2"
+                "relative overflow-hidden rounded-full border border-white bg-gradient-to-r from-amber-200 to-amber-400 shadow-sm",
+                isSmall ? "h-3.5 w-3.5" : "h-4 w-4",
               )}
-              style={{ zIndex: 3 }}
-              role="img"
-              aria-label="Blue gradient"
-              title="Blue gradient"
+              style={{ zIndex: 2 }}
+              aria-hidden="true"
             >
               <div
                 className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-white/40"
@@ -106,13 +99,11 @@ const ColorSwatches: React.FC<ColorSwatchesProps> = ({
             </div>
             <div
               className={clsx(
-                "relative rounded-full border border-white bg-gradient-to-r from-infinity-primary to-infinity-primary-light shadow-sm overflow-hidden",
-                isSmall ? "h-4 w-4" : "h-5 w-5 border-2"
+                "relative overflow-hidden rounded-full border border-white bg-gradient-to-r from-infinity-primary to-infinity-primary-light shadow-sm",
+                isSmall ? "h-3.5 w-3.5" : "h-4 w-4",
               )}
-              style={{ zIndex: 2 }}
-              role="img"
-              aria-label="Pink gradient"
-              title="Pink gradient"
+              style={{ zIndex: 1 }}
+              aria-hidden="true"
             >
               <div
                 className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-white/40"
@@ -122,6 +113,16 @@ const ColorSwatches: React.FC<ColorSwatchesProps> = ({
           </>
         )}
       </div>
+      {remaining > 0 && (
+        <span
+          className={clsx(
+            "font-medium text-white",
+            isSmall ? "text-[10px]" : "text-xs",
+          )}
+        >
+          +{faNum(remaining)}
+        </span>
+      )}
     </div>
   );
 };

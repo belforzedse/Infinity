@@ -1,5 +1,6 @@
 "use client";
 
+import type React from "react";
 import Image from "next/image";
 import imageLoader from "@/utils/imageLoader";
 import ShoppingCartQuantityControl from "../QuantityControl";
@@ -12,18 +13,50 @@ interface Props {
   className?: string;
 }
 
-export default function ShoppingCartMobileProductCard({ cartItem }: Props) {
-  const formatPrice = (value: number) => `${faNum(value)} تومان`;
+function CartPriceValue({
+  amount,
+  originalAmount,
+}: {
+  amount: number;
+  originalAmount?: number;
+}): React.JSX.Element {
+  const hasDiscount = Boolean(originalAmount && originalAmount > amount);
+
+  if (!hasDiscount) {
+    return (
+      <span className="truncate text-sm font-medium text-neutral-800">
+        {faNum(amount)} تومان
+      </span>
+    );
+  }
 
   return (
-    <div className="flex w-full flex-col divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-100 lg:hidden">
+    <div className="flex min-w-0 flex-col items-end gap-0.5">
+      <span className="truncate text-sm font-medium text-infinity-primary">
+        {faNum(amount)} تومان
+      </span>
+      <span className="text-xs text-neutral-400 line-through">
+        {faNum(originalAmount!)} تومان
+      </span>
+    </div>
+  );
+}
+
+export default function ShoppingCartMobileProductCard({ cartItem }: Props) {
+  const unitOriginal =
+    cartItem.originalPrice && cartItem.originalPrice > cartItem.price
+      ? cartItem.originalPrice
+      : undefined;
+
+  return (
+    <div className="flex w-full flex-col divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-100 bg-white lg:hidden">
       <div className="grid grid-cols-4">
         <div className="flex items-center justify-start border-l border-slate-100 bg-stone-50 pr-3">
-          <span className="text-sm text-foreground-primary">نام محصول</span>
+          <span className="text-xs text-neutral-500">نام محصول</span>
         </div>
 
-        <div className="col-span-3 flex items-center gap-1 px-3 py-2">
-          <div className="relative h-12 w-12 overflow-hidden rounded-lg">
+        <div className="col-span-3 flex min-w-0 items-center gap-2 px-3 py-2">
+          <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl">
             <Image
               src={
                 cartItem.image.startsWith("http")
@@ -37,20 +70,20 @@ export default function ShoppingCartMobileProductCard({ cartItem }: Props) {
               loader={imageLoader}
             />
           </div>
-          <span className="text-sm text-foreground-primary">{cartItem.name}</span>
+          <span className="line-clamp-2 text-base text-neutral-800">{cartItem.name}</span>
         </div>
       </div>
 
       <div className="grid grid-cols-4">
         <div className="flex items-center justify-start border-l border-slate-100 bg-stone-50 pr-3">
-          <span className="text-sm text-foreground-primary">دسته بندی</span>
+          <span className="text-xs text-neutral-500">دسته بندی</span>
         </div>
 
         <div className="col-span-3 flex items-center gap-1 p-3">
           <div className="flex flex-col gap-1">
-            <span className="text-sm text-foreground-primary">{cartItem.category}</span>
+            <span className="text-sm text-neutral-800">{cartItem.category}</span>
             {[cartItem.color, cartItem.size, cartItem.model].some(Boolean) ? (
-              <span className="text-xs text-slate-500">
+              <span className="text-xs text-neutral-500">
                 {[
                   cartItem.color ? `رنگ: ${cartItem.color}` : null,
                   cartItem.size ? `سایز: ${cartItem.size}` : null,
@@ -66,28 +99,19 @@ export default function ShoppingCartMobileProductCard({ cartItem }: Props) {
 
       <div className="grid grid-cols-4">
         <div className="flex items-center justify-start border-l border-slate-100 bg-stone-50 pr-3">
-          <span className="text-sm text-foreground-primary">قیمت</span>
+          <span className="text-xs text-neutral-500">قیمت</span>
         </div>
 
-        <div className="col-span-3 flex flex-col items-end gap-1 p-3">
-          {cartItem.originalPrice && cartItem.originalPrice > cartItem.price ? (
-            <>
-              <span className="text-xs text-neutral-500 line-through">
-                {formatPrice(cartItem.originalPrice)}
-              </span>
-              <span className="text-base font-semibold text-infinity-primary">
-                {formatPrice(cartItem.price)}
-              </span>
-            </>
-          ) : (
-            <span className="text-base text-neutral-800">{formatPrice(cartItem.price)}</span>
-          )}
+        <div className="col-span-3 p-3">
+          <div className="rounded-[14px] bg-stone-100 px-3 py-2">
+            <CartPriceValue amount={cartItem.price} originalAmount={unitOriginal} />
+          </div>
         </div>
       </div>
 
       <div className="grid grid-cols-4">
         <div className="flex items-center justify-start border-l border-slate-100 bg-stone-50 pr-3">
-          <span className="text-sm text-foreground-primary">تعداد</span>
+          <span className="text-xs text-neutral-500">تعداد</span>
         </div>
 
         <div className="col-span-3 flex items-center gap-1 p-3">
@@ -97,24 +121,18 @@ export default function ShoppingCartMobileProductCard({ cartItem }: Props) {
 
       <div className="grid grid-cols-4">
         <div className="flex items-center justify-start border-l border-slate-100 bg-stone-50 pr-3">
-          <span className="text-sm text-foreground-primary">قیمت کل</span>
+          <span className="text-xs text-neutral-500">قیمت کل</span>
         </div>
 
-        <div className="col-span-3 flex flex-col items-end gap-1 p-3">
-          {cartItem.originalPrice && cartItem.originalPrice > cartItem.price ? (
-            <>
-              <span className="text-xs text-neutral-500 line-through">
-                {formatPrice(cartItem.originalPrice * cartItem.quantity)}
-              </span>
-              <span className="text-base font-semibold text-infinity-primary">
-                {formatPrice(cartItem.price * cartItem.quantity)}
-              </span>
-            </>
-          ) : (
-            <span className="text-base text-neutral-800">
-              {formatPrice(cartItem.price * cartItem.quantity)}
-            </span>
-          )}
+        <div className="col-span-3 p-3">
+          <div className="rounded-[14px] bg-stone-100 px-3 py-2">
+            <CartPriceValue
+              amount={cartItem.price * cartItem.quantity}
+              originalAmount={
+                unitOriginal !== undefined ? unitOriginal * cartItem.quantity : undefined
+              }
+            />
+          </div>
         </div>
       </div>
     </div>

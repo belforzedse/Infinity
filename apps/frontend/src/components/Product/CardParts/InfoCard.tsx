@@ -21,13 +21,13 @@ export function InfoCard({
   children,
 }: InfoCardProps & { children?: React.ReactNode }): React.JSX.Element {
   return (
-    <div className="flex flex-1 flex-col justify-between py-0.5">
+    <div className="flex min-w-0 flex-1 flex-col justify-between py-0.5">
       <div className="flex items-center justify-between gap-1">
-        <div className="flex items-center gap-1">
-          <GridIcon className="h-4 w-4 text-neutral-400" />
-          <span className="text-xs text-neutral-400">{category}</span>
+        <div className="flex min-w-0 items-center gap-1">
+          <GridIcon className="h-4 w-4 shrink-0 text-neutral-400" />
+          <span className="truncate text-xs text-neutral-400">{category}</span>
         </div>
-        <div className="flex items-center justify-between">
+        <div className="flex shrink-0 items-center justify-between">
           <button
             ref={menuButtonRef}
             onClick={handleMenuToggle}
@@ -36,17 +36,16 @@ export function InfoCard({
             aria-expanded={isMenuOpen}
             type="button"
           >
-            <MoreIcon className="h-6 w-6 text-infinity-primary" />
+            <MoreIcon className="h-6 w-6 text-neutral-400" />
           </button>
         </div>
       </div>
 
       <div className="flex flex-col gap-0.5">
-        <h3 className="text-xs line-clamp-1 text-neutral-800">{title}</h3>
+        <h3 className="line-clamp-1 text-base text-neutral-800">{title}</h3>
       </div>
 
       {children}
     </div>
   );
 }
-

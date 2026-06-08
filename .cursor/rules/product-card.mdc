@@ -1,0 +1,73 @@
+---
+description: Product card visual tokens, variants, and light-touch styling policy for ProductCard, ProductSmallCard, BlogProductCard, and cart mobile line items.
+globs:
+alwaysApply: false
+---
+
+# Product Cards
+
+## Components
+
+| Component | Path | Usage |
+|-----------|------|-------|
+| **ProductCard** (normal) | `apps/frontend/src/components/Product/Card.tsx` | Desktop PLP, homepage carousels, PDP related |
+| **ProductSmallCard** (small) | `apps/frontend/src/components/Product/SmallCard.tsx` | Mobile PLP, sidebar, favorites, featured category |
+| **BlogProductCard** | `apps/frontend/src/components/Blog/BlogProductCard.tsx` | Blog post product carousel |
+| **ShoppingCartMobileProductCard** | `apps/frontend/src/components/ShoppingCart/Table/MobileProductCard.tsx` | Cart mobile line items (`lg:hidden`) |
+
+Shared subcomponents live in `apps/frontend/src/components/Product/CardParts/`. Color preview uses `ColorSwatches.tsx`.
+
+## Light-touch policy
+
+- **Preserve layout and composition** — same component trees, overlay positions, hover slide-up (`VariationOverlay`), responsive aspects, and interactions.
+- **Visual-only changes** — border radius, neutral palette, typography, price-pill styling, badge appearance.
+- **No carousel indicator bars** on PLP/home cards — cover image only in `ImageSlider`.
+- Keep global `.interactive-card:hover { translateY(-2px) }` on discovery cards.
+
+## Visual tokens
+
+| Token | Value |
+|-------|-------|
+| Card shell | `rounded-2xl`, `border-slate-100`, `bg-white`, `p-1`, `gap-1` |
+| Image radius | `rounded-xl` (12px) |
+| Category | `text-xs text-neutral-400` |
+| Title | `text-base text-neutral-800`, `line-clamp-1` (or `line-clamp-2` on blog) |
+| Price pill | `bg-stone-100`, `rounded-[14px]`, `px-3 py-2`, min-height ~43px on normal card |
+| Price hover (desktop) | `bg-infinity-primary`, white / `infinity-primary-lighter` text via `group-hover` + `group-focus-within` |
+| Sale badge | `DiscountBadge` — only when `discountPrice > 0 && discountPrice < price`; percent via `computeSaleDiscountPercent` in `utils/discounts.ts` |
+| Quick actions chip | `.product-card-glass-chip` — `24×24px`, `padding: 2px`, `bg rgba(0,0,0,0.14)`, `blur(3.65px)`, `border-radius: 8px`, white icons |
+| Color badge | `.product-card-color-badge` — `padding: 4px 8px 4px 6px`, same glass bg/blur, `border-radius: 6px`; swatch gradient glow preserved |
+
+## Color badge — always visible
+
+`ColorSwatches` **always renders** on normal, small, and blog product cards:
+
+- Up to **2 swatches** + `+N` remaining when `colorsCount` or `colorCodes` exist.
+- **Fallback gradient swatches** when no color data (badge never empty).
+- **Not hidden on hover** (no `group-hover:opacity-0` on the badge).
+
+## Sale detection
+
+```typescript
+import { computeSaleDiscountPercent } from "@/utils/discounts";
+
+const percent = computeSaleDiscountPercent(price, discountPrice, discount);
+// Badge renders only when percent is defined (> 0 and valid sale)
+```
+
+## Responsive behavior
+
+- **PLP:** `md+` → `ProductCard`; below `md` → `ProductSmallCard` (see `plp-layout.mdc`).
+- **ProductCard image:** `aspect-[3/4]` mobile, `aspect-[250/270]` from `md+`; `w-full min-w-0` in grid cells.
+- **ProductSmallCard:** horizontal layout, `h-[116px]`, image `w-24 h-[100px]`.
+- Cards scale inside [`StorefrontGrid`](apps/frontend/src/components/storefront/StorefrontGrid.tsx) — do not force fixed `260px` width.
+
+## Cart mobile card
+
+`ShoppingCartMobileProductCard` keeps the **5-row label/value grid** (name, category, price, quantity, line total). Visual tokens align with product cards; quantity control and cart logic unchanged.
+
+## Tests
+
+- `apps/frontend/src/components/Product/__tests__/Card.test.tsx`
+- `apps/frontend/src/components/Product/__tests__/ImageSlider.test.tsx`
+- `apps/frontend/src/utils/__tests__/discounts.test.ts` (`computeSaleDiscountPercent`)

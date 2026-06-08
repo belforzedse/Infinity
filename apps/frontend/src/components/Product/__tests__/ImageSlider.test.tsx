@@ -16,11 +16,7 @@ jest.mock("@/utils/imageLoader", () => ({
 }));
 
 describe("ImageSlider", () => {
-  const mockImages = [
-    "/image1.jpg",
-    "/image2.jpg",
-    "/image3.jpg",
-  ];
+  const mockImages = ["/image1.jpg", "/image2.jpg", "/image3.jpg"];
 
   it("should render only the cover (first) image", () => {
     render(<ImageSlider images={mockImages} title="Test Product" />);
@@ -70,8 +66,7 @@ describe("ImageSlider", () => {
 
     const mainContainer = container.firstChild;
     expect(mainContainer).toHaveClass("relative");
-    expect(mainContainer).toHaveClass("mx-auto");
     expect(mainContainer).toHaveClass("overflow-hidden");
-    expect(mainContainer).toHaveClass("rounded-[21px]");
+    expect(mainContainer).toHaveClass("rounded-xl");
   });
 });

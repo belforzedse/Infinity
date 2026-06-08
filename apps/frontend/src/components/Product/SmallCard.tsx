@@ -10,6 +10,7 @@ import ShuffleIcon from "@/components/PDP/Icons/ShuffleIcon";
 import useProductLike from "@/hooks/useProductLike";
 import clsx from "clsx";
 import { ImageCard, InfoCard, PriceCard } from "./CardParts";
+import { computeSaleDiscountPercent } from "@/utils/discounts";
 
 // Lazy load heavy modals
 const QuickViewModal = dynamic(() => import("./QuickViewModal"), {
@@ -77,6 +78,8 @@ const ProductSmallCard: React.FC<ProductSmallCardProps> = ({
     discountedPrice && discountedPrice > 0 && discountedPrice < price,
   );
 
+  const saleDiscountPercent = computeSaleDiscountPercent(price, discountedPrice, discount);
+
   // Use slug if available, otherwise fall back to ID for backwards compatibility.
   const productUrl = slug ? `/pdp/${encodeURIComponent(slug)}` : `/pdp/${id}`;
 
@@ -141,11 +144,11 @@ const ProductSmallCard: React.FC<ProductSmallCardProps> = ({
           className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
           aria-label={`مشاهده جزئیات ${title}`}
         >
-          <div className="flex h-[116px] flex-row gap-2 rounded-2xl border border-slate-200 bg-white p-2 md:w-full">
+          <div className="flex h-[116px] flex-row gap-2 rounded-2xl border border-slate-100 bg-white p-2 md:w-full">
             <ImageCard
               image={image}
               title={title}
-              discount={discount}
+              discount={saleDiscountPercent}
               isAvailable={isAvailable}
               priority={priority}
               imageLoader={imageLoader}

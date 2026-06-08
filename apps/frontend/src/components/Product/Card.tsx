@@ -5,6 +5,7 @@ import { type FC, useState, useMemo, useCallback, useEffect, useRef } from "reac
 import dynamic from "next/dynamic";
 import useProductLike from "@/hooks/useProductLike";
 import { getLazySecondaryMediaByProductId } from "@/services/product/product";
+import { computeSaleDiscountPercent } from "@/utils/discounts";
 
 // Components
 import ImageSlider from "./ImageSlider";
@@ -90,6 +91,11 @@ const ProductCard: FC<ProductCardProps> = ({
     [discountPrice, price],
   );
 
+  const saleDiscountPercent = useMemo(
+    () => computeSaleDiscountPercent(price, discountPrice, discount),
+    [price, discountPrice, discount],
+  );
+
   const validImages = useMemo(
     () => enrichedImages.filter((img) => img && typeof img === "string" && img.trim() !== ""),
     [enrichedImages],
@@ -173,9 +179,9 @@ const ProductCard: FC<ProductCardProps> = ({
           className="block rounded-3xl focus:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
           aria-label={`مشاهده جزئیات ${title}`}
         >
-          <div className="interactive-card pressable flex h-full w-full min-w-0 flex-col rounded-2xl border border-zinc-100 bg-white p-0.5 shadow-[0_8px_24px_rgba(15,23,42,0.035)] transition-all duration-300 md:rounded-3xl md:p-1 md:group-hover:border-infinity-primary-lighter/40 md:group-hover:shadow-[0_16px_36px_rgba(15,23,42,0.08)]">
+          <div className="interactive-card pressable flex h-full w-full min-w-0 flex-col gap-1 rounded-2xl border border-slate-100 bg-white p-1 transition-all duration-300 md:group-hover:border-infinity-primary-lighter/40">
             {/* Image Section */}
-            <div className="relative aspect-[3/4] w-full min-w-0 overflow-hidden rounded-2xl md:aspect-[250/270] md:rounded-[20px]">
+            <div className="relative aspect-[3/4] w-full min-w-0 overflow-hidden rounded-xl md:aspect-[250/270]">
               <ImageSlider
                 images={enrichedImages}
                 title={title}
@@ -195,16 +201,15 @@ const ProductCard: FC<ProductCardProps> = ({
               )}
 
               {/* Badges */}
-              <div className="absolute left-1 right-1 top-1 flex items-center justify-between">
-                <DiscountBadge discount={discount} />
+              <div className="absolute left-1 right-1 top-1 flex items-center justify-end">
+                <DiscountBadge discount={saleDiscountPercent} />
               </div>
 
-              {/* Color Swatches - Mobile */}
               <ColorSwatches
                 colorCodes={colorCodes}
                 colorsCount={colorsCount}
                 size="sm"
-                className="absolute bottom-2 right-2 transition-opacity duration-300 md:group-hover:opacity-0"
+                className="absolute bottom-2 right-2"
               />
             </div>
 

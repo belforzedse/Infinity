@@ -21,15 +21,17 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
   onShare,
 }) => {
   const buttonBaseClass =
-    "pressable luxury-glass-chip flex h-7 w-7 md:h-8 md:w-8 items-center justify-center rounded-full text-neutral-500 ring-1 ring-white/60 transition-all hover:text-infinity-primary hover:shadow-[0_10px_24px_rgba(61, 76, 110,0.18)] touch-manipulation";
+    "product-card-glass-chip pressable h-6 w-6 text-white transition-opacity hover:opacity-90 touch-manipulation";
+
+  const revealClass =
+    "hidden opacity-0 md:flex md:-translate-y-2 md:group-hover:translate-y-0 md:group-hover:opacity-100 md:group-focus-within:translate-y-0 md:group-focus-within:opacity-100";
 
   return (
     <div
-      className="absolute left-2.5 top-2.5 z-20 flex flex-col gap-2"
+      className="absolute left-2 top-2 z-20 flex flex-col gap-2.5"
       role="group"
       aria-label="عملیات محصول"
     >
-      {/* Like Button */}
       <button
         type="button"
         onClick={onToggleLike}
@@ -41,31 +43,29 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
         aria-pressed={isLiked}
       >
         <HeartIcon
-          className={`h-3.5 w-3.5 transition-colors md:h-4 md:w-4 ${
-            isLiked ? "fill-infinity-primary text-infinity-primary" : "text-neutral-500"
+          className={`h-4 w-4 transition-colors ${
+            isLiked ? "fill-infinity-primary text-infinity-primary" : "text-white"
           }`}
           filled={isLiked}
         />
       </button>
 
-      {/* Quick View Button - hidden on mobile */}
       <button
         type="button"
         onClick={onQuickView}
-        className={`${buttonBaseClass} z-20 hidden opacity-0 md:flex md:-translate-y-10 md:group-hover:translate-y-0 md:group-hover:opacity-100`}
+        className={`${buttonBaseClass} z-20 ${revealClass}`}
         aria-label="نمایش سریع محصول"
       >
-        <EyeIcon className="h-5 w-5 text-neutral-500 md:h-4 md:w-4" />
+        <EyeIcon className="h-4 w-4 text-white" />
       </button>
 
-      {/* Share Button - hidden on mobile */}
       <button
         type="button"
         onClick={onShare}
-        className={`${buttonBaseClass} z-10 hidden opacity-0 md:flex md:-translate-y-20 md:group-hover:translate-y-0 md:group-hover:opacity-100`}
+        className={`${buttonBaseClass} z-10 ${revealClass} md:-translate-y-4 md:group-hover:translate-y-0 md:group-focus-within:translate-y-0`}
         aria-label="اشتراک‌گذاری"
       >
-        <ShuffleIcon className="h-5 w-5 text-neutral-500 md:h-4 md:w-4" />
+        <ShuffleIcon className="h-4 w-4 text-white" />
       </button>
     </div>
   );

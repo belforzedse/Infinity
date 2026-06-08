@@ -1,6 +1,7 @@
 import React from "react";
 import BlurImage from "@/components/ui/BlurImage";
 import ColorSwatches from "@/components/Product/ColorSwatches";
+import { DiscountBadge } from "./DiscountBadge";
 import type { ImageLoaderProps } from "next/image";
 
 interface ImageCardProps {
@@ -25,10 +26,10 @@ export function ImageCard({
   colorsCount,
 }: ImageCardProps): React.JSX.Element {
   return (
-    <div className="relative h-[100px] w-24">
-      {discount && discount > 0 && (
-        <div className="text-xs absolute left-0 top-0 z-10 rounded-br-xl rounded-tl-xl bg-infinity-primary px-2 py-0.5 text-white">
-          ٪{discount}
+    <div className="relative h-[100px] w-24 shrink-0">
+      {discount !== undefined && discount > 0 && (
+        <div className="absolute right-0 top-0 z-10">
+          <DiscountBadge discount={discount} />
         </div>
       )}
       <BlurImage
@@ -43,7 +44,7 @@ export function ImageCard({
         loader={imageLoader}
       />
       {!isAvailable && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-stone-200/20 backdrop-blur-[1px]">
+        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-stone-200/20 backdrop-blur-[1px]">
           <div className="rounded-full bg-neutral-800/70 px-2.5 py-1 shadow-md backdrop-blur-md ring-1 ring-white/10">
             <span className="text-[10px] font-bold text-white">ناموجود</span>
           </div>
@@ -58,4 +59,3 @@ export function ImageCard({
     </div>
   );
 }
-
