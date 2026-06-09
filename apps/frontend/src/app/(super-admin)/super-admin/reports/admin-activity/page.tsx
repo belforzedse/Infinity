@@ -2,7 +2,11 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { getAdminActivity, AdminActivityLog } from "@/services/super-admin/reports/adminActivity";
+import {
+  getAdminActivity,
+  AdminActivityLog,
+  AdminActivityAdmin,
+} from "@/services/super-admin/reports/adminActivity";
 import { DatePicker } from "zaman";
 import ContentWrapper from "@/components/SuperAdmin/Layout/ContentWrapper";
 import { faNum } from "@/utils/faNum";
@@ -19,6 +23,9 @@ const actionTypeMap: Record<string, string> = {
   Publish: "انتشار",
   Unpublish: "برداشتن انتشار",
   Adjust: "تنظیم",
+  Import: "ورود گروهی",
+  Refund: "بازپرداخت",
+  StatusChange: "تغییر وضعیت",
   Other: "سایر",
 };
 
@@ -84,7 +91,7 @@ export default function AdminActivityReportPage() {
   const [selectedUser, setSelectedUser] = useState<string>("");
   const [selectedActionType, setSelectedActionType] = useState<string>("");
   const [selectedLogType, setSelectedLogType] = useState<string>("All");
-  const [adminUsers, setAdminUsers] = useState<string[]>([]);
+  const [adminUsers, setAdminUsers] = useState<AdminActivityAdmin[]>([]);
   const [showSystemActivities, setShowSystemActivities] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
 
@@ -204,15 +211,12 @@ export default function AdminActivityReportPage() {
     })
       .then((response) => {
         setActivities(response.data || []);
-        // Extract unique admin users
-        const users = Array.from(
-          new Set(
-            (response.data || [])
-              .map((a) => getAdminName(a))
-              .filter((name): name is string => !!name && name !== "System")
-          )
-        ).sort();
-        setAdminUsers(users);
+        // Prefer the backend's distinct-admins list (covers all pages, keyed by id). Only refresh
+        // it when not filtering by a specific admin, so the dropdown doesn't collapse to one.
+        const admins = response.meta?.admins;
+        if (admins && !selectedUser) {
+          setAdminUsers(admins.filter((a) => a.id != null));
+        }
       })
       .catch((error) => {
         console.error("Error fetching admin activity:", error);
@@ -375,10 +379,12 @@ export default function AdminActivityReportPage() {
                   <option value="Create">{actionTypeMap["Create"]}</option>
                   <option value="Update">{actionTypeMap["Update"]}</option>
                   <option value="Delete">{actionTypeMap["Delete"]}</option>
-                  <option value="Delete-Soft">{actionTypeMap["Delete-Soft"]}</option>
                   <option value="Publish">{actionTypeMap["Publish"]}</option>
                   <option value="Unpublish">{actionTypeMap["Unpublish"]}</option>
                   <option value="Adjust">{actionTypeMap["Adjust"]}</option>
+                  <option value="StatusChange">{actionTypeMap["StatusChange"]}</option>
+                  <option value="Refund">{actionTypeMap["Refund"]}</option>
+                  <option value="Import">{actionTypeMap["Import"]}</option>
                   <option value="Other">{actionTypeMap["Other"]}</option>
                 </select>
               </div>
@@ -413,8 +419,8 @@ export default function AdminActivityReportPage() {
                     >
                       <option value="">همه ادمین‌ها</option>
                       {adminUsers.map((user) => (
-                        <option key={user} value={user}>
-                          {user}
+                        <option key={user.id} value={String(user.id)}>
+                          {user.name}
                         </option>
                       ))}
                     </select>

@@ -36,7 +36,7 @@ function makeConfig() {
  */
 function makeEngine(opts = {}) {
   const engine = new CatalogEngine(makeConfig(), noopLogger, { environment: "local" });
-  const calls = { upserts: [], stockUpserts: [], puts: [] };
+  const calls = { upserts: [], stockUpserts: [], puts: [], sizeHelpers: [] };
 
   // Every variation id that "exists" in Strapi (variable variations + simple synth ids).
   const existingVariationIds = opts.withExisting ? ["201", "202", "203", "102", "103"] : [];
@@ -50,13 +50,17 @@ function makeEngine(opts = {}) {
     if (endpoint === "/product-variations") existingVariationIds.forEach((id) => map.set(id, { id: Number(id) + 10000 }));
     return map;
   };
-  engine.repo.upsert = async ({ endpoint, externalId }) => {
-    calls.upserts.push({ endpoint, externalId });
+  engine.repo.upsert = async ({ endpoint, externalId, payload }) => {
+    calls.upserts.push({ endpoint, externalId, payload });
     return { id: Number(externalId) + 10000, mode: "created" };
   };
   engine.repo.upsertStock = async ({ externalId, variationId }) => {
     calls.stockUpserts.push({ externalId, variationId });
     return "created";
+  };
+  engine.repo.syncProductSizeHelper = async (productId, helperMatrix) => {
+    calls.sizeHelpers.push({ productId, helperMatrix });
+    return helperMatrix ? "created" : "unchanged";
   };
   engine.repo.resolveAttributeId = async () => 1;
   engine.repo.http = { put: async (url, body) => { calls.puts.push({ url, body }); return {}; } };
@@ -65,7 +69,7 @@ function makeEngine(opts = {}) {
     { id: 5, name: "کیف", slug: "kif", parent: 0 },
     { id: 9, name: "اکسسوری", slug: "acc", parent: 5 },
   ];
-  engine.woo.iterateProducts = async function* () { for (const p of products) yield p; };
+  engine.woo.iterateProducts = async function* () { for (const p of opts.products || products) yield p; };
   engine.woo.iterateVariations = async function* (productId) {
     for (const v of variations.filter((x) => x.parent_id === productId)) yield v;
   };
@@ -99,8 +103,56 @@ test("full sync: upserts categories + products + variations + stock, records map
   assert.equal(report.entities.products.created, 3);
   assert.equal(report.entities.variations.created, 4);
   assert.equal(report.entities.stocks.created, 4);
+  assert.equal(engine._calls.sizeHelpers.length, 3);
   assert.equal(engine.mapping.getStrapiId("products", 101), 10101);
   assert.equal(engine.mapping.getStrapiId("variations", 201), 10201);
+});
+
+test("full sync: mirrors WooCommerce color attributes exactly", async () => {
+  const engine = makeEngine();
+  await engine.runSync({ dryRun: false, scope: "no-media" });
+
+  const variationUpserts = new Map(
+    engine._calls.upserts
+      .filter((call) => call.endpoint === "/product-variations")
+      .map((call) => [call.externalId, call.payload]),
+  );
+
+  assert.equal(variationUpserts.get("201").product_variation_color, 1);
+  assert.equal(variationUpserts.get("202").product_variation_color, 1);
+  assert.equal(variationUpserts.get("203").product_variation_color, null);
+  assert.equal(variationUpserts.get("102").product_variation_color, null);
+});
+
+test("full sync: syncs WooCommerce size guide matrix to product-size-helper", async () => {
+  const productWithGuide = {
+    ...products[1],
+    id: 150,
+    meta_data: [
+      {
+        key: "product_size_guide",
+        value: JSON.stringify([
+          ["Size", "Chest"],
+          ["M", 42],
+          ["L", null],
+        ]),
+      },
+    ],
+  };
+  const engine = makeEngine({ products: [productWithGuide] });
+  const report = await engine.runSync({ scope: "no-media" });
+
+  assert.deepEqual(engine._calls.sizeHelpers, [
+    {
+      productId: 10150,
+      helperMatrix: [
+        ["Size", "Chest"],
+        ["M", "42"],
+        ["L", ""],
+      ],
+    },
+  ]);
+  assert.equal(report.entities.sizeHelpers.created, 1);
 });
 
 test("stock scope: writes ONLY stock, only for existing variations, no product/variation upserts", async () => {
@@ -123,6 +175,7 @@ test("price scope: PUTs only {Price,DiscountPrice} on existing variations, creat
   // Nothing created (no upsert), no stock writes.
   assert.equal(engine._calls.upserts.length, 0);
   assert.equal(engine._calls.stockUpserts.length, 0);
+  assert.equal(engine._calls.sizeHelpers.length, 0);
 
   // Price PUTs only touch /product-variations and only carry price fields.
   const pricePuts = engine._calls.puts.filter((p) => p.url.startsWith("/product-variations/"));

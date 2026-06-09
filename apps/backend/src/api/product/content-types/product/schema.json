@@ -141,6 +141,9 @@
     "removedAt": {
       "type": "datetime"
     },
+    "LastEditedByAdminAt": {
+      "type": "datetime"
+    },
     "external_id": {
       "type": "string",
       "unique": true

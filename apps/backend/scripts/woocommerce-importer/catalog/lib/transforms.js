@@ -128,12 +128,69 @@ function mapProduct(wcProduct, opts = {}) {
         otherCategoryMisses.push(cat.id);
       }
     }
-    if (otherIds.length > 0) {
-      data.product_other_categories = otherIds;
+    data.product_other_categories = otherIds;
+  }
+
+  return {
+    data,
+    mainCategoryMissing,
+    otherCategoryMisses,
+    sizeGuideMatrix: extractSizeGuideMatrix(wcProduct),
+  };
+}
+
+/**
+ * Extract and sanitize the product size-guide matrix stored in WooCommerce meta.
+ * Legacy importer supported both meta keys; keep the same source compatibility.
+ *
+ * @param {object} wcProduct
+ * @returns {string[][] | null}
+ */
+function extractSizeGuideMatrix(wcProduct) {
+  if (!wcProduct || !Array.isArray(wcProduct.meta_data)) {
+    return null;
+  }
+
+  const sizeGuideKeys = ["product_size_guide", "product-custom-meta-inp"];
+  const metaEntry = wcProduct.meta_data.find((meta) => meta && sizeGuideKeys.includes(meta.key));
+
+  if (!metaEntry || metaEntry.value === undefined || metaEntry.value === null) {
+    return null;
+  }
+
+  let rawValue = metaEntry.value;
+  if (typeof rawValue === "string") {
+    rawValue = rawValue.trim();
+    if (rawValue === "") {
+      return null;
+    }
+    try {
+      rawValue = JSON.parse(rawValue);
+    } catch {
+      return null;
     }
   }
 
-  return { data, mainCategoryMissing, otherCategoryMisses };
+  if (!Array.isArray(rawValue)) {
+    return null;
+  }
+
+  const sanitized = rawValue
+    .filter((row) => Array.isArray(row))
+    .map((row) =>
+      row.map((cell) => {
+        if (cell === null || cell === undefined) {
+          return "";
+        }
+        return typeof cell === "string" ? cell : String(cell);
+      }),
+    );
+
+  const hasContent = sanitized.some((row) =>
+    row.some((cell) => typeof cell === "string" && cell.trim() !== ""),
+  );
+
+  return hasContent ? sanitized : null;
 }
 
 /**
@@ -382,6 +439,7 @@ module.exports = {
   prepareRichtext,
   mapProductStatus,
   mapProduct,
+  extractSizeGuideMatrix,
   mapCategory,
   generateVariationSku,
   computeVariationPricing,

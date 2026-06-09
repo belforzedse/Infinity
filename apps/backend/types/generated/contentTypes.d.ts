@@ -1447,7 +1447,18 @@ export interface ApiManualAdminActivityManualAdminActivity extends Schema.Collec
   };
   attributes: {
     Action: Attribute.Enumeration<
-      ["Create", "Update", "Delete", "Publish", "Unpublish", "Adjust", "Other"]
+      [
+        "Create",
+        "Update",
+        "Delete",
+        "Publish",
+        "Unpublish",
+        "Adjust",
+        "Import",
+        "Refund",
+        "StatusChange",
+        "Other",
+      ]
     > &
       Attribute.Required;
     Changes: Attribute.JSON;
@@ -2730,6 +2741,7 @@ export interface ApiProductProduct extends Schema.CollectionType {
     external_source: Attribute.String;
     Files: Attribute.Media<"files", true>;
     IsSimpleProduct: Attribute.Boolean & Attribute.DefaultTo<false>;
+    LastEditedByAdminAt: Attribute.DateTime;
     Media: Attribute.Media<"images" | "videos", true>;
     product_faqs: Attribute.Relation<
       "api::product.product",
@@ -2856,7 +2868,16 @@ export interface ApiSettingsSettings extends Schema.SingleType {
     homeBannerTwoTextSize: Attribute.Integer & Attribute.DefaultTo<30>;
     homeBannerTwoTitle: Attribute.String & Attribute.DefaultTo<"">;
     homeBannerTwoTitleColor: Attribute.String & Attribute.DefaultTo<"">;
+    homeCustomSectionAssignment: Attribute.JSON &
+      Attribute.DefaultTo<{
+        mode: "manual";
+        productIds: [];
+      }>;
+    homeCustomSectionEnabled: Attribute.Boolean & Attribute.DefaultTo<false>;
+    homeCustomSectionTitle: Attribute.String & Attribute.DefaultTo<"">;
     homeDiscountedProductIds: Attribute.JSON & Attribute.DefaultTo<[]>;
+    homeEveryoneFollowsEnabled: Attribute.Boolean & Attribute.DefaultTo<false>;
+    homeEveryoneFollowsProductIds: Attribute.JSON & Attribute.DefaultTo<[]>;
     homeFeaturedCategoryBannerBackgroundColor: Attribute.String & Attribute.DefaultTo<"#f1f5f9">;
     homeFeaturedCategoryBannerImage: Attribute.Text & Attribute.DefaultTo<"">;
     homeFeaturedCategoryBannerImageFit: Attribute.Enumeration<["cover", "contain"]> &
@@ -2889,6 +2910,8 @@ export interface ApiSettingsSettings extends Schema.SingleType {
     homeHeroSliderMeta: Attribute.JSON & Attribute.DefaultTo<{}>;
     homeHeroSliderPublished: Attribute.JSON & Attribute.DefaultTo<{}>;
     homeNewestProductIds: Attribute.JSON & Attribute.DefaultTo<[]>;
+    homeWeeklyPicksEnabled: Attribute.Boolean & Attribute.DefaultTo<false>;
+    homeWeeklyPicksProductIds: Attribute.JSON & Attribute.DefaultTo<[]>;
     siteGifAltText: Attribute.String & Attribute.DefaultTo<"">;
     siteGifEnabled: Attribute.Boolean & Attribute.DefaultTo<false>;
     siteGifImage: Attribute.String & Attribute.DefaultTo<"">;

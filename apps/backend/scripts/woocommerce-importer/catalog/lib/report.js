@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path");
 
 function emptyCounters() {
-  return { created: 0, updated: 0, unchanged: 0, skipped: 0, failed: 0, duplicate: 0 };
+  return { created: 0, updated: 0, unchanged: 0, skipped: 0, failed: 0, duplicate: 0, deleted: 0 };
 }
 
 /**
@@ -35,6 +35,7 @@ class ImportReport {
       variations: emptyCounters(),
       stocks: emptyCounters(),
       attributes: emptyCounters(),
+      sizeHelpers: emptyCounters(),
     };
     this.media = { uploaded: 0, reused: 0, failed: 0 };
     /** @type {Array<{ entity:string, wcId:any, stage:string, error:string }>} */
@@ -97,7 +98,7 @@ class ImportReport {
     for (const [entity, c] of Object.entries(this.entities)) {
       this.logger.info(
         `${entity.padEnd(11)} created=${c.created} updated=${c.updated} unchanged=${c.unchanged} ` +
-          `skipped=${c.skipped} duplicate=${c.duplicate} failed=${c.failed}`,
+          `skipped=${c.skipped} duplicate=${c.duplicate} deleted=${c.deleted} failed=${c.failed}`,
       );
     }
     this.logger.info(

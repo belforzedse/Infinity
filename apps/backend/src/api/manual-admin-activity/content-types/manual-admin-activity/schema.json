@@ -21,7 +21,18 @@
     },
     "Action": {
       "type": "enumeration",
-      "enum": ["Create", "Update", "Delete", "Publish", "Unpublish", "Adjust", "Other"],
+      "enum": [
+        "Create",
+        "Update",
+        "Delete",
+        "Publish",
+        "Unpublish",
+        "Adjust",
+        "Import",
+        "Refund",
+        "StatusChange",
+        "Other"
+      ],
       "required": true
     },
     "Title": {

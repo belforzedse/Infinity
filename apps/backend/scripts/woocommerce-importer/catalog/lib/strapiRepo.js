@@ -210,6 +210,50 @@ class StrapiRepo {
     });
     return result.mode;
   }
+
+  async findProductSizeHelper(productId) {
+    const response = await this.http.get("/product-size-helpers", {
+      params: {
+        "filters[product][id][$eq]": productId,
+        "pagination[pageSize]": 1,
+      },
+    });
+    const data = response.data?.data;
+    return Array.isArray(data) && data.length > 0 ? data[0] : null;
+  }
+
+  /**
+   * Mirror the legacy size-guide helper behavior for a product.
+   * @param {number} productId
+   * @param {string[][] | null} helperMatrix
+   * @returns {Promise<"created"|"updated"|"deleted"|"unchanged">}
+   */
+  async syncProductSizeHelper(productId, helperMatrix) {
+    const existing = await this.findProductSizeHelper(productId);
+
+    if (!helperMatrix) {
+      if (existing) {
+        await this.http.delete(`/product-size-helpers/${existing.id}`);
+        return "deleted";
+      }
+      return "unchanged";
+    }
+
+    if (existing) {
+      await this.http.put(`/product-size-helpers/${existing.id}`, {
+        data: { Helper: helperMatrix },
+      });
+      return "updated";
+    }
+
+    await this.http.post("/product-size-helpers", {
+      data: {
+        Helper: helperMatrix,
+        product: productId,
+      },
+    });
+    return "created";
+  }
 }
 
 module.exports = StrapiRepo;

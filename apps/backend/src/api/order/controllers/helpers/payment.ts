@@ -1,6 +1,5 @@
 import type { Strapi } from "@strapi/strapi";
 import { consumeOrderReservation, releaseOrderReservation } from "../../../../utils/stockReservations";
-import { logAdminActivity } from "../../../../utils/adminActivity";
 import { decrementStockAtomic } from "../../../cart/services/lib/stock";
 const getFrontendBaseUrl = () =>
   (process.env.FRONTEND_BASE_URL || process.env.FRONTEND_URL || "https://infinitycolor.co").replace(
@@ -376,31 +375,17 @@ async function handleStockDecrementFailure(
     strapi.log.error("Failed to create order-log for stock errors", logErr);
   }
 
-  // Send admin notification
-  try {
-    await logAdminActivity(strapi, {
-      resourceType: "Order",
-      resourceId: orderId,
-      action: "Update",
-      title: "Stock Decrement Failure - Order Halted",
-      message: `سفارش ${orderId} به دلیل خطا در کاهش موجودی متوقف شد. نیاز به بررسی دستی دارد.`,
-      messageEn: `Order ${orderId} halted due to stock decrement failures. Manual review required.`,
-      severity: "error",
-      description: errorMessage,
-      metadata: {
-        orderId,
-        refNum,
-        stockErrors,
-        paymentMethod,
-        requiresRetry: true,
-      },
-      performedBy: {
-        name: "System",
-      },
-    });
-  } catch (notifErr) {
-    strapi.log.error("Failed to send admin notification for stock errors", notifErr);
-  }
+  // A stock-decrement failure during a payment callback is a SYSTEM event, not an admin action,
+  // so it is intentionally NOT written to the admin audit log. The order-log entry above is the
+  // durable record; surface it loudly in the application logs for on-call review.
+  strapi.log.error("CRITICAL: Stock decrement failure halted order completion", {
+    orderId,
+    refNum,
+    stockErrors,
+    paymentMethod,
+    errorMessage,
+    requiresManualRetry: true,
+  });
 
   // Keep order in "Paying" status (payment succeeded but stock failed)
   // Don't transition to "Started" to prevent fulfillment of unavailable items

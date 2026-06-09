@@ -47,6 +47,50 @@ test("mapProduct: resolves category relations and reports misses", () => {
   assert.deepEqual(otherCategoryMisses, []);
 });
 
+test("mapProduct: sends empty product_other_categories to clear stale relations", () => {
+  const resolveCategoryId = (id) => ({ 5: 50 })[id] || null;
+  const { data } = T.mapProduct(byId(products, 102), { resolveCategoryId });
+
+  assert.equal(data.product_main_category, 50);
+  assert.deepEqual(data.product_other_categories, []);
+});
+
+test("extractSizeGuideMatrix: supports legacy meta keys and sanitizes cells", () => {
+  const wcProduct = {
+    ...byId(products, 101),
+    meta_data: [
+      { key: "ignored", value: [["x"]] },
+      {
+        key: "product-custom-meta-inp",
+        value: JSON.stringify([
+          ["Size", "Waist"],
+          ["M", 38],
+          ["L", null],
+          "bad-row",
+        ]),
+      },
+    ],
+  };
+
+  assert.deepEqual(T.extractSizeGuideMatrix(wcProduct), [
+    ["Size", "Waist"],
+    ["M", "38"],
+    ["L", ""],
+  ]);
+  assert.deepEqual(T.mapProduct(wcProduct).sizeGuideMatrix, [
+    ["Size", "Waist"],
+    ["M", "38"],
+    ["L", ""],
+  ]);
+});
+
+test("extractSizeGuideMatrix: rejects empty or invalid payloads", () => {
+  assert.equal(T.extractSizeGuideMatrix({}), null);
+  assert.equal(T.extractSizeGuideMatrix({ meta_data: [{ key: "product_size_guide", value: "" }] }), null);
+  assert.equal(T.extractSizeGuideMatrix({ meta_data: [{ key: "product_size_guide", value: "not-json" }] }), null);
+  assert.equal(T.extractSizeGuideMatrix({ meta_data: [{ key: "product_size_guide", value: [["", null]] }] }), null);
+});
+
 test("computeVariationPricing: regular + sale → Price + DiscountPrice", () => {
   const r = T.computeVariationPricing(byId(variations, 201), {}, 1);
   assert.deepEqual(r, { price: 1000000, discountPrice: 850000 });

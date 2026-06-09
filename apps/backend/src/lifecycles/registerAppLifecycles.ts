@@ -1,10 +1,9 @@
 import type { Strapi } from "@strapi/strapi";
 
-import { logAdminActivity } from "../utils/adminActivity";
+import { recordAdminAudit } from "../utils/adminAudit";
 import { resolveAuditActor } from "../utils/audit";
 import { logAdminEvent, logOrderEvent } from "../utils/eventLogger";
 import { asEntityId } from "../utils/lastEdited";
-import { logManualActivity } from "../utils/manualAdminActivity";
 
 type AuditAction = "Create" | "Update" | "Delete";
 
@@ -38,64 +37,6 @@ function diffChanges(
   return changes;
 }
 
-async function touchProductLastEdited(strapi: Strapi, productRef: any) {
-  const productId = asEntityId(productRef);
-  if (!productId) return;
-
-  try {
-    await strapi.db.connection("products").where({ id: productId }).update({
-      updated_at: new Date(),
-    });
-  } catch (error: any) {
-    strapi.log.warn("[LastEdited] Failed to touch product timestamp", {
-      productId,
-      error: error?.message || error,
-    });
-  }
-}
-
-async function touchOrderLastEdited(strapi: Strapi, orderRef: any) {
-  const orderId = asEntityId(orderRef);
-  if (!orderId) return;
-
-  try {
-    await strapi.db.connection("orders").where({ id: orderId }).update({
-      updated_at: new Date(),
-    });
-  } catch (error: any) {
-    strapi.log.warn("[LastEdited] Failed to touch order timestamp", {
-      orderId,
-      error: error?.message || error,
-    });
-  }
-}
-
-async function touchProductByVariation(strapi: Strapi, variationRef: any) {
-  const variationId = asEntityId(variationRef);
-  if (!variationId) return;
-
-  const variation = await strapi.db
-    .query("api::product-variation.product-variation")
-    .findOne({
-      where: { id: variationId },
-      populate: { product: true },
-    });
-
-  await touchProductLastEdited(strapi, (variation as any)?.product);
-}
-
-async function touchOrderByContract(strapi: Strapi, contractRef: any) {
-  const contractId = asEntityId(contractRef);
-  if (!contractId) return;
-
-  const contract = await strapi.db.query("api::contract.contract").findOne({
-    where: { id: contractId },
-    populate: { order: true },
-  });
-
-  await touchOrderLastEdited(strapi, (contract as any)?.order);
-}
-
 function registerOrderLifecycle(strapi: Strapi) {
   strapi.db.lifecycles.subscribe({
     models: ["api::order.order"],
@@ -116,40 +57,23 @@ function registerOrderLifecycle(strapi: Strapi) {
         },
       });
 
-      await logAdminActivity(strapi as any, {
+      // Only logs when the actor is a verified admin (e.g. an admin-created order); customer
+      // checkout orders are intentionally not recorded in the admin audit log.
+      await recordAdminAudit(strapi as any, {
+        event,
         resourceType: "Order",
         resourceId: result.id,
         action: "Create",
-        description: "سفارش ایجاد شد",
+        title: "سفارش ایجاد شد",
+        message: `سفارش #${result.id} توسط ادمین ایجاد شد`,
+        messageEn: `Order #${result.id} created`,
+        severity: "success",
         metadata: {
           orderId: result.id,
           orderType: result.Type,
           orderStatus: result.Status,
         },
-        performedBy: {
-          id: actor.userId || undefined,
-          name: actor.label || undefined,
-          role: null,
-        },
-        ip: actor.ip,
-        userAgent: actor.userAgent,
       });
-
-      if (actor.userId) {
-        await logManualActivity(strapi as any, {
-          resourceType: "Order",
-          resourceId: result.id,
-          action: "Create",
-          title: "سفارش ایجاد شد",
-          message: `سفارش #${result.id} توسط ادمین ایجاد شد`,
-          messageEn: `Order #${result.id} created`,
-          severity: "success",
-          metadata: { orderId: result.id, status: result.Status },
-          performedBy: { id: actor.userId },
-          ip: actor.ip,
-          userAgent: actor.userAgent,
-        });
-      }
 
       const orderUserId = typeof result.user === "object" && result.user?.id
         ? result.user.id
@@ -285,39 +209,25 @@ function registerOrderLifecycle(strapi: Strapi) {
         },
       });
 
-      await logAdminActivity(strapi as any, {
+      const orderStatusChange = changes.Status as
+        | { from?: unknown; to?: unknown }
+        | undefined;
+      await recordAdminAudit(strapi as any, {
+        event,
         resourceType: "Order",
         resourceId: result.id,
-        action: "Update",
-        description: "سفارش بروزرسانی شد",
-        metadata: {
-          orderId: result.id,
-          changes,
-        },
-        performedBy: {
-          id: actor.userId || undefined,
-          name: actor.label || undefined,
-          role: null,
-        },
-        ip: actor.ip,
-        userAgent: actor.userAgent,
+        action: orderStatusChange ? "StatusChange" : "Update",
+        title: orderStatusChange ? "وضعیت سفارش تغییر کرد" : "سفارش بروزرسانی شد",
+        message: orderStatusChange
+          ? `وضعیت سفارش #${result.id} از ${orderStatusChange.from ?? "-"} به ${orderStatusChange.to ?? "-"} تغییر کرد`
+          : `سفارش #${result.id} توسط ادمین بروزرسانی شد`,
+        messageEn: orderStatusChange
+          ? `Order #${result.id} status changed from ${orderStatusChange.from ?? "-"} to ${orderStatusChange.to ?? "-"}`
+          : `Order #${result.id} updated`,
+        severity: "info",
+        changes,
+        metadata: { orderId: result.id, status: (current as any)?.Status },
       });
-
-      if (actor.userId) {
-        await logManualActivity(strapi as any, {
-          resourceType: "Order",
-          resourceId: result.id,
-          action: "Update",
-          title: "سفارش بروزرسانی شد",
-          message: `سفارش #${result.id} توسط ادمین بروزرسانی شد`,
-          messageEn: `Order #${result.id} updated`,
-          severity: "info",
-          metadata: { changes, status: (current as any)?.Status },
-          performedBy: { id: actor.userId },
-          ip: actor.ip,
-          userAgent: actor.userAgent,
-        });
-      }
 
       const orderUserId = typeof (current as any)?.user === "object" && (current as any).user?.id
         ? (current as any).user.id
@@ -411,21 +321,16 @@ function registerOrderLifecycle(strapi: Strapi) {
         },
       });
 
-      await logAdminActivity(strapi as any, {
+      await recordAdminAudit(strapi as any, {
+        event,
         resourceType: "Order",
         resourceId: id,
         action: "Delete",
-        description: "سفارش حذف شد",
-        metadata: {
-          orderId: id,
-        },
-        performedBy: {
-          id: actor.userId || undefined,
-          name: actor.label || undefined,
-          role: null,
-        },
-        ip: actor.ip,
-        userAgent: actor.userAgent,
+        title: "سفارش حذف شد",
+        message: `سفارش #${id} حذف شد`,
+        messageEn: `Order #${id} deleted`,
+        severity: "warning",
+        metadata: { orderId: id },
       });
 
       if (actor.userId && actor.label) {
@@ -467,27 +372,22 @@ function registerContractLifecycle(strapi: Strapi) {
         },
       });
 
-      await logAdminActivity(strapi as any, {
+      await recordAdminAudit(strapi as any, {
+        event,
         resourceType: "Contract",
         resourceId: result.id,
         action: "Create",
-        description: "قرارداد ایجاد شد",
+        title: "قرارداد ایجاد شد",
+        message: `قرارداد #${result.id} ایجاد شد`,
+        messageEn: `Contract #${result.id} created`,
+        severity: "info",
         metadata: {
           contractId: result.id,
           contractType: result.Type,
           contractStatus: result.Status,
           amount: result.Amount,
         },
-        performedBy: {
-          id: actor.userId || undefined,
-          name: actor.label || undefined,
-          role: null,
-        },
-        ip: actor.ip,
-        userAgent: actor.userAgent,
       });
-
-      await touchOrderByContract(strapi, result.id);
     },
 
     async beforeUpdate(event) {
@@ -538,25 +438,18 @@ function registerContractLifecycle(strapi: Strapi) {
         },
       });
 
-      await logAdminActivity(strapi as any, {
+      await recordAdminAudit(strapi as any, {
+        event,
         resourceType: "Contract",
         resourceId: result.id,
         action: "Update",
-        description: "قرارداد بروزرسانی شد",
-        metadata: {
-          contractId: result.id,
-          changes,
-        },
-        performedBy: {
-          id: actor.userId || undefined,
-          name: actor.label || undefined,
-          role: null,
-        },
-        ip: actor.ip,
-        userAgent: actor.userAgent,
+        title: "قرارداد بروزرسانی شد",
+        message: `قرارداد #${result.id} بروزرسانی شد`,
+        messageEn: `Contract #${result.id} updated`,
+        severity: "info",
+        changes,
+        metadata: { contractId: result.id },
       });
-
-      await touchOrderByContract(strapi, result.id);
     },
 
     async beforeDelete(event) {
@@ -593,24 +486,17 @@ function registerContractLifecycle(strapi: Strapi) {
         },
       });
 
-      await logAdminActivity(strapi as any, {
+      await recordAdminAudit(strapi as any, {
+        event,
         resourceType: "Contract",
         resourceId: id,
         action: "Delete",
-        description: "قرارداد حذف شد",
-        metadata: {
-          contractId: id,
-        },
-        performedBy: {
-          id: actor.userId || undefined,
-          name: actor.label || undefined,
-          role: null,
-        },
-        ip: actor.ip,
-        userAgent: actor.userAgent,
+        title: "قرارداد حذف شد",
+        message: `قرارداد #${id} حذف شد`,
+        messageEn: `Contract #${id} deleted`,
+        severity: "warning",
+        metadata: { contractId: id },
       });
-
-      await touchOrderLastEdited(strapi, (event as any)?.state?.deletingOrderId);
     },
   });
 }
@@ -621,7 +507,6 @@ function registerProductStockLifecycle(strapi: Strapi) {
 
     async afterCreate(event) {
       const { result } = event as any;
-      await touchProductByVariation(strapi, result?.product_variation);
 
       const initialCount = result?.Count ?? 0;
       if (result?.id && initialCount > 0) {
@@ -683,83 +568,20 @@ function registerProductStockLifecycle(strapi: Strapi) {
         }
       );
 
-      const actor = resolveAuditActor(event as any);
-      if (actor.userId) {
-        await logManualActivity(strapi as any, {
-          resourceType: "Stock",
-          resourceId: result.id,
-          action: "Update",
-          title: "موجودی تغییر کرد",
-          message: `موجودی ${result.id} از ${previous} به ${current} تغییر یافت`,
-          messageEn: `Stock ${result.id} changed from ${previous} to ${current}`,
-          severity: "info",
-          metadata: { previous, current, delta },
-          performedBy: { id: actor.userId },
-          ip: actor.ip,
-          userAgent: actor.userAgent,
-        });
-      }
-
-      await touchProductByVariation(strapi, state?.productVariationId || result?.product_variation);
-    },
-
-    async beforeDelete(event) {
-      const where = (event as any)?.params?.where || {};
-      const id = (where && (where.id || where.documentId)) || null;
-      if (!id) return;
-
-      const existing = await strapi.entityService.findOne(
-        "api::product-stock.product-stock",
-        id,
-        {
-          populate: { product_variation: true },
-        }
-      );
-
-      (event as any).state = {
-        ...((event as any).state || {}),
-        deletingProductVariationId: asEntityId((existing as any)?.product_variation),
-      };
-    },
-
-    async afterDelete(event) {
-      await touchProductByVariation(strapi, (event as any)?.state?.deletingProductVariationId);
-    },
-  });
-}
-
-function registerOrderItemLifecycle(strapi: Strapi) {
-  strapi.db.lifecycles.subscribe({
-    models: ["api::order-item.order-item"],
-
-    async afterCreate(event) {
-      const { result, params } = event as any;
-      await touchOrderLastEdited(strapi, result?.order || params?.data?.order);
-    },
-
-    async afterUpdate(event) {
-      const { result, params } = event as any;
-      await touchOrderLastEdited(strapi, result?.order || params?.data?.order);
-    },
-
-    async beforeDelete(event) {
-      const where = (event as any)?.params?.where || {};
-      const id = (where && (where.id || where.documentId)) || null;
-      if (!id) return;
-
-      const existing = await strapi.db.query("api::order-item.order-item").findOne({
-        where: { id },
-        populate: { order: true },
+      // Only a verified admin's manual stock change is audited; purchases (stock decrement on
+      // payment) and reservation-expiry jobs have no admin actor and are skipped.
+      await recordAdminAudit(strapi as any, {
+        event,
+        resourceType: "Stock",
+        resourceId: result.id,
+        action: "Adjust",
+        title: "موجودی تغییر کرد",
+        message: `موجودی ${result.id} از ${previous} به ${current} تغییر یافت`,
+        messageEn: `Stock ${result.id} changed from ${previous} to ${current}`,
+        severity: "info",
+        changes: { Count: { from: previous, to: current } },
+        metadata: { previous, current, delta, type },
       });
-
-      (event as any).state = {
-        ...((event as any).state || {}),
-        deletingOrderId: asEntityId((existing as any)?.order),
-      };
-    },
-
-    async afterDelete(event) {
-      await touchOrderLastEdited(strapi, (event as any)?.state?.deletingOrderId);
     },
   });
 }
@@ -768,5 +590,4 @@ export function registerAppLifecycles(strapi: Strapi) {
   registerOrderLifecycle(strapi);
   registerContractLifecycle(strapi);
   registerProductStockLifecycle(strapi);
-  registerOrderItemLifecycle(strapi);
 }

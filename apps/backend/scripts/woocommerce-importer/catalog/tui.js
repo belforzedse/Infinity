@@ -172,7 +172,7 @@ function printCounters(title, counters) {
   for (const [name, c] of Object.entries(counters)) {
     console.log(
       `  ${name.padEnd(11)} created=${c.created} updated=${c.updated} unchanged=${c.unchanged} ` +
-        `skipped=${c.skipped} duplicate=${c.duplicate} failed=${c.failed}`,
+        `skipped=${c.skipped} duplicate=${c.duplicate} deleted=${c.deleted} failed=${c.failed}`,
     );
   }
 }

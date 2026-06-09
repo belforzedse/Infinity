@@ -4,6 +4,7 @@ import VideoUploader from "@/components/Product/add/VideoUploader";
 import FileUploader from "./FileUploader";
 import type { EditProductData } from "@/types/super-admin/products";
 import logger from "@/utils/logger";
+import resolveAssetUrl from "@/utils/resolveAssetUrl";
 
 interface OverallProps {
   productData?: EditProductData;
@@ -20,16 +21,16 @@ export default function Overall({ productData, isEditMode = false }: OverallProp
   const showMediaUploaders = false;
 
   const images =
-    productData?.Media?.filter((media) => media.attributes.mime.startsWith("image/")).map(
-      (media) => media.attributes.url,
-    ) || [];
+    productData?.Media?.filter((media) => media.attributes.mime?.startsWith("image/"))
+      .map((media) => resolveAssetUrl(media.attributes.url))
+      .filter(Boolean) || [];
 
   const videos =
-    productData?.Media?.filter((media) => media.attributes.mime.startsWith("video/")).map(
-      (media) => media.attributes.url,
-    ) || [];
+    productData?.Media?.filter((media) => media.attributes.mime?.startsWith("video/"))
+      .map((media) => resolveAssetUrl(media.attributes.url))
+      .filter(Boolean) || [];
 
-  const files = productData?.Files?.map((file) => file.attributes.url) || [];
+  const files = productData?.Files?.map((file) => resolveAssetUrl(file.attributes.url)).filter(Boolean) || [];
 
   return (
     <div className="flex w-full flex-col gap-4">

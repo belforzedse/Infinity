@@ -66,7 +66,6 @@ class CatalogEngine {
     this.multiplier = config.import.currency.multiplier || 1;
     this.statusMappings = config.import.statusMappings.product || {};
     this.defaultInStockCount = config.catalog.defaultInStockCount;
-    this.defaultColor = config.import.defaults.variationAttributes.color;
   }
 
   async preflight() {
@@ -192,10 +191,14 @@ class CatalogEngine {
     // Product record write (only in scopes that touch products).
     if (flags.products) {
       const resolveCategoryId = (wooId) => this.mapping.getStrapiId("categories", wooId);
-      const { data } = T.mapProduct(wcProduct, { resolveCategoryId, statusMappings: this.statusMappings });
+      const { data, sizeGuideMatrix } = T.mapProduct(wcProduct, {
+        resolveCategoryId,
+        statusMappings: this.statusMappings,
+      });
 
       if (dryRun) {
         report.count("products", existing ? "updated" : "created");
+        report.count("sizeHelpers", sizeGuideMatrix ? "skipped" : "unchanged");
         productStrapiId = existing?.id || -1;
       } else {
         const { id, mode } = await this.repo.upsert({
@@ -207,6 +210,14 @@ class CatalogEngine {
         this.mapping.set("products", wcProduct.id, id, { name: wcProduct.name, slug: data.Slug });
         report.count("products", mode);
         productStrapiId = id;
+
+        try {
+          const helperMode = await this.repo.syncProductSizeHelper(id, sizeGuideMatrix);
+          report.count("sizeHelpers", helperMode);
+        } catch (error) {
+          report.fail("sizeHelpers", { wcId: wcProduct.id, stage: "sync-size-guide", error });
+          this.logger.warn(`⚠️ size guide ${wcProduct.id} (${wcProduct.name}): ${error.message}`);
+        }
       }
     } else if (flags.onlyExisting && !productStrapiId) {
       // stock/price/media scopes: skip products that were never imported.
@@ -370,35 +381,29 @@ class CatalogEngine {
   }
 
   async attachAttributes(wcVariation, data, report) {
-    const seen = new Set();
+    let hasWooColorAttribute = false;
     const wcAttrs = Array.isArray(wcVariation.attributes) ? wcVariation.attributes : [];
     for (const attr of wcAttrs) {
       const type = T.identifyAttributeType(attr.name || "");
       const resolved = T.resolveAttribute(type, attr.option);
       if (!resolved) continue;
+      if (type === "color") {
+        hasWooColorAttribute = true;
+      }
       try {
         const id = await this.repo.resolveAttributeId({ type, ...resolved });
         if (id) {
           data[`product_variation_${type}`] = id;
-          seen.add(type);
         }
       } catch (error) {
         report.fail("attributes", { wcId: wcVariation.id, stage: `attr-${type}`, error });
       }
     }
 
-    // Default color when no color attribute present (preserve legacy behaviour).
-    if (!seen.has("color") && !data.product_variation_color) {
-      const resolved = T.resolveAttribute("color", this.defaultColor.title);
-      if (resolved) {
-        resolved.colorCode = this.defaultColor.colorCode || resolved.colorCode;
-        try {
-          const id = await this.repo.resolveAttributeId({ type: "color", ...resolved });
-          if (id) data.product_variation_color = id;
-        } catch (error) {
-          report.fail("attributes", { wcId: wcVariation.id, stage: "attr-default-color", error });
-        }
-      }
+    // WooCommerce is the source of truth. If it has no color, clear any
+    // previously imported default color relation in Strapi.
+    if (!hasWooColorAttribute) {
+      data.product_variation_color = null;
     }
   }
 }

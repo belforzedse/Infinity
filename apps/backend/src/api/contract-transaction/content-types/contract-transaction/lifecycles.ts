@@ -1,35 +1,5 @@
-import { asEntityId, touchOrderByContract } from "../../../../utils/lastEdited";
-
-export default {
-  async afterCreate(event) {
-    const { result, params } = event as any;
-    await touchOrderByContract(result?.contract || params?.data?.contract);
-  },
-
-  async afterUpdate(event) {
-    const { result, params } = event as any;
-    await touchOrderByContract(result?.contract || params?.data?.contract);
-  },
-
-  async beforeDelete(event) {
-    const where = event?.params?.where || {};
-    const id = (where && (where.id || where.documentId)) || null;
-    if (!id) return;
-
-    const existing = await strapi.db
-      .query("api::contract-transaction.contract-transaction")
-      .findOne({
-        where: { id },
-        populate: { contract: true },
-      });
-
-    event.state = {
-      ...(event.state || {}),
-      deletingContractId: asEntityId((existing as any)?.contract),
-    };
-  },
-
-  async afterDelete(event) {
-    await touchOrderByContract((event as any)?.state?.deletingContractId);
-  },
-};
+// Contract-transaction changes (created on payment success, refunds, etc.) are NOT admin edits.
+// They previously bumped the parent order's `updated_at` via `touchOrderByContract`, which
+// corrupted the "last edited by admin" ordering. That side effect has been removed; admin edits
+// are tracked exclusively through the gated audit log (see utils/adminAudit.ts).
+export default {};

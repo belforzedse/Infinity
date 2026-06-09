@@ -1,9 +1,9 @@
 import { resolveAuditActor } from "../../../../utils/audit";
-import { logManualActivity } from "../../../../utils/manualAdminActivity";
 import {
-  asEntityId,
-  touchProductLastEdited,
-} from "../../../../utils/lastEdited";
+  recordAdminAudit,
+  markProductEditedByAdmin,
+} from "../../../../utils/adminAudit";
+import { asEntityId } from "../../../../utils/lastEdited";
 
 type AuditAction = "Create" | "Update" | "Delete";
 
@@ -54,34 +54,24 @@ export default {
       }
     );
 
-    if (actor.userId) {
-      const productId =
-        typeof result.product === "object"
-          ? result.product?.id
-          : typeof result.product === "number"
-            ? result.product
-            : undefined;
-      const productLabel =
-        typeof result.product === "object"
-          ? result.product?.Title || result.product?.Name
-          : undefined;
+    const createProductId = asEntityId(result.product) ?? undefined;
+    const createProductLabel =
+      typeof result.product === "object"
+        ? result.product?.Title || result.product?.Name
+        : undefined;
 
-    await logManualActivity(strapi, {
+    const recordedCreate = await recordAdminAudit(strapi, {
+      event,
       resourceType: "Product",
-      resourceId: productId,
+      resourceId: createProductId,
       action: "Create",
       title: "محصول-ورژن جدید ایجاد شد",
-      message: `ورژن جدید برای محصول ${productLabel || productId || "نامشخص"} ایجاد شد`,
-      messageEn: `Product variation #${result.id} created for product ${productLabel || productId || "unknown"}`,
-        severity: "success",
-        metadata: { variationId: result.id, sku: result.SKU },
-        performedBy: { id: actor.userId },
-        ip: actor.ip,
-        userAgent: actor.userAgent,
-      });
-    }
-
-    await touchProductLastEdited(result?.product);
+      message: `ورژن جدید برای محصول ${createProductLabel || createProductId || "نامشخص"} ایجاد شد`,
+      messageEn: `Product variation #${result.id} created for product ${createProductLabel || createProductId || "unknown"}`,
+      severity: "success",
+      metadata: { variationId: result.id, sku: result.SKU },
+    });
+    if (recordedCreate) await markProductEditedByAdmin(strapi, createProductId);
   },
 
   async beforeUpdate(event) {
@@ -148,35 +138,26 @@ export default {
       }
     );
 
-    if (actor.userId) {
-      const productId =
-        typeof result.product === "object"
-          ? result.product?.id
-          : typeof result.product === "number"
-            ? result.product
-            : undefined;
-      const productLabel =
-        typeof result.product === "object"
-          ? result.product?.Title || result.product?.Name
-          : undefined;
+    const updateProductId =
+      asEntityId(result.product) ?? asEntityId((current as any)?.product) ?? undefined;
+    const updateProductLabel =
+      typeof result.product === "object"
+        ? result.product?.Title || result.product?.Name
+        : undefined;
 
-      await logManualActivity(strapi, {
-        resourceType: "Product",
-        resourceId: productId,
-        action: "Update",
-        title: "ورژن محصول ویرایش شد",
-        message: `ورژن #${result.id} محصول ${productLabel || productId || "نامشخص"} بروزرسانی شد`,
-        messageEn: `Product variation #${result.id} updated for product ${productLabel || productId || "unknown"}`,
-        severity: "info",
-        changes,
-        metadata: { variationId: result.id },
-        performedBy: { id: actor.userId },
-        ip: actor.ip,
-        userAgent: actor.userAgent,
-      });
-    }
-
-    await touchProductLastEdited(result?.product || current?.product);
+    const recordedUpdate = await recordAdminAudit(strapi, {
+      event,
+      resourceType: "Product",
+      resourceId: updateProductId,
+      action: "Update",
+      title: "ورژن محصول ویرایش شد",
+      message: `ورژن #${result.id} محصول ${updateProductLabel || updateProductId || "نامشخص"} بروزرسانی شد`,
+      messageEn: `Product variation #${result.id} updated for product ${updateProductLabel || updateProductId || "unknown"}`,
+      severity: "info",
+      changes,
+      metadata: { variationId: result.id },
+    });
+    if (recordedUpdate) await markProductEditedByAdmin(strapi, updateProductId);
   },
 
   async beforeDelete(event) {
@@ -217,22 +198,18 @@ export default {
       }
     );
 
-    if (actor.userId) {
-      await logManualActivity(strapi, {
-        resourceType: "Product",
-        resourceId: null,
-        action: "Delete",
-        title: "ورژن محصول حذف شد",
-        message: `ورژن ${id} حذف شد`,
-        messageEn: `Product variation #${id} deleted`,
-        severity: "warning",
-        metadata: { variationId: id },
-        performedBy: { id: actor.userId },
-        ip: actor.ip,
-        userAgent: actor.userAgent,
-      });
-    }
-
-    await touchProductLastEdited((event as any)?.state?.deletingProductId);
+    const deletedProductId = (event as any)?.state?.deletingProductId ?? undefined;
+    const recordedDelete = await recordAdminAudit(strapi, {
+      event,
+      resourceType: "Product",
+      resourceId: deletedProductId,
+      action: "Delete",
+      title: "ورژن محصول حذف شد",
+      message: `ورژن ${id} حذف شد`,
+      messageEn: `Product variation #${id} deleted`,
+      severity: "warning",
+      metadata: { variationId: id },
+    });
+    if (recordedDelete) await markProductEditedByAdmin(strapi, deletedProductId);
   },
 };

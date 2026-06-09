@@ -115,6 +115,7 @@ const PRODUCT_COLUMN_MAP: Record<string, string> = {
   createdAt: "created_at",
   updatedAt: "updated_at",
   removedAt: "removed_at",
+  LastEditedByAdminAt: "last_edited_by_admin_at",
 };
 
 const CATEGORY_COLUMN_MAP: Record<string, string> = {
@@ -375,6 +376,11 @@ const applyAvailabilityAwareOrder = (
   if (rawField === "Price" || rawField === "price") {
     const priceSql = buildProductDisplayPriceSql(knex, ctx, "p");
     query.orderByRaw(`${priceSql.toQuery()} ${direction.toUpperCase()} NULLS LAST`);
+  } else if (rawField === "LastEditedByAdminAt") {
+    // Dedicated "last edited by admin" sort: products never edited by an admin have a NULL
+    // timestamp and must sort last, falling back to creation order.
+    query.orderByRaw(`p.last_edited_by_admin_at ${direction.toUpperCase()} NULLS LAST`);
+    query.orderBy("p.created_at", "desc");
   } else {
     const column = PRODUCT_COLUMN_MAP[rawField || "createdAt"] || PRODUCT_COLUMN_MAP.createdAt;
     query.orderBy(`p.${column}`, direction);

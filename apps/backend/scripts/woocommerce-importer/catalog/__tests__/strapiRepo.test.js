@@ -10,6 +10,7 @@ function mockHttp() {
   return {
     posts: [],
     puts: [],
+    deletes: [],
     gets: [],
     nextPostId: 1000,
     async post(url, body) {
@@ -23,6 +24,10 @@ function mockHttp() {
     async get(url, config) {
       this.gets.push({ url, config });
       return { data: { data: [] } };
+    },
+    async delete(url) {
+      this.deletes.push({ url });
+      return { data: {} };
     },
   };
 }
@@ -96,4 +101,48 @@ test("resolveAttributeId: caches and creates once", async () => {
   const id2 = await repo.resolveAttributeId({ type: "size", title: "M", externalId: "size_m" });
   assert.equal(id1, id2);
   assert.equal(http.posts.length, 1); // second call hits cache, no extra POST
+});
+
+test("syncProductSizeHelper: creates helper when product has a matrix", async () => {
+  const http = mockHttp();
+  const repo = new StrapiRepo(http, noopLogger);
+  const matrix = [["Size", "Chest"], ["M", "42"]];
+
+  const mode = await repo.syncProductSizeHelper(500, matrix);
+
+  assert.equal(mode, "created");
+  assert.equal(http.posts.length, 1);
+  assert.equal(http.posts[0].url, "/product-size-helpers");
+  assert.deepEqual(http.posts[0].body.data, { Helper: matrix, product: 500 });
+});
+
+test("syncProductSizeHelper: updates existing helper", async () => {
+  const http = mockHttp();
+  http.get = async (url, config) => {
+    http.gets.push({ url, config });
+    return { data: { data: [{ id: 77, attributes: {} }] } };
+  };
+  const repo = new StrapiRepo(http, noopLogger);
+  const matrix = [["Size", "Chest"], ["L", "45"]];
+
+  const mode = await repo.syncProductSizeHelper(500, matrix);
+
+  assert.equal(mode, "updated");
+  assert.equal(http.puts.length, 1);
+  assert.equal(http.puts[0].url, "/product-size-helpers/77");
+  assert.deepEqual(http.puts[0].body.data, { Helper: matrix });
+});
+
+test("syncProductSizeHelper: deletes existing helper when WooCommerce has none", async () => {
+  const http = mockHttp();
+  http.get = async (url, config) => {
+    http.gets.push({ url, config });
+    return { data: { data: [{ id: 88, attributes: {} }] } };
+  };
+  const repo = new StrapiRepo(http, noopLogger);
+
+  const mode = await repo.syncProductSizeHelper(500, null);
+
+  assert.equal(mode, "deleted");
+  assert.deepEqual(http.deletes, [{ url: "/product-size-helpers/88" }]);
 });

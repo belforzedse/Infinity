@@ -1,4 +1,8 @@
-import type { ProductDataResponse, GenericRelationArray } from "@/services/super-admin/product/get";
+import type {
+  ProductDataResponse,
+  GenericRelationArray,
+  MediaDataItem,
+} from "@/services/super-admin/product/get";
 import type { EditProductData } from "@/types/super-admin/products";
 import type { TagResponseType, TagAttributes } from "@/services/super-admin/product/tag/get";
 
@@ -51,32 +55,38 @@ const safeNumber = (value: number | string | null | undefined, fallback: number)
   return Number.isFinite(parsed) ? parsed : fallback;
 };
 
+const relationOne = <T>(relation: { data?: T | null } | null | undefined): T | null =>
+  relation?.data ?? null;
+
+const relationMany = <T>(relation: { data?: T[] | null } | null | undefined): T[] =>
+  Array.isArray(relation?.data) ? relation.data : [];
+
 export function transformToProductData(strapiProduct: ProductDataResponse): EditProductData {
   // Extract CoverImage URL if it exists, otherwise use an empty string
   const coverImageUrl = {
-    data: strapiProduct.CoverImage.data || null,
+    data: relationOne(strapiProduct.CoverImage),
   };
 
   // Map each media item to its url. If no data, use an empty array.
-  const mediaIds = strapiProduct.Media.data;
+  const mediaIds = relationMany<MediaDataItem>(strapiProduct.Media);
 
   // Transform product_main_category to categoryResponseType or null
-  const mainCategory = strapiProduct.product_main_category.data as StrapiCategory | null;
+  const mainCategory = relationOne(strapiProduct.product_main_category) as StrapiCategory | null;
 
   // Convert product_tags to TagResponseType array
-  const productTags: TagResponseType[] = (
-    strapiProduct.product_tags as unknown as GenericRelationArray<StrapiTagData>
-  ).data.map((tag) => ({
+  const productTags: TagResponseType[] = relationMany<StrapiTagData>(
+    strapiProduct.product_tags as unknown as GenericRelationArray<StrapiTagData>,
+  ).map((tag) => ({
     id: tag.id,
     attributes: tag.attributes,
   }));
 
   // Convert Files into an array of strings
-  const files = strapiProduct.Files.data;
+  const files = relationMany<MediaDataItem>(strapiProduct.Files);
 
   // Transform product_other_categories into array of categoryResponseType
-  const otherCategories = (
-    (strapiProduct.product_other_categories as StrapiArrayResponse<StrapiCategory>).data || []
+  const otherCategories = relationMany<StrapiCategory>(
+    strapiProduct.product_other_categories as StrapiArrayResponse<StrapiCategory>,
   ).map((category) => ({
     id: category.id,
     attributes: {
@@ -87,7 +97,9 @@ export function transformToProductData(strapiProduct: ProductDataResponse): Edit
     },
   }));
 
-  const productVariations = (strapiProduct.product_variations?.data || []) as VariationData[];
+  const productVariations = relationMany<VariationData>(
+    strapiProduct.product_variations as unknown as { data?: VariationData[] | null },
+  );
   const simpleVariation =
     productVariations.find((variation) => variation?.attributes?.IsPublished === true) ||
     productVariations[0];

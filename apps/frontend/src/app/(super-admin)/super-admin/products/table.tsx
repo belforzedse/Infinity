@@ -32,6 +32,7 @@ export type Product = {
     RatingCount: number | null;
     createdAt: string;
     updatedAt: string;
+    LastEditedByAdminAt: string | null;
     CleaningTips: string;
     ReturnConditions: string;
     product_variations: {
@@ -221,12 +222,15 @@ export const columns: ColumnDef<Product>[] = [
     },
   },
   {
-    accessorKey: "attributes.updatedAt",
+    accessorKey: "attributes.LastEditedByAdminAt",
     header: "آخرین ویرایش",
     cell: ({ row }) => {
-      const updatedAt = row.original?.attributes?.updatedAt;
-      if (!updatedAt) return "-";
-      return <SuperAdminTableCellFullDateTime date={new Date(updatedAt)} />;
+      // Dedicated admin-edit timestamp; fall back to creation time for never-edited products.
+      const lastEdited =
+        row.original?.attributes?.LastEditedByAdminAt ||
+        row.original?.attributes?.createdAt;
+      if (!lastEdited) return "-";
+      return <SuperAdminTableCellFullDateTime date={new Date(lastEdited)} />;
     },
   },
   {
@@ -462,7 +466,10 @@ export const MobileTable = ({ data, enableSelection, selectedIds, onSelectionCha
               </div>
 
               <span className="text-[11px] text-neutral-400">
-                آخرین ویرایش: {formatFaRelativeDateTime(row?.attributes?.updatedAt)}
+                آخرین ویرایش:{" "}
+                {formatFaRelativeDateTime(
+                  row?.attributes?.LastEditedByAdminAt || row?.attributes?.createdAt,
+                )}
               </span>
             </div>
           </div>

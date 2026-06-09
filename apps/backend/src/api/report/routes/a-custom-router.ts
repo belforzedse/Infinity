@@ -38,6 +38,14 @@ export default {
     },
     {
       method: "GET",
+      path: "/reports/admin-activity/:id",
+      handler: "report.adminActivityById",
+      config: {
+        auth: { scope: [] },
+      },
+    },
+    {
+      method: "GET",
       path: "/reports/traffic/dashboard",
       handler: "report.trafficDashboard",
       config: {

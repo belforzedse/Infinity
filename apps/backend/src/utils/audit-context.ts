@@ -8,6 +8,14 @@ export interface AuditContext {
   isAdmin: boolean;
   ip: string | null;
   userAgent: string | null;
+  /**
+   * Canonical role name for `userId`, lazily resolved by `recordAdminAudit` and memoized
+   * here so repeated audit writes within a single request avoid extra DB lookups.
+   * `undefined` = not yet resolved, `null` = resolved with no role.
+   */
+  roleName?: string | null;
+  /** Display name resolved alongside `roleName` (e.g. "First Last"), memoized. */
+  resolvedName?: string | null;
 }
 
 // Global storage for audit context

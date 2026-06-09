@@ -768,7 +768,13 @@ export default {
         filters.performed_by = { id: Number(ctx.query.performedBy) };
       }
 
-      const allowedRoles = [ROLE_NAMES.SUPERADMIN, ROLE_NAMES.STORE_MANAGER];
+      // Defense-in-depth: although writes are now gated to management roles, keep the role filter
+      // so any legacy/non-admin rows are excluded from the report.
+      const allowedRoles = [
+        ROLE_NAMES.SUPERADMIN,
+        ROLE_NAMES.STORE_MANAGER,
+        ROLE_NAMES.EDITOR,
+      ];
       filters.PerformedByRole = { $in: allowedRoles };
 
       const manualActivities = await strapi.entityService.findMany(
@@ -823,6 +829,43 @@ export default {
         },
       );
 
+      // Distinct admins who have activity in the date range, so the frontend admin filter lists
+      // every admin (not just those on the current page) and can key options by user id.
+      let admins: Array<{ id: number | null; name: string; role: string | null }> = [];
+      try {
+        const knex = strapi.db.connection;
+        const linkTable = "manual_admin_activities_performed_by_links";
+        const hasLink = await knex.schema.hasTable(linkTable);
+        if (hasLink) {
+          const rows = await knex("manual_admin_activities as m")
+            .leftJoin(`${linkTable} as l`, "l.manual_admin_activity_id", "m.id")
+            .whereBetween("m.created_at", [start.toISOString(), end.toISOString()])
+            .whereIn("m.performed_by_role", allowedRoles)
+            .distinct(
+              "l.user_id as id",
+              "m.performed_by_name as name",
+              "m.performed_by_role as role",
+            );
+          const seen = new Set<string>();
+          for (const r of rows as any[]) {
+            const key = r.id != null ? `id:${r.id}` : `name:${r.name}`;
+            if (!r.id && !r.name) continue;
+            if (seen.has(key)) continue;
+            seen.add(key);
+            admins.push({
+              id: r.id ?? null,
+              name: r.name || (r.id ? `User ${r.id}` : "نامشخص"),
+              role: r.role ?? null,
+            });
+          }
+          admins.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+        }
+      } catch (adminsError) {
+        strapi.log.warn("Failed to load distinct admins for activity report", {
+          error: (adminsError as Error).message,
+        });
+      }
+
       ctx.body = {
         data,
         meta: {
@@ -832,6 +875,67 @@ export default {
             total: totalCount,
             pageCount: Math.ceil(totalCount / pageSize) || 1,
           },
+          admins,
+        },
+      };
+    } catch (error) {
+      ctx.badRequest(error.message, { data: { success: false } });
+    }
+  },
+
+  async adminActivityById(ctx) {
+    try {
+      const user = await ensureRoleAccess(
+        ctx,
+        [ROLE_NAMES.SUPERADMIN],
+        "Access denied - Superadmin role required",
+      );
+      if (!user) return;
+
+      const id = Number(ctx.params.id);
+      if (!id || Number.isNaN(id)) {
+        return ctx.badRequest("Invalid id", { data: { success: false } });
+      }
+
+      const log = (await strapi.entityService.findOne(
+        "api::manual-admin-activity.manual-admin-activity" as any,
+        id,
+        { populate: ["performed_by"] },
+      )) as any;
+
+      if (!log) {
+        return ctx.notFound("Activity not found", { data: { success: false } });
+      }
+
+      const actor = log.performed_by;
+      ctx.body = {
+        data: {
+          id: log.id,
+          ResourceType: log.ResourceType || "Admin",
+          Action: log.Action,
+          Title: log.Title,
+          Message: log.Message,
+          MessageEn: log.MessageEn,
+          Severity: log.Severity,
+          Changes: log.Changes,
+          PerformedByName:
+            log.PerformedByName ||
+            actor?.username ||
+            actor?.email ||
+            actor?.phone ||
+            (actor?.id ? `User ${actor.id}` : "System"),
+          PerformedByRole:
+            log.PerformedByRole ||
+            actor?.role?.name ||
+            (actor ? "Unknown" : "System"),
+          Description: log.Description,
+          Metadata: log.Metadata,
+          IP: log.IP,
+          UserAgent: log.UserAgent,
+          ResourceId: log.ResourceId,
+          createdAt: log.createdAt,
+          updatedAt: log.updatedAt,
+          performed_by: actor,
         },
       };
     } catch (error) {

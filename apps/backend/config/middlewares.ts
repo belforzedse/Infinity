@@ -21,6 +21,9 @@ const maxUploadLabel = `${Math.round(maxUploadBytes / 1024 / 1024)}mb`;
 export default [
   "strapi::logger",
   "strapi::errors",
+  // Merge duplicate slashes before static-serving/routing so malformed paths like
+  // `//rest-cache/config/strategy` (from third-party admin plugins) route instead of 400-ing.
+  "global::normalize-path",
   "strapi::security",
   "strapi::poweredBy",
   {

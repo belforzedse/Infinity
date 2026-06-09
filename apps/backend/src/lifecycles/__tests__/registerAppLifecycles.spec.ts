@@ -5,9 +5,8 @@ import contractLifecycle from "../../api/contract/content-types/contract/lifecyc
 import orderItemLifecycle from "../../api/order-item/content-types/order-item/lifecycles";
 import orderLifecycle from "../../api/order/content-types/order/lifecycles";
 import productStockLifecycle from "../../api/product-stock/content-types/product-stock/lifecycles";
-import { logAdminActivity } from "../../utils/adminActivity";
+import { recordAdminAudit } from "../../utils/adminAudit";
 import { logAdminEvent, logOrderEvent } from "../../utils/eventLogger";
-import { logManualActivity } from "../../utils/manualAdminActivity";
 import { registerAppLifecycles } from "../registerAppLifecycles";
 
 jest.mock("../../utils/audit", () => ({
@@ -19,17 +18,13 @@ jest.mock("../../utils/audit", () => ({
   })),
 }));
 
-jest.mock("../../utils/adminActivity", () => ({
-  logAdminActivity: jest.fn(),
+jest.mock("../../utils/adminAudit", () => ({
+  recordAdminAudit: jest.fn().mockResolvedValue(true),
 }));
 
 jest.mock("../../utils/eventLogger", () => ({
   logOrderEvent: jest.fn(),
   logAdminEvent: jest.fn(),
-}));
-
-jest.mock("../../utils/manualAdminActivity", () => ({
-  logManualActivity: jest.fn(),
 }));
 
 function createMockStrapi() {
@@ -102,7 +97,6 @@ describe("registerAppLifecycles", () => {
       "api::order.order",
       "api::contract.contract",
       "api::product-stock.product-stock",
-      "api::order-item.order-item",
     ]);
   });
 
@@ -159,12 +153,12 @@ describe("registerAppLifecycles", () => {
         }),
       })
     );
-    expect(logAdminActivity).toHaveBeenCalledWith(
+    expect(recordAdminAudit).toHaveBeenCalledWith(
       strapi,
       expect.objectContaining({
         resourceType: "Order",
         resourceId: 10,
-        action: "Update",
+        action: "StatusChange",
       })
     );
     expect(logOrderEvent).toHaveBeenCalledWith(
@@ -187,8 +181,8 @@ describe("registerAppLifecycles", () => {
     );
   });
 
-  it("logs contract updates and touches the related order using the closed-over Strapi instance", async () => {
-    const { strapi, subscribers, connection, update } = createMockStrapi();
+  it("logs contract updates through the gated admin-audit writer", async () => {
+    const { strapi, subscribers } = createMockStrapi();
     strapi.entityService.findOne
       .mockResolvedValueOnce({
         id: 20,
@@ -217,7 +211,7 @@ describe("registerAppLifecycles", () => {
         }),
       })
     );
-    expect(logAdminActivity).toHaveBeenCalledWith(
+    expect(recordAdminAudit).toHaveBeenCalledWith(
       strapi,
       expect.objectContaining({
         resourceType: "Contract",
@@ -225,9 +219,6 @@ describe("registerAppLifecycles", () => {
         action: "Update",
       })
     );
-    expect(strapi.db.query).toHaveBeenCalledWith("api::contract.contract");
-    expect(connection).toHaveBeenCalledWith("orders");
-    expect(update).toHaveBeenCalledWith(expect.objectContaining({ updated_at: expect.any(Date) }));
   });
 
   it("logs product-stock deltas once through the bootstrap subscriber", async () => {
@@ -255,12 +246,12 @@ describe("registerAppLifecycles", () => {
         }),
       })
     );
-    expect(logManualActivity).toHaveBeenCalledWith(
+    expect(recordAdminAudit).toHaveBeenCalledWith(
       strapi,
       expect.objectContaining({
         resourceType: "Stock",
         resourceId: 30,
-        action: "Update",
+        action: "Adjust",
       })
     );
   });

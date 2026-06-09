@@ -108,6 +108,7 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   const [viewMode, setViewMode] = React.useState<"visual" | "code">("visual");
   const [codeValue, setCodeValue] = React.useState(content || "");
   const [stats, setStats] = React.useState({ words: 0, characters: 0 });
+  const previousViewModeRef = React.useRef(viewMode);
   const debouncedOnChange = useDebouncedCallback(
     (value: string) => {
       if (onChange) {
@@ -121,6 +122,9 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
     extensions: [
       StarterKit.configure({
         codeBlock: false, // We'll use CodeBlockLowlight instead
+        link: false,
+        underline: false,
+        horizontalRule: false,
       }),
       Underline,
       Subscript,
@@ -195,14 +199,20 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({
   }, [debouncedOnChange]);
 
   React.useEffect(() => {
-    if (editor && content !== editor.getHTML()) {
-      editor.commands.setContent(content);
+    const nextContent = content || "";
+
+    if (editor && nextContent !== editor.getHTML()) {
+      editor.commands.setContent(nextContent, { emitUpdate: false });
     }
-    setCodeValue(content || "");
+
+    setCodeValue(nextContent);
   }, [content, editor]);
 
   React.useEffect(() => {
-    if (viewMode === "visual" && editor && codeValue !== editor.getHTML()) {
+    const previousViewMode = previousViewModeRef.current;
+    previousViewModeRef.current = viewMode;
+
+    if (previousViewMode === "code" && viewMode === "visual" && editor && codeValue !== editor.getHTML()) {
       editor.commands.setContent(codeValue);
     }
   }, [viewMode, codeValue, editor]);

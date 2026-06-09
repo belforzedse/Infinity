@@ -1,5 +1,7 @@
 import type { Strapi } from "@strapi/strapi";
 
+import { recordAdminAudit } from "./adminAudit";
+
 export type ManualSeverity = "info" | "success" | "warning" | "error";
 
 export type ManualActivityParams = {
@@ -22,78 +24,34 @@ export type ManualActivityParams = {
   userAgent?: string | null;
 };
 
-async function getAdminIdentity(strapi: Strapi, userId?: number) {
-  if (!userId) return { name: null, role: null };
-
-  try {
-    const user = await strapi.entityService.findOne(
-      "plugin::users-permissions.user",
-      userId,
-      {
-        populate: { user_info: true, role: true },
-      },
-    ) as any;
-
-    if (!user) return { name: null, role: null };
-
-    const role =
-      (user.role && typeof user.role?.name === "string" ? user.role.name : null) || null;
-
-    const info = user.user_info;
-    const fullName = info?.FirstName || info?.LastName
-      ? `${info?.FirstName || ""} ${info?.LastName || ""}`.trim()
-      : null;
-
-    const fallback =
-      user.username || user.email || user.phone || (userId ? `User ${userId}` : null);
-
-    return { name: fullName || fallback, role };
-  } catch {
-    return { name: null, role: null };
-  }
-}
-
+/**
+ * Backwards-compatible shim. All admin-audit writes now flow through the single gated writer
+ * `recordAdminAudit`, which records an entry only when the actor is a verified admin. Existing
+ * callers that pass `performedBy.id` continue to work and are now gated automatically.
+ */
 export async function logManualActivity(
   strapi: Strapi,
   params: ManualActivityParams,
 ) {
-  try {
-    let name = typeof params.performedBy?.name === "string" ? params.performedBy.name : undefined;
-    let role = typeof params.performedBy?.role === "string" ? params.performedBy.role : undefined;
-
-    if ((!name || !role) && params.performedBy?.id) {
-      const resolved = await getAdminIdentity(strapi, params.performedBy.id);
-      if (!name) name = resolved.name || undefined;
-      if (!role) role = resolved.role || undefined;
-    }
-
-    await strapi.entityService.create(
-      "api::manual-admin-activity.manual-admin-activity" as any,
-      {
-        data: {
-          ResourceType: params.resourceType,
-          Action: params.action,
-          ResourceId: params.resourceId ? String(params.resourceId) : undefined,
-          Title: params.title,
-          Message: params.message,
-          MessageEn: params.messageEn,
-          Severity: params.severity || "info",
-          Changes: params.changes || null,
-          Description: params.description,
-          Metadata: params.metadata,
-          performed_by: params.performedBy?.id || undefined,
-          PerformedByName: name,
-          PerformedByRole: role,
-          IP: params.ip,
-          UserAgent: params.userAgent,
-        },
-      },
-    );
-  } catch (error) {
-    strapi.log.error("Failed to log manual admin activity", {
-      error: error instanceof Error ? error.message : error,
-      payload: params,
-    });
-  }
+  await recordAdminAudit(strapi, {
+    resourceType: params.resourceType,
+    resourceId: params.resourceId,
+    action: params.action,
+    title: params.title,
+    message: params.message,
+    messageEn: params.messageEn,
+    severity: params.severity,
+    changes: params.changes,
+    description: params.description,
+    metadata: params.metadata,
+    ip: params.ip,
+    userAgent: params.userAgent,
+    actor: params.performedBy?.id
+      ? {
+          id: params.performedBy.id,
+          name: params.performedBy.name ?? undefined,
+          role: params.performedBy.role ?? undefined,
+        }
+      : undefined,
+  });
 }
-

@@ -1,5 +1,9 @@
 import { resolveAuditActor } from "../../../../utils/audit";
-import { logAdminActivity, logAdminProductEdit } from "../../../../utils/adminActivity";
+import {
+  recordAdminAudit,
+  markProductEditedByAdmin,
+  type AdminAuditAction,
+} from "../../../../utils/adminAudit";
 import { generateUniqueProductSlug } from "../../../../utils/productSlug";
 
 type AuditAction = "Create" | "Update" | "Delete";
@@ -117,6 +121,12 @@ export default {
   async beforeCreate(event) {
     const { data } = event.params;
 
+    // Seed the dedicated admin-edit timestamp at creation so it is never NULL (creation is the
+    // baseline "last edited" moment). Real admin edits update it later; non-admin events never do.
+    if (!data.LastEditedByAdminAt) {
+      data.LastEditedByAdminAt = new Date();
+    }
+
     // Auto-generate slug from Title if not provided
     // This must run BEFORE Strapi's uid field auto-generation to preserve Persian characters
     if (!data.Slug && data.Title) {
@@ -150,22 +160,17 @@ export default {
       },
     });
 
-    await logAdminActivity(strapi as any, {
+    // LastEditedByAdminAt is already seeded in beforeCreate; just record the audit entry (gated).
+    await recordAdminAudit(strapi as any, {
+      event,
       resourceType: "Product",
       resourceId: result.id,
       action: "Create",
-      description: "محصول ایجاد شد",
-      metadata: {
-        productId: result.id,
-        title: result.Title,
-      },
-      performedBy: {
-        id: actor.userId || undefined,
-        name: actor.label || undefined,
-        role: null,
-      },
-      ip: actor.ip,
-      userAgent: actor.userAgent,
+      title: "محصول ایجاد شد",
+      message: `محصول «${result.Title}» ایجاد شد`,
+      messageEn: `Product #${result.id} created`,
+      severity: "success",
+      metadata: { productId: result.id, title: result.Title },
     });
 
     // Trigger revalidation if product has a slug and is active
@@ -189,15 +194,16 @@ export default {
       "api::product.product",
       id,
       {
+        // NOTE: AverageRating/RatingCount are intentionally excluded — they are recomputed by
+        // customer reviews (a non-admin event) and must never count as an admin edit.
         fields: [
           "Title",
           "Slug",
           "Status",
           "Description",
-          "AverageRating",
-          "RatingCount",
           "CleaningTips",
           "ReturnConditions",
+          "removedAt",
         ],
         populate: { product_main_category: true, product_tags: true },
       }
@@ -233,15 +239,16 @@ export default {
       "api::product.product",
       result.id,
       {
+        // NOTE: AverageRating/RatingCount are intentionally excluded — they are recomputed by
+        // customer reviews (a non-admin event) and must never count as an admin edit.
         fields: [
           "Title",
           "Slug",
           "Status",
           "Description",
-          "AverageRating",
-          "RatingCount",
           "CleaningTips",
           "ReturnConditions",
+          "removedAt",
         ],
         populate: { product_main_category: true, product_tags: true },
       }
@@ -263,43 +270,50 @@ export default {
       },
     });
 
-    // Log with enhanced admin activity if actor is an admin
-    if (actor.userId) {
-      try {
-        await logAdminProductEdit(
-          strapi as any,
-          result.id,
-          changes,
-          actor.userId,
-          actor.ip || null,
-          actor.userAgent || null,
-        );
-      } catch (activityError) {
-        strapi.log.error("Failed to log admin activity for product edit", {
-          productId: result.id,
-          error: (activityError as Error).message,
-        });
+    // Record a single gated admin-audit entry. A soft-delete (removedAt set) or restore takes
+    // priority, then a Status transition (Publish/Unpublish); otherwise it is a generic edit.
+    const removedChange = changes.removedAt as { from?: unknown; to?: unknown } | undefined;
+    const statusChange = changes.Status as { from?: unknown; to?: unknown } | undefined;
+    let action: AdminAuditAction = "Update";
+    let title = "محصول ویرایش شد";
+    let messageEn = `Product #${result.id} was edited`;
+    let isSoftDelete = false;
+    if (removedChange && removedChange.to) {
+      action = "Delete";
+      title = "محصول حذف شد";
+      messageEn = `Product #${result.id} was deleted`;
+      isSoftDelete = true;
+    } else if (removedChange && !removedChange.to) {
+      title = "محصول بازیابی شد";
+      messageEn = `Product #${result.id} was restored`;
+    } else if (statusChange) {
+      if (statusChange.to === "Active") {
+        action = "Publish";
+        title = "محصول منتشر شد";
+        messageEn = `Product #${result.id} was published`;
+      } else if (statusChange.to === "InActive") {
+        action = "Unpublish";
+        title = "محصول از انتشار خارج شد";
+        messageEn = `Product #${result.id} was unpublished`;
       }
     }
-
-    // Also keep the legacy logAdminActivity call for backward compatibility
-    await logAdminActivity(strapi as any, {
+    const changedFields = Object.keys(changes);
+    const recordedUpdate = await recordAdminAudit(strapi as any, {
+      event,
       resourceType: "Product",
       resourceId: result.id,
-      action: "Update",
-      description: "محصول بروزرسانی شد",
-      metadata: {
-        productId: result.id,
-        changes,
-      },
-      performedBy: {
-        id: actor.userId || undefined,
-        name: actor.label || undefined,
-        role: null,
-      },
-      ip: actor.ip,
-      userAgent: actor.userAgent,
+      action,
+      title,
+      message:
+        action === "Update"
+          ? `محصول #${result.id} ویرایش شد. تغییرات: ${changedFields.join("، ")}`
+          : title,
+      messageEn,
+      severity: isSoftDelete ? "warning" : "info",
+      changes,
+      metadata: { productId: result.id, changedFields, isSoftDelete },
     });
+    if (recordedUpdate) await markProductEditedByAdmin(strapi as any, result.id);
 
     // Trigger revalidation if product has a slug and is active
     // Get the current slug (may have changed in the update)
@@ -350,21 +364,16 @@ export default {
       }
     }
 
-    await logAdminActivity(strapi as any, {
+    await recordAdminAudit(strapi as any, {
+      event,
       resourceType: "Product",
       resourceId: id,
       action: "Delete",
-      description: "محصول حذف شد",
-      metadata: {
-        productId: id,
-      },
-      performedBy: {
-        id: actor.userId || undefined,
-        name: actor.label || undefined,
-        role: null,
-      },
-      ip: actor.ip,
-      userAgent: actor.userAgent,
+      title: "محصول حذف شد",
+      message: `محصول #${id} برای همیشه حذف شد`,
+      messageEn: `Product #${id} was permanently deleted`,
+      severity: "warning",
+      metadata: { productId: id, isSoftDelete: false },
     });
   },
 };

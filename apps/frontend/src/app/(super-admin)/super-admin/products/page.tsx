@@ -571,7 +571,7 @@ export default function ProductsPage() {
               sortedBase += `&filters[Title][$containsi]=${encodeURIComponent(debouncedSearchQuery.trim())}`;
             }
 
-            if (sort === "last-edited") return sortedBase + "&sort[0]=updatedAt:desc";
+            if (sort === "last-edited") return sortedBase + "&sort[0]=LastEditedByAdminAt:desc";
             if (sort === "newest") return sortedBase + "&sort[0]=createdAt:desc";
             return sortedBase + "&sort[0]=createdAt:asc";
           })()}

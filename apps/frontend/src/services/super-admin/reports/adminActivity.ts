@@ -4,7 +4,17 @@ import { formatQueryParams } from "@/utils/api";
 export interface AdminActivityLog {
   id: number;
   ResourceType: "Order" | "Product" | "User" | "Contract" | "Discount" | "Stock" | "Other";
-  Action: "Create" | "Update" | "Delete" | "Publish" | "Unpublish" | "Adjust" | "Other";
+  Action:
+    | "Create"
+    | "Update"
+    | "Delete"
+    | "Publish"
+    | "Unpublish"
+    | "Adjust"
+    | "Import"
+    | "Refund"
+    | "StatusChange"
+    | "Other";
   Title?: string;
   Message?: string;
   MessageEn?: string;
@@ -30,6 +40,12 @@ export interface AdminActivityLog {
   };
 }
 
+export interface AdminActivityAdmin {
+  id: number | null;
+  name: string;
+  role: string | null;
+}
+
 export interface AdminActivityResponse {
   data: AdminActivityLog[];
   meta?: {
@@ -39,6 +55,7 @@ export interface AdminActivityResponse {
       pageCount: number;
       total: number;
     };
+    admins?: AdminActivityAdmin[];
   };
 }
 
@@ -66,56 +83,23 @@ export async function getAdminActivity(params: {
   const res = await apiClient.get(`/reports/admin-activity${query}` as any);
   const responseData = (res as any)?.data || [];
   const pagination = (res as any)?.meta?.pagination || undefined;
+  const admins = (res as any)?.meta?.admins || undefined;
   return {
     data: responseData,
-    meta: pagination
-      ? {
-          pagination,
-        }
-      : undefined,
+    meta:
+      pagination || admins
+        ? {
+            pagination,
+            admins,
+          }
+        : undefined,
   };
 }
 
 /**
- * Get admin activity by ID
+ * Get a single admin activity (audit log entry) by ID.
  */
 export async function getAdminActivityById(id: number): Promise<AdminActivityLog> {
-  const res = await apiClient.get(`/admin-activities/${id}` as any);
+  const res = await apiClient.get(`/reports/admin-activity/${id}` as any);
   return (res as any).data as AdminActivityLog;
-}
-
-/**
- * Get admin activities for a specific order
- */
-export async function getOrderAdminActivities(
-  orderId: number,
-  params?: { page?: number; pageSize?: number }
-): Promise<AdminActivityResponse> {
-  const query = params ? formatQueryParams(params as any) : "";
-  const res = await apiClient.get(`/admin-activities/order/${orderId}${query}` as any);
-  return res as AdminActivityResponse;
-}
-
-/**
- * Get admin activities for a specific user
- */
-export async function getUserAdminActivities(
-  userId: number,
-  params?: { page?: number; pageSize?: number }
-): Promise<AdminActivityResponse> {
-  const query = params ? formatQueryParams(params as any) : "";
-  const res = await apiClient.get(`/admin-activities/user/${userId}${query}` as any);
-  return res as AdminActivityResponse;
-}
-
-/**
- * Get admin activities for a specific product
- */
-export async function getProductAdminActivities(
-  productId: number,
-  params?: { page?: number; pageSize?: number }
-): Promise<AdminActivityResponse> {
-  const query = params ? formatQueryParams(params as any) : "";
-  const res = await apiClient.get(`/admin-activities/product/${productId}${query}` as any);
-  return res as AdminActivityResponse;
 }
