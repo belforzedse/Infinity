@@ -12,6 +12,28 @@ import type {
 } from "@/types/super-admin/settings";
 
 const PRODUCT_CARD_VIEW = "view=card";
+export type HomepageProductSectionId =
+  | "newest"
+  | "favorites"
+  | "discounted"
+  | "gifPromoSlot1"
+  | "gifPromoSlot2"
+  | "custom"
+  | "weeklyPicks"
+  | "everyoneFollows";
+
+export type BatchedHomepageSections = Partial<Record<HomepageProductSectionId, ProductCardProps[]>>;
+
+const HOMEPAGE_SECTION_IDS: HomepageProductSectionId[] = [
+  "newest",
+  "favorites",
+  "discounted",
+  "gifPromoSlot1",
+  "gifPromoSlot2",
+  "custom",
+  "weeklyPicks",
+  "everyoneFollows",
+];
 
 const productHasStock = (product: any): boolean => {
   const attrs = product?.attributes ?? product;
@@ -51,12 +73,62 @@ const productHasDiscount = (product: any): boolean => {
 };
 
 const HOMEPAGE_FETCH_OPTIONS = {
-  next: { revalidate: 90 } as const,
+  next: { revalidate: 90, tags: ["home-products"] },
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
     "Accept-Encoding": "gzip", // Explicitly request compression
   },
+};
+
+const parseBatchedHomepageAllowlist = () => {
+  const raw = process.env.HOME_BATCHED_SECTION_ALLOWLIST || "";
+  return new Set(
+    raw
+      .split(",")
+      .map((sectionId) => sectionId.trim())
+      .filter(Boolean),
+  );
+};
+
+export const isHomepageBatchedSectionEnabled = (sectionId: HomepageProductSectionId): boolean => {
+  if (process.env.HOME_BATCHED_SECTIONS_ENABLED !== "true") return false;
+  const allowlist = parseBatchedHomepageAllowlist();
+  return allowlist.size === 0 || allowlist.has(sectionId);
+};
+
+export const getBatchedHomepageSections = async (): Promise<BatchedHomepageSections | null> => {
+  if (!HOMEPAGE_SECTION_IDS.some(isHomepageBatchedSectionEnabled)) return null;
+
+  try {
+    const response = await fetch(
+      `${getStrapiServerUrl()}${ENDPOINTS.PRODUCT.HOMEPAGE_SECTIONS}`,
+      HOMEPAGE_FETCH_OPTIONS,
+    ).then((res) => res.json());
+
+    const sections = (response as { data?: { sections?: unknown[] } })?.data?.sections ?? [];
+    const result: BatchedHomepageSections = {};
+
+    for (const section of sections as any[]) {
+      const sectionId = section?.id as HomepageProductSectionId | undefined;
+      if (!sectionId || !HOMEPAGE_SECTION_IDS.includes(sectionId)) continue;
+      result[sectionId] = formatProductsToCardProps(section?.products ?? []);
+    }
+
+    return result;
+  } catch (error) {
+    logger.error("[Homepage] getBatchedHomepageSections error:", error as any);
+    return null;
+  }
+};
+
+export const pickBatchedHomepageSection = (
+  batchedSections: BatchedHomepageSections | null,
+  sectionId: HomepageProductSectionId,
+): ProductCardProps[] | null => {
+  if (!isHomepageBatchedSectionEnabled(sectionId)) return null;
+  const products = batchedSections?.[sectionId];
+  return products && products.length > 0 ? products : null;
 };
 
 /**

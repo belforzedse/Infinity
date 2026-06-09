@@ -1,0 +1,6086 @@
+{
+  "categories": {
+    "15": {
+      "strapiId": 603,
+      "updatedAt": "2026-06-09T12:55:49.674Z",
+      "name": "بدون دسته‌بندی",
+      "slug": "uncategory"
+    },
+    "1331": {
+      "strapiId": 604,
+      "updatedAt": "2026-06-09T12:55:49.882Z",
+      "name": "شومیز",
+      "slug": "paperback-and-tonic"
+    },
+    "1332": {
+      "strapiId": 605,
+      "updatedAt": "2026-06-09T12:55:50.116Z",
+      "name": "شومیز نخی",
+      "slug": "cotton-paper"
+    },
+    "1333": {
+      "strapiId": 606,
+      "updatedAt": "2026-06-09T12:55:50.465Z",
+      "name": "شومیز جین",
+      "slug": "denim-paper"
+    },
+    "1335": {
+      "strapiId": 607,
+      "updatedAt": "2026-06-09T12:55:50.758Z",
+      "name": "تونیک اسپرت",
+      "slug": "sports-tunic"
+    },
+    "1336": {
+      "strapiId": 608,
+      "updatedAt": "2026-06-09T12:55:51.349Z",
+      "name": "شومیز مجلسی",
+      "slug": "house-paper"
+    },
+    "1337": {
+      "strapiId": 610,
+      "updatedAt": "2026-06-09T12:55:51.678Z",
+      "name": "راحتی",
+      "slug": "house-dress"
+    },
+    "1338": {
+      "strapiId": 611,
+      "updatedAt": "2026-06-09T12:55:51.828Z",
+      "name": "تیشرت راحتی",
+      "slug": "comfortable-t-shirt"
+    },
+    "1340": {
+      "strapiId": 612,
+      "updatedAt": "2026-06-09T12:55:52.024Z",
+      "name": "ست دوتیکه راحتی",
+      "slug": "comfort-set"
+    },
+    "1341": {
+      "strapiId": 613,
+      "updatedAt": "2026-06-09T12:55:52.246Z",
+      "name": "تاپ و کراپ",
+      "slug": "comfortable-top"
+    },
+    "1345": {
+      "strapiId": 614,
+      "updatedAt": "2026-06-09T12:55:52.464Z",
+      "name": "پیراهن راحتی",
+      "slug": "comfortable-shirt"
+    },
+    "1346": {
+      "strapiId": 617,
+      "updatedAt": "2026-06-09T12:55:53.067Z",
+      "name": "شلوار",
+      "slug": "pants"
+    },
+    "1347": {
+      "strapiId": 618,
+      "updatedAt": "2026-06-09T12:55:53.241Z",
+      "name": "شلوار جین",
+      "slug": "jeans"
+    },
+    "1349": {
+      "strapiId": 619,
+      "updatedAt": "2026-06-09T12:55:53.389Z",
+      "name": "شلوار لینن",
+      "slug": "lenin-pants"
+    },
+    "1353": {
+      "strapiId": 620,
+      "updatedAt": "2026-06-09T12:55:53.557Z",
+      "name": "شلوار دمپا",
+      "slug": "flip-flops"
+    },
+    "1354": {
+      "strapiId": 621,
+      "updatedAt": "2026-06-09T12:55:53.780Z",
+      "name": "شلوار مام استایل",
+      "slug": "mom-style-pants"
+    },
+    "1355": {
+      "strapiId": 622,
+      "updatedAt": "2026-06-09T12:55:53.992Z",
+      "name": "شلوار راسته",
+      "slug": "straight-pants"
+    },
+    "1356": {
+      "strapiId": 623,
+      "updatedAt": "2026-06-09T12:55:54.242Z",
+      "name": "شلوار بگ",
+      "slug": "bag-pants"
+    },
+    "1357": {
+      "strapiId": 624,
+      "updatedAt": "2026-06-09T12:55:54.811Z",
+      "name": "شلوار نیم بگ",
+      "slug": "half-bag-pants"
+    },
+    "1360": {
+      "strapiId": 625,
+      "updatedAt": "2026-06-09T12:55:55.447Z",
+      "name": "شلوار مام فیت",
+      "slug": "mom-fit-pants"
+    },
+    "1361": {
+      "strapiId": 627,
+      "updatedAt": "2026-06-09T12:55:56.261Z",
+      "name": "مانتو",
+      "slug": "coat-and-mantle"
+    },
+    "1362": {
+      "strapiId": 628,
+      "updatedAt": "2026-06-09T12:55:56.626Z",
+      "name": "کت ژاکارد",
+      "slug": "jacquard-coat"
+    },
+    "1363": {
+      "strapiId": 629,
+      "updatedAt": "2026-06-09T12:55:56.963Z",
+      "name": "کت لینن",
+      "slug": "linen-coat"
+    },
+    "1364": {
+      "strapiId": 630,
+      "updatedAt": "2026-06-09T12:55:57.208Z",
+      "name": "کت کرپ",
+      "slug": "crepe-coat"
+    },
+    "1365": {
+      "strapiId": 631,
+      "updatedAt": "2026-06-09T12:55:57.460Z",
+      "name": "کت کتان",
+      "slug": "linen-coat-coat-and-mantle"
+    },
+    "1366": {
+      "strapiId": 632,
+      "updatedAt": "2026-06-09T12:55:57.783Z",
+      "name": "کت جین",
+      "slug": "jean-coat"
+    },
+    "1367": {
+      "strapiId": 633,
+      "updatedAt": "2026-06-09T12:55:58.010Z",
+      "name": "مانتو لینن",
+      "slug": "linencoat"
+    },
+    "1368": {
+      "strapiId": 634,
+      "updatedAt": "2026-06-09T12:55:58.292Z",
+      "name": "مانتو دانشجویی",
+      "slug": "student-coat"
+    },
+    "1369": {
+      "strapiId": 635,
+      "updatedAt": "2026-06-09T12:55:58.491Z",
+      "name": "مانتو نخی",
+      "slug": "cotton-coat"
+    },
+    "1370": {
+      "strapiId": 637,
+      "updatedAt": "2026-06-09T12:55:58.932Z",
+      "name": "لباس زیر",
+      "slug": "under-wear"
+    },
+    "1371": {
+      "strapiId": 638,
+      "updatedAt": "2026-06-09T12:56:00.078Z",
+      "name": "شورت فانتزی",
+      "slug": "fancy-shorts"
+    },
+    "1372": {
+      "strapiId": 639,
+      "updatedAt": "2026-06-09T12:56:00.290Z",
+      "name": "شورت کبریتی",
+      "slug": "match-shorts"
+    },
+    "1373": {
+      "strapiId": 640,
+      "updatedAt": "2026-06-09T12:56:00.558Z",
+      "name": "شورت توری",
+      "slug": "lace-shorts"
+    },
+    "1374": {
+      "strapiId": 641,
+      "updatedAt": "2026-06-09T12:56:00.768Z",
+      "name": "شورت بکلس",
+      "slug": "backless-shorts"
+    },
+    "1375": {
+      "strapiId": 642,
+      "updatedAt": "2026-06-09T12:56:00.951Z",
+      "name": "سوتین اسپرت",
+      "slug": "sports-bra"
+    },
+    "1376": {
+      "strapiId": 643,
+      "updatedAt": "2026-06-09T12:56:01.179Z",
+      "name": "سوتین توری",
+      "slug": "lace-bra"
+    },
+    "1377": {
+      "strapiId": 644,
+      "updatedAt": "2026-06-09T12:56:01.589Z",
+      "name": "سوتین فنردار گن",
+      "slug": "spring-bra"
+    },
+    "1378": {
+      "strapiId": 645,
+      "updatedAt": "2026-06-09T12:56:01.813Z",
+      "name": "سوتین اسفنجی",
+      "slug": "sponge-bra"
+    },
+    "1379": {
+      "strapiId": 646,
+      "updatedAt": "2026-06-09T12:56:02.008Z",
+      "name": "سوتین جک دار",
+      "slug": "jacquard-bra"
+    },
+    "1380": {
+      "strapiId": 647,
+      "updatedAt": "2026-06-09T12:56:02.139Z",
+      "name": "لباس خواب",
+      "slug": "sleepwear"
+    },
+    "1381": {
+      "strapiId": 648,
+      "updatedAt": "2026-06-09T12:56:02.272Z",
+      "name": "نیم تنه کبریتی",
+      "slug": "match-bust"
+    },
+    "1382": {
+      "strapiId": 649,
+      "updatedAt": "2026-06-09T12:56:02.458Z",
+      "name": "ست نیم تنه شورت",
+      "slug": "short-torso-set"
+    },
+    "1383": {
+      "strapiId": 650,
+      "updatedAt": "2026-06-09T12:56:02.743Z",
+      "name": "ست لباس زیر",
+      "slug": "underwear-set"
+    },
+    "1384": {
+      "strapiId": 654,
+      "updatedAt": "2026-06-09T12:56:03.632Z",
+      "name": "پیراهن",
+      "slug": "shirt"
+    },
+    "1385": {
+      "strapiId": 655,
+      "updatedAt": "2026-06-09T12:56:03.851Z",
+      "name": "پیراهن نخی",
+      "slug": "cotton-shirt"
+    },
+    "1386": {
+      "strapiId": 656,
+      "updatedAt": "2026-06-09T12:56:04.135Z",
+      "name": "پیراهن خامه دوزی",
+      "slug": "cream-embroidered-shirt"
+    },
+    "1387": {
+      "strapiId": 657,
+      "updatedAt": "2026-06-09T12:56:04.355Z",
+      "name": "پیراهن کوتاه",
+      "slug": "short-dress"
+    },
+    "1388": {
+      "strapiId": 658,
+      "updatedAt": "2026-06-09T12:56:04.602Z",
+      "name": "پیراهن بلند",
+      "slug": "long-shirt"
+    },
+    "1389": {
+      "strapiId": 659,
+      "updatedAt": "2026-06-09T12:56:04.768Z",
+      "name": "پیراهن لینن",
+      "slug": "linen-shirt"
+    },
+    "1390": {
+      "strapiId": 660,
+      "updatedAt": "2026-06-09T12:56:04.970Z",
+      "name": "پیراهن کرسپو",
+      "slug": "crespo-shirt"
+    },
+    "1391": {
+      "strapiId": 661,
+      "updatedAt": "2026-06-09T12:56:05.179Z",
+      "name": "پیراهن کتان",
+      "slug": "linenshirt"
+    },
+    "1392": {
+      "strapiId": 663,
+      "updatedAt": "2026-06-09T12:56:05.702Z",
+      "name": "شال",
+      "slug": "shawls-and-scarves"
+    },
+    "1393": {
+      "strapiId": 664,
+      "updatedAt": "2026-06-09T12:56:05.902Z",
+      "name": "شال نخی",
+      "slug": "cotton-shawl"
+    },
+    "1394": {
+      "strapiId": 665,
+      "updatedAt": "2026-06-09T12:56:06.106Z",
+      "name": "شال طرحدار",
+      "slug": "patterned-shawl"
+    },
+    "1395": {
+      "strapiId": 666,
+      "updatedAt": "2026-06-09T12:56:06.312Z",
+      "name": "شال ساده",
+      "slug": "simple-shawl"
+    },
+    "1396": {
+      "strapiId": 667,
+      "updatedAt": "2026-06-09T12:56:06.530Z",
+      "name": "شال پلیسه",
+      "slug": "pleated-shawl"
+    },
+    "1397": {
+      "strapiId": 668,
+      "updatedAt": "2026-06-09T12:56:06.748Z",
+      "name": "شال لینن",
+      "slug": "linen-shawl"
+    },
+    "1398": {
+      "strapiId": 669,
+      "updatedAt": "2026-06-09T12:56:06.961Z",
+      "name": "شال موهر",
+      "slug": "mohair-shawl"
+    },
+    "1399": {
+      "strapiId": 670,
+      "updatedAt": "2026-06-09T12:56:07.184Z",
+      "name": "شال حریر",
+      "slug": "silk-shawl"
+    },
+    "1400": {
+      "strapiId": 671,
+      "updatedAt": "2026-06-09T12:56:07.467Z",
+      "name": "شال مجلسی",
+      "slug": "majlisi-shawl"
+    },
+    "1401": {
+      "strapiId": 672,
+      "updatedAt": "2026-06-09T12:56:07.621Z",
+      "name": "مینی اسکارف",
+      "slug": "mini-scarf"
+    },
+    "1402": {
+      "strapiId": 673,
+      "updatedAt": "2026-06-09T12:56:07.808Z",
+      "name": "روسری نخی",
+      "slug": "cotton-scarf"
+    },
+    "1403": {
+      "strapiId": 674,
+      "updatedAt": "2026-06-09T12:56:08.447Z",
+      "name": "روسری ابریشم",
+      "slug": "silk-scarf"
+    },
+    "1404": {
+      "strapiId": 679,
+      "updatedAt": "2026-06-09T12:56:09.857Z",
+      "name": "جوراب",
+      "slug": "socks"
+    },
+    "1405": {
+      "strapiId": 680,
+      "updatedAt": "2026-06-09T12:56:10.450Z",
+      "name": "جوراب کالج",
+      "slug": "college-socks"
+    },
+    "1406": {
+      "strapiId": 681,
+      "updatedAt": "2026-06-09T12:56:10.624Z",
+      "name": "جوراب مچی",
+      "slug": "ankle-socks"
+    },
+    "1407": {
+      "strapiId": 682,
+      "updatedAt": "2026-06-09T12:56:10.831Z",
+      "name": "جوراب نیم ساق",
+      "slug": "stocking"
+    },
+    "1408": {
+      "strapiId": 683,
+      "updatedAt": "2026-06-09T12:56:11.051Z",
+      "name": "جوراب ساق بلند",
+      "slug": "stockings"
+    },
+    "1409": {
+      "strapiId": 684,
+      "updatedAt": "2026-06-09T12:56:11.274Z",
+      "name": "جوراب حوله ای",
+      "slug": "towel-socks"
+    },
+    "1410": {
+      "strapiId": 685,
+      "updatedAt": "2026-06-09T12:56:11.518Z",
+      "name": "جوراب فانتزی",
+      "slug": "fancy-socks"
+    },
+    "1411": {
+      "strapiId": 686,
+      "updatedAt": "2026-06-09T12:56:11.729Z",
+      "name": "جوراب کبریتی",
+      "slug": "match-socks"
+    },
+    "1412": {
+      "strapiId": 687,
+      "updatedAt": "2026-06-09T12:56:11.932Z",
+      "name": "جوراب مردانه",
+      "slug": "mens-socks"
+    },
+    "1449": {
+      "strapiId": 689,
+      "updatedAt": "2026-06-09T12:56:12.345Z",
+      "name": "لباس مردانه",
+      "slug": "لباس-مردانه"
+    },
+    "1451": {
+      "strapiId": 690,
+      "updatedAt": "2026-06-09T12:56:12.479Z",
+      "name": "پیراهن مردانه",
+      "slug": "پیراهن-مردانه"
+    },
+    "1456": {
+      "strapiId": 691,
+      "updatedAt": "2026-06-09T12:56:12.601Z",
+      "name": "دامن",
+      "slug": "skirt"
+    },
+    "1457": {
+      "strapiId": 692,
+      "updatedAt": "2026-06-09T12:56:12.733Z",
+      "name": "دامن بلند",
+      "slug": "long-skirt"
+    },
+    "1458": {
+      "strapiId": 693,
+      "updatedAt": "2026-06-09T12:56:12.864Z",
+      "name": "دامن کوتاه",
+      "slug": "short-skirt"
+    },
+    "1459": {
+      "strapiId": 694,
+      "updatedAt": "2026-06-09T12:56:12.994Z",
+      "name": "دامن مجلسی",
+      "slug": "majestic-skirt"
+    },
+    "1460": {
+      "strapiId": 695,
+      "updatedAt": "2026-06-09T12:56:13.203Z",
+      "name": "دامن لینن",
+      "slug": "linen-skirt"
+    },
+    "1461": {
+      "strapiId": 696,
+      "updatedAt": "2026-06-09T12:56:13.452Z",
+      "name": "دامن کتان",
+      "slug": "linen-skirt-skirt"
+    },
+    "1462": {
+      "strapiId": 697,
+      "updatedAt": "2026-06-09T12:56:13.656Z",
+      "name": "دامن جین",
+      "slug": "jean-skirt"
+    },
+    "1463": {
+      "strapiId": 698,
+      "updatedAt": "2026-06-09T12:56:13.807Z",
+      "name": "دامن گلدار",
+      "slug": "floral-skirt"
+    },
+    "1464": {
+      "strapiId": 699,
+      "updatedAt": "2026-06-09T12:56:13.939Z",
+      "name": "دامن پلیسه",
+      "slug": "pleated-skirt"
+    },
+    "1468": {
+      "strapiId": 701,
+      "updatedAt": "2026-06-09T12:56:14.309Z",
+      "name": "سایر",
+      "slug": "سایر"
+    },
+    "1526": {
+      "strapiId": 702,
+      "updatedAt": "2026-06-09T12:56:14.849Z",
+      "name": "پلیور",
+      "slug": "پلیور-و-بافت"
+    },
+    "2095": {
+      "strapiId": 636,
+      "updatedAt": "2026-06-09T12:55:58.714Z",
+      "name": "کت و مانتو بافت",
+      "slug": "textured-coat-and-mantle"
+    },
+    "2096": {
+      "strapiId": 700,
+      "updatedAt": "2026-06-09T12:56:14.100Z",
+      "name": "دامن بافت",
+      "slug": "woven-skirt"
+    },
+    "2097": {
+      "strapiId": 688,
+      "updatedAt": "2026-06-09T12:56:12.148Z",
+      "name": "جوراب بافت",
+      "slug": "knitted-socks"
+    },
+    "2098": {
+      "strapiId": 615,
+      "updatedAt": "2026-06-09T12:55:52.672Z",
+      "name": "لباس آستین بلند",
+      "slug": "woven-casual-clothes"
+    },
+    "2099": {
+      "strapiId": 626,
+      "updatedAt": "2026-06-09T12:55:55.710Z",
+      "name": "شلوار بافت",
+      "slug": "woven-pants"
+    },
+    "2100": {
+      "strapiId": 609,
+      "updatedAt": "2026-06-09T12:55:51.532Z",
+      "name": "شومیز بافت",
+      "slug": "textured-paper"
+    },
+    "2101": {
+      "strapiId": 662,
+      "updatedAt": "2026-06-09T12:56:05.460Z",
+      "name": "پیراهن بافت",
+      "slug": "woven-shirt"
+    },
+    "2102": {
+      "strapiId": 651,
+      "updatedAt": "2026-06-09T12:56:02.897Z",
+      "name": "لباس زیر بافت",
+      "slug": "woven-underwear"
+    },
+    "2103": {
+      "strapiId": 675,
+      "updatedAt": "2026-06-09T12:56:08.660Z",
+      "name": "شال و روسری بافت",
+      "slug": "woven-shawls-and-scarves"
+    },
+    "2111": {
+      "strapiId": 703,
+      "updatedAt": "2026-06-09T12:56:15.046Z",
+      "name": "هودی",
+      "slug": "hoodie-and-dores"
+    },
+    "2157": {
+      "strapiId": 705,
+      "updatedAt": "2026-06-09T12:56:15.486Z",
+      "name": "کاپشن و پافر",
+      "slug": "jacket-and-puffer"
+    },
+    "2158": {
+      "strapiId": 706,
+      "updatedAt": "2026-06-09T12:56:15.693Z",
+      "name": "پالتو",
+      "slug": "coat"
+    },
+    "2159": {
+      "strapiId": 707,
+      "updatedAt": "2026-06-09T12:56:15.903Z",
+      "name": "شکت",
+      "slug": "shacket"
+    },
+    "2160": {
+      "strapiId": 708,
+      "updatedAt": "2026-06-09T12:56:16.094Z",
+      "name": "بارانی",
+      "slug": "baroni"
+    },
+    "2161": {
+      "strapiId": 709,
+      "updatedAt": "2026-06-09T12:56:16.273Z",
+      "name": "ترنچ کت",
+      "slug": "teranchcoat"
+    },
+    "2162": {
+      "strapiId": 704,
+      "updatedAt": "2026-06-09T12:56:15.282Z",
+      "name": "سویشرت",
+      "slug": "sweatshirt"
+    },
+    "2173": {
+      "strapiId": 710,
+      "updatedAt": "2026-06-09T12:56:16.524Z",
+      "name": "لباس‌های زمستانه",
+      "slug": "winter"
+    },
+    "2230": {
+      "strapiId": 711,
+      "updatedAt": "2026-06-09T12:56:16.744Z",
+      "name": "خرید اقساطی لباس",
+      "slug": "installment-purchase-of-clothes"
+    },
+    "2361": {
+      "strapiId": 712,
+      "updatedAt": "2026-06-09T12:56:17.345Z",
+      "name": "کمربند زنانه",
+      "slug": "womens-belt"
+    },
+    "2396": {
+      "strapiId": 616,
+      "updatedAt": "2026-06-09T12:55:52.907Z",
+      "name": "شلوار و شلوارک راحتی",
+      "slug": "casual-pants"
+    },
+    "2427": {
+      "strapiId": 713,
+      "updatedAt": "2026-06-09T12:56:17.530Z",
+      "name": "کیف",
+      "slug": "کیف"
+    },
+    "2620": {
+      "strapiId": 714,
+      "updatedAt": "2026-06-09T12:56:17.720Z",
+      "name": "ژیله",
+      "slug": "ژیله"
+    },
+    "2666": {
+      "strapiId": 715,
+      "updatedAt": "2026-06-09T12:56:17.936Z",
+      "name": "انواع کفش",
+      "slug": "shoes"
+    },
+    "2758": {
+      "strapiId": 652,
+      "updatedAt": "2026-06-09T12:56:03.117Z",
+      "name": "لگ",
+      "slug": "لگ"
+    },
+    "2771": {
+      "strapiId": 676,
+      "updatedAt": "2026-06-09T12:56:08.861Z",
+      "name": "کلاه",
+      "slug": "کلاه"
+    },
+    "2789": {
+      "strapiId": 716,
+      "updatedAt": "2026-06-09T12:56:18.162Z",
+      "name": "عینک",
+      "slug": "glasses"
+    },
+    "2799": {
+      "strapiId": 653,
+      "updatedAt": "2026-06-09T12:56:03.307Z",
+      "name": "مایو",
+      "slug": "مایو"
+    },
+    "2849": {
+      "strapiId": 677,
+      "updatedAt": "2026-06-09T12:56:09.060Z",
+      "name": "دستکش",
+      "slug": "دستکش"
+    },
+    "2880": {
+      "strapiId": 717,
+      "updatedAt": "2026-06-09T12:56:18.394Z",
+      "name": "جشنواره",
+      "slug": "جشنواره"
+    },
+    "2910": {
+      "strapiId": 678,
+      "updatedAt": "2026-06-09T12:56:09.612Z",
+      "name": "کلیپس",
+      "slug": "کلیپس"
+    }
+  },
+  "products": {
+    "521713": {
+      "strapiId": 4056,
+      "updatedAt": "2026-06-09T12:56:29.886Z",
+      "name": "تیشرت طرحدار A00115",
+      "slug": "patterned-t-shirt-a00115"
+    },
+    "536284": {
+      "strapiId": 4057,
+      "updatedAt": "2026-06-09T12:56:59.481Z",
+      "name": "شومیز راه راه A00376",
+      "slug": "corrugated-paper-a00376"
+    },
+    "547686": {
+      "strapiId": 4058,
+      "updatedAt": "2026-06-09T12:57:12.446Z",
+      "name": "شلوار تدی Z0051",
+      "slug": "teddy-pants-z0051"
+    },
+    "596503": {
+      "strapiId": 4059,
+      "updatedAt": "2026-06-09T12:57:24.307Z",
+      "name": "پیراهن جلو دکمه OppsiZ00286",
+      "slug": "oppsiz00286-button-front-shirt"
+    },
+    "596725": {
+      "strapiId": 4060,
+      "updatedAt": "2026-06-09T12:57:28.259Z",
+      "name": "دورس تو کرک طرحدار Z00181 گروه Oppsi A",
+      "slug": "dors-in-crack-design-z00181-oppsi-a-group"
+    },
+    "597399": {
+      "strapiId": 4061,
+      "updatedAt": "2026-06-09T12:57:31.695Z",
+      "name": "بارونی OppsiZ00324",
+      "slug": "barony-oppsiz00324"
+    },
+    "602311": {
+      "strapiId": 4062,
+      "updatedAt": "2026-06-09T12:57:36.858Z",
+      "name": "شلوار بغل دکمه مازراتی R0033",
+      "slug": "r0033-maserati-button-up-trousers"
+    },
+    "603923": {
+      "strapiId": 4063,
+      "updatedAt": "2026-06-09T12:57:52.448Z",
+      "name": "شلوار راسته جلو دوخت زنانه R0025",
+      "slug": "r0025-womens-straight-front-sewing-pants"
+    },
+    "610928": {
+      "strapiId": 4064,
+      "updatedAt": "2026-06-09T12:58:03.369Z",
+      "name": "شال طرحدار S0082",
+      "slug": "شال-طرحدار-s0082"
+    },
+    "611640": {
+      "strapiId": 4065,
+      "updatedAt": "2026-06-09T12:58:05.471Z",
+      "name": "Wallet Topup",
+      "slug": "wallet-topup"
+    },
+    "615218": {
+      "strapiId": 4066,
+      "updatedAt": "2026-06-09T12:58:07.338Z",
+      "name": "شلوار نیم بگ مازراتی R0082",
+      "slug": "maserati-half-bag-pants-r0082"
+    },
+    "615992": {
+      "strapiId": 4067,
+      "updatedAt": "2026-06-09T12:58:18.691Z",
+      "name": "شلوار سایز بزرگ R00123",
+      "slug": "large-size-pants-r00123"
+    },
+    "617901": {
+      "strapiId": 4068,
+      "updatedAt": "2026-06-09T12:58:26.521Z",
+      "name": "شلوار مازراتی پیله ای R00124",
+      "slug": "maserati-cocoon-pants-r00124"
+    },
+    "619137": {
+      "strapiId": 4069,
+      "updatedAt": "2026-06-09T12:58:32.226Z",
+      "name": "شال طرحدار S0088",
+      "slug": "patterned-shawl-s0088"
+    },
+    "619483": {
+      "strapiId": 4070,
+      "updatedAt": "2026-06-09T12:58:35.412Z",
+      "name": "شلوار دمپا R00143",
+      "slug": "slippers-r00143"
+    },
+    "619569": {
+      "strapiId": 4071,
+      "updatedAt": "2026-06-09T12:58:48.887Z",
+      "name": "شلوار کتان مام استایل R00139",
+      "slug": "r00139-mom-style-linen-pants"
+    },
+    "623271": {
+      "strapiId": 4072,
+      "updatedAt": "2026-06-09T12:58:57.707Z",
+      "name": "شال حریر S0031",
+      "slug": "شال-حریر-s0031"
+    },
+    "623281": {
+      "strapiId": 4073,
+      "updatedAt": "2026-06-09T12:59:01.556Z",
+      "name": "شال S0032",
+      "slug": "شال-s0032"
+    },
+    "628086": {
+      "strapiId": 4074,
+      "updatedAt": "2026-06-09T12:59:05.983Z",
+      "name": "شلوار تک پیل پاکتی OppsiR0058",
+      "slug": "oppsir0058-single-pocket-pants"
+    },
+    "631516": {
+      "strapiId": 4075,
+      "updatedAt": "2026-06-09T12:59:09.655Z",
+      "name": "شال نخی کد S00143",
+      "slug": "shawl-code-s00143"
+    },
+    "636098": {
+      "strapiId": 4076,
+      "updatedAt": "2026-06-09T12:59:18.889Z",
+      "name": "شلوار راسته کرپ R00223",
+      "slug": "half-bag-crepe-pants-r00223"
+    },
+    "636440": {
+      "strapiId": 4077,
+      "updatedAt": "2026-06-09T12:59:24.474Z",
+      "name": "شال پلیسه خالخالی s00151",
+      "slug": "شال-پلیسه-خالخالی-s00151"
+    },
+    "637073": {
+      "strapiId": 4078,
+      "updatedAt": "2026-06-09T12:59:30.255Z",
+      "name": "شلوار کتان R00207",
+      "slug": "r00207-linen-pants"
+    },
+    "637504": {
+      "strapiId": 4079,
+      "updatedAt": "2026-06-09T12:59:37.268Z",
+      "name": "شال پلیسه s00157",
+      "slug": "شال-پلیسه-s00157"
+    },
+    "637612": {
+      "strapiId": 4080,
+      "updatedAt": "2026-06-09T12:59:43.951Z",
+      "name": "شال پلیسه ماهی S00159",
+      "slug": "fish-pleated-shawl-s00159"
+    },
+    "638696": {
+      "strapiId": 4081,
+      "updatedAt": "2026-06-09T12:59:50.227Z",
+      "name": "شلوار لینن کمرکش R00224",
+      "slug": "shalwar-linen-commercial-r00224"
+    },
+    "639896": {
+      "strapiId": 4082,
+      "updatedAt": "2026-06-09T13:00:00.063Z",
+      "name": "شلوار مام تک پیل لینن R00237",
+      "slug": "r00237-mam-single-ply-linen-pants"
+    },
+    "640001": {
+      "strapiId": 4083,
+      "updatedAt": "2026-06-09T13:00:05.255Z",
+      "name": "شلوار مازراتی R00218",
+      "slug": "maserati-pants-r00218"
+    },
+    "640789": {
+      "strapiId": 4084,
+      "updatedAt": "2026-06-09T13:00:10.021Z",
+      "name": "شلوار لینن مام فیت R00225",
+      "slug": "mom-fit-linen-pants-r00225"
+    },
+    "641920": {
+      "strapiId": 4085,
+      "updatedAt": "2026-06-09T13:00:15.478Z",
+      "name": "شلوار کتان سایز بزرگ R00256",
+      "slug": "large-size-linen-pants-r00256"
+    },
+    "641928": {
+      "strapiId": 4086,
+      "updatedAt": "2026-06-09T13:00:30.710Z",
+      "name": "تونیک لینن OppsiR00148",
+      "slug": "linen-tunic-oppsir00148"
+    },
+    "642240": {
+      "strapiId": 4087,
+      "updatedAt": "2026-06-09T13:00:34.169Z",
+      "name": "شلوار مام دو پیل R00236",
+      "slug": "mam-du-peel-r00236-pants"
+    },
+    "644377": {
+      "strapiId": 4088,
+      "updatedAt": "2026-06-09T13:00:40.391Z",
+      "name": "شال طرحدار نخی S00171",
+      "slug": "patterned-cotton-shawl-s00171"
+    },
+    "644390": {
+      "strapiId": 4089,
+      "updatedAt": "2026-06-09T13:00:46.213Z",
+      "name": "شال طرحدار نخی S00172",
+      "slug": "patterned-cotton-shawl-s00172"
+    },
+    "645807": {
+      "strapiId": 4090,
+      "updatedAt": "2026-06-09T13:00:50.645Z",
+      "name": "شال پلیسه نخ S00167",
+      "slug": "yarn-pleated-shawl-s00167"
+    },
+    "645871": {
+      "strapiId": 4091,
+      "updatedAt": "2026-06-09T13:01:11.789Z",
+      "name": "شال لینن S00166",
+      "slug": "shawl-linen-s00166"
+    },
+    "647629": {
+      "strapiId": 4092,
+      "updatedAt": "2026-06-09T13:01:28.225Z",
+      "name": "شال پلیسه مرواریدی کد S00169",
+      "slug": "pearl-pleated-shawl-code-s00169"
+    },
+    "650358": {
+      "strapiId": 4093,
+      "updatedAt": "2026-06-09T13:01:40.259Z",
+      "name": "شال لینن S00178",
+      "slug": "شال-لینن-s00178"
+    },
+    "654489": {
+      "strapiId": 4094,
+      "updatedAt": "2026-06-09T13:01:45.075Z",
+      "name": "شال کنفی شاین S00184",
+      "slug": "shine-hemp-shawl-s00184"
+    },
+    "655869": {
+      "strapiId": 4095,
+      "updatedAt": "2026-06-09T13:01:50.680Z",
+      "name": "شال طرحدار S00194",
+      "slug": "patterned-shawl-s00194"
+    },
+    "655888": {
+      "strapiId": 4096,
+      "updatedAt": "2026-06-09T13:01:54.266Z",
+      "name": "شال خالخالی S00193",
+      "slug": "polka-dot-shawl-s00193"
+    },
+    "655893": {
+      "strapiId": 4097,
+      "updatedAt": "2026-06-09T13:01:59.278Z",
+      "name": "شال طرحدار S00199",
+      "slug": "patterned-shawl-s00199"
+    },
+    "656472": {
+      "strapiId": 4098,
+      "updatedAt": "2026-06-09T13:02:03.115Z",
+      "name": "تیشرت اسپرت R00299",
+      "slug": "sports-t-shirt-r00299"
+    },
+    "657457": {
+      "strapiId": 4099,
+      "updatedAt": "2026-06-09T13:02:25.506Z",
+      "name": "شلوار کمرکش مام استایل لینن R00347",
+      "slug": "waist-trousers-linen-style-r00347"
+    },
+    "660059": {
+      "strapiId": 4100,
+      "updatedAt": "2026-06-09T13:02:29.629Z",
+      "name": "شال کنفی خالخالی S00206",
+      "slug": "dotted-hemp-shawl-s00206"
+    },
+    "661152": {
+      "strapiId": 4101,
+      "updatedAt": "2026-06-09T13:02:38.897Z",
+      "name": "شال لینن راه راه S00213",
+      "slug": "striped-linen-shawl-s00213"
+    },
+    "662766": {
+      "strapiId": 4102,
+      "updatedAt": "2026-06-09T13:02:44.348Z",
+      "name": "شال لینن راه راه S00207",
+      "slug": "striped-linen-shawl-s00207"
+    },
+    "662813": {
+      "strapiId": 4103,
+      "updatedAt": "2026-06-09T13:02:51.864Z",
+      "name": "تونیک تابستونه R00346",
+      "slug": "tonic-r00346"
+    },
+    "667405": {
+      "strapiId": 4104,
+      "updatedAt": "2026-06-09T13:02:56.598Z",
+      "name": "تونیک راه راه R00404",
+      "slug": "striped-tunic-r00404"
+    },
+    "667424": {
+      "strapiId": 4105,
+      "updatedAt": "2026-06-09T13:03:00.848Z",
+      "name": "شلوار نیم بگ لینن R00407",
+      "slug": "shalwar-big-linen-r00407"
+    },
+    "668970": {
+      "strapiId": 4106,
+      "updatedAt": "2026-06-09T13:03:06.545Z",
+      "name": "شومیز جلو بسته سرشونه چین R00406",
+      "slug": "r00406-folded-front-paperback"
+    },
+    "671178": {
+      "strapiId": 4107,
+      "updatedAt": "2026-06-09T13:03:13.916Z",
+      "name": "ست کبریتی کد 00408",
+      "slug": "match-set-code-00408"
+    },
+    "672235": {
+      "strapiId": 4108,
+      "updatedAt": "2026-06-09T13:03:24.818Z",
+      "name": "شال طرحدار S00232",
+      "slug": "patterned-shawl-s00232"
+    },
+    "672520": {
+      "strapiId": 4109,
+      "updatedAt": "2026-06-09T13:03:28.645Z",
+      "name": "شال لبه سکه ای شاین S00244",
+      "slug": "cheyenne-coin-edge-shawl-s00244"
+    },
+    "674387": {
+      "strapiId": 4110,
+      "updatedAt": "2026-06-09T13:03:38.902Z",
+      "name": "ست کت و شلوار R00428",
+      "slug": "suit-set-r00428"
+    },
+    "675113": {
+      "strapiId": 4111,
+      "updatedAt": "2026-06-09T13:03:43.352Z",
+      "name": "شلوار لینن R00420",
+      "slug": "shalwar-linen-r00420"
+    },
+    "675697": {
+      "strapiId": 4112,
+      "updatedAt": "2026-06-09T13:03:50.040Z",
+      "name": "شال پلیسه ماهی S00253",
+      "slug": "fish-pleated-shawl-s00253"
+    },
+    "675720": {
+      "strapiId": 4113,
+      "updatedAt": "2026-06-09T13:03:59.392Z",
+      "name": "شال پلیسه کد S00250",
+      "slug": "pleated-shawl-code-s00250"
+    },
+    "676358": {
+      "strapiId": 4114,
+      "updatedAt": "2026-06-09T13:04:11.652Z",
+      "name": "شال حریر s00258",
+      "slug": "شال-حریر-چهارخونه-s00258"
+    },
+    "678639": {
+      "strapiId": 4115,
+      "updatedAt": "2026-06-09T13:04:16.835Z",
+      "name": "شال دور سکه ایی ماهی S00257",
+      "slug": "fish-round-coin-scarf-s00257"
+    },
+    "678709": {
+      "strapiId": 4116,
+      "updatedAt": "2026-06-09T13:04:18.968Z",
+      "name": "شال پلیسه طرحدار S00246",
+      "slug": "patterned-pleated-shawl-s00246"
+    },
+    "679186": {
+      "strapiId": 4117,
+      "updatedAt": "2026-06-09T13:04:29.764Z",
+      "name": "تاپ لینن R00427",
+      "slug": "linen-top-r00427"
+    },
+    "679957": {
+      "strapiId": 4118,
+      "updatedAt": "2026-06-09T13:04:46.549Z",
+      "name": "شال لینن نگینی S00261",
+      "slug": "lin-nagini-shawl-s00261"
+    },
+    "680189": {
+      "strapiId": 4119,
+      "updatedAt": "2026-06-09T13:04:52.657Z",
+      "name": "شال لینن راه راه S00262",
+      "slug": "s00262-striped-lane-shawl"
+    },
+    "681977": {
+      "strapiId": 4120,
+      "updatedAt": "2026-06-09T13:05:03.438Z",
+      "name": "شوار بگ لینن R00456",
+      "slug": "shower-bag-linen-r00456"
+    },
+    "682769": {
+      "strapiId": 4121,
+      "updatedAt": "2026-06-09T13:05:07.913Z",
+      "name": "شال کنفی OppsiS00188",
+      "slug": "oppsis00188-hemp-shawl"
+    },
+    "683381": {
+      "strapiId": 4122,
+      "updatedAt": "2026-06-09T13:05:12.068Z",
+      "name": "روسری ابریشم gucci",
+      "slug": "روسری-ابریشم-gucci"
+    },
+    "683799": {
+      "strapiId": 4123,
+      "updatedAt": "2026-06-09T13:05:18.899Z",
+      "name": "شال کنفی شاین OppsiS00184",
+      "slug": "shine-hemp-shawl-oppsis00184"
+    },
+    "683910": {
+      "strapiId": 4124,
+      "updatedAt": "2026-06-09T13:05:22.234Z",
+      "name": "شلوار نیم بگ لینن r00476",
+      "slug": "shalwar-big-linen-r00476"
+    },
+    "684170": {
+      "strapiId": 4125,
+      "updatedAt": "2026-06-09T13:05:27.636Z",
+      "name": "روسری هرمس کد S00270",
+      "slug": "hermes-scarf-code-s00270"
+    },
+    "685354": {
+      "strapiId": 4126,
+      "updatedAt": "2026-06-09T13:05:34.581Z",
+      "name": "مانتو لینن OppsiR00297",
+      "slug": "oppsir00297-linen-mantle"
+    },
+    "685588": {
+      "strapiId": 4127,
+      "updatedAt": "2026-06-09T13:05:39.750Z",
+      "name": "تونیک کرسپو OppsiR00272",
+      "slug": "tonic-crespo-oppsir00272"
+    },
+    "685698": {
+      "strapiId": 4128,
+      "updatedAt": "2026-06-09T13:05:44.502Z",
+      "name": "کراپ لب فرفری R00466",
+      "slug": "curly-lip-crop-r00466"
+    },
+    "686279": {
+      "strapiId": 4129,
+      "updatedAt": "2026-06-09T13:05:52.793Z",
+      "name": "شلوار بگ R00478",
+      "slug": "bag-pants-r00478"
+    },
+    "686795": {
+      "strapiId": 4130,
+      "updatedAt": "2026-06-09T13:06:01.929Z",
+      "name": "شال طرحدار S00279",
+      "slug": "patterned-shawl-s00279"
+    },
+    "688112": {
+      "strapiId": 4131,
+      "updatedAt": "2026-06-09T13:06:05.320Z",
+      "name": "شلوار بگ آنیل R00483",
+      "slug": "anil-bag-pants-r00483"
+    },
+    "688133": {
+      "strapiId": 4132,
+      "updatedAt": "2026-06-09T13:06:11.947Z",
+      "name": "شلوار بگ R00485",
+      "slug": "شلوار-r00485"
+    },
+    "688322": {
+      "strapiId": 4133,
+      "updatedAt": "2026-06-09T13:06:16.310Z",
+      "name": "مایو مردانه OppsiA00182",
+      "slug": "oppsia00182-mens-swimsuit"
+    },
+    "688412": {
+      "strapiId": 4134,
+      "updatedAt": "2026-06-09T13:06:20.969Z",
+      "name": "شال پلیسه S00280",
+      "slug": "pleated-shawl-s00280"
+    },
+    "690466": {
+      "strapiId": 4135,
+      "updatedAt": "2026-06-09T13:06:24.241Z",
+      "name": "شال طرحدار S00293",
+      "slug": "شال-طرحدار-s00293"
+    },
+    "690477": {
+      "strapiId": 4136,
+      "updatedAt": "2026-06-09T13:06:27.479Z",
+      "name": "شال طرحدار S00294",
+      "slug": "patterned-shawl-s00294"
+    },
+    "691347": {
+      "strapiId": 4137,
+      "updatedAt": "2026-06-09T13:06:30.631Z",
+      "name": "روسری طرحدار S00302",
+      "slug": "patterned-scarf-s00302"
+    },
+    "691367": {
+      "strapiId": 4138,
+      "updatedAt": "2026-06-09T13:06:33.674Z",
+      "name": "شال طرحدار S00297",
+      "slug": "patterned-shawl-s00297"
+    },
+    "691396": {
+      "strapiId": 4139,
+      "updatedAt": "2026-06-09T13:06:36.648Z",
+      "name": "شال لینن راه راه OppsiS00262",
+      "slug": "striped-linen-shawl-oppsis00262"
+    },
+    "691961": {
+      "strapiId": 4140,
+      "updatedAt": "2026-06-09T13:06:39.744Z",
+      "name": "روسری طرحدار S00301",
+      "slug": "patterned-scarf-s00301"
+    },
+    "692285": {
+      "strapiId": 4141,
+      "updatedAt": "2026-06-09T13:06:42.912Z",
+      "name": "شلوار لینن نیم بگ R00498",
+      "slug": "half-bag-linen-pants-r00498"
+    },
+    "693062": {
+      "strapiId": 4142,
+      "updatedAt": "2026-06-09T13:06:52.441Z",
+      "name": "تونیک OppsiR00480",
+      "slug": "oppsir00480-tonic"
+    },
+    "693968": {
+      "strapiId": 4143,
+      "updatedAt": "2026-06-09T13:06:56.279Z",
+      "name": "کراپ کبریتی R00503",
+      "slug": "match-crop-r00503"
+    },
+    "695317": {
+      "strapiId": 4144,
+      "updatedAt": "2026-06-09T13:07:06.569Z",
+      "name": "شال کنفی چهارخونه Oppsis00255",
+      "slug": "oppsis00255-square-hemp-shawl"
+    },
+    "695847": {
+      "strapiId": 4145,
+      "updatedAt": "2026-06-09T13:07:09.683Z",
+      "name": "شال لبه مرواریدی حریر OppsiS00266",
+      "slug": "oppsis00266-silk-pearl-edge-shawl"
+    },
+    "701836": {
+      "strapiId": 4146,
+      "updatedAt": "2026-06-09T13:07:12.722Z",
+      "name": "شال کنفی s00326",
+      "slug": "شال-پفکی-s00326"
+    },
+    "704843": {
+      "strapiId": 4147,
+      "updatedAt": "2026-06-09T13:07:20.232Z",
+      "name": "شلوار کتان مام فیت R00548",
+      "slug": "mom-fit-r00548-linen-pants"
+    },
+    "706364": {
+      "strapiId": 4148,
+      "updatedAt": "2026-06-09T13:07:33.321Z",
+      "name": "شلوار کتان مام استایل R00549",
+      "slug": "r00549-mom-style-linen-pants"
+    },
+    "713182": {
+      "strapiId": 4149,
+      "updatedAt": "2026-06-09T13:07:36.826Z",
+      "name": "شال طرحدار آبرنگی S00337",
+      "slug": "watercolor-patterned-shawl-s00337"
+    },
+    "714337": {
+      "strapiId": 4150,
+      "updatedAt": "2026-06-09T13:07:40.709Z",
+      "name": "شال طرح دار S00330",
+      "slug": "patterned-shawl-s00330"
+    },
+    "714349": {
+      "strapiId": 4151,
+      "updatedAt": "2026-06-09T13:07:44.520Z",
+      "name": "شال طرحدار S00329",
+      "slug": "شال-طرحدار-s00329"
+    },
+    "717103": {
+      "strapiId": 4152,
+      "updatedAt": "2026-06-09T13:07:47.909Z",
+      "name": "شال طرحدار S00333",
+      "slug": "patterned-shawl-s00333"
+    },
+    "721975": {
+      "strapiId": 4153,
+      "updatedAt": "2026-06-09T13:07:51.141Z",
+      "name": "کراپ بافت رنگی H0030",
+      "slug": "colored-texture-crop-h0030"
+    },
+    "729805": {
+      "strapiId": 4154,
+      "updatedAt": "2026-06-09T13:07:54.497Z",
+      "name": "کراپ یقه اسکی H0097",
+      "slug": "cropped-turtleneck-h0097"
+    },
+    "734430": {
+      "strapiId": 4155,
+      "updatedAt": "2026-06-09T13:07:58.206Z",
+      "name": "شلوار بگ کشمیر E0029",
+      "slug": "shalwar-big-kashmir-e0029"
+    }
+  },
+  "variations": {
+    "522217": {
+      "strapiId": 29111,
+      "updatedAt": "2026-06-09T12:56:37.622Z",
+      "productId": 521713,
+      "sku": "WC-521713-522217"
+    },
+    "522219": {
+      "strapiId": 29112,
+      "updatedAt": "2026-06-09T12:56:39.243Z",
+      "productId": 521713,
+      "sku": "WC-521713-522219"
+    },
+    "522220": {
+      "strapiId": 29113,
+      "updatedAt": "2026-06-09T12:56:40.464Z",
+      "productId": 521713,
+      "sku": "WC-521713-522220"
+    },
+    "522221": {
+      "strapiId": 29114,
+      "updatedAt": "2026-06-09T12:56:41.140Z",
+      "productId": 521713,
+      "sku": "WC-521713-522221"
+    },
+    "522222": {
+      "strapiId": 29115,
+      "updatedAt": "2026-06-09T12:56:42.253Z",
+      "productId": 521713,
+      "sku": "WC-521713-522222"
+    },
+    "522223": {
+      "strapiId": 29116,
+      "updatedAt": "2026-06-09T12:56:42.882Z",
+      "productId": 521713,
+      "sku": "WC-521713-522223"
+    },
+    "522224": {
+      "strapiId": 29117,
+      "updatedAt": "2026-06-09T12:56:43.231Z",
+      "productId": 521713,
+      "sku": "WC-521713-522224"
+    },
+    "522225": {
+      "strapiId": 29118,
+      "updatedAt": "2026-06-09T12:56:44.226Z",
+      "productId": 521713,
+      "sku": "WC-521713-522225"
+    },
+    "522226": {
+      "strapiId": 29119,
+      "updatedAt": "2026-06-09T12:56:45.537Z",
+      "productId": 521713,
+      "sku": "WC-521713-522226"
+    },
+    "522227": {
+      "strapiId": 29120,
+      "updatedAt": "2026-06-09T12:56:46.624Z",
+      "productId": 521713,
+      "sku": "WC-521713-522227"
+    },
+    "522228": {
+      "strapiId": 29121,
+      "updatedAt": "2026-06-09T12:56:47.244Z",
+      "productId": 521713,
+      "sku": "WC-521713-522228"
+    },
+    "522229": {
+      "strapiId": 29122,
+      "updatedAt": "2026-06-09T12:56:47.840Z",
+      "productId": 521713,
+      "sku": "WC-521713-522229"
+    },
+    "522230": {
+      "strapiId": 29123,
+      "updatedAt": "2026-06-09T12:56:48.309Z",
+      "productId": 521713,
+      "sku": "WC-521713-522230"
+    },
+    "522231": {
+      "strapiId": 29124,
+      "updatedAt": "2026-06-09T12:56:49.054Z",
+      "productId": 521713,
+      "sku": "WC-521713-522231"
+    },
+    "522232": {
+      "strapiId": 29125,
+      "updatedAt": "2026-06-09T12:56:49.741Z",
+      "productId": 521713,
+      "sku": "WC-521713-522232"
+    },
+    "522233": {
+      "strapiId": 29126,
+      "updatedAt": "2026-06-09T12:56:51.038Z",
+      "productId": 521713,
+      "sku": "WC-521713-522233"
+    },
+    "522234": {
+      "strapiId": 29127,
+      "updatedAt": "2026-06-09T12:56:51.784Z",
+      "productId": 521713,
+      "sku": "WC-521713-522234"
+    },
+    "522235": {
+      "strapiId": 29128,
+      "updatedAt": "2026-06-09T12:56:52.225Z",
+      "productId": 521713,
+      "sku": "WC-521713-522235"
+    },
+    "522236": {
+      "strapiId": 29129,
+      "updatedAt": "2026-06-09T12:56:52.986Z",
+      "productId": 521713,
+      "sku": "WC-521713-522236"
+    },
+    "522237": {
+      "strapiId": 29130,
+      "updatedAt": "2026-06-09T12:56:53.711Z",
+      "productId": 521713,
+      "sku": "WC-521713-522237"
+    },
+    "522238": {
+      "strapiId": 29131,
+      "updatedAt": "2026-06-09T12:56:54.135Z",
+      "productId": 521713,
+      "sku": "WC-521713-522238"
+    },
+    "522239": {
+      "strapiId": 29132,
+      "updatedAt": "2026-06-09T12:56:54.714Z",
+      "productId": 521713,
+      "sku": "WC-521713-522239"
+    },
+    "522240": {
+      "strapiId": 29133,
+      "updatedAt": "2026-06-09T12:56:55.165Z",
+      "productId": 521713,
+      "sku": "WC-521713-522240"
+    },
+    "522241": {
+      "strapiId": 29134,
+      "updatedAt": "2026-06-09T12:56:55.925Z",
+      "productId": 521713,
+      "sku": "WC-521713-522241"
+    },
+    "522242": {
+      "strapiId": 29135,
+      "updatedAt": "2026-06-09T12:56:56.522Z",
+      "productId": 521713,
+      "sku": "WC-521713-522242"
+    },
+    "522243": {
+      "strapiId": 29136,
+      "updatedAt": "2026-06-09T12:56:56.890Z",
+      "productId": 521713,
+      "sku": "WC-521713-522243"
+    },
+    "522244": {
+      "strapiId": 29137,
+      "updatedAt": "2026-06-09T12:56:57.383Z",
+      "productId": 521713,
+      "sku": "WC-521713-522244"
+    },
+    "522245": {
+      "strapiId": 29138,
+      "updatedAt": "2026-06-09T12:56:57.814Z",
+      "productId": 521713,
+      "sku": "WC-521713-522245"
+    },
+    "536288": {
+      "strapiId": 29139,
+      "updatedAt": "2026-06-09T12:57:03.238Z",
+      "productId": 536284,
+      "sku": "WC-536284-536288"
+    },
+    "536289": {
+      "strapiId": 29140,
+      "updatedAt": "2026-06-09T12:57:03.931Z",
+      "productId": 536284,
+      "sku": "WC-536284-536289"
+    },
+    "536290": {
+      "strapiId": 29141,
+      "updatedAt": "2026-06-09T12:57:05.037Z",
+      "productId": 536284,
+      "sku": "WC-536284-536290"
+    },
+    "536291": {
+      "strapiId": 29142,
+      "updatedAt": "2026-06-09T12:57:05.741Z",
+      "productId": 536284,
+      "sku": "WC-536284-536291"
+    },
+    "536292": {
+      "strapiId": 29143,
+      "updatedAt": "2026-06-09T12:57:06.537Z",
+      "productId": 536284,
+      "sku": "WC-536284-536292"
+    },
+    "536294": {
+      "strapiId": 29144,
+      "updatedAt": "2026-06-09T12:57:07.457Z",
+      "productId": 536284,
+      "sku": "WC-536284-536294"
+    },
+    "536295": {
+      "strapiId": 29145,
+      "updatedAt": "2026-06-09T12:57:08.565Z",
+      "productId": 536284,
+      "sku": "WC-536284-536295"
+    },
+    "536297": {
+      "strapiId": 29146,
+      "updatedAt": "2026-06-09T12:57:09.241Z",
+      "productId": 536284,
+      "sku": "WC-536284-536297"
+    },
+    "536298": {
+      "strapiId": 29147,
+      "updatedAt": "2026-06-09T12:57:09.664Z",
+      "productId": 536284,
+      "sku": "WC-536284-536298"
+    },
+    "536299": {
+      "strapiId": 29148,
+      "updatedAt": "2026-06-09T12:57:10.001Z",
+      "productId": 536284,
+      "sku": "WC-536284-536299"
+    },
+    "547692": {
+      "strapiId": 29150,
+      "updatedAt": "2026-06-09T12:57:16.198Z",
+      "productId": 547686,
+      "sku": "WC-547686-547692"
+    },
+    "547693": {
+      "strapiId": 29151,
+      "updatedAt": "2026-06-09T12:57:16.940Z",
+      "productId": 547686,
+      "sku": "WC-547686-547693"
+    },
+    "547697": {
+      "strapiId": 29152,
+      "updatedAt": "2026-06-09T12:57:18.266Z",
+      "productId": 547686,
+      "sku": "WC-547686-547697"
+    },
+    "547698": {
+      "strapiId": 29153,
+      "updatedAt": "2026-06-09T12:57:18.922Z",
+      "productId": 547686,
+      "sku": "WC-547686-547698"
+    },
+    "547699": {
+      "strapiId": 29154,
+      "updatedAt": "2026-06-09T12:57:19.884Z",
+      "productId": 547686,
+      "sku": "WC-547686-547699"
+    },
+    "547700": {
+      "strapiId": 29155,
+      "updatedAt": "2026-06-09T12:57:20.321Z",
+      "productId": 547686,
+      "sku": "WC-547686-547700"
+    },
+    "547701": {
+      "strapiId": 29156,
+      "updatedAt": "2026-06-09T12:57:20.681Z",
+      "productId": 547686,
+      "sku": "WC-547686-547701"
+    },
+    "547702": {
+      "strapiId": 29157,
+      "updatedAt": "2026-06-09T12:57:21.094Z",
+      "productId": 547686,
+      "sku": "WC-547686-547702"
+    },
+    "547703": {
+      "strapiId": 29158,
+      "updatedAt": "2026-06-09T12:57:21.521Z",
+      "productId": 547686,
+      "sku": "WC-547686-547703"
+    },
+    "547704": {
+      "strapiId": 29159,
+      "updatedAt": "2026-06-09T12:57:22.209Z",
+      "productId": 547686,
+      "sku": "WC-547686-547704"
+    },
+    "547705": {
+      "strapiId": 29160,
+      "updatedAt": "2026-06-09T12:57:22.702Z",
+      "productId": 547686,
+      "sku": "WC-547686-547705"
+    },
+    "596505": {
+      "strapiId": 29161,
+      "updatedAt": "2026-06-09T12:57:26.384Z",
+      "productId": 596503,
+      "sku": "WC-596503-596505"
+    },
+    "596726": {
+      "strapiId": 29163,
+      "updatedAt": "2026-06-09T12:57:29.902Z",
+      "productId": 596725,
+      "sku": "WC-596725-596726"
+    },
+    "597296": {
+      "strapiId": 29164,
+      "updatedAt": "2026-06-09T12:57:30.201Z",
+      "productId": 596725,
+      "sku": "WC-596725-597296"
+    },
+    "597400": {
+      "strapiId": 29165,
+      "updatedAt": "2026-06-09T12:57:33.767Z",
+      "productId": 597399,
+      "sku": "WC-597399-597400"
+    },
+    "599611": {
+      "strapiId": 29166,
+      "updatedAt": "2026-06-09T12:57:34.245Z",
+      "productId": 597399,
+      "sku": "WC-597399-599611"
+    },
+    "599620": {
+      "strapiId": 29167,
+      "updatedAt": "2026-06-09T12:57:34.609Z",
+      "productId": 597399,
+      "sku": "WC-597399-599620"
+    },
+    "602349": {
+      "strapiId": 29169,
+      "updatedAt": "2026-06-09T12:57:39.033Z",
+      "productId": 602311,
+      "sku": "WC-602311-602349"
+    },
+    "602350": {
+      "strapiId": 29170,
+      "updatedAt": "2026-06-09T12:57:40.260Z",
+      "productId": 602311,
+      "sku": "WC-602311-602350"
+    },
+    "602351": {
+      "strapiId": 29171,
+      "updatedAt": "2026-06-09T12:57:40.859Z",
+      "productId": 602311,
+      "sku": "WC-602311-602351"
+    },
+    "602352": {
+      "strapiId": 29172,
+      "updatedAt": "2026-06-09T12:57:41.557Z",
+      "productId": 602311,
+      "sku": "WC-602311-602352"
+    },
+    "602353": {
+      "strapiId": 29173,
+      "updatedAt": "2026-06-09T12:57:41.911Z",
+      "productId": 602311,
+      "sku": "WC-602311-602353"
+    },
+    "602354": {
+      "strapiId": 29174,
+      "updatedAt": "2026-06-09T12:57:44.382Z",
+      "productId": 602311,
+      "sku": "WC-602311-602354"
+    },
+    "602355": {
+      "strapiId": 29175,
+      "updatedAt": "2026-06-09T12:57:44.852Z",
+      "productId": 602311,
+      "sku": "WC-602311-602355"
+    },
+    "602356": {
+      "strapiId": 29176,
+      "updatedAt": "2026-06-09T12:57:45.194Z",
+      "productId": 602311,
+      "sku": "WC-602311-602356"
+    },
+    "602357": {
+      "strapiId": 29177,
+      "updatedAt": "2026-06-09T12:57:45.502Z",
+      "productId": 602311,
+      "sku": "WC-602311-602357"
+    },
+    "602358": {
+      "strapiId": 29178,
+      "updatedAt": "2026-06-09T12:57:45.924Z",
+      "productId": 602311,
+      "sku": "WC-602311-602358"
+    },
+    "602359": {
+      "strapiId": 29179,
+      "updatedAt": "2026-06-09T12:57:46.515Z",
+      "productId": 602311,
+      "sku": "WC-602311-602359"
+    },
+    "602360": {
+      "strapiId": 29180,
+      "updatedAt": "2026-06-09T12:57:46.924Z",
+      "productId": 602311,
+      "sku": "WC-602311-602360"
+    },
+    "602361": {
+      "strapiId": 29181,
+      "updatedAt": "2026-06-09T12:57:47.342Z",
+      "productId": 602311,
+      "sku": "WC-602311-602361"
+    },
+    "602362": {
+      "strapiId": 29182,
+      "updatedAt": "2026-06-09T12:57:47.853Z",
+      "productId": 602311,
+      "sku": "WC-602311-602362"
+    },
+    "602363": {
+      "strapiId": 29183,
+      "updatedAt": "2026-06-09T12:57:48.190Z",
+      "productId": 602311,
+      "sku": "WC-602311-602363"
+    },
+    "602364": {
+      "strapiId": 29184,
+      "updatedAt": "2026-06-09T12:57:48.528Z",
+      "productId": 602311,
+      "sku": "WC-602311-602364"
+    },
+    "602365": {
+      "strapiId": 29185,
+      "updatedAt": "2026-06-09T12:57:48.755Z",
+      "productId": 602311,
+      "sku": "WC-602311-602365"
+    },
+    "602366": {
+      "strapiId": 29186,
+      "updatedAt": "2026-06-09T12:57:49.007Z",
+      "productId": 602311,
+      "sku": "WC-602311-602366"
+    },
+    "602367": {
+      "strapiId": 29187,
+      "updatedAt": "2026-06-09T12:57:49.242Z",
+      "productId": 602311,
+      "sku": "WC-602311-602367"
+    },
+    "602368": {
+      "strapiId": 29188,
+      "updatedAt": "2026-06-09T12:57:49.479Z",
+      "productId": 602311,
+      "sku": "WC-602311-602368"
+    },
+    "602369": {
+      "strapiId": 29189,
+      "updatedAt": "2026-06-09T12:57:49.849Z",
+      "productId": 602311,
+      "sku": "WC-602311-602369"
+    },
+    "602370": {
+      "strapiId": 29190,
+      "updatedAt": "2026-06-09T12:57:50.127Z",
+      "productId": 602311,
+      "sku": "WC-602311-602370"
+    },
+    "602371": {
+      "strapiId": 29191,
+      "updatedAt": "2026-06-09T12:57:50.385Z",
+      "productId": 602311,
+      "sku": "WC-602311-602371"
+    },
+    "602372": {
+      "strapiId": 29192,
+      "updatedAt": "2026-06-09T12:57:50.632Z",
+      "productId": 602311,
+      "sku": "WC-602311-602372"
+    },
+    "602373": {
+      "strapiId": 29193,
+      "updatedAt": "2026-06-09T12:57:50.953Z",
+      "productId": 602311,
+      "sku": "WC-602311-602373"
+    },
+    "603925": {
+      "strapiId": 29194,
+      "updatedAt": "2026-06-09T12:57:55.080Z",
+      "productId": 603923,
+      "sku": "WC-603923-603925"
+    },
+    "603926": {
+      "strapiId": 29195,
+      "updatedAt": "2026-06-09T12:57:56.509Z",
+      "productId": 603923,
+      "sku": "WC-603923-603926"
+    },
+    "603929": {
+      "strapiId": 29196,
+      "updatedAt": "2026-06-09T12:57:56.917Z",
+      "productId": 603923,
+      "sku": "WC-603923-603929"
+    },
+    "603930": {
+      "strapiId": 29197,
+      "updatedAt": "2026-06-09T12:57:57.339Z",
+      "productId": 603923,
+      "sku": "WC-603923-603930"
+    },
+    "603932": {
+      "strapiId": 29198,
+      "updatedAt": "2026-06-09T12:57:57.703Z",
+      "productId": 603923,
+      "sku": "WC-603923-603932"
+    },
+    "603933": {
+      "strapiId": 29199,
+      "updatedAt": "2026-06-09T12:57:58.008Z",
+      "productId": 603923,
+      "sku": "WC-603923-603933"
+    },
+    "603934": {
+      "strapiId": 29200,
+      "updatedAt": "2026-06-09T12:57:58.367Z",
+      "productId": 603923,
+      "sku": "WC-603923-603934"
+    },
+    "603935": {
+      "strapiId": 29201,
+      "updatedAt": "2026-06-09T12:57:58.634Z",
+      "productId": 603923,
+      "sku": "WC-603923-603935"
+    },
+    "603936": {
+      "strapiId": 29202,
+      "updatedAt": "2026-06-09T12:57:59.021Z",
+      "productId": 603923,
+      "sku": "WC-603923-603936"
+    },
+    "603937": {
+      "strapiId": 29203,
+      "updatedAt": "2026-06-09T12:57:59.327Z",
+      "productId": 603923,
+      "sku": "WC-603923-603937"
+    },
+    "603938": {
+      "strapiId": 29204,
+      "updatedAt": "2026-06-09T12:57:59.616Z",
+      "productId": 603923,
+      "sku": "WC-603923-603938"
+    },
+    "603939": {
+      "strapiId": 29205,
+      "updatedAt": "2026-06-09T12:57:59.864Z",
+      "productId": 603923,
+      "sku": "WC-603923-603939"
+    },
+    "603940": {
+      "strapiId": 29206,
+      "updatedAt": "2026-06-09T12:58:00.111Z",
+      "productId": 603923,
+      "sku": "WC-603923-603940"
+    },
+    "603942": {
+      "strapiId": 29207,
+      "updatedAt": "2026-06-09T12:58:00.454Z",
+      "productId": 603923,
+      "sku": "WC-603923-603942"
+    },
+    "603945": {
+      "strapiId": 29208,
+      "updatedAt": "2026-06-09T12:58:00.718Z",
+      "productId": 603923,
+      "sku": "WC-603923-603945"
+    },
+    "603946": {
+      "strapiId": 29209,
+      "updatedAt": "2026-06-09T12:58:01.125Z",
+      "productId": 603923,
+      "sku": "WC-603923-603946"
+    },
+    "603947": {
+      "strapiId": 29210,
+      "updatedAt": "2026-06-09T12:58:01.512Z",
+      "productId": 603923,
+      "sku": "WC-603923-603947"
+    },
+    "603948": {
+      "strapiId": 29211,
+      "updatedAt": "2026-06-09T12:58:01.789Z",
+      "productId": 603923,
+      "sku": "WC-603923-603948"
+    },
+    "610933": {
+      "strapiId": 29212,
+      "updatedAt": "2026-06-09T12:58:05.218Z",
+      "productId": 610928,
+      "sku": "WC-610928-610933"
+    },
+    "615219": {
+      "strapiId": 29213,
+      "updatedAt": "2026-06-09T12:58:09.346Z",
+      "productId": 615218,
+      "sku": "WC-615218-615219"
+    },
+    "615220": {
+      "strapiId": 29214,
+      "updatedAt": "2026-06-09T12:58:09.606Z",
+      "productId": 615218,
+      "sku": "WC-615218-615220"
+    },
+    "615221": {
+      "strapiId": 29215,
+      "updatedAt": "2026-06-09T12:58:09.874Z",
+      "productId": 615218,
+      "sku": "WC-615218-615221"
+    },
+    "615222": {
+      "strapiId": 29216,
+      "updatedAt": "2026-06-09T12:58:10.242Z",
+      "productId": 615218,
+      "sku": "WC-615218-615222"
+    },
+    "615223": {
+      "strapiId": 29217,
+      "updatedAt": "2026-06-09T12:58:10.494Z",
+      "productId": 615218,
+      "sku": "WC-615218-615223"
+    },
+    "615224": {
+      "strapiId": 29218,
+      "updatedAt": "2026-06-09T12:58:10.823Z",
+      "productId": 615218,
+      "sku": "WC-615218-615224"
+    },
+    "615225": {
+      "strapiId": 29219,
+      "updatedAt": "2026-06-09T12:58:11.061Z",
+      "productId": 615218,
+      "sku": "WC-615218-615225"
+    },
+    "615226": {
+      "strapiId": 29220,
+      "updatedAt": "2026-06-09T12:58:11.312Z",
+      "productId": 615218,
+      "sku": "WC-615218-615226"
+    },
+    "615227": {
+      "strapiId": 29221,
+      "updatedAt": "2026-06-09T12:58:11.863Z",
+      "productId": 615218,
+      "sku": "WC-615218-615227"
+    },
+    "615228": {
+      "strapiId": 29222,
+      "updatedAt": "2026-06-09T12:58:12.257Z",
+      "productId": 615218,
+      "sku": "WC-615218-615228"
+    },
+    "615229": {
+      "strapiId": 29223,
+      "updatedAt": "2026-06-09T12:58:12.752Z",
+      "productId": 615218,
+      "sku": "WC-615218-615229"
+    },
+    "615230": {
+      "strapiId": 29224,
+      "updatedAt": "2026-06-09T12:58:13.013Z",
+      "productId": 615218,
+      "sku": "WC-615218-615230"
+    },
+    "615231": {
+      "strapiId": 29225,
+      "updatedAt": "2026-06-09T12:58:13.348Z",
+      "productId": 615218,
+      "sku": "WC-615218-615231"
+    },
+    "615232": {
+      "strapiId": 29226,
+      "updatedAt": "2026-06-09T12:58:13.631Z",
+      "productId": 615218,
+      "sku": "WC-615218-615232"
+    },
+    "615233": {
+      "strapiId": 29227,
+      "updatedAt": "2026-06-09T12:58:13.897Z",
+      "productId": 615218,
+      "sku": "WC-615218-615233"
+    },
+    "615234": {
+      "strapiId": 29228,
+      "updatedAt": "2026-06-09T12:58:14.170Z",
+      "productId": 615218,
+      "sku": "WC-615218-615234"
+    },
+    "615235": {
+      "strapiId": 29229,
+      "updatedAt": "2026-06-09T12:58:14.512Z",
+      "productId": 615218,
+      "sku": "WC-615218-615235"
+    },
+    "615236": {
+      "strapiId": 29230,
+      "updatedAt": "2026-06-09T12:58:14.884Z",
+      "productId": 615218,
+      "sku": "WC-615218-615236"
+    },
+    "615237": {
+      "strapiId": 29231,
+      "updatedAt": "2026-06-09T12:58:15.281Z",
+      "productId": 615218,
+      "sku": "WC-615218-615237"
+    },
+    "615238": {
+      "strapiId": 29232,
+      "updatedAt": "2026-06-09T12:58:15.875Z",
+      "productId": 615218,
+      "sku": "WC-615218-615238"
+    },
+    "615239": {
+      "strapiId": 29233,
+      "updatedAt": "2026-06-09T12:58:16.195Z",
+      "productId": 615218,
+      "sku": "WC-615218-615239"
+    },
+    "615240": {
+      "strapiId": 29234,
+      "updatedAt": "2026-06-09T12:58:16.523Z",
+      "productId": 615218,
+      "sku": "WC-615218-615240"
+    },
+    "615241": {
+      "strapiId": 29235,
+      "updatedAt": "2026-06-09T12:58:16.798Z",
+      "productId": 615218,
+      "sku": "WC-615218-615241"
+    },
+    "615242": {
+      "strapiId": 29236,
+      "updatedAt": "2026-06-09T12:58:17.082Z",
+      "productId": 615218,
+      "sku": "WC-615218-615242"
+    },
+    "616017": {
+      "strapiId": 29237,
+      "updatedAt": "2026-06-09T12:58:20.622Z",
+      "productId": 615992,
+      "sku": "WC-615992-616017"
+    },
+    "616018": {
+      "strapiId": 29238,
+      "updatedAt": "2026-06-09T12:58:21.046Z",
+      "productId": 615992,
+      "sku": "WC-615992-616018"
+    },
+    "616019": {
+      "strapiId": 29239,
+      "updatedAt": "2026-06-09T12:58:21.327Z",
+      "productId": 615992,
+      "sku": "WC-615992-616019"
+    },
+    "616020": {
+      "strapiId": 29240,
+      "updatedAt": "2026-06-09T12:58:21.658Z",
+      "productId": 615992,
+      "sku": "WC-615992-616020"
+    },
+    "616021": {
+      "strapiId": 29241,
+      "updatedAt": "2026-06-09T12:58:21.883Z",
+      "productId": 615992,
+      "sku": "WC-615992-616021"
+    },
+    "616022": {
+      "strapiId": 29242,
+      "updatedAt": "2026-06-09T12:58:22.167Z",
+      "productId": 615992,
+      "sku": "WC-615992-616022"
+    },
+    "616023": {
+      "strapiId": 29243,
+      "updatedAt": "2026-06-09T12:58:22.506Z",
+      "productId": 615992,
+      "sku": "WC-615992-616023"
+    },
+    "616024": {
+      "strapiId": 29244,
+      "updatedAt": "2026-06-09T12:58:22.764Z",
+      "productId": 615992,
+      "sku": "WC-615992-616024"
+    },
+    "616025": {
+      "strapiId": 29245,
+      "updatedAt": "2026-06-09T12:58:23.127Z",
+      "productId": 615992,
+      "sku": "WC-615992-616025"
+    },
+    "616026": {
+      "strapiId": 29246,
+      "updatedAt": "2026-06-09T12:58:23.497Z",
+      "productId": 615992,
+      "sku": "WC-615992-616026"
+    },
+    "616027": {
+      "strapiId": 29247,
+      "updatedAt": "2026-06-09T12:58:23.729Z",
+      "productId": 615992,
+      "sku": "WC-615992-616027"
+    },
+    "616028": {
+      "strapiId": 29248,
+      "updatedAt": "2026-06-09T12:58:23.973Z",
+      "productId": 615992,
+      "sku": "WC-615992-616028"
+    },
+    "616029": {
+      "strapiId": 29249,
+      "updatedAt": "2026-06-09T12:58:24.311Z",
+      "productId": 615992,
+      "sku": "WC-615992-616029"
+    },
+    "616030": {
+      "strapiId": 29250,
+      "updatedAt": "2026-06-09T12:58:24.617Z",
+      "productId": 615992,
+      "sku": "WC-615992-616030"
+    },
+    "616031": {
+      "strapiId": 29251,
+      "updatedAt": "2026-06-09T12:58:24.910Z",
+      "productId": 615992,
+      "sku": "WC-615992-616031"
+    },
+    "617914": {
+      "strapiId": 29252,
+      "updatedAt": "2026-06-09T12:58:29.502Z",
+      "productId": 617901,
+      "sku": "WC-617901-617914"
+    },
+    "617915": {
+      "strapiId": 29253,
+      "updatedAt": "2026-06-09T12:58:29.794Z",
+      "productId": 617901,
+      "sku": "WC-617901-617915"
+    },
+    "619144": {
+      "strapiId": 29257,
+      "updatedAt": "2026-06-09T12:58:33.807Z",
+      "productId": 619137,
+      "sku": "WC-619137-619144"
+    },
+    "619492": {
+      "strapiId": 29258,
+      "updatedAt": "2026-06-09T12:58:38.988Z",
+      "productId": 619483,
+      "sku": "WC-619483-619492"
+    },
+    "619493": {
+      "strapiId": 29259,
+      "updatedAt": "2026-06-09T12:58:39.230Z",
+      "productId": 619483,
+      "sku": "WC-619483-619493"
+    },
+    "619494": {
+      "strapiId": 29260,
+      "updatedAt": "2026-06-09T12:58:39.484Z",
+      "productId": 619483,
+      "sku": "WC-619483-619494"
+    },
+    "619495": {
+      "strapiId": 29261,
+      "updatedAt": "2026-06-09T12:58:39.731Z",
+      "productId": 619483,
+      "sku": "WC-619483-619495"
+    },
+    "619496": {
+      "strapiId": 29262,
+      "updatedAt": "2026-06-09T12:58:39.988Z",
+      "productId": 619483,
+      "sku": "WC-619483-619496"
+    },
+    "619497": {
+      "strapiId": 29263,
+      "updatedAt": "2026-06-09T12:58:40.223Z",
+      "productId": 619483,
+      "sku": "WC-619483-619497"
+    },
+    "619498": {
+      "strapiId": 29264,
+      "updatedAt": "2026-06-09T12:58:40.473Z",
+      "productId": 619483,
+      "sku": "WC-619483-619498"
+    },
+    "619499": {
+      "strapiId": 29265,
+      "updatedAt": "2026-06-09T12:58:41.001Z",
+      "productId": 619483,
+      "sku": "WC-619483-619499"
+    },
+    "619500": {
+      "strapiId": 29266,
+      "updatedAt": "2026-06-09T12:58:41.240Z",
+      "productId": 619483,
+      "sku": "WC-619483-619500"
+    },
+    "619501": {
+      "strapiId": 29267,
+      "updatedAt": "2026-06-09T12:58:41.509Z",
+      "productId": 619483,
+      "sku": "WC-619483-619501"
+    },
+    "619502": {
+      "strapiId": 29268,
+      "updatedAt": "2026-06-09T12:58:41.777Z",
+      "productId": 619483,
+      "sku": "WC-619483-619502"
+    },
+    "619503": {
+      "strapiId": 29269,
+      "updatedAt": "2026-06-09T12:58:42.038Z",
+      "productId": 619483,
+      "sku": "WC-619483-619503"
+    },
+    "619504": {
+      "strapiId": 29270,
+      "updatedAt": "2026-06-09T12:58:42.278Z",
+      "productId": 619483,
+      "sku": "WC-619483-619504"
+    },
+    "619505": {
+      "strapiId": 29271,
+      "updatedAt": "2026-06-09T12:58:42.510Z",
+      "productId": 619483,
+      "sku": "WC-619483-619505"
+    },
+    "619506": {
+      "strapiId": 29272,
+      "updatedAt": "2026-06-09T12:58:42.752Z",
+      "productId": 619483,
+      "sku": "WC-619483-619506"
+    },
+    "619507": {
+      "strapiId": 29273,
+      "updatedAt": "2026-06-09T12:58:42.990Z",
+      "productId": 619483,
+      "sku": "WC-619483-619507"
+    },
+    "619508": {
+      "strapiId": 29274,
+      "updatedAt": "2026-06-09T12:58:43.249Z",
+      "productId": 619483,
+      "sku": "WC-619483-619508"
+    },
+    "619509": {
+      "strapiId": 29275,
+      "updatedAt": "2026-06-09T12:58:43.499Z",
+      "productId": 619483,
+      "sku": "WC-619483-619509"
+    },
+    "619510": {
+      "strapiId": 29276,
+      "updatedAt": "2026-06-09T12:58:43.750Z",
+      "productId": 619483,
+      "sku": "WC-619483-619510"
+    },
+    "619511": {
+      "strapiId": 29277,
+      "updatedAt": "2026-06-09T12:58:44.003Z",
+      "productId": 619483,
+      "sku": "WC-619483-619511"
+    },
+    "619512": {
+      "strapiId": 29278,
+      "updatedAt": "2026-06-09T12:58:44.263Z",
+      "productId": 619483,
+      "sku": "WC-619483-619512"
+    },
+    "619513": {
+      "strapiId": 29279,
+      "updatedAt": "2026-06-09T12:58:44.557Z",
+      "productId": 619483,
+      "sku": "WC-619483-619513"
+    },
+    "619514": {
+      "strapiId": 29280,
+      "updatedAt": "2026-06-09T12:58:44.815Z",
+      "productId": 619483,
+      "sku": "WC-619483-619514"
+    },
+    "619515": {
+      "strapiId": 29281,
+      "updatedAt": "2026-06-09T12:58:45.118Z",
+      "productId": 619483,
+      "sku": "WC-619483-619515"
+    },
+    "619516": {
+      "strapiId": 29282,
+      "updatedAt": "2026-06-09T12:58:45.360Z",
+      "productId": 619483,
+      "sku": "WC-619483-619516"
+    },
+    "619517": {
+      "strapiId": 29283,
+      "updatedAt": "2026-06-09T12:58:45.593Z",
+      "productId": 619483,
+      "sku": "WC-619483-619517"
+    },
+    "619518": {
+      "strapiId": 29284,
+      "updatedAt": "2026-06-09T12:58:45.886Z",
+      "productId": 619483,
+      "sku": "WC-619483-619518"
+    },
+    "619519": {
+      "strapiId": 29285,
+      "updatedAt": "2026-06-09T12:58:46.123Z",
+      "productId": 619483,
+      "sku": "WC-619483-619519"
+    },
+    "619520": {
+      "strapiId": 29286,
+      "updatedAt": "2026-06-09T12:58:46.534Z",
+      "productId": 619483,
+      "sku": "WC-619483-619520"
+    },
+    "619521": {
+      "strapiId": 29287,
+      "updatedAt": "2026-06-09T12:58:46.969Z",
+      "productId": 619483,
+      "sku": "WC-619483-619521"
+    },
+    "619576": {
+      "strapiId": 29288,
+      "updatedAt": "2026-06-09T12:58:51.517Z",
+      "productId": 619569,
+      "sku": "WC-619569-619576"
+    },
+    "619581": {
+      "strapiId": 29289,
+      "updatedAt": "2026-06-09T12:58:52.144Z",
+      "productId": 619569,
+      "sku": "WC-619569-619581"
+    },
+    "619586": {
+      "strapiId": 29290,
+      "updatedAt": "2026-06-09T12:58:53.014Z",
+      "productId": 619569,
+      "sku": "WC-619569-619586"
+    },
+    "619590": {
+      "strapiId": 29291,
+      "updatedAt": "2026-06-09T12:58:53.736Z",
+      "productId": 619569,
+      "sku": "WC-619569-619590"
+    },
+    "619591": {
+      "strapiId": 29292,
+      "updatedAt": "2026-06-09T12:58:54.495Z",
+      "productId": 619569,
+      "sku": "WC-619569-619591"
+    },
+    "623273": {
+      "strapiId": 29297,
+      "updatedAt": "2026-06-09T12:58:59.572Z",
+      "productId": 623271,
+      "sku": "WC-623271-623273"
+    },
+    "623274": {
+      "strapiId": 29298,
+      "updatedAt": "2026-06-09T12:58:59.825Z",
+      "productId": 623271,
+      "sku": "WC-623271-623274"
+    },
+    "623275": {
+      "strapiId": 29299,
+      "updatedAt": "2026-06-09T12:59:00.068Z",
+      "productId": 623271,
+      "sku": "WC-623271-623275"
+    },
+    "623282": {
+      "strapiId": 29300,
+      "updatedAt": "2026-06-09T12:59:03.485Z",
+      "productId": 623281,
+      "sku": "WC-623281-623282"
+    },
+    "623283": {
+      "strapiId": 29301,
+      "updatedAt": "2026-06-09T12:59:03.727Z",
+      "productId": 623281,
+      "sku": "WC-623281-623283"
+    },
+    "623284": {
+      "strapiId": 29302,
+      "updatedAt": "2026-06-09T12:59:04.122Z",
+      "productId": 623281,
+      "sku": "WC-623281-623284"
+    },
+    "623285": {
+      "strapiId": 29303,
+      "updatedAt": "2026-06-09T12:59:04.467Z",
+      "productId": 623281,
+      "sku": "WC-623281-623285"
+    },
+    "628087": {
+      "strapiId": 29304,
+      "updatedAt": "2026-06-09T12:59:08.171Z",
+      "productId": 628086,
+      "sku": "WC-628086-628087"
+    },
+    "631518": {
+      "strapiId": 29305,
+      "updatedAt": "2026-06-09T12:59:11.549Z",
+      "productId": 631516,
+      "sku": "WC-631516-631518"
+    },
+    "631519": {
+      "strapiId": 29306,
+      "updatedAt": "2026-06-09T12:59:11.801Z",
+      "productId": 631516,
+      "sku": "WC-631516-631519"
+    },
+    "631520": {
+      "strapiId": 29307,
+      "updatedAt": "2026-06-09T12:59:12.041Z",
+      "productId": 631516,
+      "sku": "WC-631516-631520"
+    },
+    "631521": {
+      "strapiId": 29308,
+      "updatedAt": "2026-06-09T12:59:12.269Z",
+      "productId": 631516,
+      "sku": "WC-631516-631521"
+    },
+    "631522": {
+      "strapiId": 29309,
+      "updatedAt": "2026-06-09T12:59:12.613Z",
+      "productId": 631516,
+      "sku": "WC-631516-631522"
+    },
+    "631523": {
+      "strapiId": 29310,
+      "updatedAt": "2026-06-09T12:59:12.895Z",
+      "productId": 631516,
+      "sku": "WC-631516-631523"
+    },
+    "631524": {
+      "strapiId": 29311,
+      "updatedAt": "2026-06-09T12:59:14.016Z",
+      "productId": 631516,
+      "sku": "WC-631516-631524"
+    },
+    "631525": {
+      "strapiId": 29312,
+      "updatedAt": "2026-06-09T12:59:14.386Z",
+      "productId": 631516,
+      "sku": "WC-631516-631525"
+    },
+    "631526": {
+      "strapiId": 29313,
+      "updatedAt": "2026-06-09T12:59:14.731Z",
+      "productId": 631516,
+      "sku": "WC-631516-631526"
+    },
+    "631527": {
+      "strapiId": 29314,
+      "updatedAt": "2026-06-09T12:59:15.061Z",
+      "productId": 631516,
+      "sku": "WC-631516-631527"
+    },
+    "631528": {
+      "strapiId": 29315,
+      "updatedAt": "2026-06-09T12:59:15.452Z",
+      "productId": 631516,
+      "sku": "WC-631516-631528"
+    },
+    "631529": {
+      "strapiId": 29316,
+      "updatedAt": "2026-06-09T12:59:16.119Z",
+      "productId": 631516,
+      "sku": "WC-631516-631529"
+    },
+    "631530": {
+      "strapiId": 29317,
+      "updatedAt": "2026-06-09T12:59:16.505Z",
+      "productId": 631516,
+      "sku": "WC-631516-631530"
+    },
+    "631531": {
+      "strapiId": 29318,
+      "updatedAt": "2026-06-09T12:59:16.833Z",
+      "productId": 631516,
+      "sku": "WC-631516-631531"
+    },
+    "631532": {
+      "strapiId": 29319,
+      "updatedAt": "2026-06-09T12:59:17.151Z",
+      "productId": 631516,
+      "sku": "WC-631516-631532"
+    },
+    "631533": {
+      "strapiId": 29320,
+      "updatedAt": "2026-06-09T12:59:17.388Z",
+      "productId": 631516,
+      "sku": "WC-631516-631533"
+    },
+    "636113": {
+      "strapiId": 29321,
+      "updatedAt": "2026-06-09T12:59:20.680Z",
+      "productId": 636098,
+      "sku": "WC-636098-636113"
+    },
+    "636114": {
+      "strapiId": 29322,
+      "updatedAt": "2026-06-09T12:59:20.954Z",
+      "productId": 636098,
+      "sku": "WC-636098-636114"
+    },
+    "636115": {
+      "strapiId": 29323,
+      "updatedAt": "2026-06-09T12:59:21.203Z",
+      "productId": 636098,
+      "sku": "WC-636098-636115"
+    },
+    "636116": {
+      "strapiId": 29324,
+      "updatedAt": "2026-06-09T12:59:21.570Z",
+      "productId": 636098,
+      "sku": "WC-636098-636116"
+    },
+    "636117": {
+      "strapiId": 29325,
+      "updatedAt": "2026-06-09T12:59:21.836Z",
+      "productId": 636098,
+      "sku": "WC-636098-636117"
+    },
+    "636118": {
+      "strapiId": 29326,
+      "updatedAt": "2026-06-09T12:59:22.085Z",
+      "productId": 636098,
+      "sku": "WC-636098-636118"
+    },
+    "636119": {
+      "strapiId": 29327,
+      "updatedAt": "2026-06-09T12:59:22.372Z",
+      "productId": 636098,
+      "sku": "WC-636098-636119"
+    },
+    "636120": {
+      "strapiId": 29328,
+      "updatedAt": "2026-06-09T12:59:22.983Z",
+      "productId": 636098,
+      "sku": "WC-636098-636120"
+    },
+    "636442": {
+      "strapiId": 29329,
+      "updatedAt": "2026-06-09T12:59:26.529Z",
+      "productId": 636440,
+      "sku": "WC-636440-636442"
+    },
+    "636443": {
+      "strapiId": 29330,
+      "updatedAt": "2026-06-09T12:59:26.912Z",
+      "productId": 636440,
+      "sku": "WC-636440-636443"
+    },
+    "636444": {
+      "strapiId": 29331,
+      "updatedAt": "2026-06-09T12:59:27.352Z",
+      "productId": 636440,
+      "sku": "WC-636440-636444"
+    },
+    "636445": {
+      "strapiId": 29332,
+      "updatedAt": "2026-06-09T12:59:27.736Z",
+      "productId": 636440,
+      "sku": "WC-636440-636445"
+    },
+    "636446": {
+      "strapiId": 29333,
+      "updatedAt": "2026-06-09T12:59:28.107Z",
+      "productId": 636440,
+      "sku": "WC-636440-636446"
+    },
+    "636447": {
+      "strapiId": 29334,
+      "updatedAt": "2026-06-09T12:59:28.448Z",
+      "productId": 636440,
+      "sku": "WC-636440-636447"
+    },
+    "637075": {
+      "strapiId": 29336,
+      "updatedAt": "2026-06-09T12:59:32.263Z",
+      "productId": 637073,
+      "sku": "WC-637073-637075"
+    },
+    "637076": {
+      "strapiId": 29337,
+      "updatedAt": "2026-06-09T12:59:32.494Z",
+      "productId": 637073,
+      "sku": "WC-637073-637076"
+    },
+    "637077": {
+      "strapiId": 29338,
+      "updatedAt": "2026-06-09T12:59:32.734Z",
+      "productId": 637073,
+      "sku": "WC-637073-637077"
+    },
+    "637078": {
+      "strapiId": 29339,
+      "updatedAt": "2026-06-09T12:59:32.974Z",
+      "productId": 637073,
+      "sku": "WC-637073-637078"
+    },
+    "637079": {
+      "strapiId": 29340,
+      "updatedAt": "2026-06-09T12:59:33.211Z",
+      "productId": 637073,
+      "sku": "WC-637073-637079"
+    },
+    "637080": {
+      "strapiId": 29341,
+      "updatedAt": "2026-06-09T12:59:33.440Z",
+      "productId": 637073,
+      "sku": "WC-637073-637080"
+    },
+    "637081": {
+      "strapiId": 29342,
+      "updatedAt": "2026-06-09T12:59:33.668Z",
+      "productId": 637073,
+      "sku": "WC-637073-637081"
+    },
+    "637082": {
+      "strapiId": 29343,
+      "updatedAt": "2026-06-09T12:59:33.899Z",
+      "productId": 637073,
+      "sku": "WC-637073-637082"
+    },
+    "637083": {
+      "strapiId": 29344,
+      "updatedAt": "2026-06-09T12:59:34.139Z",
+      "productId": 637073,
+      "sku": "WC-637073-637083"
+    },
+    "637084": {
+      "strapiId": 29345,
+      "updatedAt": "2026-06-09T12:59:34.444Z",
+      "productId": 637073,
+      "sku": "WC-637073-637084"
+    },
+    "637085": {
+      "strapiId": 29346,
+      "updatedAt": "2026-06-09T12:59:34.705Z",
+      "productId": 637073,
+      "sku": "WC-637073-637085"
+    },
+    "637086": {
+      "strapiId": 29347,
+      "updatedAt": "2026-06-09T12:59:34.939Z",
+      "productId": 637073,
+      "sku": "WC-637073-637086"
+    },
+    "637087": {
+      "strapiId": 29348,
+      "updatedAt": "2026-06-09T12:59:35.295Z",
+      "productId": 637073,
+      "sku": "WC-637073-637087"
+    },
+    "637088": {
+      "strapiId": 29349,
+      "updatedAt": "2026-06-09T12:59:35.569Z",
+      "productId": 637073,
+      "sku": "WC-637073-637088"
+    },
+    "637089": {
+      "strapiId": 29350,
+      "updatedAt": "2026-06-09T12:59:35.808Z",
+      "productId": 637073,
+      "sku": "WC-637073-637089"
+    },
+    "637492": {
+      "strapiId": 29335,
+      "updatedAt": "2026-06-09T12:59:28.777Z",
+      "productId": 636440,
+      "sku": "WC-636440-637492"
+    },
+    "637506": {
+      "strapiId": 29351,
+      "updatedAt": "2026-06-09T12:59:39.063Z",
+      "productId": 637504,
+      "sku": "WC-637504-637506"
+    },
+    "637507": {
+      "strapiId": 29352,
+      "updatedAt": "2026-06-09T12:59:39.289Z",
+      "productId": 637504,
+      "sku": "WC-637504-637507"
+    },
+    "637508": {
+      "strapiId": 29353,
+      "updatedAt": "2026-06-09T12:59:39.578Z",
+      "productId": 637504,
+      "sku": "WC-637504-637508"
+    },
+    "637509": {
+      "strapiId": 29354,
+      "updatedAt": "2026-06-09T12:59:39.830Z",
+      "productId": 637504,
+      "sku": "WC-637504-637509"
+    },
+    "637510": {
+      "strapiId": 29355,
+      "updatedAt": "2026-06-09T12:59:40.044Z",
+      "productId": 637504,
+      "sku": "WC-637504-637510"
+    },
+    "637511": {
+      "strapiId": 29356,
+      "updatedAt": "2026-06-09T12:59:40.297Z",
+      "productId": 637504,
+      "sku": "WC-637504-637511"
+    },
+    "637512": {
+      "strapiId": 29357,
+      "updatedAt": "2026-06-09T12:59:40.577Z",
+      "productId": 637504,
+      "sku": "WC-637504-637512"
+    },
+    "637513": {
+      "strapiId": 29358,
+      "updatedAt": "2026-06-09T12:59:40.972Z",
+      "productId": 637504,
+      "sku": "WC-637504-637513"
+    },
+    "637514": {
+      "strapiId": 29359,
+      "updatedAt": "2026-06-09T12:59:41.346Z",
+      "productId": 637504,
+      "sku": "WC-637504-637514"
+    },
+    "637515": {
+      "strapiId": 29360,
+      "updatedAt": "2026-06-09T12:59:41.742Z",
+      "productId": 637504,
+      "sku": "WC-637504-637515"
+    },
+    "637516": {
+      "strapiId": 29361,
+      "updatedAt": "2026-06-09T12:59:42.072Z",
+      "productId": 637504,
+      "sku": "WC-637504-637516"
+    },
+    "637517": {
+      "strapiId": 29362,
+      "updatedAt": "2026-06-09T12:59:42.447Z",
+      "productId": 637504,
+      "sku": "WC-637504-637517"
+    },
+    "637629": {
+      "strapiId": 29363,
+      "updatedAt": "2026-06-09T12:59:45.707Z",
+      "productId": 637612,
+      "sku": "WC-637612-637629"
+    },
+    "637630": {
+      "strapiId": 29364,
+      "updatedAt": "2026-06-09T12:59:45.960Z",
+      "productId": 637612,
+      "sku": "WC-637612-637630"
+    },
+    "637631": {
+      "strapiId": 29365,
+      "updatedAt": "2026-06-09T12:59:46.202Z",
+      "productId": 637612,
+      "sku": "WC-637612-637631"
+    },
+    "637632": {
+      "strapiId": 29366,
+      "updatedAt": "2026-06-09T12:59:46.553Z",
+      "productId": 637612,
+      "sku": "WC-637612-637632"
+    },
+    "637633": {
+      "strapiId": 29367,
+      "updatedAt": "2026-06-09T12:59:46.839Z",
+      "productId": 637612,
+      "sku": "WC-637612-637633"
+    },
+    "637634": {
+      "strapiId": 29368,
+      "updatedAt": "2026-06-09T12:59:47.198Z",
+      "productId": 637612,
+      "sku": "WC-637612-637634"
+    },
+    "637635": {
+      "strapiId": 29369,
+      "updatedAt": "2026-06-09T12:59:47.471Z",
+      "productId": 637612,
+      "sku": "WC-637612-637635"
+    },
+    "637636": {
+      "strapiId": 29370,
+      "updatedAt": "2026-06-09T12:59:47.730Z",
+      "productId": 637612,
+      "sku": "WC-637612-637636"
+    },
+    "637637": {
+      "strapiId": 29371,
+      "updatedAt": "2026-06-09T12:59:47.991Z",
+      "productId": 637612,
+      "sku": "WC-637612-637637"
+    },
+    "637638": {
+      "strapiId": 29372,
+      "updatedAt": "2026-06-09T12:59:48.233Z",
+      "productId": 637612,
+      "sku": "WC-637612-637638"
+    },
+    "637639": {
+      "strapiId": 29373,
+      "updatedAt": "2026-06-09T12:59:48.473Z",
+      "productId": 637612,
+      "sku": "WC-637612-637639"
+    },
+    "637640": {
+      "strapiId": 29374,
+      "updatedAt": "2026-06-09T12:59:48.723Z",
+      "productId": 637612,
+      "sku": "WC-637612-637640"
+    },
+    "639922": {
+      "strapiId": 29385,
+      "updatedAt": "2026-06-09T13:00:02.062Z",
+      "productId": 639896,
+      "sku": "WC-639896-639922"
+    },
+    "639923": {
+      "strapiId": 29386,
+      "updatedAt": "2026-06-09T13:00:02.609Z",
+      "productId": 639896,
+      "sku": "WC-639896-639923"
+    },
+    "639924": {
+      "strapiId": 29387,
+      "updatedAt": "2026-06-09T13:00:02.896Z",
+      "productId": 639896,
+      "sku": "WC-639896-639924"
+    },
+    "639925": {
+      "strapiId": 29388,
+      "updatedAt": "2026-06-09T13:00:03.135Z",
+      "productId": 639896,
+      "sku": "WC-639896-639925"
+    },
+    "639926": {
+      "strapiId": 29389,
+      "updatedAt": "2026-06-09T13:00:03.465Z",
+      "productId": 639896,
+      "sku": "WC-639896-639926"
+    },
+    "639927": {
+      "strapiId": 29390,
+      "updatedAt": "2026-06-09T13:00:03.747Z",
+      "productId": 639896,
+      "sku": "WC-639896-639927"
+    },
+    "640008": {
+      "strapiId": 29391,
+      "updatedAt": "2026-06-09T13:00:06.922Z",
+      "productId": 640001,
+      "sku": "WC-640001-640008"
+    },
+    "640010": {
+      "strapiId": 29392,
+      "updatedAt": "2026-06-09T13:00:07.229Z",
+      "productId": 640001,
+      "sku": "WC-640001-640010"
+    },
+    "640017": {
+      "strapiId": 29393,
+      "updatedAt": "2026-06-09T13:00:07.494Z",
+      "productId": 640001,
+      "sku": "WC-640001-640017"
+    },
+    "640018": {
+      "strapiId": 29394,
+      "updatedAt": "2026-06-09T13:00:07.744Z",
+      "productId": 640001,
+      "sku": "WC-640001-640018"
+    },
+    "641923": {
+      "strapiId": 29407,
+      "updatedAt": "2026-06-09T13:00:28.886Z",
+      "productId": 641920,
+      "sku": "WC-641920-641923"
+    },
+    "641924": {
+      "strapiId": 29408,
+      "updatedAt": "2026-06-09T13:00:29.185Z",
+      "productId": 641920,
+      "sku": "WC-641920-641924"
+    },
+    "641935": {
+      "strapiId": 29409,
+      "updatedAt": "2026-06-09T13:00:32.376Z",
+      "productId": 641928,
+      "sku": "WC-641928-641935"
+    },
+    "644380": {
+      "strapiId": 29419,
+      "updatedAt": "2026-06-09T13:00:44.458Z",
+      "productId": 644377,
+      "sku": "WC-644377-644380"
+    },
+    "644395": {
+      "strapiId": 29420,
+      "updatedAt": "2026-06-09T13:00:48.912Z",
+      "productId": 644390,
+      "sku": "WC-644390-644395"
+    },
+    "645811": {
+      "strapiId": 29421,
+      "updatedAt": "2026-06-09T13:00:54.448Z",
+      "productId": 645807,
+      "sku": "WC-645807-645811"
+    },
+    "645812": {
+      "strapiId": 29422,
+      "updatedAt": "2026-06-09T13:00:54.942Z",
+      "productId": 645807,
+      "sku": "WC-645807-645812"
+    },
+    "645813": {
+      "strapiId": 29423,
+      "updatedAt": "2026-06-09T13:00:55.408Z",
+      "productId": 645807,
+      "sku": "WC-645807-645813"
+    },
+    "645814": {
+      "strapiId": 29424,
+      "updatedAt": "2026-06-09T13:00:56.248Z",
+      "productId": 645807,
+      "sku": "WC-645807-645814"
+    },
+    "645815": {
+      "strapiId": 29425,
+      "updatedAt": "2026-06-09T13:00:56.767Z",
+      "productId": 645807,
+      "sku": "WC-645807-645815"
+    },
+    "645816": {
+      "strapiId": 29426,
+      "updatedAt": "2026-06-09T13:00:57.721Z",
+      "productId": 645807,
+      "sku": "WC-645807-645816"
+    },
+    "645817": {
+      "strapiId": 29427,
+      "updatedAt": "2026-06-09T13:00:58.114Z",
+      "productId": 645807,
+      "sku": "WC-645807-645817"
+    },
+    "645818": {
+      "strapiId": 29428,
+      "updatedAt": "2026-06-09T13:00:58.364Z",
+      "productId": 645807,
+      "sku": "WC-645807-645818"
+    },
+    "645819": {
+      "strapiId": 29429,
+      "updatedAt": "2026-06-09T13:00:58.946Z",
+      "productId": 645807,
+      "sku": "WC-645807-645819"
+    },
+    "645820": {
+      "strapiId": 29430,
+      "updatedAt": "2026-06-09T13:00:59.609Z",
+      "productId": 645807,
+      "sku": "WC-645807-645820"
+    },
+    "645821": {
+      "strapiId": 29431,
+      "updatedAt": "2026-06-09T13:01:01.680Z",
+      "productId": 645807,
+      "sku": "WC-645807-645821"
+    },
+    "645822": {
+      "strapiId": 29432,
+      "updatedAt": "2026-06-09T13:01:02.712Z",
+      "productId": 645807,
+      "sku": "WC-645807-645822"
+    },
+    "645823": {
+      "strapiId": 29433,
+      "updatedAt": "2026-06-09T13:01:03.455Z",
+      "productId": 645807,
+      "sku": "WC-645807-645823"
+    },
+    "645824": {
+      "strapiId": 29434,
+      "updatedAt": "2026-06-09T13:01:04.088Z",
+      "productId": 645807,
+      "sku": "WC-645807-645824"
+    },
+    "645825": {
+      "strapiId": 29435,
+      "updatedAt": "2026-06-09T13:01:04.788Z",
+      "productId": 645807,
+      "sku": "WC-645807-645825"
+    },
+    "645826": {
+      "strapiId": 29436,
+      "updatedAt": "2026-06-09T13:01:05.911Z",
+      "productId": 645807,
+      "sku": "WC-645807-645826"
+    },
+    "645827": {
+      "strapiId": 29437,
+      "updatedAt": "2026-06-09T13:01:07.120Z",
+      "productId": 645807,
+      "sku": "WC-645807-645827"
+    },
+    "645828": {
+      "strapiId": 29438,
+      "updatedAt": "2026-06-09T13:01:07.565Z",
+      "productId": 645807,
+      "sku": "WC-645807-645828"
+    },
+    "645829": {
+      "strapiId": 29439,
+      "updatedAt": "2026-06-09T13:01:08.027Z",
+      "productId": 645807,
+      "sku": "WC-645807-645829"
+    },
+    "645830": {
+      "strapiId": 29440,
+      "updatedAt": "2026-06-09T13:01:08.446Z",
+      "productId": 645807,
+      "sku": "WC-645807-645830"
+    },
+    "645831": {
+      "strapiId": 29441,
+      "updatedAt": "2026-06-09T13:01:08.706Z",
+      "productId": 645807,
+      "sku": "WC-645807-645831"
+    },
+    "645832": {
+      "strapiId": 29442,
+      "updatedAt": "2026-06-09T13:01:08.986Z",
+      "productId": 645807,
+      "sku": "WC-645807-645832"
+    },
+    "645833": {
+      "strapiId": 29443,
+      "updatedAt": "2026-06-09T13:01:09.251Z",
+      "productId": 645807,
+      "sku": "WC-645807-645833"
+    },
+    "645834": {
+      "strapiId": 29444,
+      "updatedAt": "2026-06-09T13:01:09.599Z",
+      "productId": 645807,
+      "sku": "WC-645807-645834"
+    },
+    "645875": {
+      "strapiId": 29445,
+      "updatedAt": "2026-06-09T13:01:15.010Z",
+      "productId": 645871,
+      "sku": "WC-645871-645875"
+    },
+    "645876": {
+      "strapiId": 29446,
+      "updatedAt": "2026-06-09T13:01:15.446Z",
+      "productId": 645871,
+      "sku": "WC-645871-645876"
+    },
+    "645877": {
+      "strapiId": 29447,
+      "updatedAt": "2026-06-09T13:01:15.935Z",
+      "productId": 645871,
+      "sku": "WC-645871-645877"
+    },
+    "645878": {
+      "strapiId": 29448,
+      "updatedAt": "2026-06-09T13:01:16.365Z",
+      "productId": 645871,
+      "sku": "WC-645871-645878"
+    },
+    "645879": {
+      "strapiId": 29449,
+      "updatedAt": "2026-06-09T13:01:16.857Z",
+      "productId": 645871,
+      "sku": "WC-645871-645879"
+    },
+    "645880": {
+      "strapiId": 29450,
+      "updatedAt": "2026-06-09T13:01:17.390Z",
+      "productId": 645871,
+      "sku": "WC-645871-645880"
+    },
+    "645881": {
+      "strapiId": 29451,
+      "updatedAt": "2026-06-09T13:01:17.912Z",
+      "productId": 645871,
+      "sku": "WC-645871-645881"
+    },
+    "645882": {
+      "strapiId": 29452,
+      "updatedAt": "2026-06-09T13:01:19.156Z",
+      "productId": 645871,
+      "sku": "WC-645871-645882"
+    },
+    "645883": {
+      "strapiId": 29453,
+      "updatedAt": "2026-06-09T13:01:19.568Z",
+      "productId": 645871,
+      "sku": "WC-645871-645883"
+    },
+    "645884": {
+      "strapiId": 29454,
+      "updatedAt": "2026-06-09T13:01:20.466Z",
+      "productId": 645871,
+      "sku": "WC-645871-645884"
+    },
+    "645885": {
+      "strapiId": 29455,
+      "updatedAt": "2026-06-09T13:01:20.997Z",
+      "productId": 645871,
+      "sku": "WC-645871-645885"
+    },
+    "645886": {
+      "strapiId": 29456,
+      "updatedAt": "2026-06-09T13:01:21.535Z",
+      "productId": 645871,
+      "sku": "WC-645871-645886"
+    },
+    "645887": {
+      "strapiId": 29457,
+      "updatedAt": "2026-06-09T13:01:22.051Z",
+      "productId": 645871,
+      "sku": "WC-645871-645887"
+    },
+    "645888": {
+      "strapiId": 29458,
+      "updatedAt": "2026-06-09T13:01:22.567Z",
+      "productId": 645871,
+      "sku": "WC-645871-645888"
+    },
+    "645889": {
+      "strapiId": 29459,
+      "updatedAt": "2026-06-09T13:01:23.026Z",
+      "productId": 645871,
+      "sku": "WC-645871-645889"
+    },
+    "645890": {
+      "strapiId": 29460,
+      "updatedAt": "2026-06-09T13:01:23.910Z",
+      "productId": 645871,
+      "sku": "WC-645871-645890"
+    },
+    "645891": {
+      "strapiId": 29461,
+      "updatedAt": "2026-06-09T13:01:24.390Z",
+      "productId": 645871,
+      "sku": "WC-645871-645891"
+    },
+    "645892": {
+      "strapiId": 29462,
+      "updatedAt": "2026-06-09T13:01:25.166Z",
+      "productId": 645871,
+      "sku": "WC-645871-645892"
+    },
+    "645893": {
+      "strapiId": 29463,
+      "updatedAt": "2026-06-09T13:01:25.664Z",
+      "productId": 645871,
+      "sku": "WC-645871-645893"
+    },
+    "645894": {
+      "strapiId": 29464,
+      "updatedAt": "2026-06-09T13:01:26.119Z",
+      "productId": 645871,
+      "sku": "WC-645871-645894"
+    },
+    "647645": {
+      "strapiId": 29465,
+      "updatedAt": "2026-06-09T13:01:31.963Z",
+      "productId": 647629,
+      "sku": "WC-647629-647645"
+    },
+    "647646": {
+      "strapiId": 29466,
+      "updatedAt": "2026-06-09T13:01:33.301Z",
+      "productId": 647629,
+      "sku": "WC-647629-647646"
+    },
+    "647647": {
+      "strapiId": 29467,
+      "updatedAt": "2026-06-09T13:01:33.902Z",
+      "productId": 647629,
+      "sku": "WC-647629-647647"
+    },
+    "647648": {
+      "strapiId": 29468,
+      "updatedAt": "2026-06-09T13:01:34.320Z",
+      "productId": 647629,
+      "sku": "WC-647629-647648"
+    },
+    "647649": {
+      "strapiId": 29469,
+      "updatedAt": "2026-06-09T13:01:34.636Z",
+      "productId": 647629,
+      "sku": "WC-647629-647649"
+    },
+    "647650": {
+      "strapiId": 29470,
+      "updatedAt": "2026-06-09T13:01:35.112Z",
+      "productId": 647629,
+      "sku": "WC-647629-647650"
+    },
+    "647651": {
+      "strapiId": 29471,
+      "updatedAt": "2026-06-09T13:01:35.557Z",
+      "productId": 647629,
+      "sku": "WC-647629-647651"
+    },
+    "647652": {
+      "strapiId": 29472,
+      "updatedAt": "2026-06-09T13:01:36.006Z",
+      "productId": 647629,
+      "sku": "WC-647629-647652"
+    },
+    "647653": {
+      "strapiId": 29473,
+      "updatedAt": "2026-06-09T13:01:36.534Z",
+      "productId": 647629,
+      "sku": "WC-647629-647653"
+    },
+    "647654": {
+      "strapiId": 29474,
+      "updatedAt": "2026-06-09T13:01:36.935Z",
+      "productId": 647629,
+      "sku": "WC-647629-647654"
+    },
+    "647655": {
+      "strapiId": 29475,
+      "updatedAt": "2026-06-09T13:01:37.340Z",
+      "productId": 647629,
+      "sku": "WC-647629-647655"
+    },
+    "647656": {
+      "strapiId": 29476,
+      "updatedAt": "2026-06-09T13:01:38.153Z",
+      "productId": 647629,
+      "sku": "WC-647629-647656"
+    },
+    "650378": {
+      "strapiId": 29477,
+      "updatedAt": "2026-06-09T13:01:43.262Z",
+      "productId": 650358,
+      "sku": "WC-650358-650378"
+    },
+    "650381": {
+      "strapiId": 29478,
+      "updatedAt": "2026-06-09T13:01:43.621Z",
+      "productId": 650358,
+      "sku": "WC-650358-650381"
+    },
+    "654490": {
+      "strapiId": 29479,
+      "updatedAt": "2026-06-09T13:01:46.756Z",
+      "productId": 654489,
+      "sku": "WC-654489-654490"
+    },
+    "654491": {
+      "strapiId": 29480,
+      "updatedAt": "2026-06-09T13:01:47.019Z",
+      "productId": 654489,
+      "sku": "WC-654489-654491"
+    },
+    "654492": {
+      "strapiId": 29481,
+      "updatedAt": "2026-06-09T13:01:47.334Z",
+      "productId": 654489,
+      "sku": "WC-654489-654492"
+    },
+    "654493": {
+      "strapiId": 29482,
+      "updatedAt": "2026-06-09T13:01:48.004Z",
+      "productId": 654489,
+      "sku": "WC-654489-654493"
+    },
+    "654494": {
+      "strapiId": 29483,
+      "updatedAt": "2026-06-09T13:01:48.287Z",
+      "productId": 654489,
+      "sku": "WC-654489-654494"
+    },
+    "654495": {
+      "strapiId": 29484,
+      "updatedAt": "2026-06-09T13:01:48.619Z",
+      "productId": 654489,
+      "sku": "WC-654489-654495"
+    },
+    "654496": {
+      "strapiId": 29485,
+      "updatedAt": "2026-06-09T13:01:48.879Z",
+      "productId": 654489,
+      "sku": "WC-654489-654496"
+    },
+    "654497": {
+      "strapiId": 29486,
+      "updatedAt": "2026-06-09T13:01:49.130Z",
+      "productId": 654489,
+      "sku": "WC-654489-654497"
+    },
+    "655871": {
+      "strapiId": 29487,
+      "updatedAt": "2026-06-09T13:01:52.538Z",
+      "productId": 655869,
+      "sku": "WC-655869-655871"
+    },
+    "655889": {
+      "strapiId": 29488,
+      "updatedAt": "2026-06-09T13:01:55.976Z",
+      "productId": 655888,
+      "sku": "WC-655888-655889"
+    },
+    "655890": {
+      "strapiId": 29489,
+      "updatedAt": "2026-06-09T13:01:56.338Z",
+      "productId": 655888,
+      "sku": "WC-655888-655890"
+    },
+    "655896": {
+      "strapiId": 29490,
+      "updatedAt": "2026-06-09T13:02:01.102Z",
+      "productId": 655893,
+      "sku": "WC-655893-655896"
+    },
+    "660062": {
+      "strapiId": 29521,
+      "updatedAt": "2026-06-09T13:02:31.505Z",
+      "productId": 660059,
+      "sku": "WC-660059-660062"
+    },
+    "660063": {
+      "strapiId": 29522,
+      "updatedAt": "2026-06-09T13:02:32.279Z",
+      "productId": 660059,
+      "sku": "WC-660059-660063"
+    },
+    "660064": {
+      "strapiId": 29523,
+      "updatedAt": "2026-06-09T13:02:32.643Z",
+      "productId": 660059,
+      "sku": "WC-660059-660064"
+    },
+    "660065": {
+      "strapiId": 29524,
+      "updatedAt": "2026-06-09T13:02:33.456Z",
+      "productId": 660059,
+      "sku": "WC-660059-660065"
+    },
+    "660066": {
+      "strapiId": 29525,
+      "updatedAt": "2026-06-09T13:02:33.755Z",
+      "productId": 660059,
+      "sku": "WC-660059-660066"
+    },
+    "660067": {
+      "strapiId": 29526,
+      "updatedAt": "2026-06-09T13:02:34.270Z",
+      "productId": 660059,
+      "sku": "WC-660059-660067"
+    },
+    "660068": {
+      "strapiId": 29527,
+      "updatedAt": "2026-06-09T13:02:35.825Z",
+      "productId": 660059,
+      "sku": "WC-660059-660068"
+    },
+    "660069": {
+      "strapiId": 29528,
+      "updatedAt": "2026-06-09T13:02:36.187Z",
+      "productId": 660059,
+      "sku": "WC-660059-660069"
+    },
+    "661156": {
+      "strapiId": 29529,
+      "updatedAt": "2026-06-09T13:02:42.012Z",
+      "productId": 661152,
+      "sku": "WC-661152-661156"
+    },
+    "661157": {
+      "strapiId": 29530,
+      "updatedAt": "2026-06-09T13:02:42.294Z",
+      "productId": 661152,
+      "sku": "WC-661152-661157"
+    },
+    "661159": {
+      "strapiId": 29531,
+      "updatedAt": "2026-06-09T13:02:42.596Z",
+      "productId": 661152,
+      "sku": "WC-661152-661159"
+    },
+    "662769": {
+      "strapiId": 29532,
+      "updatedAt": "2026-06-09T13:02:46.531Z",
+      "productId": 662766,
+      "sku": "WC-662766-662769"
+    },
+    "662770": {
+      "strapiId": 29533,
+      "updatedAt": "2026-06-09T13:02:47.026Z",
+      "productId": 662766,
+      "sku": "WC-662766-662770"
+    },
+    "662771": {
+      "strapiId": 29534,
+      "updatedAt": "2026-06-09T13:02:47.305Z",
+      "productId": 662766,
+      "sku": "WC-662766-662771"
+    },
+    "662772": {
+      "strapiId": 29535,
+      "updatedAt": "2026-06-09T13:02:47.600Z",
+      "productId": 662766,
+      "sku": "WC-662766-662772"
+    },
+    "662773": {
+      "strapiId": 29536,
+      "updatedAt": "2026-06-09T13:02:47.921Z",
+      "productId": 662766,
+      "sku": "WC-662766-662773"
+    },
+    "662774": {
+      "strapiId": 29537,
+      "updatedAt": "2026-06-09T13:02:48.253Z",
+      "productId": 662766,
+      "sku": "WC-662766-662774"
+    },
+    "662775": {
+      "strapiId": 29538,
+      "updatedAt": "2026-06-09T13:02:48.549Z",
+      "productId": 662766,
+      "sku": "WC-662766-662775"
+    },
+    "662776": {
+      "strapiId": 29539,
+      "updatedAt": "2026-06-09T13:02:48.952Z",
+      "productId": 662766,
+      "sku": "WC-662766-662776"
+    },
+    "662777": {
+      "strapiId": 29540,
+      "updatedAt": "2026-06-09T13:02:49.367Z",
+      "productId": 662766,
+      "sku": "WC-662766-662777"
+    },
+    "662778": {
+      "strapiId": 29541,
+      "updatedAt": "2026-06-09T13:02:49.763Z",
+      "productId": 662766,
+      "sku": "WC-662766-662778"
+    },
+    "662779": {
+      "strapiId": 29542,
+      "updatedAt": "2026-06-09T13:02:50.035Z",
+      "productId": 662766,
+      "sku": "WC-662766-662779"
+    },
+    "662780": {
+      "strapiId": 29543,
+      "updatedAt": "2026-06-09T13:02:50.327Z",
+      "productId": 662766,
+      "sku": "WC-662766-662780"
+    },
+    "662818": {
+      "strapiId": 29544,
+      "updatedAt": "2026-06-09T13:02:54.722Z",
+      "productId": 662813,
+      "sku": "WC-662813-662818"
+    },
+    "662820": {
+      "strapiId": 29545,
+      "updatedAt": "2026-06-09T13:02:55.024Z",
+      "productId": 662813,
+      "sku": "WC-662813-662820"
+    },
+    "667410": {
+      "strapiId": 29546,
+      "updatedAt": "2026-06-09T13:02:58.256Z",
+      "productId": 667405,
+      "sku": "WC-667405-667410"
+    },
+    "667413": {
+      "strapiId": 29547,
+      "updatedAt": "2026-06-09T13:02:58.513Z",
+      "productId": 667405,
+      "sku": "WC-667405-667413"
+    },
+    "667415": {
+      "strapiId": 29548,
+      "updatedAt": "2026-06-09T13:02:58.749Z",
+      "productId": 667405,
+      "sku": "WC-667405-667415"
+    },
+    "667418": {
+      "strapiId": 29549,
+      "updatedAt": "2026-06-09T13:02:59.006Z",
+      "productId": 667405,
+      "sku": "WC-667405-667418"
+    },
+    "667420": {
+      "strapiId": 29550,
+      "updatedAt": "2026-06-09T13:02:59.312Z",
+      "productId": 667405,
+      "sku": "WC-667405-667420"
+    },
+    "667427": {
+      "strapiId": 29551,
+      "updatedAt": "2026-06-09T13:03:02.766Z",
+      "productId": 667424,
+      "sku": "WC-667424-667427"
+    },
+    "667428": {
+      "strapiId": 29552,
+      "updatedAt": "2026-06-09T13:03:03.057Z",
+      "productId": 667424,
+      "sku": "WC-667424-667428"
+    },
+    "667429": {
+      "strapiId": 29553,
+      "updatedAt": "2026-06-09T13:03:03.366Z",
+      "productId": 667424,
+      "sku": "WC-667424-667429"
+    },
+    "667430": {
+      "strapiId": 29554,
+      "updatedAt": "2026-06-09T13:03:03.790Z",
+      "productId": 667424,
+      "sku": "WC-667424-667430"
+    },
+    "667431": {
+      "strapiId": 29555,
+      "updatedAt": "2026-06-09T13:03:04.211Z",
+      "productId": 667424,
+      "sku": "WC-667424-667431"
+    },
+    "667432": {
+      "strapiId": 29556,
+      "updatedAt": "2026-06-09T13:03:04.516Z",
+      "productId": 667424,
+      "sku": "WC-667424-667432"
+    },
+    "667433": {
+      "strapiId": 29557,
+      "updatedAt": "2026-06-09T13:03:04.764Z",
+      "productId": 667424,
+      "sku": "WC-667424-667433"
+    },
+    "667434": {
+      "strapiId": 29558,
+      "updatedAt": "2026-06-09T13:03:05.045Z",
+      "productId": 667424,
+      "sku": "WC-667424-667434"
+    },
+    "668976": {
+      "strapiId": 29559,
+      "updatedAt": "2026-06-09T13:03:08.451Z",
+      "productId": 668970,
+      "sku": "WC-668970-668976"
+    },
+    "668977": {
+      "strapiId": 29560,
+      "updatedAt": "2026-06-09T13:03:08.719Z",
+      "productId": 668970,
+      "sku": "WC-668970-668977"
+    },
+    "668978": {
+      "strapiId": 29561,
+      "updatedAt": "2026-06-09T13:03:09.073Z",
+      "productId": 668970,
+      "sku": "WC-668970-668978"
+    },
+    "668979": {
+      "strapiId": 29562,
+      "updatedAt": "2026-06-09T13:03:09.325Z",
+      "productId": 668970,
+      "sku": "WC-668970-668979"
+    },
+    "668980": {
+      "strapiId": 29563,
+      "updatedAt": "2026-06-09T13:03:09.626Z",
+      "productId": 668970,
+      "sku": "WC-668970-668980"
+    },
+    "668981": {
+      "strapiId": 29564,
+      "updatedAt": "2026-06-09T13:03:09.863Z",
+      "productId": 668970,
+      "sku": "WC-668970-668981"
+    },
+    "668982": {
+      "strapiId": 29565,
+      "updatedAt": "2026-06-09T13:03:10.113Z",
+      "productId": 668970,
+      "sku": "WC-668970-668982"
+    },
+    "668983": {
+      "strapiId": 29566,
+      "updatedAt": "2026-06-09T13:03:10.992Z",
+      "productId": 668970,
+      "sku": "WC-668970-668983"
+    },
+    "668984": {
+      "strapiId": 29567,
+      "updatedAt": "2026-06-09T13:03:11.878Z",
+      "productId": 668970,
+      "sku": "WC-668970-668984"
+    },
+    "668985": {
+      "strapiId": 29568,
+      "updatedAt": "2026-06-09T13:03:12.249Z",
+      "productId": 668970,
+      "sku": "WC-668970-668985"
+    },
+    "671179": {
+      "strapiId": 29569,
+      "updatedAt": "2026-06-09T13:03:17.751Z",
+      "productId": 671178,
+      "sku": "WC-671178-671179"
+    },
+    "671180": {
+      "strapiId": 29570,
+      "updatedAt": "2026-06-09T13:03:19.813Z",
+      "productId": 671178,
+      "sku": "WC-671178-671180"
+    },
+    "671181": {
+      "strapiId": 29571,
+      "updatedAt": "2026-06-09T13:03:20.449Z",
+      "productId": 671178,
+      "sku": "WC-671178-671181"
+    },
+    "671182": {
+      "strapiId": 29572,
+      "updatedAt": "2026-06-09T13:03:21.657Z",
+      "productId": 671178,
+      "sku": "WC-671178-671182"
+    },
+    "671183": {
+      "strapiId": 29573,
+      "updatedAt": "2026-06-09T13:03:22.699Z",
+      "productId": 671178,
+      "sku": "WC-671178-671183"
+    },
+    "671184": {
+      "strapiId": 29574,
+      "updatedAt": "2026-06-09T13:03:23.169Z",
+      "productId": 671178,
+      "sku": "WC-671178-671184"
+    },
+    "672237": {
+      "strapiId": 29575,
+      "updatedAt": "2026-06-09T13:03:27.110Z",
+      "productId": 672235,
+      "sku": "WC-672235-672237"
+    },
+    "672530": {
+      "strapiId": 29576,
+      "updatedAt": "2026-06-09T13:03:31.601Z",
+      "productId": 672520,
+      "sku": "WC-672520-672530"
+    },
+    "672531": {
+      "strapiId": 29577,
+      "updatedAt": "2026-06-09T13:03:32.057Z",
+      "productId": 672520,
+      "sku": "WC-672520-672531"
+    },
+    "672532": {
+      "strapiId": 29578,
+      "updatedAt": "2026-06-09T13:03:32.497Z",
+      "productId": 672520,
+      "sku": "WC-672520-672532"
+    },
+    "672533": {
+      "strapiId": 29579,
+      "updatedAt": "2026-06-09T13:03:32.817Z",
+      "productId": 672520,
+      "sku": "WC-672520-672533"
+    },
+    "672534": {
+      "strapiId": 29580,
+      "updatedAt": "2026-06-09T13:03:33.171Z",
+      "productId": 672520,
+      "sku": "WC-672520-672534"
+    },
+    "672535": {
+      "strapiId": 29581,
+      "updatedAt": "2026-06-09T13:03:33.611Z",
+      "productId": 672520,
+      "sku": "WC-672520-672535"
+    },
+    "672536": {
+      "strapiId": 29582,
+      "updatedAt": "2026-06-09T13:03:33.963Z",
+      "productId": 672520,
+      "sku": "WC-672520-672536"
+    },
+    "672537": {
+      "strapiId": 29583,
+      "updatedAt": "2026-06-09T13:03:34.689Z",
+      "productId": 672520,
+      "sku": "WC-672520-672537"
+    },
+    "672538": {
+      "strapiId": 29584,
+      "updatedAt": "2026-06-09T13:03:35.491Z",
+      "productId": 672520,
+      "sku": "WC-672520-672538"
+    },
+    "672539": {
+      "strapiId": 29585,
+      "updatedAt": "2026-06-09T13:03:35.875Z",
+      "productId": 672520,
+      "sku": "WC-672520-672539"
+    },
+    "672540": {
+      "strapiId": 29586,
+      "updatedAt": "2026-06-09T13:03:36.708Z",
+      "productId": 672520,
+      "sku": "WC-672520-672540"
+    },
+    "672541": {
+      "strapiId": 29587,
+      "updatedAt": "2026-06-09T13:03:37.074Z",
+      "productId": 672520,
+      "sku": "WC-672520-672541"
+    },
+    "674390": {
+      "strapiId": 29588,
+      "updatedAt": "2026-06-09T13:03:40.751Z",
+      "productId": 674387,
+      "sku": "WC-674387-674390"
+    },
+    "674391": {
+      "strapiId": 29589,
+      "updatedAt": "2026-06-09T13:03:41.004Z",
+      "productId": 674387,
+      "sku": "WC-674387-674391"
+    },
+    "674392": {
+      "strapiId": 29590,
+      "updatedAt": "2026-06-09T13:03:41.243Z",
+      "productId": 674387,
+      "sku": "WC-674387-674392"
+    },
+    "674393": {
+      "strapiId": 29591,
+      "updatedAt": "2026-06-09T13:03:41.549Z",
+      "productId": 674387,
+      "sku": "WC-674387-674393"
+    },
+    "674394": {
+      "strapiId": 29592,
+      "updatedAt": "2026-06-09T13:03:41.791Z",
+      "productId": 674387,
+      "sku": "WC-674387-674394"
+    },
+    "675118": {
+      "strapiId": 29593,
+      "updatedAt": "2026-06-09T13:03:45.268Z",
+      "productId": 675113,
+      "sku": "WC-675113-675118"
+    },
+    "675127": {
+      "strapiId": 29594,
+      "updatedAt": "2026-06-09T13:03:45.664Z",
+      "productId": 675113,
+      "sku": "WC-675113-675127"
+    },
+    "675128": {
+      "strapiId": 29595,
+      "updatedAt": "2026-06-09T13:03:45.988Z",
+      "productId": 675113,
+      "sku": "WC-675113-675128"
+    },
+    "675137": {
+      "strapiId": 29596,
+      "updatedAt": "2026-06-09T13:03:46.240Z",
+      "productId": 675113,
+      "sku": "WC-675113-675137"
+    },
+    "675138": {
+      "strapiId": 29597,
+      "updatedAt": "2026-06-09T13:03:46.505Z",
+      "productId": 675113,
+      "sku": "WC-675113-675138"
+    },
+    "675139": {
+      "strapiId": 29598,
+      "updatedAt": "2026-06-09T13:03:46.767Z",
+      "productId": 675113,
+      "sku": "WC-675113-675139"
+    },
+    "675140": {
+      "strapiId": 29599,
+      "updatedAt": "2026-06-09T13:03:47.039Z",
+      "productId": 675113,
+      "sku": "WC-675113-675140"
+    },
+    "675141": {
+      "strapiId": 29600,
+      "updatedAt": "2026-06-09T13:03:47.268Z",
+      "productId": 675113,
+      "sku": "WC-675113-675141"
+    },
+    "675142": {
+      "strapiId": 29601,
+      "updatedAt": "2026-06-09T13:03:47.521Z",
+      "productId": 675113,
+      "sku": "WC-675113-675142"
+    },
+    "675143": {
+      "strapiId": 29602,
+      "updatedAt": "2026-06-09T13:03:47.766Z",
+      "productId": 675113,
+      "sku": "WC-675113-675143"
+    },
+    "675144": {
+      "strapiId": 29603,
+      "updatedAt": "2026-06-09T13:03:48.035Z",
+      "productId": 675113,
+      "sku": "WC-675113-675144"
+    },
+    "675145": {
+      "strapiId": 29604,
+      "updatedAt": "2026-06-09T13:03:48.449Z",
+      "productId": 675113,
+      "sku": "WC-675113-675145"
+    },
+    "675698": {
+      "strapiId": 29605,
+      "updatedAt": "2026-06-09T13:03:52.080Z",
+      "productId": 675697,
+      "sku": "WC-675697-675698"
+    },
+    "675699": {
+      "strapiId": 29606,
+      "updatedAt": "2026-06-09T13:03:52.315Z",
+      "productId": 675697,
+      "sku": "WC-675697-675699"
+    },
+    "675700": {
+      "strapiId": 29607,
+      "updatedAt": "2026-06-09T13:03:52.815Z",
+      "productId": 675697,
+      "sku": "WC-675697-675700"
+    },
+    "675701": {
+      "strapiId": 29608,
+      "updatedAt": "2026-06-09T13:03:53.691Z",
+      "productId": 675697,
+      "sku": "WC-675697-675701"
+    },
+    "675702": {
+      "strapiId": 29609,
+      "updatedAt": "2026-06-09T13:03:54.093Z",
+      "productId": 675697,
+      "sku": "WC-675697-675702"
+    },
+    "675703": {
+      "strapiId": 29610,
+      "updatedAt": "2026-06-09T13:03:54.912Z",
+      "productId": 675697,
+      "sku": "WC-675697-675703"
+    },
+    "675704": {
+      "strapiId": 29611,
+      "updatedAt": "2026-06-09T13:03:55.326Z",
+      "productId": 675697,
+      "sku": "WC-675697-675704"
+    },
+    "675705": {
+      "strapiId": 29612,
+      "updatedAt": "2026-06-09T13:03:55.775Z",
+      "productId": 675697,
+      "sku": "WC-675697-675705"
+    },
+    "675706": {
+      "strapiId": 29613,
+      "updatedAt": "2026-06-09T13:03:56.201Z",
+      "productId": 675697,
+      "sku": "WC-675697-675706"
+    },
+    "675707": {
+      "strapiId": 29614,
+      "updatedAt": "2026-06-09T13:03:56.772Z",
+      "productId": 675697,
+      "sku": "WC-675697-675707"
+    },
+    "675708": {
+      "strapiId": 29615,
+      "updatedAt": "2026-06-09T13:03:57.208Z",
+      "productId": 675697,
+      "sku": "WC-675697-675708"
+    },
+    "675709": {
+      "strapiId": 29616,
+      "updatedAt": "2026-06-09T13:03:57.694Z",
+      "productId": 675697,
+      "sku": "WC-675697-675709"
+    },
+    "675791": {
+      "strapiId": 29617,
+      "updatedAt": "2026-06-09T13:04:03.443Z",
+      "productId": 675720,
+      "sku": "WC-675720-675791"
+    },
+    "675792": {
+      "strapiId": 29618,
+      "updatedAt": "2026-06-09T13:04:03.941Z",
+      "productId": 675720,
+      "sku": "WC-675720-675792"
+    },
+    "675793": {
+      "strapiId": 29619,
+      "updatedAt": "2026-06-09T13:04:04.812Z",
+      "productId": 675720,
+      "sku": "WC-675720-675793"
+    },
+    "675794": {
+      "strapiId": 29620,
+      "updatedAt": "2026-06-09T13:04:05.438Z",
+      "productId": 675720,
+      "sku": "WC-675720-675794"
+    },
+    "675795": {
+      "strapiId": 29621,
+      "updatedAt": "2026-06-09T13:04:06.166Z",
+      "productId": 675720,
+      "sku": "WC-675720-675795"
+    },
+    "675796": {
+      "strapiId": 29622,
+      "updatedAt": "2026-06-09T13:04:06.773Z",
+      "productId": 675720,
+      "sku": "WC-675720-675796"
+    },
+    "675797": {
+      "strapiId": 29623,
+      "updatedAt": "2026-06-09T13:04:07.043Z",
+      "productId": 675720,
+      "sku": "WC-675720-675797"
+    },
+    "675798": {
+      "strapiId": 29624,
+      "updatedAt": "2026-06-09T13:04:07.278Z",
+      "productId": 675720,
+      "sku": "WC-675720-675798"
+    },
+    "675799": {
+      "strapiId": 29625,
+      "updatedAt": "2026-06-09T13:04:07.494Z",
+      "productId": 675720,
+      "sku": "WC-675720-675799"
+    },
+    "675800": {
+      "strapiId": 29626,
+      "updatedAt": "2026-06-09T13:04:07.728Z",
+      "productId": 675720,
+      "sku": "WC-675720-675800"
+    },
+    "675801": {
+      "strapiId": 29627,
+      "updatedAt": "2026-06-09T13:04:07.975Z",
+      "productId": 675720,
+      "sku": "WC-675720-675801"
+    },
+    "675802": {
+      "strapiId": 29628,
+      "updatedAt": "2026-06-09T13:04:08.261Z",
+      "productId": 675720,
+      "sku": "WC-675720-675802"
+    },
+    "675803": {
+      "strapiId": 29629,
+      "updatedAt": "2026-06-09T13:04:08.499Z",
+      "productId": 675720,
+      "sku": "WC-675720-675803"
+    },
+    "675804": {
+      "strapiId": 29630,
+      "updatedAt": "2026-06-09T13:04:08.767Z",
+      "productId": 675720,
+      "sku": "WC-675720-675804"
+    },
+    "675805": {
+      "strapiId": 29631,
+      "updatedAt": "2026-06-09T13:04:09.003Z",
+      "productId": 675720,
+      "sku": "WC-675720-675805"
+    },
+    "675806": {
+      "strapiId": 29632,
+      "updatedAt": "2026-06-09T13:04:09.266Z",
+      "productId": 675720,
+      "sku": "WC-675720-675806"
+    },
+    "675807": {
+      "strapiId": 29633,
+      "updatedAt": "2026-06-09T13:04:09.740Z",
+      "productId": 675720,
+      "sku": "WC-675720-675807"
+    },
+    "675808": {
+      "strapiId": 29634,
+      "updatedAt": "2026-06-09T13:04:10.154Z",
+      "productId": 675720,
+      "sku": "WC-675720-675808"
+    },
+    "676360": {
+      "strapiId": 29635,
+      "updatedAt": "2026-06-09T13:04:14.762Z",
+      "productId": 676358,
+      "sku": "WC-676358-676360"
+    },
+    "676361": {
+      "strapiId": 29636,
+      "updatedAt": "2026-06-09T13:04:15.250Z",
+      "productId": 676358,
+      "sku": "WC-676358-676361"
+    },
+    "678653": {
+      "strapiId": 29637,
+      "updatedAt": "2026-06-09T13:04:18.440Z",
+      "productId": 678639,
+      "sku": "WC-678639-678653"
+    },
+    "678659": {
+      "strapiId": 29638,
+      "updatedAt": "2026-06-09T13:04:18.710Z",
+      "productId": 678639,
+      "sku": "WC-678639-678659"
+    },
+    "678719": {
+      "strapiId": 29639,
+      "updatedAt": "2026-06-09T13:04:21.371Z",
+      "productId": 678709,
+      "sku": "WC-678709-678719"
+    },
+    "678720": {
+      "strapiId": 29640,
+      "updatedAt": "2026-06-09T13:04:21.790Z",
+      "productId": 678709,
+      "sku": "WC-678709-678720"
+    },
+    "678721": {
+      "strapiId": 29641,
+      "updatedAt": "2026-06-09T13:04:22.519Z",
+      "productId": 678709,
+      "sku": "WC-678709-678721"
+    },
+    "678722": {
+      "strapiId": 29642,
+      "updatedAt": "2026-06-09T13:04:22.857Z",
+      "productId": 678709,
+      "sku": "WC-678709-678722"
+    },
+    "678723": {
+      "strapiId": 29643,
+      "updatedAt": "2026-06-09T13:04:23.163Z",
+      "productId": 678709,
+      "sku": "WC-678709-678723"
+    },
+    "678724": {
+      "strapiId": 29644,
+      "updatedAt": "2026-06-09T13:04:23.441Z",
+      "productId": 678709,
+      "sku": "WC-678709-678724"
+    },
+    "678725": {
+      "strapiId": 29645,
+      "updatedAt": "2026-06-09T13:04:23.690Z",
+      "productId": 678709,
+      "sku": "WC-678709-678725"
+    },
+    "678726": {
+      "strapiId": 29646,
+      "updatedAt": "2026-06-09T13:04:24.054Z",
+      "productId": 678709,
+      "sku": "WC-678709-678726"
+    },
+    "678727": {
+      "strapiId": 29647,
+      "updatedAt": "2026-06-09T13:04:24.518Z",
+      "productId": 678709,
+      "sku": "WC-678709-678727"
+    },
+    "678728": {
+      "strapiId": 29648,
+      "updatedAt": "2026-06-09T13:04:25.124Z",
+      "productId": 678709,
+      "sku": "WC-678709-678728"
+    },
+    "678729": {
+      "strapiId": 29649,
+      "updatedAt": "2026-06-09T13:04:26.020Z",
+      "productId": 678709,
+      "sku": "WC-678709-678729"
+    },
+    "678730": {
+      "strapiId": 29650,
+      "updatedAt": "2026-06-09T13:04:26.533Z",
+      "productId": 678709,
+      "sku": "WC-678709-678730"
+    },
+    "678731": {
+      "strapiId": 29651,
+      "updatedAt": "2026-06-09T13:04:26.975Z",
+      "productId": 678709,
+      "sku": "WC-678709-678731"
+    },
+    "678732": {
+      "strapiId": 29652,
+      "updatedAt": "2026-06-09T13:04:27.350Z",
+      "productId": 678709,
+      "sku": "WC-678709-678732"
+    },
+    "679192": {
+      "strapiId": 29653,
+      "updatedAt": "2026-06-09T13:04:32.293Z",
+      "productId": 679186,
+      "sku": "WC-679186-679192"
+    },
+    "679193": {
+      "strapiId": 29654,
+      "updatedAt": "2026-06-09T13:04:32.728Z",
+      "productId": 679186,
+      "sku": "WC-679186-679193"
+    },
+    "679194": {
+      "strapiId": 29655,
+      "updatedAt": "2026-06-09T13:04:33.209Z",
+      "productId": 679186,
+      "sku": "WC-679186-679194"
+    },
+    "679195": {
+      "strapiId": 29656,
+      "updatedAt": "2026-06-09T13:04:33.691Z",
+      "productId": 679186,
+      "sku": "WC-679186-679195"
+    },
+    "679196": {
+      "strapiId": 29657,
+      "updatedAt": "2026-06-09T13:04:34.448Z",
+      "productId": 679186,
+      "sku": "WC-679186-679196"
+    },
+    "679197": {
+      "strapiId": 29658,
+      "updatedAt": "2026-06-09T13:04:35.068Z",
+      "productId": 679186,
+      "sku": "WC-679186-679197"
+    },
+    "679198": {
+      "strapiId": 29659,
+      "updatedAt": "2026-06-09T13:04:35.354Z",
+      "productId": 679186,
+      "sku": "WC-679186-679198"
+    },
+    "679199": {
+      "strapiId": 29660,
+      "updatedAt": "2026-06-09T13:04:35.962Z",
+      "productId": 679186,
+      "sku": "WC-679186-679199"
+    },
+    "679200": {
+      "strapiId": 29661,
+      "updatedAt": "2026-06-09T13:04:36.692Z",
+      "productId": 679186,
+      "sku": "WC-679186-679200"
+    },
+    "679201": {
+      "strapiId": 29662,
+      "updatedAt": "2026-06-09T13:04:37.956Z",
+      "productId": 679186,
+      "sku": "WC-679186-679201"
+    },
+    "679202": {
+      "strapiId": 29663,
+      "updatedAt": "2026-06-09T13:04:38.478Z",
+      "productId": 679186,
+      "sku": "WC-679186-679202"
+    },
+    "679203": {
+      "strapiId": 29664,
+      "updatedAt": "2026-06-09T13:04:38.764Z",
+      "productId": 679186,
+      "sku": "WC-679186-679203"
+    },
+    "679204": {
+      "strapiId": 29665,
+      "updatedAt": "2026-06-09T13:04:39.198Z",
+      "productId": 679186,
+      "sku": "WC-679186-679204"
+    },
+    "679205": {
+      "strapiId": 29666,
+      "updatedAt": "2026-06-09T13:04:39.472Z",
+      "productId": 679186,
+      "sku": "WC-679186-679205"
+    },
+    "679206": {
+      "strapiId": 29667,
+      "updatedAt": "2026-06-09T13:04:39.725Z",
+      "productId": 679186,
+      "sku": "WC-679186-679206"
+    },
+    "679207": {
+      "strapiId": 29668,
+      "updatedAt": "2026-06-09T13:04:39.973Z",
+      "productId": 679186,
+      "sku": "WC-679186-679207"
+    },
+    "679208": {
+      "strapiId": 29669,
+      "updatedAt": "2026-06-09T13:04:40.228Z",
+      "productId": 679186,
+      "sku": "WC-679186-679208"
+    },
+    "679209": {
+      "strapiId": 29670,
+      "updatedAt": "2026-06-09T13:04:40.461Z",
+      "productId": 679186,
+      "sku": "WC-679186-679209"
+    },
+    "679210": {
+      "strapiId": 29671,
+      "updatedAt": "2026-06-09T13:04:40.743Z",
+      "productId": 679186,
+      "sku": "WC-679186-679210"
+    },
+    "679211": {
+      "strapiId": 29672,
+      "updatedAt": "2026-06-09T13:04:40.979Z",
+      "productId": 679186,
+      "sku": "WC-679186-679211"
+    },
+    "679212": {
+      "strapiId": 29673,
+      "updatedAt": "2026-06-09T13:04:41.259Z",
+      "productId": 679186,
+      "sku": "WC-679186-679212"
+    },
+    "679213": {
+      "strapiId": 29674,
+      "updatedAt": "2026-06-09T13:04:41.646Z",
+      "productId": 679186,
+      "sku": "WC-679186-679213"
+    },
+    "679214": {
+      "strapiId": 29675,
+      "updatedAt": "2026-06-09T13:04:42.022Z",
+      "productId": 679186,
+      "sku": "WC-679186-679214"
+    },
+    "679215": {
+      "strapiId": 29676,
+      "updatedAt": "2026-06-09T13:04:42.303Z",
+      "productId": 679186,
+      "sku": "WC-679186-679215"
+    },
+    "679216": {
+      "strapiId": 29677,
+      "updatedAt": "2026-06-09T13:04:42.608Z",
+      "productId": 679186,
+      "sku": "WC-679186-679216"
+    },
+    "679217": {
+      "strapiId": 29678,
+      "updatedAt": "2026-06-09T13:04:42.937Z",
+      "productId": 679186,
+      "sku": "WC-679186-679217"
+    },
+    "679218": {
+      "strapiId": 29679,
+      "updatedAt": "2026-06-09T13:04:43.207Z",
+      "productId": 679186,
+      "sku": "WC-679186-679218"
+    },
+    "679219": {
+      "strapiId": 29680,
+      "updatedAt": "2026-06-09T13:04:43.463Z",
+      "productId": 679186,
+      "sku": "WC-679186-679219"
+    },
+    "679220": {
+      "strapiId": 29681,
+      "updatedAt": "2026-06-09T13:04:43.690Z",
+      "productId": 679186,
+      "sku": "WC-679186-679220"
+    },
+    "679221": {
+      "strapiId": 29682,
+      "updatedAt": "2026-06-09T13:04:43.942Z",
+      "productId": 679186,
+      "sku": "WC-679186-679221"
+    },
+    "679222": {
+      "strapiId": 29683,
+      "updatedAt": "2026-06-09T13:04:44.188Z",
+      "productId": 679186,
+      "sku": "WC-679186-679222"
+    },
+    "679223": {
+      "strapiId": 29684,
+      "updatedAt": "2026-06-09T13:04:44.442Z",
+      "productId": 679186,
+      "sku": "WC-679186-679223"
+    },
+    "679224": {
+      "strapiId": 29685,
+      "updatedAt": "2026-06-09T13:04:44.678Z",
+      "productId": 679186,
+      "sku": "WC-679186-679224"
+    },
+    "679225": {
+      "strapiId": 29686,
+      "updatedAt": "2026-06-09T13:04:44.925Z",
+      "productId": 679186,
+      "sku": "WC-679186-679225"
+    },
+    "680006": {
+      "strapiId": 29687,
+      "updatedAt": "2026-06-09T13:04:49.008Z",
+      "productId": 679957,
+      "sku": "WC-679957-680006"
+    },
+    "680008": {
+      "strapiId": 29688,
+      "updatedAt": "2026-06-09T13:04:49.483Z",
+      "productId": 679957,
+      "sku": "WC-679957-680008"
+    },
+    "680012": {
+      "strapiId": 29689,
+      "updatedAt": "2026-06-09T13:04:49.833Z",
+      "productId": 679957,
+      "sku": "WC-679957-680012"
+    },
+    "680013": {
+      "strapiId": 29690,
+      "updatedAt": "2026-06-09T13:04:50.164Z",
+      "productId": 679957,
+      "sku": "WC-679957-680013"
+    },
+    "680014": {
+      "strapiId": 29691,
+      "updatedAt": "2026-06-09T13:04:50.597Z",
+      "productId": 679957,
+      "sku": "WC-679957-680014"
+    },
+    "680015": {
+      "strapiId": 29692,
+      "updatedAt": "2026-06-09T13:04:50.883Z",
+      "productId": 679957,
+      "sku": "WC-679957-680015"
+    },
+    "680016": {
+      "strapiId": 29693,
+      "updatedAt": "2026-06-09T13:04:51.116Z",
+      "productId": 679957,
+      "sku": "WC-679957-680016"
+    },
+    "680191": {
+      "strapiId": 29694,
+      "updatedAt": "2026-06-09T13:04:54.937Z",
+      "productId": 680189,
+      "sku": "WC-680189-680191"
+    },
+    "680192": {
+      "strapiId": 29695,
+      "updatedAt": "2026-06-09T13:04:56.122Z",
+      "productId": 680189,
+      "sku": "WC-680189-680192"
+    },
+    "680193": {
+      "strapiId": 29696,
+      "updatedAt": "2026-06-09T13:04:56.509Z",
+      "productId": 680189,
+      "sku": "WC-680189-680193"
+    },
+    "680194": {
+      "strapiId": 29697,
+      "updatedAt": "2026-06-09T13:04:57.202Z",
+      "productId": 680189,
+      "sku": "WC-680189-680194"
+    },
+    "680195": {
+      "strapiId": 29698,
+      "updatedAt": "2026-06-09T13:04:58.012Z",
+      "productId": 680189,
+      "sku": "WC-680189-680195"
+    },
+    "680196": {
+      "strapiId": 29699,
+      "updatedAt": "2026-06-09T13:04:58.481Z",
+      "productId": 680189,
+      "sku": "WC-680189-680196"
+    },
+    "680197": {
+      "strapiId": 29700,
+      "updatedAt": "2026-06-09T13:04:58.836Z",
+      "productId": 680189,
+      "sku": "WC-680189-680197"
+    },
+    "680198": {
+      "strapiId": 29701,
+      "updatedAt": "2026-06-09T13:04:59.073Z",
+      "productId": 680189,
+      "sku": "WC-680189-680198"
+    },
+    "680199": {
+      "strapiId": 29702,
+      "updatedAt": "2026-06-09T13:04:59.302Z",
+      "productId": 680189,
+      "sku": "WC-680189-680199"
+    },
+    "680200": {
+      "strapiId": 29703,
+      "updatedAt": "2026-06-09T13:04:59.598Z",
+      "productId": 680189,
+      "sku": "WC-680189-680200"
+    },
+    "680201": {
+      "strapiId": 29704,
+      "updatedAt": "2026-06-09T13:04:59.858Z",
+      "productId": 680189,
+      "sku": "WC-680189-680201"
+    },
+    "680202": {
+      "strapiId": 29705,
+      "updatedAt": "2026-06-09T13:05:00.142Z",
+      "productId": 680189,
+      "sku": "WC-680189-680202"
+    },
+    "680203": {
+      "strapiId": 29706,
+      "updatedAt": "2026-06-09T13:05:00.563Z",
+      "productId": 680189,
+      "sku": "WC-680189-680203"
+    },
+    "680204": {
+      "strapiId": 29707,
+      "updatedAt": "2026-06-09T13:05:01.347Z",
+      "productId": 680189,
+      "sku": "WC-680189-680204"
+    },
+    "680205": {
+      "strapiId": 29708,
+      "updatedAt": "2026-06-09T13:05:01.662Z",
+      "productId": 680189,
+      "sku": "WC-680189-680205"
+    },
+    "680206": {
+      "strapiId": 29709,
+      "updatedAt": "2026-06-09T13:05:01.916Z",
+      "productId": 680189,
+      "sku": "WC-680189-680206"
+    },
+    "682784": {
+      "strapiId": 29714,
+      "updatedAt": "2026-06-09T13:05:10.016Z",
+      "productId": 682769,
+      "sku": "WC-682769-682784"
+    },
+    "683384": {
+      "strapiId": 29715,
+      "updatedAt": "2026-06-09T13:05:14.048Z",
+      "productId": 683381,
+      "sku": "WC-683381-683384"
+    },
+    "683385": {
+      "strapiId": 29716,
+      "updatedAt": "2026-06-09T13:05:14.289Z",
+      "productId": 683381,
+      "sku": "WC-683381-683385"
+    },
+    "683386": {
+      "strapiId": 29717,
+      "updatedAt": "2026-06-09T13:05:14.596Z",
+      "productId": 683381,
+      "sku": "WC-683381-683386"
+    },
+    "683387": {
+      "strapiId": 29718,
+      "updatedAt": "2026-06-09T13:05:14.847Z",
+      "productId": 683381,
+      "sku": "WC-683381-683387"
+    },
+    "683388": {
+      "strapiId": 29719,
+      "updatedAt": "2026-06-09T13:05:15.098Z",
+      "productId": 683381,
+      "sku": "WC-683381-683388"
+    },
+    "683389": {
+      "strapiId": 29720,
+      "updatedAt": "2026-06-09T13:05:15.328Z",
+      "productId": 683381,
+      "sku": "WC-683381-683389"
+    },
+    "683390": {
+      "strapiId": 29721,
+      "updatedAt": "2026-06-09T13:05:15.609Z",
+      "productId": 683381,
+      "sku": "WC-683381-683390"
+    },
+    "683391": {
+      "strapiId": 29722,
+      "updatedAt": "2026-06-09T13:05:15.954Z",
+      "productId": 683381,
+      "sku": "WC-683381-683391"
+    },
+    "683392": {
+      "strapiId": 29723,
+      "updatedAt": "2026-06-09T13:05:16.206Z",
+      "productId": 683381,
+      "sku": "WC-683381-683392"
+    },
+    "683393": {
+      "strapiId": 29724,
+      "updatedAt": "2026-06-09T13:05:16.510Z",
+      "productId": 683381,
+      "sku": "WC-683381-683393"
+    },
+    "683394": {
+      "strapiId": 29725,
+      "updatedAt": "2026-06-09T13:05:17.047Z",
+      "productId": 683381,
+      "sku": "WC-683381-683394"
+    },
+    "683395": {
+      "strapiId": 29726,
+      "updatedAt": "2026-06-09T13:05:17.299Z",
+      "productId": 683381,
+      "sku": "WC-683381-683395"
+    },
+    "683808": {
+      "strapiId": 29727,
+      "updatedAt": "2026-06-09T13:05:20.716Z",
+      "productId": 683799,
+      "sku": "WC-683799-683808"
+    },
+    "683912": {
+      "strapiId": 29728,
+      "updatedAt": "2026-06-09T13:05:24.028Z",
+      "productId": 683910,
+      "sku": "WC-683910-683912"
+    },
+    "683913": {
+      "strapiId": 29729,
+      "updatedAt": "2026-06-09T13:05:24.312Z",
+      "productId": 683910,
+      "sku": "WC-683910-683913"
+    },
+    "683914": {
+      "strapiId": 29730,
+      "updatedAt": "2026-06-09T13:05:24.671Z",
+      "productId": 683910,
+      "sku": "WC-683910-683914"
+    },
+    "683916": {
+      "strapiId": 29731,
+      "updatedAt": "2026-06-09T13:05:24.970Z",
+      "productId": 683910,
+      "sku": "WC-683910-683916"
+    },
+    "683917": {
+      "strapiId": 29732,
+      "updatedAt": "2026-06-09T13:05:25.228Z",
+      "productId": 683910,
+      "sku": "WC-683910-683917"
+    },
+    "683918": {
+      "strapiId": 29733,
+      "updatedAt": "2026-06-09T13:05:25.521Z",
+      "productId": 683910,
+      "sku": "WC-683910-683918"
+    },
+    "683919": {
+      "strapiId": 29734,
+      "updatedAt": "2026-06-09T13:05:25.758Z",
+      "productId": 683910,
+      "sku": "WC-683910-683919"
+    },
+    "684171": {
+      "strapiId": 29736,
+      "updatedAt": "2026-06-09T13:05:29.859Z",
+      "productId": 684170,
+      "sku": "WC-684170-684171"
+    },
+    "684172": {
+      "strapiId": 29737,
+      "updatedAt": "2026-06-09T13:05:30.109Z",
+      "productId": 684170,
+      "sku": "WC-684170-684172"
+    },
+    "684173": {
+      "strapiId": 29738,
+      "updatedAt": "2026-06-09T13:05:30.348Z",
+      "productId": 684170,
+      "sku": "WC-684170-684173"
+    },
+    "684174": {
+      "strapiId": 29739,
+      "updatedAt": "2026-06-09T13:05:30.617Z",
+      "productId": 684170,
+      "sku": "WC-684170-684174"
+    },
+    "684175": {
+      "strapiId": 29740,
+      "updatedAt": "2026-06-09T13:05:30.850Z",
+      "productId": 684170,
+      "sku": "WC-684170-684175"
+    },
+    "684176": {
+      "strapiId": 29741,
+      "updatedAt": "2026-06-09T13:05:31.097Z",
+      "productId": 684170,
+      "sku": "WC-684170-684176"
+    },
+    "684177": {
+      "strapiId": 29742,
+      "updatedAt": "2026-06-09T13:05:31.362Z",
+      "productId": 684170,
+      "sku": "WC-684170-684177"
+    },
+    "684178": {
+      "strapiId": 29743,
+      "updatedAt": "2026-06-09T13:05:31.632Z",
+      "productId": 684170,
+      "sku": "WC-684170-684178"
+    },
+    "684179": {
+      "strapiId": 29744,
+      "updatedAt": "2026-06-09T13:05:31.895Z",
+      "productId": 684170,
+      "sku": "WC-684170-684179"
+    },
+    "684180": {
+      "strapiId": 29745,
+      "updatedAt": "2026-06-09T13:05:32.209Z",
+      "productId": 684170,
+      "sku": "WC-684170-684180"
+    },
+    "684181": {
+      "strapiId": 29746,
+      "updatedAt": "2026-06-09T13:05:32.542Z",
+      "productId": 684170,
+      "sku": "WC-684170-684181"
+    },
+    "684182": {
+      "strapiId": 29747,
+      "updatedAt": "2026-06-09T13:05:32.929Z",
+      "productId": 684170,
+      "sku": "WC-684170-684182"
+    },
+    "685382": {
+      "strapiId": 29748,
+      "updatedAt": "2026-06-09T13:05:36.819Z",
+      "productId": 685354,
+      "sku": "WC-685354-685382"
+    },
+    "685702": {
+      "strapiId": 29754,
+      "updatedAt": "2026-06-09T13:05:46.653Z",
+      "productId": 685698,
+      "sku": "WC-685698-685702"
+    },
+    "685704": {
+      "strapiId": 29755,
+      "updatedAt": "2026-06-09T13:05:47.081Z",
+      "productId": 685698,
+      "sku": "WC-685698-685704"
+    },
+    "685705": {
+      "strapiId": 29756,
+      "updatedAt": "2026-06-09T13:05:47.443Z",
+      "productId": 685698,
+      "sku": "WC-685698-685705"
+    },
+    "685707": {
+      "strapiId": 29757,
+      "updatedAt": "2026-06-09T13:05:47.834Z",
+      "productId": 685698,
+      "sku": "WC-685698-685707"
+    },
+    "685709": {
+      "strapiId": 29758,
+      "updatedAt": "2026-06-09T13:05:48.058Z",
+      "productId": 685698,
+      "sku": "WC-685698-685709"
+    },
+    "685711": {
+      "strapiId": 29759,
+      "updatedAt": "2026-06-09T13:05:48.293Z",
+      "productId": 685698,
+      "sku": "WC-685698-685711"
+    },
+    "685712": {
+      "strapiId": 29760,
+      "updatedAt": "2026-06-09T13:05:48.561Z",
+      "productId": 685698,
+      "sku": "WC-685698-685712"
+    },
+    "685718": {
+      "strapiId": 29761,
+      "updatedAt": "2026-06-09T13:05:48.839Z",
+      "productId": 685698,
+      "sku": "WC-685698-685718"
+    },
+    "685720": {
+      "strapiId": 29762,
+      "updatedAt": "2026-06-09T13:05:49.243Z",
+      "productId": 685698,
+      "sku": "WC-685698-685720"
+    },
+    "685721": {
+      "strapiId": 29763,
+      "updatedAt": "2026-06-09T13:05:49.475Z",
+      "productId": 685698,
+      "sku": "WC-685698-685721"
+    },
+    "685722": {
+      "strapiId": 29764,
+      "updatedAt": "2026-06-09T13:05:49.714Z",
+      "productId": 685698,
+      "sku": "WC-685698-685722"
+    },
+    "685723": {
+      "strapiId": 29765,
+      "updatedAt": "2026-06-09T13:05:50.011Z",
+      "productId": 685698,
+      "sku": "WC-685698-685723"
+    },
+    "685724": {
+      "strapiId": 29766,
+      "updatedAt": "2026-06-09T13:05:50.256Z",
+      "productId": 685698,
+      "sku": "WC-685698-685724"
+    },
+    "685725": {
+      "strapiId": 29767,
+      "updatedAt": "2026-06-09T13:05:50.492Z",
+      "productId": 685698,
+      "sku": "WC-685698-685725"
+    },
+    "685726": {
+      "strapiId": 29768,
+      "updatedAt": "2026-06-09T13:05:50.729Z",
+      "productId": 685698,
+      "sku": "WC-685698-685726"
+    },
+    "685730": {
+      "strapiId": 29769,
+      "updatedAt": "2026-06-09T13:05:50.999Z",
+      "productId": 685698,
+      "sku": "WC-685698-685730"
+    },
+    "685732": {
+      "strapiId": 29770,
+      "updatedAt": "2026-06-09T13:05:51.267Z",
+      "productId": 685698,
+      "sku": "WC-685698-685732"
+    },
+    "686285": {
+      "strapiId": 29771,
+      "updatedAt": "2026-06-09T13:05:54.910Z",
+      "productId": 686279,
+      "sku": "WC-686279-686285"
+    },
+    "686286": {
+      "strapiId": 29772,
+      "updatedAt": "2026-06-09T13:05:55.188Z",
+      "productId": 686279,
+      "sku": "WC-686279-686286"
+    },
+    "686287": {
+      "strapiId": 29773,
+      "updatedAt": "2026-06-09T13:05:55.487Z",
+      "productId": 686279,
+      "sku": "WC-686279-686287"
+    },
+    "686288": {
+      "strapiId": 29774,
+      "updatedAt": "2026-06-09T13:05:55.738Z",
+      "productId": 686279,
+      "sku": "WC-686279-686288"
+    },
+    "686289": {
+      "strapiId": 29775,
+      "updatedAt": "2026-06-09T13:05:56.013Z",
+      "productId": 686279,
+      "sku": "WC-686279-686289"
+    },
+    "686290": {
+      "strapiId": 29776,
+      "updatedAt": "2026-06-09T13:05:56.272Z",
+      "productId": 686279,
+      "sku": "WC-686279-686290"
+    },
+    "686291": {
+      "strapiId": 29777,
+      "updatedAt": "2026-06-09T13:05:56.998Z",
+      "productId": 686279,
+      "sku": "WC-686279-686291"
+    },
+    "686292": {
+      "strapiId": 29778,
+      "updatedAt": "2026-06-09T13:05:57.259Z",
+      "productId": 686279,
+      "sku": "WC-686279-686292"
+    },
+    "686293": {
+      "strapiId": 29779,
+      "updatedAt": "2026-06-09T13:05:57.520Z",
+      "productId": 686279,
+      "sku": "WC-686279-686293"
+    },
+    "686294": {
+      "strapiId": 29780,
+      "updatedAt": "2026-06-09T13:05:57.758Z",
+      "productId": 686279,
+      "sku": "WC-686279-686294"
+    },
+    "686295": {
+      "strapiId": 29781,
+      "updatedAt": "2026-06-09T13:05:57.998Z",
+      "productId": 686279,
+      "sku": "WC-686279-686295"
+    },
+    "686296": {
+      "strapiId": 29782,
+      "updatedAt": "2026-06-09T13:05:58.258Z",
+      "productId": 686279,
+      "sku": "WC-686279-686296"
+    },
+    "686297": {
+      "strapiId": 29783,
+      "updatedAt": "2026-06-09T13:05:58.491Z",
+      "productId": 686279,
+      "sku": "WC-686279-686297"
+    },
+    "686298": {
+      "strapiId": 29784,
+      "updatedAt": "2026-06-09T13:05:58.983Z",
+      "productId": 686279,
+      "sku": "WC-686279-686298"
+    },
+    "686299": {
+      "strapiId": 29785,
+      "updatedAt": "2026-06-09T13:05:59.208Z",
+      "productId": 686279,
+      "sku": "WC-686279-686299"
+    },
+    "686300": {
+      "strapiId": 29786,
+      "updatedAt": "2026-06-09T13:05:59.476Z",
+      "productId": 686279,
+      "sku": "WC-686279-686300"
+    },
+    "686301": {
+      "strapiId": 29787,
+      "updatedAt": "2026-06-09T13:05:59.726Z",
+      "productId": 686279,
+      "sku": "WC-686279-686301"
+    },
+    "686302": {
+      "strapiId": 29788,
+      "updatedAt": "2026-06-09T13:05:59.972Z",
+      "productId": 686279,
+      "sku": "WC-686279-686302"
+    },
+    "686303": {
+      "strapiId": 29789,
+      "updatedAt": "2026-06-09T13:06:00.198Z",
+      "productId": 686279,
+      "sku": "WC-686279-686303"
+    },
+    "686304": {
+      "strapiId": 29790,
+      "updatedAt": "2026-06-09T13:06:00.442Z",
+      "productId": 686279,
+      "sku": "WC-686279-686304"
+    },
+    "686804": {
+      "strapiId": 29791,
+      "updatedAt": "2026-06-09T13:06:03.751Z",
+      "productId": 686795,
+      "sku": "WC-686795-686804"
+    },
+    "688113": {
+      "strapiId": 29792,
+      "updatedAt": "2026-06-09T13:06:07.350Z",
+      "productId": 688112,
+      "sku": "WC-688112-688113"
+    },
+    "688114": {
+      "strapiId": 29793,
+      "updatedAt": "2026-06-09T13:06:07.904Z",
+      "productId": 688112,
+      "sku": "WC-688112-688114"
+    },
+    "688115": {
+      "strapiId": 29794,
+      "updatedAt": "2026-06-09T13:06:08.346Z",
+      "productId": 688112,
+      "sku": "WC-688112-688115"
+    },
+    "688116": {
+      "strapiId": 29795,
+      "updatedAt": "2026-06-09T13:06:08.630Z",
+      "productId": 688112,
+      "sku": "WC-688112-688116"
+    },
+    "688117": {
+      "strapiId": 29796,
+      "updatedAt": "2026-06-09T13:06:08.887Z",
+      "productId": 688112,
+      "sku": "WC-688112-688117"
+    },
+    "688118": {
+      "strapiId": 29797,
+      "updatedAt": "2026-06-09T13:06:09.132Z",
+      "productId": 688112,
+      "sku": "WC-688112-688118"
+    },
+    "688119": {
+      "strapiId": 29798,
+      "updatedAt": "2026-06-09T13:06:09.441Z",
+      "productId": 688112,
+      "sku": "WC-688112-688119"
+    },
+    "688120": {
+      "strapiId": 29799,
+      "updatedAt": "2026-06-09T13:06:09.688Z",
+      "productId": 688112,
+      "sku": "WC-688112-688120"
+    },
+    "688121": {
+      "strapiId": 29800,
+      "updatedAt": "2026-06-09T13:06:09.963Z",
+      "productId": 688112,
+      "sku": "WC-688112-688121"
+    },
+    "688122": {
+      "strapiId": 29801,
+      "updatedAt": "2026-06-09T13:06:10.318Z",
+      "productId": 688112,
+      "sku": "WC-688112-688122"
+    },
+    "688136": {
+      "strapiId": 29802,
+      "updatedAt": "2026-06-09T13:06:13.685Z",
+      "productId": 688133,
+      "sku": "WC-688133-688136"
+    },
+    "688137": {
+      "strapiId": 29803,
+      "updatedAt": "2026-06-09T13:06:13.976Z",
+      "productId": 688133,
+      "sku": "WC-688133-688137"
+    },
+    "688138": {
+      "strapiId": 29804,
+      "updatedAt": "2026-06-09T13:06:14.438Z",
+      "productId": 688133,
+      "sku": "WC-688133-688138"
+    },
+    "688139": {
+      "strapiId": 29805,
+      "updatedAt": "2026-06-09T13:06:14.775Z",
+      "productId": 688133,
+      "sku": "WC-688133-688139"
+    },
+    "688346": {
+      "strapiId": 29806,
+      "updatedAt": "2026-06-09T13:06:18.010Z",
+      "productId": 688322,
+      "sku": "WC-688322-688346"
+    },
+    "688417": {
+      "strapiId": 29810,
+      "updatedAt": "2026-06-09T13:06:22.708Z",
+      "productId": 688412,
+      "sku": "WC-688412-688417"
+    },
+    "690475": {
+      "strapiId": 29811,
+      "updatedAt": "2026-06-09T13:06:26.064Z",
+      "productId": 690466,
+      "sku": "WC-690466-690475"
+    },
+    "690479": {
+      "strapiId": 29812,
+      "updatedAt": "2026-06-09T13:06:28.982Z",
+      "productId": 690477,
+      "sku": "WC-690477-690479"
+    },
+    "691373": {
+      "strapiId": 29814,
+      "updatedAt": "2026-06-09T13:06:35.185Z",
+      "productId": 691367,
+      "sku": "WC-691367-691373"
+    },
+    "691418": {
+      "strapiId": 29815,
+      "updatedAt": "2026-06-09T13:06:38.271Z",
+      "productId": 691396,
+      "sku": "WC-691396-691418"
+    },
+    "691877": {
+      "strapiId": 29813,
+      "updatedAt": "2026-06-09T13:06:32.169Z",
+      "productId": 691347,
+      "sku": "WC-691347-691877"
+    },
+    "691979": {
+      "strapiId": 29816,
+      "updatedAt": "2026-06-09T13:06:41.359Z",
+      "productId": 691961,
+      "sku": "WC-691961-691979"
+    },
+    "693971": {
+      "strapiId": 29837,
+      "updatedAt": "2026-06-09T13:06:58.267Z",
+      "productId": 693968,
+      "sku": "WC-693968-693971"
+    },
+    "693972": {
+      "strapiId": 29838,
+      "updatedAt": "2026-06-09T13:06:58.553Z",
+      "productId": 693968,
+      "sku": "WC-693968-693972"
+    },
+    "693973": {
+      "strapiId": 29839,
+      "updatedAt": "2026-06-09T13:06:58.902Z",
+      "productId": 693968,
+      "sku": "WC-693968-693973"
+    },
+    "693974": {
+      "strapiId": 29840,
+      "updatedAt": "2026-06-09T13:06:59.156Z",
+      "productId": 693968,
+      "sku": "WC-693968-693974"
+    },
+    "693975": {
+      "strapiId": 29841,
+      "updatedAt": "2026-06-09T13:06:59.641Z",
+      "productId": 693968,
+      "sku": "WC-693968-693975"
+    },
+    "693976": {
+      "strapiId": 29842,
+      "updatedAt": "2026-06-09T13:06:59.857Z",
+      "productId": 693968,
+      "sku": "WC-693968-693976"
+    },
+    "693977": {
+      "strapiId": 29843,
+      "updatedAt": "2026-06-09T13:07:00.089Z",
+      "productId": 693968,
+      "sku": "WC-693968-693977"
+    },
+    "693978": {
+      "strapiId": 29844,
+      "updatedAt": "2026-06-09T13:07:00.335Z",
+      "productId": 693968,
+      "sku": "WC-693968-693978"
+    },
+    "693979": {
+      "strapiId": 29845,
+      "updatedAt": "2026-06-09T13:07:00.877Z",
+      "productId": 693968,
+      "sku": "WC-693968-693979"
+    },
+    "693980": {
+      "strapiId": 29846,
+      "updatedAt": "2026-06-09T13:07:01.122Z",
+      "productId": 693968,
+      "sku": "WC-693968-693980"
+    },
+    "693981": {
+      "strapiId": 29847,
+      "updatedAt": "2026-06-09T13:07:01.365Z",
+      "productId": 693968,
+      "sku": "WC-693968-693981"
+    },
+    "693982": {
+      "strapiId": 29848,
+      "updatedAt": "2026-06-09T13:07:01.671Z",
+      "productId": 693968,
+      "sku": "WC-693968-693982"
+    },
+    "693983": {
+      "strapiId": 29849,
+      "updatedAt": "2026-06-09T13:07:02.005Z",
+      "productId": 693968,
+      "sku": "WC-693968-693983"
+    },
+    "693984": {
+      "strapiId": 29850,
+      "updatedAt": "2026-06-09T13:07:02.314Z",
+      "productId": 693968,
+      "sku": "WC-693968-693984"
+    },
+    "693985": {
+      "strapiId": 29851,
+      "updatedAt": "2026-06-09T13:07:03.362Z",
+      "productId": 693968,
+      "sku": "WC-693968-693985"
+    },
+    "693986": {
+      "strapiId": 29852,
+      "updatedAt": "2026-06-09T13:07:03.677Z",
+      "productId": 693968,
+      "sku": "WC-693968-693986"
+    },
+    "693987": {
+      "strapiId": 29853,
+      "updatedAt": "2026-06-09T13:07:04.166Z",
+      "productId": 693968,
+      "sku": "WC-693968-693987"
+    },
+    "693988": {
+      "strapiId": 29854,
+      "updatedAt": "2026-06-09T13:07:04.593Z",
+      "productId": 693968,
+      "sku": "WC-693968-693988"
+    },
+    "693989": {
+      "strapiId": 29855,
+      "updatedAt": "2026-06-09T13:07:04.890Z",
+      "productId": 693968,
+      "sku": "WC-693968-693989"
+    },
+    "693990": {
+      "strapiId": 29856,
+      "updatedAt": "2026-06-09T13:07:05.116Z",
+      "productId": 693968,
+      "sku": "WC-693968-693990"
+    },
+    "694075": {
+      "strapiId": 29749,
+      "updatedAt": "2026-06-09T13:05:37.262Z",
+      "productId": 685354,
+      "sku": "WC-685354-694075"
+    },
+    "695329": {
+      "strapiId": 29857,
+      "updatedAt": "2026-06-09T13:07:08.191Z",
+      "productId": 695317,
+      "sku": "WC-695317-695329"
+    },
+    "695858": {
+      "strapiId": 29858,
+      "updatedAt": "2026-06-09T13:07:11.237Z",
+      "productId": 695847,
+      "sku": "WC-695847-695858"
+    },
+    "701853": {
+      "strapiId": 29859,
+      "updatedAt": "2026-06-09T13:07:14.519Z",
+      "productId": 701836,
+      "sku": "WC-701836-701853"
+    },
+    "701854": {
+      "strapiId": 29860,
+      "updatedAt": "2026-06-09T13:07:15.100Z",
+      "productId": 701836,
+      "sku": "WC-701836-701854"
+    },
+    "701855": {
+      "strapiId": 29861,
+      "updatedAt": "2026-06-09T13:07:15.438Z",
+      "productId": 701836,
+      "sku": "WC-701836-701855"
+    },
+    "701856": {
+      "strapiId": 29862,
+      "updatedAt": "2026-06-09T13:07:15.698Z",
+      "productId": 701836,
+      "sku": "WC-701836-701856"
+    },
+    "701857": {
+      "strapiId": 29863,
+      "updatedAt": "2026-06-09T13:07:15.998Z",
+      "productId": 701836,
+      "sku": "WC-701836-701857"
+    },
+    "701858": {
+      "strapiId": 29864,
+      "updatedAt": "2026-06-09T13:07:16.303Z",
+      "productId": 701836,
+      "sku": "WC-701836-701858"
+    },
+    "701859": {
+      "strapiId": 29865,
+      "updatedAt": "2026-06-09T13:07:16.711Z",
+      "productId": 701836,
+      "sku": "WC-701836-701859"
+    },
+    "701860": {
+      "strapiId": 29866,
+      "updatedAt": "2026-06-09T13:07:16.959Z",
+      "productId": 701836,
+      "sku": "WC-701836-701860"
+    },
+    "701861": {
+      "strapiId": 29867,
+      "updatedAt": "2026-06-09T13:07:17.225Z",
+      "productId": 701836,
+      "sku": "WC-701836-701861"
+    },
+    "701862": {
+      "strapiId": 29868,
+      "updatedAt": "2026-06-09T13:07:17.483Z",
+      "productId": 701836,
+      "sku": "WC-701836-701862"
+    },
+    "701863": {
+      "strapiId": 29869,
+      "updatedAt": "2026-06-09T13:07:17.736Z",
+      "productId": 701836,
+      "sku": "WC-701836-701863"
+    },
+    "701864": {
+      "strapiId": 29870,
+      "updatedAt": "2026-06-09T13:07:17.980Z",
+      "productId": 701836,
+      "sku": "WC-701836-701864"
+    },
+    "701865": {
+      "strapiId": 29871,
+      "updatedAt": "2026-06-09T13:07:18.322Z",
+      "productId": 701836,
+      "sku": "WC-701836-701865"
+    },
+    "701866": {
+      "strapiId": 29872,
+      "updatedAt": "2026-06-09T13:07:18.705Z",
+      "productId": 701836,
+      "sku": "WC-701836-701866"
+    },
+    "704944": {
+      "strapiId": 29873,
+      "updatedAt": "2026-06-09T13:07:22.460Z",
+      "productId": 704843,
+      "sku": "WC-704843-704944"
+    },
+    "704945": {
+      "strapiId": 29874,
+      "updatedAt": "2026-06-09T13:07:23.754Z",
+      "productId": 704843,
+      "sku": "WC-704843-704945"
+    },
+    "704946": {
+      "strapiId": 29875,
+      "updatedAt": "2026-06-09T13:07:24.126Z",
+      "productId": 704843,
+      "sku": "WC-704843-704946"
+    },
+    "704947": {
+      "strapiId": 29876,
+      "updatedAt": "2026-06-09T13:07:24.486Z",
+      "productId": 704843,
+      "sku": "WC-704843-704947"
+    },
+    "704948": {
+      "strapiId": 29877,
+      "updatedAt": "2026-06-09T13:07:25.132Z",
+      "productId": 704843,
+      "sku": "WC-704843-704948"
+    },
+    "704949": {
+      "strapiId": 29878,
+      "updatedAt": "2026-06-09T13:07:26.116Z",
+      "productId": 704843,
+      "sku": "WC-704843-704949"
+    },
+    "704952": {
+      "strapiId": 29879,
+      "updatedAt": "2026-06-09T13:07:27.446Z",
+      "productId": 704843,
+      "sku": "WC-704843-704952"
+    },
+    "704953": {
+      "strapiId": 29880,
+      "updatedAt": "2026-06-09T13:07:28.540Z",
+      "productId": 704843,
+      "sku": "WC-704843-704953"
+    },
+    "704954": {
+      "strapiId": 29881,
+      "updatedAt": "2026-06-09T13:07:29.222Z",
+      "productId": 704843,
+      "sku": "WC-704843-704954"
+    },
+    "704955": {
+      "strapiId": 29882,
+      "updatedAt": "2026-06-09T13:07:29.485Z",
+      "productId": 704843,
+      "sku": "WC-704843-704955"
+    },
+    "704958": {
+      "strapiId": 29883,
+      "updatedAt": "2026-06-09T13:07:29.764Z",
+      "productId": 704843,
+      "sku": "WC-704843-704958"
+    },
+    "704959": {
+      "strapiId": 29884,
+      "updatedAt": "2026-06-09T13:07:30.004Z",
+      "productId": 704843,
+      "sku": "WC-704843-704959"
+    },
+    "704960": {
+      "strapiId": 29885,
+      "updatedAt": "2026-06-09T13:07:30.326Z",
+      "productId": 704843,
+      "sku": "WC-704843-704960"
+    },
+    "704962": {
+      "strapiId": 29886,
+      "updatedAt": "2026-06-09T13:07:30.692Z",
+      "productId": 704843,
+      "sku": "WC-704843-704962"
+    },
+    "704964": {
+      "strapiId": 29887,
+      "updatedAt": "2026-06-09T13:07:30.984Z",
+      "productId": 704843,
+      "sku": "WC-704843-704964"
+    },
+    "704965": {
+      "strapiId": 29888,
+      "updatedAt": "2026-06-09T13:07:31.241Z",
+      "productId": 704843,
+      "sku": "WC-704843-704965"
+    },
+    "704967": {
+      "strapiId": 29889,
+      "updatedAt": "2026-06-09T13:07:31.516Z",
+      "productId": 704843,
+      "sku": "WC-704843-704967"
+    },
+    "706718": {
+      "strapiId": 29891,
+      "updatedAt": "2026-06-09T13:07:34.944Z",
+      "productId": 706364,
+      "sku": "WC-706364-706718"
+    },
+    "706719": {
+      "strapiId": 29892,
+      "updatedAt": "2026-06-09T13:07:35.287Z",
+      "productId": 706364,
+      "sku": "WC-706364-706719"
+    },
+    "709487": {
+      "strapiId": 29735,
+      "updatedAt": "2026-06-09T13:05:26.036Z",
+      "productId": 683910,
+      "sku": "WC-683910-709487"
+    },
+    "713204": {
+      "strapiId": 29893,
+      "updatedAt": "2026-06-09T13:07:38.508Z",
+      "productId": 713182,
+      "sku": "WC-713182-713204"
+    },
+    "713205": {
+      "strapiId": 29894,
+      "updatedAt": "2026-06-09T13:07:38.732Z",
+      "productId": 713182,
+      "sku": "WC-713182-713205"
+    },
+    "713206": {
+      "strapiId": 29895,
+      "updatedAt": "2026-06-09T13:07:38.991Z",
+      "productId": 713182,
+      "sku": "WC-713182-713206"
+    },
+    "713207": {
+      "strapiId": 29896,
+      "updatedAt": "2026-06-09T13:07:39.233Z",
+      "productId": 713182,
+      "sku": "WC-713182-713207"
+    },
+    "714339": {
+      "strapiId": 29897,
+      "updatedAt": "2026-06-09T13:07:42.496Z",
+      "productId": 714337,
+      "sku": "WC-714337-714339"
+    },
+    "714350": {
+      "strapiId": 29898,
+      "updatedAt": "2026-06-09T13:07:46.275Z",
+      "productId": 714349,
+      "sku": "WC-714349-714350"
+    },
+    "717104": {
+      "strapiId": 29899,
+      "updatedAt": "2026-06-09T13:07:49.630Z",
+      "productId": 717103,
+      "sku": "WC-717103-717104"
+    },
+    "729856": {
+      "strapiId": 29901,
+      "updatedAt": "2026-06-09T13:07:56.218Z",
+      "productId": 729805,
+      "sku": "WC-729805-729856"
+    },
+    "729857": {
+      "strapiId": 29902,
+      "updatedAt": "2026-06-09T13:07:56.663Z",
+      "productId": 729805,
+      "sku": "WC-729805-729857"
+    },
+    "729858": {
+      "strapiId": 29903,
+      "updatedAt": "2026-06-09T13:07:57.030Z",
+      "productId": 729805,
+      "sku": "WC-729805-729858"
+    },
+    "729859": {
+      "strapiId": 29904,
+      "updatedAt": "2026-06-09T13:07:57.282Z",
+      "productId": 729805,
+      "sku": "WC-729805-729859"
+    },
+    "729860": {
+      "strapiId": 29905,
+      "updatedAt": "2026-06-09T13:07:57.581Z",
+      "productId": 729805,
+      "sku": "WC-729805-729860"
+    },
+    "729861": {
+      "strapiId": 29906,
+      "updatedAt": "2026-06-09T13:07:57.956Z",
+      "productId": 729805,
+      "sku": "WC-729805-729861"
+    },
+    "734457": {
+      "strapiId": 29907,
+      "updatedAt": "2026-06-09T13:07:59.981Z",
+      "productId": 734430,
+      "sku": "WC-734430-734457"
+    },
+    "734463": {
+      "strapiId": 29908,
+      "updatedAt": "2026-06-09T13:08:00.310Z",
+      "productId": 734430,
+      "sku": "WC-734430-734463"
+    },
+    "808578": {
+      "strapiId": 29807,
+      "updatedAt": "2026-06-09T13:06:18.270Z",
+      "productId": 688322,
+      "sku": "WC-688322-808578"
+    },
+    "837904": {
+      "strapiId": 29890,
+      "updatedAt": "2026-06-09T13:07:31.796Z",
+      "productId": 704843,
+      "sku": "WC-704843-837904"
+    },
+    "843603": {
+      "strapiId": 29518,
+      "updatedAt": "2026-06-09T13:02:27.354Z",
+      "productId": 657457,
+      "sku": "WC-657457-843603"
+    },
+    "843604": {
+      "strapiId": 29519,
+      "updatedAt": "2026-06-09T13:02:27.617Z",
+      "productId": 657457,
+      "sku": "WC-657457-843604"
+    },
+    "843605": {
+      "strapiId": 29520,
+      "updatedAt": "2026-06-09T13:02:27.987Z",
+      "productId": 657457,
+      "sku": "WC-657457-843605"
+    },
+    "845535": {
+      "strapiId": 29710,
+      "updatedAt": "2026-06-09T13:05:05.209Z",
+      "productId": 681977,
+      "sku": "WC-681977-845535"
+    },
+    "845536": {
+      "strapiId": 29711,
+      "updatedAt": "2026-06-09T13:05:05.454Z",
+      "productId": 681977,
+      "sku": "WC-681977-845536"
+    },
+    "845537": {
+      "strapiId": 29712,
+      "updatedAt": "2026-06-09T13:05:05.847Z",
+      "productId": 681977,
+      "sku": "WC-681977-845537"
+    },
+    "845538": {
+      "strapiId": 29713,
+      "updatedAt": "2026-06-09T13:05:06.283Z",
+      "productId": 681977,
+      "sku": "WC-681977-845538"
+    },
+    "846787": {
+      "strapiId": 29817,
+      "updatedAt": "2026-06-09T13:06:44.755Z",
+      "productId": 692285,
+      "sku": "WC-692285-846787"
+    },
+    "846788": {
+      "strapiId": 29818,
+      "updatedAt": "2026-06-09T13:06:45.020Z",
+      "productId": 692285,
+      "sku": "WC-692285-846788"
+    },
+    "846789": {
+      "strapiId": 29819,
+      "updatedAt": "2026-06-09T13:06:45.285Z",
+      "productId": 692285,
+      "sku": "WC-692285-846789"
+    },
+    "846790": {
+      "strapiId": 29820,
+      "updatedAt": "2026-06-09T13:06:45.578Z",
+      "productId": 692285,
+      "sku": "WC-692285-846790"
+    },
+    "846791": {
+      "strapiId": 29821,
+      "updatedAt": "2026-06-09T13:06:45.844Z",
+      "productId": 692285,
+      "sku": "WC-692285-846791"
+    },
+    "846793": {
+      "strapiId": 29822,
+      "updatedAt": "2026-06-09T13:06:46.104Z",
+      "productId": 692285,
+      "sku": "WC-692285-846793"
+    },
+    "846796": {
+      "strapiId": 29823,
+      "updatedAt": "2026-06-09T13:06:46.581Z",
+      "productId": 692285,
+      "sku": "WC-692285-846796"
+    },
+    "846797": {
+      "strapiId": 29824,
+      "updatedAt": "2026-06-09T13:06:46.924Z",
+      "productId": 692285,
+      "sku": "WC-692285-846797"
+    },
+    "846798": {
+      "strapiId": 29825,
+      "updatedAt": "2026-06-09T13:06:47.230Z",
+      "productId": 692285,
+      "sku": "WC-692285-846798"
+    },
+    "846799": {
+      "strapiId": 29826,
+      "updatedAt": "2026-06-09T13:06:47.578Z",
+      "productId": 692285,
+      "sku": "WC-692285-846799"
+    },
+    "846800": {
+      "strapiId": 29827,
+      "updatedAt": "2026-06-09T13:06:47.825Z",
+      "productId": 692285,
+      "sku": "WC-692285-846800"
+    },
+    "846801": {
+      "strapiId": 29828,
+      "updatedAt": "2026-06-09T13:06:48.070Z",
+      "productId": 692285,
+      "sku": "WC-692285-846801"
+    },
+    "846802": {
+      "strapiId": 29829,
+      "updatedAt": "2026-06-09T13:06:48.370Z",
+      "productId": 692285,
+      "sku": "WC-692285-846802"
+    },
+    "846806": {
+      "strapiId": 29830,
+      "updatedAt": "2026-06-09T13:06:48.690Z",
+      "productId": 692285,
+      "sku": "WC-692285-846806"
+    },
+    "846807": {
+      "strapiId": 29831,
+      "updatedAt": "2026-06-09T13:06:49.745Z",
+      "productId": 692285,
+      "sku": "WC-692285-846807"
+    },
+    "846808": {
+      "strapiId": 29832,
+      "updatedAt": "2026-06-09T13:06:50.170Z",
+      "productId": 692285,
+      "sku": "WC-692285-846808"
+    },
+    "846836": {
+      "strapiId": 29410,
+      "updatedAt": "2026-06-09T13:00:36.042Z",
+      "productId": 642240,
+      "sku": "WC-642240-846836"
+    },
+    "846918": {
+      "strapiId": 29833,
+      "updatedAt": "2026-06-09T13:06:50.606Z",
+      "productId": 692285,
+      "sku": "WC-692285-846918"
+    },
+    "846919": {
+      "strapiId": 29834,
+      "updatedAt": "2026-06-09T13:06:50.868Z",
+      "productId": 692285,
+      "sku": "WC-692285-846919"
+    },
+    "846941": {
+      "strapiId": 29411,
+      "updatedAt": "2026-06-09T13:00:36.543Z",
+      "productId": 642240,
+      "sku": "WC-642240-846941"
+    },
+    "846942": {
+      "strapiId": 29412,
+      "updatedAt": "2026-06-09T13:00:36.921Z",
+      "productId": 642240,
+      "sku": "WC-642240-846942"
+    },
+    "846943": {
+      "strapiId": 29413,
+      "updatedAt": "2026-06-09T13:00:37.198Z",
+      "productId": 642240,
+      "sku": "WC-642240-846943"
+    },
+    "846945": {
+      "strapiId": 29414,
+      "updatedAt": "2026-06-09T13:00:37.620Z",
+      "productId": 642240,
+      "sku": "WC-642240-846945"
+    },
+    "846946": {
+      "strapiId": 29415,
+      "updatedAt": "2026-06-09T13:00:37.870Z",
+      "productId": 642240,
+      "sku": "WC-642240-846946"
+    },
+    "846947": {
+      "strapiId": 29416,
+      "updatedAt": "2026-06-09T13:00:38.110Z",
+      "productId": 642240,
+      "sku": "WC-642240-846947"
+    },
+    "846948": {
+      "strapiId": 29417,
+      "updatedAt": "2026-06-09T13:00:38.443Z",
+      "productId": 642240,
+      "sku": "WC-642240-846948"
+    },
+    "846949": {
+      "strapiId": 29418,
+      "updatedAt": "2026-06-09T13:00:38.790Z",
+      "productId": 642240,
+      "sku": "WC-642240-846949"
+    },
+    "847792": {
+      "strapiId": 29398,
+      "updatedAt": "2026-06-09T13:00:11.798Z",
+      "productId": 640789,
+      "sku": "WC-640789-847792"
+    },
+    "847793": {
+      "strapiId": 29399,
+      "updatedAt": "2026-06-09T13:00:12.093Z",
+      "productId": 640789,
+      "sku": "WC-640789-847793"
+    },
+    "847794": {
+      "strapiId": 29400,
+      "updatedAt": "2026-06-09T13:00:12.346Z",
+      "productId": 640789,
+      "sku": "WC-640789-847794"
+    },
+    "847796": {
+      "strapiId": 29401,
+      "updatedAt": "2026-06-09T13:00:12.593Z",
+      "productId": 640789,
+      "sku": "WC-640789-847796"
+    },
+    "847797": {
+      "strapiId": 29402,
+      "updatedAt": "2026-06-09T13:00:12.843Z",
+      "productId": 640789,
+      "sku": "WC-640789-847797"
+    },
+    "847798": {
+      "strapiId": 29403,
+      "updatedAt": "2026-06-09T13:00:13.082Z",
+      "productId": 640789,
+      "sku": "WC-640789-847798"
+    },
+    "847800": {
+      "strapiId": 29404,
+      "updatedAt": "2026-06-09T13:00:13.333Z",
+      "productId": 640789,
+      "sku": "WC-640789-847800"
+    },
+    "847802": {
+      "strapiId": 29405,
+      "updatedAt": "2026-06-09T13:00:13.666Z",
+      "productId": 640789,
+      "sku": "WC-640789-847802"
+    },
+    "847803": {
+      "strapiId": 29406,
+      "updatedAt": "2026-06-09T13:00:13.931Z",
+      "productId": 640789,
+      "sku": "WC-640789-847803"
+    },
+    "849193": {
+      "strapiId": 29395,
+      "updatedAt": "2026-06-09T13:00:07.991Z",
+      "productId": 640001,
+      "sku": "WC-640001-849193"
+    },
+    "849195": {
+      "strapiId": 29396,
+      "updatedAt": "2026-06-09T13:00:08.257Z",
+      "productId": 640001,
+      "sku": "WC-640001-849195"
+    },
+    "849802": {
+      "strapiId": 29900,
+      "updatedAt": "2026-06-09T13:07:52.831Z",
+      "productId": 721975,
+      "sku": "WC-721975-849802"
+    },
+    "849879": {
+      "strapiId": 29375,
+      "updatedAt": "2026-06-09T12:59:52.688Z",
+      "productId": 638696,
+      "sku": "WC-638696-849879"
+    },
+    "849880": {
+      "strapiId": 29376,
+      "updatedAt": "2026-06-09T12:59:53.210Z",
+      "productId": 638696,
+      "sku": "WC-638696-849880"
+    },
+    "849881": {
+      "strapiId": 29377,
+      "updatedAt": "2026-06-09T12:59:53.767Z",
+      "productId": 638696,
+      "sku": "WC-638696-849881"
+    },
+    "849882": {
+      "strapiId": 29378,
+      "updatedAt": "2026-06-09T12:59:56.913Z",
+      "productId": 638696,
+      "sku": "WC-638696-849882"
+    },
+    "849883": {
+      "strapiId": 29379,
+      "updatedAt": "2026-06-09T12:59:57.157Z",
+      "productId": 638696,
+      "sku": "WC-638696-849883"
+    },
+    "849884": {
+      "strapiId": 29380,
+      "updatedAt": "2026-06-09T12:59:57.448Z",
+      "productId": 638696,
+      "sku": "WC-638696-849884"
+    },
+    "849885": {
+      "strapiId": 29381,
+      "updatedAt": "2026-06-09T12:59:57.687Z",
+      "productId": 638696,
+      "sku": "WC-638696-849885"
+    },
+    "849887": {
+      "strapiId": 29382,
+      "updatedAt": "2026-06-09T12:59:57.983Z",
+      "productId": 638696,
+      "sku": "WC-638696-849887"
+    },
+    "849888": {
+      "strapiId": 29383,
+      "updatedAt": "2026-06-09T12:59:58.273Z",
+      "productId": 638696,
+      "sku": "WC-638696-849888"
+    },
+    "849889": {
+      "strapiId": 29384,
+      "updatedAt": "2026-06-09T12:59:58.530Z",
+      "productId": 638696,
+      "sku": "WC-638696-849889"
+    },
+    "850993": {
+      "strapiId": 29293,
+      "updatedAt": "2026-06-09T12:58:54.932Z",
+      "productId": 619569,
+      "sku": "WC-619569-850993"
+    },
+    "850994": {
+      "strapiId": 29294,
+      "updatedAt": "2026-06-09T12:58:55.454Z",
+      "productId": 619569,
+      "sku": "WC-619569-850994"
+    },
+    "850995": {
+      "strapiId": 29295,
+      "updatedAt": "2026-06-09T12:58:55.869Z",
+      "productId": 619569,
+      "sku": "WC-619569-850995"
+    },
+    "850997": {
+      "strapiId": 29296,
+      "updatedAt": "2026-06-09T12:58:56.156Z",
+      "productId": 619569,
+      "sku": "WC-619569-850997"
+    },
+    "851247": {
+      "strapiId": 29491,
+      "updatedAt": "2026-06-09T13:02:05.463Z",
+      "productId": 656472,
+      "sku": "WC-656472-851247"
+    },
+    "851248": {
+      "strapiId": 29492,
+      "updatedAt": "2026-06-09T13:02:06.131Z",
+      "productId": 656472,
+      "sku": "WC-656472-851248"
+    },
+    "851249": {
+      "strapiId": 29493,
+      "updatedAt": "2026-06-09T13:02:06.791Z",
+      "productId": 656472,
+      "sku": "WC-656472-851249"
+    },
+    "851250": {
+      "strapiId": 29494,
+      "updatedAt": "2026-06-09T13:02:07.319Z",
+      "productId": 656472,
+      "sku": "WC-656472-851250"
+    },
+    "851251": {
+      "strapiId": 29495,
+      "updatedAt": "2026-06-09T13:02:08.192Z",
+      "productId": 656472,
+      "sku": "WC-656472-851251"
+    },
+    "851252": {
+      "strapiId": 29496,
+      "updatedAt": "2026-06-09T13:02:09.574Z",
+      "productId": 656472,
+      "sku": "WC-656472-851252"
+    },
+    "851254": {
+      "strapiId": 29497,
+      "updatedAt": "2026-06-09T13:02:11.612Z",
+      "productId": 656472,
+      "sku": "WC-656472-851254"
+    },
+    "851255": {
+      "strapiId": 29498,
+      "updatedAt": "2026-06-09T13:02:15.033Z",
+      "productId": 656472,
+      "sku": "WC-656472-851255"
+    },
+    "851256": {
+      "strapiId": 29499,
+      "updatedAt": "2026-06-09T13:02:16.365Z",
+      "productId": 656472,
+      "sku": "WC-656472-851256"
+    },
+    "851260": {
+      "strapiId": 29500,
+      "updatedAt": "2026-06-09T13:02:16.789Z",
+      "productId": 656472,
+      "sku": "WC-656472-851260"
+    },
+    "851269": {
+      "strapiId": 29501,
+      "updatedAt": "2026-06-09T13:02:17.123Z",
+      "productId": 656472,
+      "sku": "WC-656472-851269"
+    },
+    "851271": {
+      "strapiId": 29502,
+      "updatedAt": "2026-06-09T13:02:18.441Z",
+      "productId": 656472,
+      "sku": "WC-656472-851271"
+    },
+    "851272": {
+      "strapiId": 29503,
+      "updatedAt": "2026-06-09T13:02:18.801Z",
+      "productId": 656472,
+      "sku": "WC-656472-851272"
+    },
+    "851273": {
+      "strapiId": 29504,
+      "updatedAt": "2026-06-09T13:02:19.102Z",
+      "productId": 656472,
+      "sku": "WC-656472-851273"
+    },
+    "851274": {
+      "strapiId": 29505,
+      "updatedAt": "2026-06-09T13:02:19.610Z",
+      "productId": 656472,
+      "sku": "WC-656472-851274"
+    },
+    "851276": {
+      "strapiId": 29506,
+      "updatedAt": "2026-06-09T13:02:19.885Z",
+      "productId": 656472,
+      "sku": "WC-656472-851276"
+    },
+    "851277": {
+      "strapiId": 29507,
+      "updatedAt": "2026-06-09T13:02:20.123Z",
+      "productId": 656472,
+      "sku": "WC-656472-851277"
+    },
+    "851280": {
+      "strapiId": 29508,
+      "updatedAt": "2026-06-09T13:02:20.513Z",
+      "productId": 656472,
+      "sku": "WC-656472-851280"
+    },
+    "851283": {
+      "strapiId": 29509,
+      "updatedAt": "2026-06-09T13:02:20.891Z",
+      "productId": 656472,
+      "sku": "WC-656472-851283"
+    },
+    "851284": {
+      "strapiId": 29510,
+      "updatedAt": "2026-06-09T13:02:21.223Z",
+      "productId": 656472,
+      "sku": "WC-656472-851284"
+    },
+    "851285": {
+      "strapiId": 29511,
+      "updatedAt": "2026-06-09T13:02:21.691Z",
+      "productId": 656472,
+      "sku": "WC-656472-851285"
+    },
+    "851288": {
+      "strapiId": 29512,
+      "updatedAt": "2026-06-09T13:02:22.117Z",
+      "productId": 656472,
+      "sku": "WC-656472-851288"
+    },
+    "851289": {
+      "strapiId": 29513,
+      "updatedAt": "2026-06-09T13:02:22.609Z",
+      "productId": 656472,
+      "sku": "WC-656472-851289"
+    },
+    "851774": {
+      "strapiId": 29162,
+      "updatedAt": "2026-06-09T12:57:26.772Z",
+      "productId": 596503,
+      "sku": "WC-596503-851774"
+    },
+    "852049": {
+      "strapiId": 29835,
+      "updatedAt": "2026-06-09T13:06:54.306Z",
+      "productId": 693062,
+      "sku": "WC-693062-852049"
+    },
+    "866529": {
+      "strapiId": 29808,
+      "updatedAt": "2026-06-09T13:06:19.048Z",
+      "productId": 688322,
+      "sku": "WC-688322-866529"
+    },
+    "867668": {
+      "strapiId": 29751,
+      "updatedAt": "2026-06-09T13:05:42.327Z",
+      "productId": 685588,
+      "sku": "WC-685588-867668"
+    },
+    "873880": {
+      "strapiId": 29836,
+      "updatedAt": "2026-06-09T13:06:54.757Z",
+      "productId": 693062,
+      "sku": "WC-693062-873880"
+    },
+    "883742": {
+      "strapiId": 29809,
+      "updatedAt": "2026-06-09T13:06:19.339Z",
+      "productId": 688322,
+      "sku": "WC-688322-883742"
+    },
+    "883749": {
+      "strapiId": 29752,
+      "updatedAt": "2026-06-09T13:05:42.575Z",
+      "productId": 685588,
+      "sku": "WC-685588-883749"
+    },
+    "885163": {
+      "strapiId": 29168,
+      "updatedAt": "2026-06-09T12:57:35.196Z",
+      "productId": 597399,
+      "sku": "WC-597399-885163"
+    },
+    "936434": {
+      "strapiId": 29149,
+      "updatedAt": "2026-06-09T12:57:10.704Z",
+      "productId": 536284,
+      "sku": "WC-536284-936434"
+    },
+    "1021120": {
+      "strapiId": 29753,
+      "updatedAt": "2026-06-09T13:05:42.818Z",
+      "productId": 685588,
+      "sku": "WC-685588-1021120"
+    },
+    "1039482": {
+      "strapiId": 29750,
+      "updatedAt": "2026-06-09T13:05:37.702Z",
+      "productId": 685354,
+      "sku": "WC-685354-1039482"
+    },
+    "1147285": {
+      "strapiId": 29514,
+      "updatedAt": "2026-06-09T13:02:22.890Z",
+      "productId": 656472,
+      "sku": "WC-656472-1147285"
+    },
+    "1147286": {
+      "strapiId": 29515,
+      "updatedAt": "2026-06-09T13:02:23.305Z",
+      "productId": 656472,
+      "sku": "WC-656472-1147286"
+    },
+    "1147287": {
+      "strapiId": 29516,
+      "updatedAt": "2026-06-09T13:02:23.630Z",
+      "productId": 656472,
+      "sku": "WC-656472-1147287"
+    },
+    "1147288": {
+      "strapiId": 29517,
+      "updatedAt": "2026-06-09T13:02:23.979Z",
+      "productId": 656472,
+      "sku": "WC-656472-1147288"
+    },
+    "1147338": {
+      "strapiId": 29254,
+      "updatedAt": "2026-06-09T12:58:30.070Z",
+      "productId": 617901,
+      "sku": "WC-617901-1147338"
+    },
+    "1147339": {
+      "strapiId": 29255,
+      "updatedAt": "2026-06-09T12:58:30.382Z",
+      "productId": 617901,
+      "sku": "WC-617901-1147339"
+    },
+    "1147340": {
+      "strapiId": 29256,
+      "updatedAt": "2026-06-09T12:58:30.659Z",
+      "productId": 617901,
+      "sku": "WC-617901-1147340"
+    },
+    "1184602": {
+      "strapiId": 29397,
+      "updatedAt": "2026-06-09T13:00:08.519Z",
+      "productId": 640001,
+      "sku": "WC-640001-1184602"
+    }
+  }
+}

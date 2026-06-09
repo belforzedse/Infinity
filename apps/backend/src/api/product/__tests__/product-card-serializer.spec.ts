@@ -54,6 +54,11 @@ const makeProduct = (overrides: Record<string, unknown> = {}) => ({
 });
 
 describe("product card serializer", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (mockStrapi as any).entityService = undefined;
+  });
+
   it("serializes full card sections without exposing variations", () => {
     const card = service.serializeProductCard(makeProduct());
 
@@ -122,5 +127,25 @@ describe("product card serializer", () => {
         ],
       }),
     ).toBe(true);
+  });
+
+  it("dedupes requested product IDs when fetching card entities", async () => {
+    const findMany = jest.fn().mockResolvedValue([]);
+    (mockStrapi as any).entityService = { findMany };
+
+    await service.findProductCardEntitiesByIds([12, 12, 5], {
+      Status: { $eq: "Active" },
+    });
+
+    expect(findMany).toHaveBeenCalledWith(
+      "api::product.product",
+      expect.objectContaining({
+        filters: expect.objectContaining({
+          id: { $in: [12, 5] },
+          Status: { $eq: "Active" },
+        }),
+        limit: 2,
+      }),
+    );
   });
 });

@@ -2,29 +2,38 @@ type PopulateObject = {
   [key: string]: boolean | PopulateObject;
 };
 
+/**
+ * Builds a Strapi v4 `populate` query string using a single, flat list of
+ * dot-notation paths (e.g. `populate[0]=CoverImage&populate[1]=product_variations`
+ * `&populate[2]=product_variations.product_stock`).
+ *
+ * This mirrors the working PDP query shape. It intentionally avoids mixing
+ * array-index entries (`populate[0]=...`) with object-syntax entries
+ * (`populate[rel][populate][0]=...`): when `qs` parses a `populate` param that
+ * contains both numeric indices and a string key, it coerces the whole value
+ * into an object keyed by those indices, and Strapi then populates by the bogus
+ * numeric keys — dropping every top-level relation. Keeping all entries as
+ * numeric indices over dot-notation paths makes `qs` parse a clean string array.
+ */
 export function paramCreator(obj: PopulateObject): string {
-  const result: string[] = [];
+  const parts: string[] = [];
+  let index = 0;
 
-  function process(currentObj: PopulateObject, path: string[]): void {
-    let index = 0;
-
+  function walk(currentObj: PopulateObject, prefix: string): void {
     for (const key of Object.keys(currentObj)) {
       const value = currentObj[key];
+      if (!value) continue; // skip false / null
 
-      if (typeof value === "boolean" && value) {
-        if (path.length === 0) {
-          result.push(`populate[${index}]=${key}`);
-        } else {
-          const pathString = path.join("][");
-          result.push(`populate[${pathString}][populate][${index}]=${key}`);
-        }
-        index++;
-      } else if (typeof value === "object" && value !== null) {
-        process(value as PopulateObject, path.concat(key));
+      const path = prefix ? `${prefix}.${key}` : key;
+      parts.push(`populate[${index}]=${path}`);
+      index++;
+
+      if (typeof value === "object") {
+        walk(value as PopulateObject, path);
       }
     }
   }
 
-  process(obj, []);
-  return result.join("&");
+  walk(obj, "");
+  return parts.join("&");
 }

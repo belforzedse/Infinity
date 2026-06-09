@@ -172,6 +172,20 @@ test("resolveAttribute: color normalized through mapping table with hex code", (
   assert.equal(T.resolveAttribute("color", ""), null);
 });
 
+test("resolveAttribute: unmapped color values are preserved as distinct records (not collapsed)", () => {
+  // Stores enter color variants by code on the رنگ attribute. Each must become its
+  // own color record, not collapse into a single default color.
+  const c1 = T.resolveAttribute("color", "کد ۱");
+  const c2 = T.resolveAttribute("color", "کد ۲");
+
+  assert.equal(c1.title, "کد ۱");
+  assert.equal(c2.title, "کد ۲");
+  assert.equal(c1.matched, false);
+  assert.notEqual(c1.externalId, c2.externalId); // distinct records
+  assert.equal(c1.colorCode, "#FFFFFF"); // unmapped colors use white
+  assert.equal(c2.colorCode, "#FFFFFF");
+});
+
 test("identifyAttributeType: Persian and English names", () => {
   assert.equal(T.identifyAttributeType("رنگ"), "color");
   assert.equal(T.identifyAttributeType("Color"), "color");

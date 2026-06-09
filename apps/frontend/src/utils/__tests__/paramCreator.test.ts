@@ -19,7 +19,7 @@ describe("paramCreator", () => {
     });
 
     expect(result).toBe(
-      "populate[user][populate][0]=profile&populate[user][populate][1]=settings",
+      "populate[0]=user&populate[1]=user.profile&populate[2]=user.settings",
     );
   });
 
@@ -34,9 +34,10 @@ describe("paramCreator", () => {
     });
 
     expect(result).toContain("populate[0]=title");
-    expect(result).toContain("populate[author][populate][0]=name");
-    expect(result).toContain("populate[author][populate][1]=email");
-    expect(result).toContain("populate[1]=tags");
+    expect(result).toContain("populate[1]=author");
+    expect(result).toContain("populate[2]=author.name");
+    expect(result).toContain("populate[3]=author.email");
+    expect(result).toContain("populate[4]=tags");
   });
 
   it("should handle deeply nested objects", () => {
@@ -50,7 +51,9 @@ describe("paramCreator", () => {
       },
     });
 
-    expect(result).toBe("populate[post][author][profile][populate][0]=avatar");
+    expect(result).toBe(
+      "populate[0]=post&populate[1]=post.author&populate[2]=post.author.profile&populate[3]=post.author.profile.avatar",
+    );
   });
 
   it("should ignore false boolean values", () => {
@@ -93,12 +96,13 @@ describe("paramCreator", () => {
       reviews: true,
     });
 
-    expect(result).toContain("populate[product][populate][0]=images");
-    expect(result).toContain("populate[product][category][populate][0]=name");
-    expect(result).toContain(
-      "populate[product][category][parent][populate][0]=name",
-    );
-    expect(result).toContain("populate[product][populate][1]=variants");
-    expect(result).toContain("populate[0]=reviews");
+    expect(result).toContain("populate[0]=product");
+    expect(result).toContain("populate[1]=product.images");
+    expect(result).toContain("populate[2]=product.category");
+    expect(result).toContain("populate[3]=product.category.name");
+    expect(result).toContain("populate[4]=product.category.parent");
+    expect(result).toContain("populate[5]=product.category.parent.name");
+    expect(result).toContain("populate[6]=product.variants");
+    expect(result).toContain("populate[7]=reviews");
   });
 });

@@ -261,7 +261,7 @@ module.exports = {
       // Default variation attributes when not specified in WooCommerce
       variationAttributes: {
         color: {
-          title: process.env.IMPORT_DEFAULT_COLOR_TITLE || "خاکستری روشن", // Default in Persian
+          title: process.env.IMPORT_DEFAULT_COLOR_TITLE || "تک رنگ", // Mono / single-color (Persian)
           colorCode: process.env.IMPORT_DEFAULT_COLOR_CODE || "#CCCCCC", // Light gray
         },
         size: {

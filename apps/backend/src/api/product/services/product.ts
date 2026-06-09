@@ -11,6 +11,96 @@ import {
 } from "./product-card-query";
 
 const CARD_COLOR_CODE_LIMIT = 8;
+const HOMEPAGE_CARD_LIMIT = 20;
+const HOMEPAGE_GIF_PROMO_LIMIT = 4;
+const HOMEPAGE_BATCH_LIMIT = 36;
+
+const HOMEPAGE_SECTION_IDS = [
+  "newest",
+  "favorites",
+  "discounted",
+  "gifPromoSlot1",
+  "gifPromoSlot2",
+  "custom",
+  "weeklyPicks",
+  "everyoneFollows",
+] as const;
+
+const PRODUCT_BOOST_KEYWORDS: readonly string[] = [
+  "G",
+  "G0020",
+  "W0069",
+  "W0043",
+  "W0039",
+  "W0096",
+  "W002",
+  "W0042",
+  "W0018",
+  "W0036",
+  "W009",
+  "W0010",
+  "W0035",
+  "G0015",
+  "G0018",
+  "W0030",
+  "G004",
+  "G005",
+  "G006",
+  "G003",
+  "G007",
+  "W0022",
+  "W0029",
+  "G0017",
+  "W0025",
+  "W0014",
+  "W0033",
+  "G0023",
+  "G0024",
+  "G0013",
+  "W0012",
+  "W0027",
+  "W008",
+  "W0024",
+  "W0031",
+  "W004",
+  "W0015",
+  "G002",
+  "W0076",
+  "W0087",
+  "W0089",
+  "G009",
+  "G0011",
+  "G0019",
+  "G0030",
+  "G0021",
+  "G008",
+  "G0022",
+  "G0035",
+  "G0031",
+  "G0036",
+  "W007",
+  "G001",
+  "W0058",
+  "G0014",
+  "G0029",
+  "G0039",
+  "G0038",
+  "W005",
+  "W0032",
+  "W0038",
+  "W0080",
+  "G0028",
+  "G00101",
+  "G0098",
+  "G0096",
+];
+
+type HomepageSectionId = (typeof HOMEPAGE_SECTION_IDS)[number];
+type HomepageAssignment = {
+  mode: "manual" | "category";
+  productIds: number[];
+  categorySlug: string;
+};
 
 const toNumber = (value: unknown): number => {
   if (typeof value === "number") return Number.isFinite(value) ? value : 0;
@@ -19,6 +109,59 @@ const toNumber = (value: unknown): number => {
     return Number.isFinite(parsed) ? parsed : 0;
   }
   return 0;
+};
+
+const normalizeIds = (value: unknown): number[] => {
+  if (!Array.isArray(value)) return [];
+  const seen = new Set<number>();
+  const ids: number[] = [];
+  for (const item of value) {
+    const id = Number(item);
+    if (!Number.isFinite(id) || id <= 0 || seen.has(id)) continue;
+    seen.add(id);
+    ids.push(id);
+  }
+  return ids;
+};
+
+const normalizeAssignment = (value: unknown): HomepageAssignment => {
+  const input = value && typeof value === "object" ? (value as Record<string, unknown>) : {};
+  const mode = input.mode === "category" ? "category" : "manual";
+  return {
+    mode,
+    productIds: normalizeIds(input.productIds),
+    categorySlug: typeof input.categorySlug === "string" ? input.categorySlug.trim() : "",
+  };
+};
+
+const uniqueOrderedIds = (groups: Array<number[] | undefined>): number[] => {
+  const seen = new Set<number>();
+  const ids: number[] = [];
+  for (const group of groups) {
+    for (const id of group || []) {
+      if (seen.has(id)) continue;
+      seen.add(id);
+      ids.push(id);
+    }
+  }
+  return ids;
+};
+
+const baseHomepageProductFilters = () => ({
+  Status: { $eq: "Active" },
+  removedAt: { $null: true },
+  product_variations: {
+    Price: { $gte: 1 },
+    product_stock: { Count: { $gt: 0 } },
+  },
+});
+
+const buildHomepageTitleFilter = () => {
+  return {
+    $or: PRODUCT_BOOST_KEYWORDS.map((keyword) => ({
+      Title: { $containsi: keyword },
+    })),
+  };
 };
 
 const relationData = (relation: any): any => {
@@ -146,6 +289,34 @@ const getCategoryAttributes = (product: any) => {
   };
 };
 
+const productHasDiscount = (product: any): boolean => {
+  const attrs = product?.attributes ?? product;
+  const price = toNumber(attrs?.Price);
+  const discountPrice = toNumber(attrs?.DiscountPrice);
+  const discount = toNumber(attrs?.Discount);
+  return discount > 0 || (price > 0 && discountPrice > 0 && discountPrice < price);
+};
+
+const productTitleMatchesKeywords = (product: any): boolean => {
+  const attrs = product?.attributes ?? product;
+  const title = String(attrs?.Title || "").toLowerCase();
+  if (!title) return false;
+  return PRODUCT_BOOST_KEYWORDS.some((keyword) => title.includes(keyword.toLowerCase()));
+};
+
+const sectionPayload = (
+  id: HomepageSectionId,
+  products: any[],
+  limit: number,
+  source: "manual" | "category" | "algorithm" | "disabled",
+) => ({
+  id,
+  products,
+  count: products.length,
+  limit,
+  source,
+});
+
 export default factories.createCoreService(
   "api::product.product",
   ({ strapi }) => ({
@@ -217,6 +388,45 @@ export default factories.createCoreService(
         .filter((product: any) => product && product.id);
     },
 
+    async findProductCardEntitiesByIds(ids: number[], filters: Record<string, unknown> = {}) {
+      if (!Array.isArray(ids) || ids.length === 0) return [];
+      const uniqueIds = uniqueOrderedIds([ids]);
+
+      return strapi.entityService.findMany("api::product.product", {
+        filters: {
+          id: { $in: uniqueIds },
+          ...filters,
+        },
+        fields: [...PRODUCT_CARD_FIELDS] as any,
+        populate: PRODUCT_CARD_POPULATE as any,
+        limit: uniqueIds.length,
+      });
+    },
+
+    async findHomepageSectionIdsForAssignment(
+      assignment: HomepageAssignment,
+      limit: number,
+    ): Promise<{ ids: number[]; source: "manual" | "category" | "disabled" }> {
+      if (assignment.mode === "manual") {
+        return { ids: assignment.productIds.slice(0, limit), source: "manual" };
+      }
+
+      if (!assignment.categorySlug) {
+        return { ids: [], source: "disabled" };
+      }
+
+      const { ids } = await findOrderedProductIds(strapi, {
+        filters: {
+          ...baseHomepageProductFilters(),
+          product_main_category: { Slug: { $eq: assignment.categorySlug } },
+        },
+        sort: ["createdAt:desc"],
+        pagination: { limit, withCount: false },
+      });
+
+      return { ids, source: "category" };
+    },
+
     /**
      * Card listing with stock-aware ordering (in-stock products first), computed
      * at the SQL level via findOrderedProductIds. The secondary sort (e.g.
@@ -231,12 +441,7 @@ export default factories.createCoreService(
         return { data: [], meta: { pagination } };
       }
 
-      const results = await strapi.entityService.findMany("api::product.product", {
-        filters: { id: { $in: ids } },
-        fields: [...PRODUCT_CARD_FIELDS] as any,
-        populate: PRODUCT_CARD_POPULATE as any,
-        limit: ids.length,
-      });
+      const results = await this.findProductCardEntitiesByIds(ids);
 
       const orderedResults = [...results].sort((a: any, b: any) => {
         const aIndex = order.get(Number(a?.id)) ?? Number.MAX_SAFE_INTEGER;
@@ -245,6 +450,186 @@ export default factories.createCoreService(
       });
 
       return { data: this.serializeProductCards(orderedResults), meta: { pagination } };
+    },
+
+    async findHomepageSections() {
+      const settingsEntity = await strapi.db.query("api::settings.settings").findOne();
+      const settings = attrsOf(settingsEntity);
+
+      const newestManualIds = normalizeIds(settings.homeNewestProductIds);
+      const discountedManualIds = normalizeIds(settings.homeDiscountedProductIds);
+      const gifPromoSlot1Assignment = normalizeAssignment(settings.homeGifPromoSlot1Assignment);
+      const gifPromoSlot2Assignment = normalizeAssignment(settings.homeGifPromoSlot2Assignment);
+      const customAssignment = normalizeAssignment(settings.homeCustomSectionAssignment);
+      const weeklyPicksAssignment = normalizeAssignment({
+        mode: "manual",
+        productIds: settings.homeWeeklyPicksProductIds,
+      });
+      const everyoneFollowsAssignment = normalizeAssignment({
+        mode: "manual",
+        productIds: settings.homeEveryoneFollowsProductIds,
+      });
+
+      const batchPromise = findOrderedProductIds(strapi, {
+        filters: baseHomepageProductFilters(),
+        pagination: { limit: HOMEPAGE_BATCH_LIMIT, withCount: false },
+      });
+      const newestPromise =
+        newestManualIds.length > 0
+          ? Promise.resolve({ ids: newestManualIds.slice(0, HOMEPAGE_CARD_LIMIT), source: "manual" as const })
+          : findOrderedProductIds(strapi, {
+              filters: {
+                ...baseHomepageProductFilters(),
+                ...buildHomepageTitleFilter(),
+              },
+              sort: ["createdAt:desc"],
+              pagination: { limit: HOMEPAGE_CARD_LIMIT, withCount: false },
+            }).then(({ ids }) => ({ ids, source: "algorithm" as const }));
+      const discountedPromise =
+        discountedManualIds.length > 0
+          ? Promise.resolve({
+              ids: discountedManualIds.slice(0, HOMEPAGE_CARD_LIMIT),
+              source: "manual" as const,
+            })
+          : Promise.resolve({ ids: [] as number[], source: "algorithm" as const });
+      const gifPromoSlot1Promise =
+        settings.homeGifPromoEnabled && String(settings.homeGifPromoSlot1Image || "").trim()
+          ? this.findHomepageSectionIdsForAssignment(gifPromoSlot1Assignment, HOMEPAGE_GIF_PROMO_LIMIT)
+          : Promise.resolve({ ids: [] as number[], source: "disabled" as const });
+      const gifPromoSlot2Promise =
+        settings.homeGifPromoEnabled && String(settings.homeGifPromoSlot2Image || "").trim()
+          ? this.findHomepageSectionIdsForAssignment(gifPromoSlot2Assignment, HOMEPAGE_GIF_PROMO_LIMIT)
+          : Promise.resolve({ ids: [] as number[], source: "disabled" as const });
+      const customPromise =
+        settings.homeCustomSectionEnabled
+          ? this.findHomepageSectionIdsForAssignment(customAssignment, HOMEPAGE_CARD_LIMIT)
+          : Promise.resolve({ ids: [] as number[], source: "disabled" as const });
+      const weeklyPicksPromise =
+        settings.homeWeeklyPicksEnabled
+          ? this.findHomepageSectionIdsForAssignment(weeklyPicksAssignment, HOMEPAGE_CARD_LIMIT)
+          : Promise.resolve({ ids: [] as number[], source: "disabled" as const });
+      const everyoneFollowsPromise =
+        settings.homeEveryoneFollowsEnabled
+          ? this.findHomepageSectionIdsForAssignment(everyoneFollowsAssignment, HOMEPAGE_CARD_LIMIT)
+          : Promise.resolve({ ids: [] as number[], source: "disabled" as const });
+
+      const [
+        batch,
+        newest,
+        discountedManual,
+        gifPromoSlot1,
+        gifPromoSlot2,
+        custom,
+        weeklyPicks,
+        everyoneFollows,
+      ] = await Promise.all([
+        batchPromise,
+        newestPromise,
+        discountedPromise,
+        gifPromoSlot1Promise,
+        gifPromoSlot2Promise,
+        customPromise,
+        weeklyPicksPromise,
+        everyoneFollowsPromise,
+      ]);
+
+      const allIds = uniqueOrderedIds([
+        batch.ids,
+        newest.ids,
+        discountedManual.ids,
+        gifPromoSlot1.ids,
+        gifPromoSlot2.ids,
+        custom.ids,
+        weeklyPicks.ids,
+        everyoneFollows.ids,
+      ]);
+      const entities = await this.findProductCardEntitiesByIds(allIds, baseHomepageProductFilters());
+      const cards = this.serializeProductCards(entities);
+      const cardsById = new Map(cards.map((card: any) => [Number(card.id), card]));
+      const byIds = (ids: number[], limit: number, requireAvailable = false) =>
+        ids
+          .map((id) => cardsById.get(Number(id)))
+          .filter((card: any) => card && (!requireAvailable || card?.attributes?.IsAvailable === true))
+          .slice(0, limit);
+
+      const batchCards = byIds(batch.ids, HOMEPAGE_BATCH_LIMIT, true);
+      const discounted =
+        discountedManual.source === "manual"
+          ? byIds(discountedManual.ids, HOMEPAGE_CARD_LIMIT, true)
+          : [...batchCards]
+              .filter(productHasDiscount)
+              .sort((a: any, b: any) => {
+                const aMatch = productTitleMatchesKeywords(a);
+                const bMatch = productTitleMatchesKeywords(b);
+                if (aMatch && !bMatch) return -1;
+                if (!aMatch && bMatch) return 1;
+                return 0;
+              })
+              .slice(0, HOMEPAGE_CARD_LIMIT);
+
+      const favorites = [...batchCards]
+        .sort((a: any, b: any) => {
+          const attrsA = a?.attributes;
+          const attrsB = b?.attributes;
+          const ratingA = toNumber(attrsA?.AverageRating);
+          const ratingB = toNumber(attrsB?.AverageRating);
+          return ratingB - ratingA;
+        })
+        .slice(0, HOMEPAGE_CARD_LIMIT);
+
+      return {
+        data: {
+          sections: [
+            sectionPayload(
+              "newest",
+              byIds(newest.ids, HOMEPAGE_CARD_LIMIT, true),
+              HOMEPAGE_CARD_LIMIT,
+              newest.source,
+            ),
+            sectionPayload("favorites", favorites, HOMEPAGE_CARD_LIMIT, "algorithm"),
+            sectionPayload(
+              "discounted",
+              discounted,
+              HOMEPAGE_CARD_LIMIT,
+              discountedManual.source === "manual" ? "manual" : "algorithm",
+            ),
+            sectionPayload(
+              "gifPromoSlot1",
+              byIds(gifPromoSlot1.ids, HOMEPAGE_GIF_PROMO_LIMIT, gifPromoSlot1.source === "manual"),
+              HOMEPAGE_GIF_PROMO_LIMIT,
+              gifPromoSlot1.source,
+            ),
+            sectionPayload(
+              "gifPromoSlot2",
+              byIds(gifPromoSlot2.ids, HOMEPAGE_GIF_PROMO_LIMIT, gifPromoSlot2.source === "manual"),
+              HOMEPAGE_GIF_PROMO_LIMIT,
+              gifPromoSlot2.source,
+            ),
+            sectionPayload(
+              "custom",
+              byIds(custom.ids, HOMEPAGE_CARD_LIMIT, custom.source === "manual"),
+              HOMEPAGE_CARD_LIMIT,
+              custom.source,
+            ),
+            sectionPayload(
+              "weeklyPicks",
+              byIds(weeklyPicks.ids, HOMEPAGE_CARD_LIMIT, true),
+              HOMEPAGE_CARD_LIMIT,
+              weeklyPicks.source,
+            ),
+            sectionPayload(
+              "everyoneFollows",
+              byIds(everyoneFollows.ids, HOMEPAGE_CARD_LIMIT, true),
+              HOMEPAGE_CARD_LIMIT,
+              everyoneFollows.source,
+            ),
+          ],
+        },
+        meta: {
+          sectionOrder: HOMEPAGE_SECTION_IDS,
+          generatedAt: new Date().toISOString(),
+        },
+      };
     },
 
     /**

@@ -3,6 +3,7 @@ import type { Strapi } from "@strapi/strapi";
 import { recordAdminAudit } from "../utils/adminAudit";
 import { resolveAuditActor } from "../utils/audit";
 import { logAdminEvent, logOrderEvent } from "../utils/eventLogger";
+import { scheduleHomeProductsRevalidation } from "../utils/homepageRevalidation";
 import { asEntityId } from "../utils/lastEdited";
 
 type AuditAction = "Create" | "Update" | "Delete";
@@ -522,6 +523,11 @@ function registerProductStockLifecycle(strapi: Strapi) {
           }
         );
       }
+
+      scheduleHomeProductsRevalidation("product-stock-create", {
+        stockId: result?.id,
+        count: initialCount,
+      });
     },
 
     async beforeUpdate(event) {
@@ -582,6 +588,19 @@ function registerProductStockLifecycle(strapi: Strapi) {
         changes: { Count: { from: previous, to: current } },
         metadata: { previous, current, delta, type },
       });
+
+      scheduleHomeProductsRevalidation("product-stock-update", {
+        stockId: result.id,
+        previous,
+        current,
+        delta,
+        type,
+      });
+    },
+
+    async afterDelete(event) {
+      const stockId = (event as any)?.result?.id ?? (event as any)?.params?.where?.id;
+      scheduleHomeProductsRevalidation("product-stock-delete", { stockId });
     },
   });
 }

@@ -50,6 +50,7 @@ export const ENDPOINTS = {
       SUBMIT: "/product-reviews/submit",
     },
     SEARCH: "/products/search",
+    HOMEPAGE_SECTIONS: "/products/homepage-sections",
   },
   PRODUCT_LIKES: {
     TOGGLE: "/product-likes/toggle",

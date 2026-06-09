@@ -4,6 +4,7 @@ import {
   markProductEditedByAdmin,
 } from "../../../../utils/adminAudit";
 import { asEntityId } from "../../../../utils/lastEdited";
+import { scheduleHomeProductsRevalidation } from "../../../../utils/homepageRevalidation";
 
 type AuditAction = "Create" | "Update" | "Delete";
 
@@ -72,6 +73,10 @@ export default {
       metadata: { variationId: result.id, sku: result.SKU },
     });
     if (recordedCreate) await markProductEditedByAdmin(strapi, createProductId);
+    scheduleHomeProductsRevalidation("product-variation-create", {
+      variationId: result.id,
+      productId: createProductId,
+    });
   },
 
   async beforeUpdate(event) {
@@ -158,6 +163,11 @@ export default {
       metadata: { variationId: result.id },
     });
     if (recordedUpdate) await markProductEditedByAdmin(strapi, updateProductId);
+    scheduleHomeProductsRevalidation("product-variation-update", {
+      variationId: result.id,
+      productId: updateProductId,
+      changedFields: Object.keys(changes),
+    });
   },
 
   async beforeDelete(event) {
@@ -211,5 +221,9 @@ export default {
       metadata: { variationId: id },
     });
     if (recordedDelete) await markProductEditedByAdmin(strapi, deletedProductId);
+    scheduleHomeProductsRevalidation("product-variation-delete", {
+      variationId: id,
+      productId: deletedProductId,
+    });
   },
 };

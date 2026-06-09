@@ -42,6 +42,7 @@
     "type-check": "tsc --noEmit",
     "check-types": "tsc --noEmit",
     "check:sql": "node scripts/check-sql-column-names.js",
+    "diagnose:homepage-db": "node scripts/homepage-query-plans.js",
     "clean": "rm -rf .cache build dist .tmp",
     "logs": "pm2 logs infinity-backend --lines 100",
     "validate": "pnpm run check-types && pnpm run test"

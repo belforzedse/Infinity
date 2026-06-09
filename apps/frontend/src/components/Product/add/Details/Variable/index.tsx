@@ -115,8 +115,12 @@ const ProductVariables: React.FC<ProductVariablesProps> = ({ productId, refreshK
             });
           }
 
-          // Create variable name from combinations - only include parts that exist
-          const variableParts = [size, color, model].filter((part) => part !== "");
+          // Create variable name from combinations - only include parts that exist.
+          // Absent attributes are `undefined` (not ""), so filter on truthiness to
+          // avoid stray " - " separators (e.g. a model-only "کد 1" variation).
+          const variableParts = [size, color, model].filter(
+            (part) => Boolean(part && part.trim()),
+          );
           const variableName = variableParts.join(" - ");
 
           // Get variation-specific discount price (priority)

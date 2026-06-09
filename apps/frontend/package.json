@@ -18,6 +18,7 @@
     "type-check": "tsc --noEmit",
     "check-types": "tsc --noEmit",
     "test": "jest",
+    "compare:homepage": "node scripts/compare-homepage-sections.mjs",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:seo": "node scripts/test-seo.js",

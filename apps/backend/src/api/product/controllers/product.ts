@@ -263,6 +263,40 @@ export default factories.createCoreController(
       return response;
     },
 
+    async homepageSections(ctx) {
+      try {
+        const user = ctx.state.user;
+        const isAdmin = isAdminUser(user);
+        const bypassCache =
+          shouldBypassEndpointCache(ctx.request?.headers as Record<string, unknown>) || isAdmin;
+
+        const cacheKey = buildCacheKey({
+          routeId: "product.homepage-sections",
+          query: ctx.query || {},
+          locale: String(ctx.query?.locale || ""),
+          authSegment: bypassCache ? "auth" : "anon",
+        });
+
+        const payload = await withCache(
+          {
+            key: cacheKey,
+            ttlSec: getCacheTtlFromEnv("CACHE_TTL_HOMEPAGE_SECTIONS_SEC", 90),
+            bypass: bypassCache,
+            onStatus: (status) => setCacheHeaderIfEnabled(ctx, status),
+            shouldCacheValue: (value) => Array.isArray((value as any)?.data?.sections),
+          },
+          async () => strapi.service("api::product.product").findHomepageSections(),
+        );
+
+        return payload;
+      } catch (error) {
+        strapi.log.error("[Product.homepageSections] Error building homepage sections:", error);
+        return ctx.badRequest("An error occurred while building homepage sections", {
+          error: (error as Error).message,
+        });
+      }
+    },
+
     async findOne(ctx, next) {
       // @ts-expect-error Strapi controller typings require two args; we only need ctx for filtering
       const filtersApplied = this.applyPublicProductFilters(ctx);

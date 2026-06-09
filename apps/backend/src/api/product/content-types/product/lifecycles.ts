@@ -5,6 +5,7 @@ import {
   type AdminAuditAction,
 } from "../../../../utils/adminAudit";
 import { generateUniqueProductSlug } from "../../../../utils/productSlug";
+import { scheduleHomeProductsRevalidation } from "../../../../utils/homepageRevalidation";
 
 type AuditAction = "Create" | "Update" | "Delete";
 const PRODUCT_COUNTER_ONLY_FIELDS = new Set(["SeenCount"]);
@@ -177,6 +178,11 @@ export default {
     if (result.Slug && result.Status === "Active") {
       await triggerProductRevalidation(result.Slug);
     }
+    scheduleHomeProductsRevalidation("product-create", {
+      productId: result.id,
+      slug: result.Slug,
+      status: result.Status,
+    });
   },
 
   async beforeUpdate(event) {
@@ -323,6 +329,12 @@ export default {
     if (currentSlug && currentStatus === "Active") {
       await triggerProductRevalidation(currentSlug);
     }
+    scheduleHomeProductsRevalidation("product-update", {
+      productId: result.id,
+      slug: currentSlug,
+      status: currentStatus,
+      changedFields,
+    });
   },
 
   async beforeDelete(event) {
@@ -375,5 +387,7 @@ export default {
       severity: "warning",
       metadata: { productId: id, isSoftDelete: false },
     });
+
+    scheduleHomeProductsRevalidation("product-delete", { productId: id });
   },
 };

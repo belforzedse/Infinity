@@ -1147,7 +1147,13 @@ class VariationImporter {
 
     const defaultAttrs = this.config.import.defaults.variationAttributes;
 
-    if (!presentAttributes.has("color") && !strapiVariation.product_variation_color) {
+    // Only fabricate a default color for truly attribute-less variations (simple
+    // products). Variations that carry a real attribute - including non-color ones
+    // such as "کد" (mapped to model) or a size - must NOT be given a spurious color,
+    // otherwise the editor renders e.g. a "کد 1" variation as the default color.
+    const hasAnyAttribute = presentAttributes.size > 0; // color / size / model present
+
+    if (!hasAnyAttribute && !strapiVariation.product_variation_color) {
       try {
         const defaultColorId = await this.createOrGetAttribute(
           "color",
@@ -1201,7 +1207,7 @@ class VariationImporter {
       if (!resolvedColor.matched) {
         // Log unmapped colors to help increase mappings
         this.logger.warn(
-          `🎨 UNMAPPED COLOR: "${normalizedValue}" (original: "${value}") - Using fallback ${resolvedColor.colorCode}. Add to color-mappings.json to improve accuracy.`,
+          `🎨 UNMAPPED COLOR: "${normalizedValue}" (original: "${value}") - Preserving as a distinct color with a generated swatch. Add to color-mappings.json to assign an exact hex.`,
         );
         // Track unmapped colors for summary
         if (!this.unmappedColors) {
@@ -1209,7 +1215,13 @@ class VariationImporter {
         }
         this.unmappedColors.add(normalizedValue);
       }
-      normalizedValue = resolvedColor.title;
+      // Preserve the original value when it isn't a known color. Stores sometimes
+      // enter distinct color variants by code (e.g. "کد ۱", "کد ۲") on the رنگ
+      // attribute; collapsing every unmapped value to the default color would merge
+      // them into one. Only mapped values are normalized to their canonical title.
+      if (resolvedColor.matched) {
+        normalizedValue = resolvedColor.title;
+      }
     }
 
     const cacheKey = `${type}:${normalizedValue.toLowerCase()}`;
@@ -1229,7 +1241,7 @@ class VariationImporter {
 
       if (type === "color") {
         attributeData.ColorCode =
-          customColorCode || resolvedColor?.colorCode || resolveColorMapping("").colorCode;
+          customColorCode || (resolvedColor?.matched ? resolvedColor.colorCode : "#FFFFFF");
       }
 
       switch (type) {

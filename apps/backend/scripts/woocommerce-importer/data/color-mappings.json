@@ -1,9 +1,13 @@
 {
   "default": {
-    "title": "سفید",
-    "colorCode": "#FFFFFF"
+    "title": "تک رنگ",
+    "colorCode": "#CCCCCC"
   },
   "mappings": {
+    "تک رنگ": {
+      "title": "تک رنگ",
+      "colorCode": "#CCCCCC"
+    },
     "مشکی": {
       "title": "مشکی",
       "colorCode": "#212121"

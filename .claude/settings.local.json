@@ -34,7 +34,10 @@
       "Bash(cd /d/projects && diff -rq Infinitycolor/packages pandaak/packages \\\\ *)",
       "Bash(^-\")",
       "Bash(mkdir -p ~/.claude/plans)",
-      "Bash(node -e \"console.log\\('sharp?', require\\('fs'\\).existsSync\\('node_modules/sharp'\\)\\); console.log\\('axios?', require\\('fs'\\).existsSync\\('node_modules/axios'\\)\\); console.log\\('commander?', require\\('fs'\\).existsSync\\('node_modules/commander'\\)\\)\")"
+      "Bash(node -e \"console.log\\('sharp?', require\\('fs'\\).existsSync\\('node_modules/sharp'\\)\\); console.log\\('axios?', require\\('fs'\\).existsSync\\('node_modules/axios'\\)\\); console.log\\('commander?', require\\('fs'\\).existsSync\\('node_modules/commander'\\)\\)\")",
+      "Bash(ls -la \"D:\\\\projects\\\\Infinitycolor\\\\\" | head -20)",
+      "Bash(PowerShell -NoProfile -Command ' *)",
+      "Bash(node -e ' *)"
     ],
     "deny": [],
     "ask": []

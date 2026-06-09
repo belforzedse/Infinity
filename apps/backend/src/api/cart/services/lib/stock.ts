@@ -1,4 +1,5 @@
 import type { Strapi } from "@strapi/strapi";
+import { scheduleHomeProductsRevalidation } from "../../../../utils/homepageRevalidation";
 
 /**
  * Stock interface for type safety
@@ -230,6 +231,11 @@ export const decrementStockAtomic = async (
       };
     }
 
+    scheduleHomeProductsRevalidation(
+      "stock-decrement",
+      { stockId, decrementBy: quantity },
+      trx,
+    );
     return { success: true, newCount: rows[0].count };
   } catch (error) {
     strapi.log.error("Failed to decrement stock atomically", {
@@ -284,6 +290,11 @@ export const reserveStockAtomic = async (
       };
     }
 
+    scheduleHomeProductsRevalidation(
+      "stock-reserve",
+      { stockId, reserveBy: quantity },
+      trx,
+    );
     return { success: true, newReservedCount: rows[0].reserved_count };
   } catch (error) {
     strapi.log.error("Failed to reserve stock atomically", {
@@ -356,6 +367,11 @@ export const releaseReservedStockAtomic = async (
       };
     }
 
+    scheduleHomeProductsRevalidation(
+      "stock-reservation-release",
+      { stockId, releaseBy: quantity },
+      trx,
+    );
     return { success: true, newReservedCount: rows[0].reserved_count };
   } catch (error) {
     strapi.log.error("Failed to release reserved stock atomically", {
@@ -431,6 +447,12 @@ export const consumeReservedStockAtomic = async (
       };
     }
 
+    scheduleHomeProductsRevalidation(
+      "stock-reservation-consume",
+      { stockId, consumeBy: quantity },
+      trx,
+    );
+
     return {
       success: true,
       newCount: rows[0].count,
@@ -470,4 +492,5 @@ export const decrementStock = async (
       data: { Count: currentCount - decrementBy },
     }
   );
+  scheduleHomeProductsRevalidation("stock-decrement-legacy", { stockId, decrementBy });
 };
