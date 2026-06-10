@@ -2,9 +2,12 @@
 
 import BasketIcon from "./Icons/BasketIcon";
 import { useCart } from "@/contexts/CartContext";
+import { useCartShellReady } from "@/hooks/useCartShellReady";
 
 const ShoppingCartCounter = () => {
   const { totalItems, openDrawer } = useCart();
+  const isCartShellReady = useCartShellReady();
+  const visibleTotalItems = isCartShellReady ? totalItems : 0;
 
   return (
     <button
@@ -15,9 +18,9 @@ const ShoppingCartCounter = () => {
     >
       <BasketIcon className="text-white" />
 
-      {totalItems > 0 && (
+      {visibleTotalItems > 0 && (
         <div className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full border border-slate-200 bg-white text-xs font-medium text-infinity-primary">
-          {totalItems}
+          {visibleTotalItems}
         </div>
       )}
     </button>

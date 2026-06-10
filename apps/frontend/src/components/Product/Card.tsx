@@ -18,11 +18,18 @@ import {
   FloatingActions,
 } from "./CardParts";
 
-// Lazy load heavy modals
+// Lazy load heavy modals — resolved at card-mount time (page load) so the first
+// click opens immediately without waiting for a dynamic-import round-trip.
 const QuickViewModal = dynamic(() => import("./QuickViewModal"), {
   ssr: false,
   loading: () => null,
 });
+
+// Warm the Quick View cache on hover so data is ready before the click.
+const preloadQuickView = (productId: number) =>
+  import("./QuickViewModal").then(({ preloadQuickViewProduct }) =>
+    preloadQuickViewProduct(productId),
+  );
 
 const ShareModal = dynamic(() => import("./ShareModal"), {
   ssr: false,
@@ -163,7 +170,9 @@ const ProductCard: FC<ProductCardProps> = ({
 
   const handleInteractionIntent = useCallback(() => {
     void maybeLoadSecondaryMedia();
-  }, [maybeLoadSecondaryMedia]);
+    // Pre-warm the Quick View data cache so a subsequent click is instant.
+    void preloadQuickView(id);
+  }, [maybeLoadSecondaryMedia, id]);
 
   return (
     <>
@@ -236,14 +245,13 @@ const ProductCard: FC<ProductCardProps> = ({
         />
       </article>
 
-      {/* Modals */}
-      {isQuickViewOpen && (
-        <QuickViewModal
-          isOpen={isQuickViewOpen}
-          onClose={() => setIsQuickViewOpen(false)}
-          productId={id}
-        />
-      )}
+      {/* Modals — QuickViewModal is always mounted so the dynamic import resolves at
+          page load, not on first click. Modal renders null internally when isOpen=false. */}
+      <QuickViewModal
+        isOpen={isQuickViewOpen}
+        onClose={() => setIsQuickViewOpen(false)}
+        productId={id}
+      />
 
       {isShareOpen && (
         <ShareModal

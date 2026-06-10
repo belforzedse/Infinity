@@ -80,11 +80,12 @@ function mapProductStatus(wcStatus, statusMappings = {}) {
  * @param {object} wcProduct
  * @param {object} [opts]
  * @param {(wooCategoryId:number)=>(number|null)} [opts.resolveCategoryId]
+ * @param {(wooCategoryId:number)=>(number|null)} [opts.resolveCategoryParent] - returns WC parent id
  * @param {Record<string,string>} [opts.statusMappings]
  * @returns {{ data: object, mainCategoryMissing: boolean, otherCategoryMisses: number[] }}
  */
 function mapProduct(wcProduct, opts = {}) {
-  const { resolveCategoryId = () => null, statusMappings = {} } = opts;
+  const { resolveCategoryId = () => null, resolveCategoryParent = () => null, statusMappings = {} } = opts;
 
   const data = {
     Title: normalizeName(wcProduct.name),
@@ -107,12 +108,28 @@ function mapProduct(wcProduct, opts = {}) {
   }
 
   // Categories → Strapi relation ids
+  // When a product has both a parent and a child category, the child (leaf) becomes
+  // product_main_category and the parent goes to product_other_categories.
   const categories = Array.isArray(wcProduct.categories) ? wcProduct.categories : [];
   let mainCategoryMissing = false;
   const otherCategoryMisses = [];
 
   if (categories.length > 0) {
-    const mainId = resolveCategoryId(categories[0].id);
+    // Identify which category IDs in this product's list are referenced as parents
+    // by another category also in the list. A "leaf" is one that no sibling points to.
+    const wcCategoryIds = new Set(categories.map(c => c.id));
+    const parentIdsInList = new Set(
+      categories
+        .map(cat => resolveCategoryParent(cat.id))
+        .filter(pid => pid != null && wcCategoryIds.has(pid)),
+    );
+    const leafCats = categories.filter(cat => !parentIdsInList.has(cat.id));
+    // Use the leaf (child) as main when the hierarchy is unambiguous; else fall back to first.
+    const mainCat = leafCats.length > 0 && leafCats.length < categories.length
+      ? leafCats[0]
+      : categories[0];
+
+    const mainId = resolveCategoryId(mainCat.id);
     if (mainId) {
       data.product_main_category = mainId;
     } else {
@@ -120,7 +137,8 @@ function mapProduct(wcProduct, opts = {}) {
     }
 
     const otherIds = [];
-    for (const cat of categories.slice(1)) {
+    for (const cat of categories) {
+      if (cat.id === mainCat.id) continue;
       const sid = resolveCategoryId(cat.id);
       if (sid) {
         otherIds.push(sid);

@@ -10,6 +10,7 @@ import { useCart } from "@/contexts/CartContext";
 import { usePathname } from "next/navigation";
 import MobileBackButton from "@/components/MobileBackButton";
 import { getMobileBackFallbackHref } from "@/utils/mobileBackNavigation";
+import { useCartShellReady } from "@/hooks/useCartShellReady";
 
 type Props = object;
 
@@ -17,6 +18,8 @@ export default function PLPMobileHeader({}: Props) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { totalItems, openDrawer } = useCart();
+  const isCartShellReady = useCartShellReady();
+  const visibleTotalItems = isCartShellReady ? totalItems : 0;
   const [isStandalone, setIsStandalone] = useState(false);
   const pathname = usePathname();
   const backFallbackHref = getMobileBackFallbackHref(pathname);
@@ -83,9 +86,9 @@ export default function PLPMobileHeader({}: Props) {
               aria-label="سبد خریدتان"
             >
               <CartIcon className="text-white" />
-              {totalItems > 0 && (
+              {visibleTotalItems > 0 && (
                 <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-infinity-primary-dark text-[10px] font-medium leading-none text-white">
-                  {totalItems > 9 ? "9+" : totalItems}
+                  {visibleTotalItems > 9 ? "9+" : visibleTotalItems}
                 </span>
               )}
             </button>

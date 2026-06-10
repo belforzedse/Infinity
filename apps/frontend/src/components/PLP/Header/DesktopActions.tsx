@@ -5,11 +5,14 @@ import WalletIcon from "@/components/PLP/Icons/WalletIcon";
 import OrderTrackingIcon from "@/components/PLP/Icons/OrderTrackingIcon";
 import UserProfileIcon from "@/components/PLP/Icons/UserProfileIcon";
 import { useCart } from "@/contexts/CartContext";
+import { useCartShellReady } from "@/hooks/useCartShellReady";
 
 type Props = object;
 
 const PLPDesktopHeaderActions = ({}: Props) => {
   const { totalItems, openDrawer } = useCart();
+  const isCartShellReady = useCartShellReady();
+  const visibleTotalItems = isCartShellReady ? totalItems : 0;
 
   return (
     <div className="inline-flex flex-row-reverse items-center gap-4">
@@ -22,7 +25,9 @@ const PLPDesktopHeaderActions = ({}: Props) => {
         <div className="relative">
           <ShoppingCartIcon className="h-6 w-6" />
           <div className="absolute -right-1 -top-1 flex h-[13px] w-[13px] items-center justify-center rounded-full border border-slate-200 bg-white">
-            <span className="text-xs font-normal leading-none text-infinity-primary">{totalItems}</span>
+            <span className="text-xs font-normal leading-none text-infinity-primary">
+              {visibleTotalItems}
+            </span>
           </div>
         </div>
         <span className="text-xs leading-[21px]">سبد خرید</span>

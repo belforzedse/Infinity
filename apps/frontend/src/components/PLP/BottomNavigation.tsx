@@ -12,6 +12,7 @@ import { useCart } from "@/contexts/CartContext";
 import { hapticButton } from "@/utils/haptics";
 import { ALLOWED_HOME_NAV_CATEGORY_NAME_SUBSTRINGS } from "@/constants/categories";
 import { useProductCategories } from "@/hooks/useProductCategories";
+import { useCartShellReady } from "@/hooks/useCartShellReady";
 
 const INFINITY_MARK_SRC = "/Infinity.svg";
 
@@ -69,6 +70,8 @@ const PLPBottomNavigation = () => {
   const pathname = usePathname();
   const router = useRouter();
   const { totalItems } = useCart();
+  const isCartShellReady = useCartShellReady();
+  const visibleTotalItems = isCartShellReady ? totalItems : 0;
   const { categories, isLoading: isLoadingCategories } = useProductCategories({
     mainOnly: true,
     featuredOnly: true,
@@ -157,9 +160,9 @@ const PLPBottomNavigation = () => {
               >
                 <div className="relative">
                   <BasketIcon className="shrink-0 stroke-current" />
-                  {totalItems > 0 && (
+                  {visibleTotalItems > 0 && (
                     <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-infinity-primary text-[10px] font-medium text-white">
-                      {totalItems > 9 ? "9+" : totalItems}
+                      {visibleTotalItems > 9 ? "9+" : visibleTotalItems}
                     </span>
                   )}
                 </div>

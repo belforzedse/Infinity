@@ -38,6 +38,7 @@ export const redirectToAuth = () => {
 };
 
 const useProductLike = ({ productId }: UseProductLikeParams) => {
+  const [isMounted, setIsMounted] = useState(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [likedProducts, setLikedProducts] = useAtom(likedProductsAtom);
   const [isGlobalLoading, setIsGlobalLoading] = useAtom(likedProductsLoadingAtom);
@@ -48,6 +49,8 @@ const useProductLike = ({ productId }: UseProductLikeParams) => {
 
   // Fetch liked products only once for all instances
   useEffect(() => {
+    setIsMounted(true);
+
     const fetchLikedProducts = async () => {
       if (fetchStarted) return;
 
@@ -132,10 +135,10 @@ const useProductLike = ({ productId }: UseProductLikeParams) => {
 
   return {
     isLiked:
-      productId && productId !== ""
+      isMounted && productId && productId !== ""
         ? safeProducts.some(({ product }) => product?.id?.toString() === productId.toString())
         : false,
-    isLoading: isLoading || isGlobalLoading,
+    isLoading: isMounted && (isLoading || isGlobalLoading),
     toggleLike,
   };
 };

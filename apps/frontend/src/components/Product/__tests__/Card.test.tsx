@@ -41,6 +41,16 @@ jest.mock("../Icons/GridIcon", () => ({
   default: () => <div data-testid="grid-icon" />,
 }));
 
+// QuickViewModal is always mounted inside Card (unconditional render so the dynamic
+// import resolves at page load). Stub it out in Card unit tests — QuickView behavior
+// is covered by its own test suite.
+jest.mock("../QuickViewModal", () => ({
+  __esModule: true,
+  default: ({ isOpen }: { isOpen: boolean; [key: string]: unknown }) =>
+    isOpen ? <div data-testid="quick-view-modal-stub" /> : null,
+  preloadQuickViewProduct: jest.fn(),
+}));
+
 describe("ProductCard", () => {
   const useProductLike = require("@/hooks/useProductLike").default;
   const getLazySecondaryMediaByProductId =

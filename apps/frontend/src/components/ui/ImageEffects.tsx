@@ -21,6 +21,12 @@ export default function ImageEffects() {
         if (img.dataset?.nimg !== undefined) {
           return;
         }
+        // Only mutate images explicitly opted into the image fade effect. Mutating
+        // every plain logo/icon <img> before hydration causes React attribute
+        // mismatch warnings for className/loading.
+        if (!img.classList.contains("img-fx")) {
+          return;
+        }
         // Ensure lazy loading on plain <img>
         if (!img.getAttribute("loading")) {
           img.setAttribute("loading", "lazy");
@@ -42,7 +48,7 @@ export default function ImageEffects() {
       };
 
       // Initial pass
-      document.querySelectorAll<HTMLImageElement>("img").forEach(applyEffects);
+      document.querySelectorAll<HTMLImageElement>("img.img-fx").forEach(applyEffects);
 
       // Observe for new images
       const observer = new MutationObserver((mutations) => {
@@ -51,7 +57,7 @@ export default function ImageEffects() {
             if (node instanceof HTMLImageElement) {
               applyEffects(node);
             } else if (node instanceof HTMLElement) {
-              node.querySelectorAll("img").forEach((img) => applyEffects(img));
+              node.querySelectorAll<HTMLImageElement>("img.img-fx").forEach((img) => applyEffects(img));
             }
           });
         }

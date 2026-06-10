@@ -12,81 +12,118 @@ interface QuickViewModalProps {
   productId: number;
 }
 
+/**
+ * Module-level cache so reopening the same product within a session is instant.
+ * Key: productId  Value: { data, cachedAt }
+ * TTL: 60 seconds — avoids showing stale stock/price for the whole session.
+ */
+const CACHE_TTL_MS = 60_000;
+const productCache = new Map<number, { data: ProductDetail; cachedAt: number }>();
+
+/** Exposed so Card.tsx (and others) can warm the cache on hover before the click. */
+export function preloadQuickViewProduct(productId: number): void {
+  const cached = productCache.get(productId);
+  if (cached && Date.now() - cached.cachedAt < CACHE_TTL_MS) return;
+
+  // Fire-and-forget — ignore errors here, the modal handles them on open
+  void getProductById(productId.toString()).then((response) => {
+    if (response?.data) {
+      productCache.set(productId, { data: response.data, cachedAt: Date.now() });
+    }
+  });
+}
+
+/** @internal — only for unit tests; not part of the public API. */
+export function _clearQuickViewCacheForTesting(): void {
+  productCache.clear();
+}
+
 export default function QuickViewModal({ isOpen, onClose, productId }: QuickViewModalProps) {
   const [productData, setProductData] = useState<ProductDetail | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  // Start as `true` so the skeleton renders on the very first frame, before any effect fires.
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const abortControllerRef = useRef<AbortController | null>(null);
+  // Guard setState calls after unmount to prevent memory-leak warnings.
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   const fetchProduct = useCallback(async () => {
-    // Cancel any pending requests
+    // Cancel any in-flight request from a previous open/product.
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
-
-    // Create new abort controller
     abortControllerRef.current = new AbortController();
 
-    setIsLoading(true);
-    setError(null);
+    // --- Cache hit: serve immediately, no skeleton needed ---
+    const cached = productCache.get(productId);
+    if (cached && Date.now() - cached.cachedAt < CACHE_TTL_MS) {
+      if (mountedRef.current) {
+        setProductData(cached.data);
+        setError(null);
+        setIsLoading(false);
+      }
+      return;
+    }
+
+    // --- Cache miss: show skeleton, then fetch ---
+    if (mountedRef.current) {
+      setIsLoading(true);
+      setError(null);
+    }
 
     try {
       const response = await getProductById(productId.toString());
+      if (!mountedRef.current) return;
 
       if (response?.data) {
+        productCache.set(productId, { data: response.data, cachedAt: Date.now() });
         setProductData(response.data);
       } else {
         setError("محصول یافت نشد");
       }
-    } catch (err: any) {
-      if (err.name !== "AbortError") {
+    } catch (err: unknown) {
+      if (!mountedRef.current) return;
+      const isAbort = err instanceof Error && err.name === "AbortError";
+      if (!isAbort) {
         console.error("Error fetching product for quick view:", err);
         setError("خطا در بارگیری اطلاعات محصول");
       }
     } finally {
-      setIsLoading(false);
+      if (mountedRef.current) setIsLoading(false);
     }
   }, [productId]);
 
+  // Fetch when modal opens; cancel in-flight request on close or productId change.
   useEffect(() => {
     if (isOpen && productId) {
       fetchProduct();
     }
-
-    // Cleanup on unmount or when modal closes
     return () => {
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
+        abortControllerRef.current = null;
       }
     };
   }, [isOpen, productId, fetchProduct]);
 
-  // Reset state when modal closes
+  // Reset state when modal closes so the next open starts clean.
+  // isLoading is reset to `true` so the skeleton shows immediately on the next open
+  // instead of flashing a blank frame while the effect fires.
   useEffect(() => {
     if (!isOpen) {
       setProductData(null);
       setError(null);
+      setIsLoading(true);
     }
   }, [isOpen]);
-
-  // Handle keyboard navigation
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      }
-      // Ctrl/Cmd + Enter to view full details
-      if ((e.ctrlKey || e.metaKey) && e.key === "Enter" && productData) {
-        viewFullDetails();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose, productData]);
 
   const viewFullDetails = useCallback(() => {
     if (productData) {
@@ -97,14 +134,19 @@ export default function QuickViewModal({ isOpen, onClose, productId }: QuickView
   }, [productData, productId, router, onClose]);
 
   const handleRetry = useCallback(() => {
+    // Evict the cache entry so a real fetch happens on retry.
+    productCache.delete(productId);
     fetchProduct();
-  }, [fetchProduct]);
+  }, [productId, fetchProduct]);
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      className="max-w-6xl overflow-hidden !p-0"
+      // max-w-6xl keeps the two-column layout comfortable; overflow-hidden clips rounded corners.
+      className="max-w-6xl overflow-hidden"
+      // Let QuickViewContent handle its own padding (avoids double-padding).
+      contentClassName="p-0"
       aria-labelledby="quick-view-title"
     >
       <div className="custom-scrollbar relative max-h-[90vh] overflow-y-auto">
@@ -125,25 +167,27 @@ export default function QuickViewModal({ isOpen, onClose, productId }: QuickView
   );
 }
 
-// Loading Skeleton Component
+// ---------------------------------------------------------------------------
+// Loading Skeleton
+// ---------------------------------------------------------------------------
 function QuickViewSkeleton() {
   return (
     <div className="grid gap-8 p-6 lg:grid-cols-2 lg:p-10">
-      {/* Image Skeleton */}
+      {/* Image skeleton */}
       <div className="space-y-4">
-        <div className="skeleton-shimmer aspect-square rounded-lg" />
+        <div className="skeleton-shimmer aspect-square rounded-2xl" />
         <div className="flex gap-2">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="skeleton-shimmer-light h-20 w-20 rounded-lg" />
+            <div key={i} className="skeleton-shimmer-light h-16 w-16 flex-shrink-0 rounded-xl" />
           ))}
         </div>
       </div>
 
-      {/* Content Skeleton */}
+      {/* Info skeleton */}
       <div className="space-y-6">
         <div className="space-y-3">
-          <div className="skeleton-shimmer-light h-6 w-1/3 rounded" />
-          <div className="skeleton-shimmer h-8 w-2/3 rounded" />
+          <div className="skeleton-shimmer-light h-5 w-1/3 rounded" />
+          <div className="skeleton-shimmer h-7 w-2/3 rounded" />
         </div>
 
         <div className="space-y-2">
@@ -152,15 +196,17 @@ function QuickViewSkeleton() {
           <div className="skeleton-shimmer-light h-4 w-4/6 rounded" />
         </div>
 
-        <div className="skeleton-shimmer-light h-16 rounded" />
-        <div className="skeleton-shimmer-light h-12 rounded" />
+        <div className="skeleton-shimmer-light h-16 rounded-2xl" />
+        <div className="skeleton-shimmer-light h-12 rounded-2xl" />
         <div className="skeleton-shimmer h-12 rounded-full" />
       </div>
     </div>
   );
 }
 
-// Error Component
+// ---------------------------------------------------------------------------
+// Error state
+// ---------------------------------------------------------------------------
 interface QuickViewErrorProps {
   message: string;
   onRetry: () => void;
@@ -170,21 +216,21 @@ interface QuickViewErrorProps {
 function QuickViewError({ message, onRetry, onClose }: QuickViewErrorProps) {
   return (
     <div className="flex flex-col items-center justify-center px-6 py-20 text-center">
-      <div className="mb-4 text-6xl">😔</div>
+      <div className="mb-4 text-6xl" aria-hidden="true">😔</div>
       <h3 className="mb-2 text-xl font-bold text-gray-900">مشکلی پیش آمد</h3>
       <p className="mb-6 text-gray-600">{message}</p>
       <div className="flex gap-3">
         <button
           type="button"
           onClick={onRetry}
-          className="rounded-lg bg-infinity-primary px-6 py-3 text-white transition-colors hover:bg-infinity-primary"
+          className="rounded-lg bg-infinity-primary px-6 py-3 text-white transition-colors hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary focus-visible:ring-offset-2"
         >
           تلاش مجدد
         </button>
         <button
           type="button"
           onClick={onClose}
-          className="rounded-lg bg-gray-200 px-6 py-3 text-gray-700 transition-colors hover:bg-gray-300"
+          className="rounded-lg bg-gray-200 px-6 py-3 text-gray-700 transition-colors hover:bg-gray-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 focus-visible:ring-offset-2"
         >
           بستن
         </button>

@@ -47,6 +47,16 @@ test("mapProduct: resolves category relations and reports misses", () => {
   assert.deepEqual(otherCategoryMisses, []);
 });
 
+test("mapProduct: uses child category as main when parent-child hierarchy is detectable", () => {
+  // Product 101 has categories [{id:5, name:"کیف"}, {id:9, name:"اکسسوری"}]
+  // If 9's parent is 5, then 9 is the child → should be product_main_category
+  const resolveCategoryId = (id) => ({ 5: 50, 9: 90 })[id] || null;
+  const resolveCategoryParent = (id) => ({ 9: 5 })[id] || null; // 9's parent is 5
+  const { data } = T.mapProduct(byId(products, 101), { resolveCategoryId, resolveCategoryParent });
+  assert.equal(data.product_main_category, 90); // child (id=9, strapiId=90) is main
+  assert.deepEqual(data.product_other_categories, [50]); // parent (id=5, strapiId=50) is other
+});
+
 test("mapProduct: sends empty product_other_categories to clear stale relations", () => {
   const resolveCategoryId = (id) => ({ 5: 50 })[id] || null;
   const { data } = T.mapProduct(byId(products, 102), { resolveCategoryId });

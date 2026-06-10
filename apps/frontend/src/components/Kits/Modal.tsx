@@ -8,6 +8,8 @@ interface ModalProps {
   onClose: () => void;
   children: React.ReactNode;
   className?: string;
+  /** Overrides the default `p-6` on the inner content wrapper. Pass `"p-0"` to let children control their own padding. */
+  contentClassName?: string;
   title?: string;
   titleClassName?: string;
   closeIcon?: React.ReactNode;
@@ -19,6 +21,7 @@ export default function Modal({
   onClose,
   children,
   className = "",
+  contentClassName,
   title,
   titleClassName = "",
   closeIcon,
@@ -202,7 +205,7 @@ export default function Modal({
           </button>
         </div>
 
-        <div className="p-6">
+        <div className={contentClassName ?? "p-6"}>
           {children}
         </div>
       </div>

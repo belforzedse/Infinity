@@ -83,6 +83,8 @@ class ProductImporter {
 
     // Cache for category mappings to avoid repeated lookups
     this.categoryMappingCache = new Map();
+    // WC category id → WC parent id (for child-first main-category selection)
+    this.wcCategoryParentCache = new Map();
   }
 
   /**
@@ -561,7 +563,11 @@ class ProductImporter {
     const categoryMappings = this.duplicateTracker.getAllMappings("categories");
 
     for (const [wcId, mapping] of Object.entries(categoryMappings)) {
-      this.categoryMappingCache.set(parseInt(wcId), mapping.strapiId);
+      const id = parseInt(wcId);
+      this.categoryMappingCache.set(id, mapping.strapiId);
+      if (mapping.parentId) {
+        this.wcCategoryParentCache.set(id, mapping.parentId);
+      }
     }
 
     this.logger.info(`📂 Loaded ${this.categoryMappingCache.size} category mappings`);
@@ -1186,11 +1192,22 @@ class ProductImporter {
       }
     }
 
-    // Handle main category relationship
+    // Handle main category relationship.
+    // When a product has both parent and child categories, use the child (leaf) as main.
     if (wcProduct.categories && wcProduct.categories.length > 0) {
-      const mainCategory = wcProduct.categories[0];
-      const mainCategoryStrapiId = this.categoryMappingCache.get(mainCategory.id);
+      const cats = wcProduct.categories;
+      const wcCategoryIds = new Set(cats.map(c => c.id));
+      const parentIdsInList = new Set(
+        cats
+          .map(cat => this.wcCategoryParentCache.get(cat.id))
+          .filter(pid => pid != null && wcCategoryIds.has(pid)),
+      );
+      const leafCats = cats.filter(cat => !parentIdsInList.has(cat.id));
+      const mainCategory = leafCats.length > 0 && leafCats.length < cats.length
+        ? leafCats[0]
+        : cats[0];
 
+      const mainCategoryStrapiId = this.categoryMappingCache.get(mainCategory.id);
       if (mainCategoryStrapiId) {
         strapiProduct.product_main_category = mainCategoryStrapiId;
         this.logger.debug(
@@ -1201,13 +1218,10 @@ class ProductImporter {
           `⚠️ Main category ${mainCategory.id} not found for product ${wcProduct.name}`,
         );
       }
-    }
 
-    // Store additional category relationships for later processing
-    if (wcProduct.categories && wcProduct.categories.length > 1) {
-      strapiProduct._additionalCategories = wcProduct.categories
-        .slice(1)
-        .map((cat) => {
+      strapiProduct._additionalCategories = cats
+        .filter(cat => cat.id !== mainCategory.id)
+        .map(cat => {
           const strapiId = this.categoryMappingCache.get(cat.id);
           return strapiId ? { id: strapiId } : null;
         })
