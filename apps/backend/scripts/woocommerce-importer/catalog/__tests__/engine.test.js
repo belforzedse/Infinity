@@ -124,6 +124,22 @@ test("full sync: mirrors WooCommerce color attributes exactly", async () => {
   assert.equal(variationUpserts.get("102").product_variation_color, null);
 });
 
+test("full sync: child category becomes product_main_category when parent is also assigned", async () => {
+  // Category 9 (اکسسوری) has parent 5 (کیف). Product 101 has both.
+  // The child (9 → strapiId 10009) must be main; the parent (5 → 10005) goes to other.
+  const engine = makeEngine();
+  await engine.runSync({ dryRun: false, scope: "no-media" });
+
+  const productUpserts = new Map(
+    engine._calls.upserts
+      .filter((u) => u.endpoint === "/products")
+      .map((u) => [u.externalId, u.payload]),
+  );
+
+  assert.equal(productUpserts.get("101").product_main_category, 10009); // child is main
+  assert.ok(productUpserts.get("101").product_other_categories.includes(10005)); // parent is other
+});
+
 test("full sync: syncs WooCommerce size guide matrix to product-size-helper", async () => {
   const productWithGuide = {
     ...products[1],

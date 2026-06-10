@@ -22,6 +22,42 @@ export default {
     },
     {
       method: "GET",
+      path: "/reports/products/overview",
+      handler: "report.productOverview",
+      config: { auth: { scope: [] } },
+    },
+    {
+      method: "GET",
+      path: "/reports/products/trends",
+      handler: "report.productTrends",
+      config: { auth: { scope: [] } },
+    },
+    {
+      method: "GET",
+      path: "/reports/products/performance",
+      handler: "report.productPerformance",
+      config: { auth: { scope: [] } },
+    },
+    {
+      method: "GET",
+      path: "/reports/products/export",
+      handler: "report.productExport",
+      config: { auth: { scope: [] } },
+    },
+    {
+      method: "GET",
+      path: "/reports/products/detail",
+      handler: "report.productDetail",
+      config: { auth: { scope: [] } },
+    },
+    {
+      method: "GET",
+      path: "/reports/products/inventory",
+      handler: "report.productInventory",
+      config: { auth: { scope: [] } },
+    },
+    {
+      method: "GET",
       path: "/reports/gateway-liquidity",
       handler: "report.gatewayLiquidity",
       config: {

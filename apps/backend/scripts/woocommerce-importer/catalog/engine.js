@@ -70,8 +70,20 @@ class CatalogEngine {
 
   async preflight() {
     this.logger.info("Checking API connectivity…");
-    await this.woo.http.get("/products", { params: { per_page: 1 } });
-    await this.repo.http.get("/product-categories", { params: { "pagination[pageSize]": 1 } });
+    try {
+      await this.woo.http.get("/products", { params: { per_page: 1 } });
+      this.logger.info("✓ WooCommerce reachable");
+    } catch (error) {
+      const status = error.response?.status;
+      throw new Error(`WooCommerce connectivity failed${status ? ` (HTTP ${status})` : ""}: ${error.message}`);
+    }
+    try {
+      await this.repo.http.get("/product-categories", { params: { "pagination[pageSize]": 1 } });
+      this.logger.info("✓ Strapi reachable");
+    } catch (error) {
+      const status = error.response?.status;
+      throw new Error(`Strapi connectivity failed${status ? ` (HTTP ${status})` : ""}: ${error.message}`);
+    }
     this.logger.success("WooCommerce and Strapi reachable");
   }
 
@@ -143,7 +155,8 @@ class CatalogEngine {
           payload: data,
           index,
         });
-        this.mapping.set("categories", wc.id, id, { name: wc.name, slug: data.Slug });
+        // Store parentWcId so syncOneProduct can resolve parent-child hierarchy for main-category selection.
+        this.mapping.set("categories", wc.id, id, { name: wc.name, slug: data.Slug, parentWcId: wc.parent || null });
         report.count("categories", mode);
       } catch (error) {
         report.fail("categories", { wcId: wc.id, stage: "upsert-category", error });
@@ -191,8 +204,10 @@ class CatalogEngine {
     // Product record write (only in scopes that touch products).
     if (flags.products) {
       const resolveCategoryId = (wooId) => this.mapping.getStrapiId("categories", wooId);
+      const resolveCategoryParent = (wooId) => this.mapping.get("categories", wooId)?.parentWcId ?? null;
       const { data, sizeGuideMatrix } = T.mapProduct(wcProduct, {
         resolveCategoryId,
+        resolveCategoryParent,
         statusMappings: this.statusMappings,
       });
 

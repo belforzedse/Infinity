@@ -30,6 +30,7 @@
     "import:sync:verify": "node scripts/woocommerce-importer/catalog-sync.js verify",
     "retry:images": "node scripts/retry-failed-images.js",
     "seed:admin": "node scripts/seed-admin-user.js",
+    "seed:report-fixtures": "node scripts/seed-report-fixtures.js",
     "regenerate:slugs": "node scripts/regenerate-product-slugs.js",
     "start": "strapi start",
     "start:prod": " NODE_ENV=production strapi start",

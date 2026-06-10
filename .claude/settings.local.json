@@ -37,7 +37,11 @@
       "Bash(node -e \"console.log\\('sharp?', require\\('fs'\\).existsSync\\('node_modules/sharp'\\)\\); console.log\\('axios?', require\\('fs'\\).existsSync\\('node_modules/axios'\\)\\); console.log\\('commander?', require\\('fs'\\).existsSync\\('node_modules/commander'\\)\\)\")",
       "Bash(ls -la \"D:\\\\projects\\\\Infinitycolor\\\\\" | head -20)",
       "Bash(PowerShell -NoProfile -Command ' *)",
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "Bash(Get-ChildItem -Path \"D:\\\\projects\\\\Infinitycolor\" -Force)",
+      "Bash(Select-Object Name, FullName)",
+      "Bash(Get-ChildItem -Path \"D:\\\\projects\\\\Infinitycolor\" -Directory)",
+      "Bash(Select-Object Name)"
     ],
     "deny": [],
     "ask": []

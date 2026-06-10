@@ -16,7 +16,7 @@ export default function ReportsIndexPage() {
         </li>
         <li>
           <Link className="text-infinity-primary" href="/super-admin/reports/product-sales">
-            گزارش فروش هر محصول
+            گزارش محصولات (نمای کلی، روند، عملکرد و موجودی)
           </Link>
         </li>
         <li>

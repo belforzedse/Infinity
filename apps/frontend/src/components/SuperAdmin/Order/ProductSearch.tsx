@@ -111,7 +111,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
     setLoading(true);
     const timeout = setTimeout(async () => {
       try {
-        const url = `${API_BASE_URL}${ENDPOINTS.PRODUCT.SEARCH}?q=${encodeURIComponent(q)}&page=1&pageSize=20`;
+        const url = `${API_BASE_URL}${ENDPOINTS.PRODUCT.SEARCH}?q=${encodeURIComponent(q)}&page=1&pageSize=20&view=suggestion`;
         const res = await fetch(url, {
           method: "GET",
           cache: "no-store",
@@ -214,7 +214,7 @@ const ProductSearch: React.FC<ProductSearchProps> = ({
             id,
             Title: attrs?.Title || raw?.Title,
             Description: attrs?.Description || raw?.Description,
-            Price: computedPrice,
+            Price: computedPrice || parseFloat(attrs?.Price || 0),
             ProductSKU: attrs?.ProductSKU || raw?.ProductSKU,
             product_main_category: attrs?.product_main_category || raw?.product_main_category,
             product_variations: variations,

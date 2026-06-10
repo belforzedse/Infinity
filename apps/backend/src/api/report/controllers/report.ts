@@ -10,6 +10,7 @@ import {
   getMatomoTrafficDashboardPayload,
   normalizeRange,
 } from "../services/matomo";
+import * as productAnalytics from "../services/product-analytics";
 
 type Interval = "day" | "week" | "month";
 
@@ -124,6 +125,83 @@ async function getRevenueToman(start: Date, end: Date) {
   );
   const row = (revenueRes.rows || revenueRes[0] || [])[0] || {};
   return Number(row.total_irr || 0) / 10;
+}
+
+// ---------------------------------------------------------------------------
+// Product reporting helpers (shared by the new /reports/products/* endpoints).
+// ---------------------------------------------------------------------------
+
+const PA = productAnalytics;
+
+/** Parse and validate a [start, end] window from the query string. */
+function parseProductRange(ctx: any): { start: Date; end: Date } {
+  const start = parseDate(ctx.query.start as string);
+  const end = parseDate(ctx.query.end as string, 0);
+  if (start.getTime() > end.getTime()) {
+    return { start: end, end: start };
+  }
+  return { start, end };
+}
+
+const rowsOf = (res: any): any[] => res?.rows || res?.[0] || [];
+
+/** Run the period scalar query and shape it into Toman-denominated KPI values. */
+async function computeProductPeriod(
+  knex: any,
+  joins: productAnalytics.ResolvedJoins,
+  start: Date,
+  end: Date,
+) {
+  const sql = `
+    WITH ${PA.paidOrdersCte(joins)}, ${PA.itemizedCte(joins)}
+    SELECT
+      COALESCE((SELECT SUM(line_gross) FROM itemized), 0)::numeric AS gross,
+      COALESCE((SELECT SUM(cnt) FROM itemized), 0)::bigint AS units,
+      (SELECT COUNT(*) FROM paid_orders)::bigint AS orders_count,
+      COALESCE((SELECT SUM(order_discount) FROM paid_orders), 0)::numeric AS discounts,
+      COALESCE((SELECT SUM(refund_irr) FROM paid_orders), 0)::numeric AS refund_irr
+  `;
+  const res = await knex.raw(sql, [start, end]);
+  const row = rowsOf(res)[0] || {};
+  const gross = Number(row.gross) || 0;
+  const units = Number(row.units) || 0;
+  const orders = Number(row.orders_count) || 0;
+  const discounts = Number(row.discounts) || 0;
+  const refunds = PA.irrToToman(Number(row.refund_irr) || 0);
+  const net = gross - discounts - refunds;
+  return {
+    gross,
+    units,
+    orders,
+    discounts,
+    refunds,
+    net,
+    avgPrice: units > 0 ? gross / units : 0,
+    aov: orders > 0 ? gross / orders : 0,
+  };
+}
+
+/** Attach cover-image URLs to performance rows (one query for the visible page). */
+async function attachCoverImages(rows: productAnalytics.ProductPerformanceRow[]) {
+  const ids = Array.from(
+    new Set(rows.map((r) => r.productId).filter((id): id is number => !!id)),
+  );
+  if (ids.length === 0) return rows;
+  try {
+    const products = (await strapi.entityService.findMany("api::product.product" as any, {
+      filters: { id: { $in: ids } },
+      fields: ["id"],
+      populate: { CoverImage: { fields: ["url"] } },
+    })) as any[];
+    const imageById = new Map<number, string | null>();
+    for (const p of products) imageById.set(p.id, p?.CoverImage?.url ?? null);
+    for (const r of rows) {
+      if (r.productId) r.imageUrl = imageById.get(r.productId) ?? null;
+    }
+  } catch (err) {
+    strapi.log.warn("attachCoverImages failed", { error: (err as Error).message });
+  }
+  return rows;
 }
 
 export default {
@@ -936,6 +1014,564 @@ export default {
           createdAt: log.createdAt,
           updatedAt: log.updatedAt,
           performed_by: actor,
+        },
+      };
+    } catch (error) {
+      ctx.badRequest(error.message, { data: { success: false } });
+    }
+  },
+
+  // -------------------------------------------------------------------------
+  // Product intelligence workspace (server-side aggregation).
+  // -------------------------------------------------------------------------
+
+  async productOverview(ctx) {
+    try {
+      const user = await ensureRoleAccess(
+        ctx,
+        [ROLE_NAMES.SUPERADMIN, ROLE_NAMES.STORE_MANAGER],
+        "Access denied - Superadmin or Store manager role required",
+      );
+      if (!user) return;
+
+      const { start, end } = parseProductRange(ctx);
+      const prev = PA.previousPeriod(start, end);
+      const threshold = PA.DEFAULT_LOW_STOCK_THRESHOLD;
+      const knex = strapi.db.connection;
+      const joins = await PA.resolveJoins(knex);
+
+      const [current, previous, invRes] = await Promise.all([
+        computeProductPeriod(knex, joins, start, end),
+        computeProductPeriod(knex, joins, prev.start, prev.end),
+        knex.raw(
+          `SELECT
+             (SELECT COUNT(*) FROM products p WHERE p.status = 'Active' AND p.removed_at IS NULL)::bigint AS active_products,
+             COUNT(*) FILTER (WHERE cnt > ${threshold})::bigint AS in_stock,
+             COUNT(*) FILTER (WHERE cnt > 0 AND cnt <= ${threshold})::bigint AS low_stock,
+             COUNT(*) FILTER (WHERE cnt <= 0)::bigint AS out_stock,
+             COUNT(*)::bigint AS total_variations
+           FROM (
+             SELECT pv.id, COALESCE(ps.count, 0) AS cnt
+             FROM product_variations pv
+             ${joins.variationToStock}
+           ) sv`,
+        ),
+      ]);
+
+      const inv = rowsOf(invRes)[0] || {};
+      const kpi = (key: keyof typeof current) =>
+        PA.periodDelta((current as any)[key], (previous as any)[key]);
+
+      ctx.body = {
+        data: {
+          range: { start, end },
+          previous: { start: prev.start, end: prev.end },
+          timezone: PA.REPORT_TIMEZONE,
+          lowStockThreshold: threshold,
+          kpis: {
+            gross: kpi("gross"),
+            net: kpi("net"),
+            units: kpi("units"),
+            orders: kpi("orders"),
+            avgPrice: kpi("avgPrice"),
+            aov: kpi("aov"),
+            discounts: kpi("discounts"),
+            refunds: kpi("refunds"),
+          },
+          inventory: {
+            activeProducts: Number(inv.active_products || 0),
+            inStock: Number(inv.in_stock || 0),
+            lowStock: Number(inv.low_stock || 0),
+            outStock: Number(inv.out_stock || 0),
+            totalVariations: Number(inv.total_variations || 0),
+          },
+          notes: {
+            currency: "Toman",
+            net: "خالص فروش تخمینی است: تخفیف سفارش و مرجوعی به نسبت سهم هر قلم تسهیم می‌شود.",
+            refunds: "مرجوعی‌ها در سطح سفارش ثبت می‌شوند و به اقلام تسهیم شده‌اند.",
+          },
+        },
+      };
+    } catch (error) {
+      ctx.badRequest(error.message, { data: { success: false } });
+    }
+  },
+
+  async productTrends(ctx) {
+    try {
+      const user = await ensureRoleAccess(
+        ctx,
+        [ROLE_NAMES.SUPERADMIN, ROLE_NAMES.STORE_MANAGER],
+        "Access denied - Superadmin or Store manager role required",
+      );
+      if (!user) return;
+
+      const { start, end } = parseProductRange(ctx);
+      const grouping = PA.normalizeGrouping(ctx.query.grouping, start, end);
+      const knex = strapi.db.connection;
+      const joins = await PA.resolveJoins(knex);
+
+      const bucketItems = PA.tzBucketExpr("order_date", grouping);
+      const bucketOrders = PA.tzBucketExpr("order_date", grouping);
+
+      const sql = `
+        WITH ${PA.paidOrdersCte(joins)}, ${PA.itemizedCte(joins)},
+        items_b AS (
+          SELECT ${bucketItems} AS bucket,
+                 SUM(line_gross)::numeric AS gross,
+                 SUM(cnt)::bigint AS units
+          FROM itemized GROUP BY 1
+        ),
+        orders_b AS (
+          SELECT ${bucketOrders} AS bucket,
+                 COUNT(*)::bigint AS orders_count,
+                 SUM(order_discount)::numeric AS discounts,
+                 SUM(refund_irr)::numeric AS refund_irr
+          FROM paid_orders GROUP BY 1
+        )
+        SELECT
+          COALESCE(i.bucket, o.bucket) AS bucket,
+          COALESCE(i.gross, 0)::numeric AS gross,
+          COALESCE(i.units, 0)::bigint AS units,
+          COALESCE(o.orders_count, 0)::bigint AS orders_count,
+          COALESCE(o.discounts, 0)::numeric AS discounts,
+          COALESCE(o.refund_irr, 0)::numeric AS refund_irr
+        FROM items_b i
+        FULL OUTER JOIN orders_b o ON i.bucket = o.bucket
+        ORDER BY 1
+      `;
+      const res = await knex.raw(sql, [start, end]);
+      const series = rowsOf(res).map((r: any) => {
+        const gross = Number(r.gross) || 0;
+        const discounts = Number(r.discounts) || 0;
+        const refunds = PA.irrToToman(Number(r.refund_irr) || 0);
+        return {
+          bucket: r.bucket,
+          gross: Math.round(gross),
+          net: Math.round(gross - discounts - refunds),
+          units: Number(r.units) || 0,
+          orders: Number(r.orders_count) || 0,
+          discounts: Math.round(discounts),
+          refunds: Math.round(refunds),
+        };
+      });
+
+      ctx.body = {
+        data: { range: { start, end }, grouping, timezone: PA.REPORT_TIMEZONE, series },
+      };
+    } catch (error) {
+      ctx.badRequest(error.message, { data: { success: false } });
+    }
+  },
+
+  async productPerformance(ctx) {
+    try {
+      const user = await ensureRoleAccess(
+        ctx,
+        [ROLE_NAMES.SUPERADMIN, ROLE_NAMES.STORE_MANAGER],
+        "Access denied - Superadmin or Store manager role required",
+      );
+      if (!user) return;
+
+      const { start, end } = parseProductRange(ctx);
+      // SuperAdminTable sends pagination[page]; Strapi's qs parser nests it under
+      // ctx.query.pagination. Accept the nested form, the bracket-literal, or flat.
+      const pag = (ctx.query.pagination as any) || {};
+      const page = PA.clampPage(
+        pag.page ?? ctx.query["pagination[page]"] ?? ctx.query.page,
+      );
+      const pageSize = PA.clampPageSize(
+        pag.pageSize ?? ctx.query["pagination[pageSize]"] ?? ctx.query.pageSize,
+      );
+      const sort = PA.normalizeSort(ctx.query.sort);
+      const threshold = PA.DEFAULT_LOW_STOCK_THRESHOLD;
+      const knex = strapi.db.connection;
+      const joins = await PA.resolveJoins(knex);
+
+      // WHERE filters on the enriched select (params appended after [start, end]).
+      const where: string[] = [];
+      const params: any[] = [start, end];
+      const q = (ctx.query.q as string)?.trim();
+      if (q) {
+        where.push("(agg.product_title ILIKE ? OR agg.product_sku ILIKE ?)");
+        params.push(`%${q}%`, `%${q}%`);
+      }
+      const type = ctx.query.productType as string;
+      if (type === "Simple" || type === "Variable") {
+        where.push("p.product_type = ?");
+        params.push(type);
+      }
+      const categoryId = Number(ctx.query.categoryId);
+      if (Number.isFinite(categoryId) && categoryId > 0) {
+        where.push("pc.id = ?");
+        params.push(categoryId);
+      }
+      const stockStatus = ctx.query.stockStatus as string;
+      if (stockStatus === "out") where.push(`COALESCE(ps.count, 0) <= 0`);
+      else if (stockStatus === "low")
+        where.push(`(ps.count > 0 AND ps.count <= ${threshold})`);
+      else if (stockStatus === "in") where.push(`ps.count > ${threshold}`);
+
+      const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
+      const core = `
+        WITH ${PA.paidOrdersCte(joins)}, ${PA.itemizedCte(joins)}, ${PA.aggCte()}
+        ${PA.performanceCoreSelect(joins)}
+        ${whereSql}
+      `;
+
+      const dataSql = `${core} ORDER BY ${sort.column} ${sort.direction} NULLS LAST LIMIT ${pageSize} OFFSET ${(page - 1) * pageSize}`;
+      const countSql = `SELECT COUNT(*)::bigint AS total FROM (${core}) sub`;
+
+      const [dataRes, countRes] = await Promise.all([
+        knex.raw(dataSql, params),
+        knex.raw(countSql, params),
+      ]);
+
+      const rows = rowsOf(dataRes).map((r: any) => PA.serializeProductRow(r, threshold));
+      await attachCoverImages(rows);
+      const total = Number(rowsOf(countRes)[0]?.total || 0);
+
+      ctx.body = {
+        data: rows,
+        meta: {
+          pagination: {
+            page,
+            pageSize,
+            total,
+            pageCount: Math.ceil(total / pageSize) || 1,
+          },
+          range: { start, end },
+          sort,
+          lowStockThreshold: threshold,
+        },
+      };
+    } catch (error) {
+      ctx.badRequest(error.message, { data: { success: false } });
+    }
+  },
+
+  async productExport(ctx) {
+    try {
+      const user = await ensureRoleAccess(
+        ctx,
+        [ROLE_NAMES.SUPERADMIN, ROLE_NAMES.STORE_MANAGER],
+        "Access denied - Superadmin or Store manager role required",
+      );
+      if (!user) return;
+
+      const { start, end } = parseProductRange(ctx);
+      const sort = PA.normalizeSort(ctx.query.sort);
+      const threshold = PA.DEFAULT_LOW_STOCK_THRESHOLD;
+      const knex = strapi.db.connection;
+      const joins = await PA.resolveJoins(knex);
+
+      const where: string[] = [];
+      const params: any[] = [start, end];
+      const q = (ctx.query.q as string)?.trim();
+      if (q) {
+        where.push("(agg.product_title ILIKE ? OR agg.product_sku ILIKE ?)");
+        params.push(`%${q}%`, `%${q}%`);
+      }
+      const type = ctx.query.productType as string;
+      if (type === "Simple" || type === "Variable") {
+        where.push("p.product_type = ?");
+        params.push(type);
+      }
+      const categoryId = Number(ctx.query.categoryId);
+      if (Number.isFinite(categoryId) && categoryId > 0) {
+        where.push("pc.id = ?");
+        params.push(categoryId);
+      }
+      const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : "";
+
+      // Hard cap to protect memory; the visible report is paginated separately.
+      const EXPORT_CAP = 10000;
+      const sql = `
+        WITH ${PA.paidOrdersCte(joins)}, ${PA.itemizedCte(joins)}, ${PA.aggCte()}
+        ${PA.performanceCoreSelect(joins)}
+        ${whereSql}
+        ORDER BY ${sort.column} ${sort.direction} NULLS LAST
+        LIMIT ${EXPORT_CAP}
+      `;
+      const res = await knex.raw(sql, params);
+      const rows = rowsOf(res).map((r: any) => PA.serializeProductRow(r, threshold));
+
+      const header = [
+        "نام محصول",
+        "SKU",
+        "نوع",
+        "دسته",
+        "تعداد فروش",
+        "فروش ناخالص (تومان)",
+        "تخفیف (تومان)",
+        "مرجوعی (تومان)",
+        "خالص فروش (تومان)",
+        "سفارش‌ها",
+        "قیمت میانگین (تومان)",
+        "موجودی",
+        "وضعیت موجودی",
+      ];
+      const statusFa: Record<string, string> = {
+        in: "موجود",
+        low: "کم",
+        out: "ناموجود",
+        unknown: "نامشخص",
+      };
+      const escape = (v: any) => {
+        const s = String(v ?? "");
+        return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+      };
+      const lines = [header.join(",")];
+      for (const r of rows) {
+        lines.push(
+          [
+            r.productTitle,
+            r.productSKU,
+            r.productType ?? "",
+            r.category ?? "",
+            r.units,
+            r.gross,
+            r.discounts,
+            r.refunds,
+            r.net,
+            r.ordersCount,
+            r.avgPrice,
+            r.currentStock ?? "",
+            statusFa[r.stockStatus] ?? "",
+          ]
+            .map(escape)
+            .join(","),
+        );
+      }
+      // UTF-8 BOM so Excel renders Persian correctly.
+      const csv = "﻿" + lines.join("\r\n");
+      ctx.set("Content-Type", "text/csv; charset=utf-8");
+      ctx.set(
+        "Content-Disposition",
+        `attachment; filename="product-report-${Date.now()}.csv"`,
+      );
+      ctx.body = csv;
+    } catch (error) {
+      ctx.badRequest(error.message, { data: { success: false } });
+    }
+  },
+
+  async productDetail(ctx) {
+    try {
+      const user = await ensureRoleAccess(
+        ctx,
+        [ROLE_NAMES.SUPERADMIN, ROLE_NAMES.STORE_MANAGER],
+        "Access denied - Superadmin or Store manager role required",
+      );
+      if (!user) return;
+
+      const productId = Number(ctx.query.productId);
+      if (!Number.isFinite(productId) || productId <= 0) {
+        return ctx.badRequest("productId is required", { data: { success: false } });
+      }
+      const { start, end } = parseProductRange(ctx);
+      const grouping = PA.normalizeGrouping(ctx.query.grouping, start, end);
+      const threshold = PA.DEFAULT_LOW_STOCK_THRESHOLD;
+      const knex = strapi.db.connection;
+      const joins = await PA.resolveJoins(knex);
+
+      // Product header + category.
+      const infoRes = await knex.raw(
+        `SELECT p.id, p.title, p.product_type, p.status, ${joins.productToCategory.titleExpr} AS category_title
+         FROM products p
+         ${joins.productToCategory.join}
+         WHERE p.id = ?`,
+        [productId],
+      );
+      const info = rowsOf(infoRes)[0];
+      if (!info) {
+        return ctx.notFound("Product not found", { data: { success: false } });
+      }
+
+      // All variations of the product, with current stock and window sales.
+      const variationsSql = `
+        WITH ${PA.paidOrdersCte(joins)}, ${PA.itemizedCte(joins)}, ${PA.aggCte()}
+        SELECT
+          pv.id AS variation_id,
+          pv.sku,
+          COALESCE(a.units, 0)::bigint AS units,
+          COALESCE(a.gross, 0)::numeric AS gross,
+          COALESCE(a.discounts, 0)::numeric AS discounts,
+          COALESCE(a.refunds_irr, 0)::numeric AS refunds_irr,
+          ps.count AS current_stock,
+          ps.reserved_count AS reserved_stock
+        FROM product_variations pv
+        ${joins.variationToProduct}
+        ${joins.variationToStock}
+        LEFT JOIN agg a ON a.product_variation_id = pv.id
+        WHERE p.id = ?
+        ORDER BY units DESC, pv.id ASC
+      `;
+      const variationsRes = await knex.raw(variationsSql, [start, end, productId]);
+      const variations = rowsOf(variationsRes).map((r: any) => {
+        const gross = Number(r.gross) || 0;
+        const discounts = Number(r.discounts) || 0;
+        const refunds = PA.irrToToman(Number(r.refunds_irr) || 0);
+        const stock = r.current_stock === null ? null : Number(r.current_stock) || 0;
+        return {
+          variationId: r.variation_id,
+          sku: r.sku,
+          units: Number(r.units) || 0,
+          gross: Math.round(gross),
+          discounts: Math.round(discounts),
+          refunds: Math.round(refunds),
+          net: Math.round(gross - discounts - refunds),
+          currentStock: stock,
+          reservedStock: r.reserved_stock === null ? null : Number(r.reserved_stock) || 0,
+          stockStatus: stock === null ? "unknown" : PA.classifyStock(stock, threshold),
+        };
+      });
+
+      // Product-level daily/weekly trend.
+      const bucket = PA.tzBucketExpr("order_date", grouping);
+      const trendSql = `
+        WITH ${PA.paidOrdersCte(joins)}, ${PA.itemizedCte(joins)}
+        SELECT ${bucket} AS bucket,
+               SUM(it.line_gross)::numeric AS gross,
+               SUM(it.cnt)::bigint AS units
+        FROM itemized it
+        JOIN product_variations pv ON pv.id = it.product_variation_id
+        ${joins.variationToProduct}
+        WHERE p.id = ?
+        GROUP BY 1 ORDER BY 1
+      `;
+      const trendRes = await knex.raw(trendSql, [start, end, productId]);
+      const trend = rowsOf(trendRes).map((r: any) => ({
+        bucket: r.bucket,
+        gross: Math.round(Number(r.gross) || 0),
+        units: Number(r.units) || 0,
+      }));
+
+      const totals = variations.reduce(
+        (acc, v) => {
+          acc.units += v.units;
+          acc.gross += v.gross;
+          acc.discounts += v.discounts;
+          acc.refunds += v.refunds;
+          acc.net += v.net;
+          if (v.currentStock !== null) acc.currentStock += v.currentStock;
+          return acc;
+        },
+        { units: 0, gross: 0, discounts: 0, refunds: 0, net: 0, currentStock: 0 },
+      );
+
+      ctx.body = {
+        data: {
+          product: {
+            id: info.id,
+            title: info.title,
+            productType: info.product_type,
+            status: info.status,
+            category: info.category_title,
+          },
+          range: { start, end },
+          grouping,
+          timezone: PA.REPORT_TIMEZONE,
+          totals,
+          variations,
+          trend,
+        },
+      };
+    } catch (error) {
+      ctx.badRequest(error.message, { data: { success: false } });
+    }
+  },
+
+  async productInventory(ctx) {
+    try {
+      const user = await ensureRoleAccess(
+        ctx,
+        [ROLE_NAMES.SUPERADMIN, ROLE_NAMES.STORE_MANAGER],
+        "Access denied - Superadmin or Store manager role required",
+      );
+      if (!user) return;
+
+      const { start, end } = parseProductRange(ctx);
+      const threshold = PA.DEFAULT_LOW_STOCK_THRESHOLD;
+      const days = PA.windowDays(start, end);
+      const limit = PA.clampPageSize(ctx.query.limit, 50);
+      const knex = strapi.db.connection;
+      const joins = await PA.resolveJoins(knex);
+
+      const sql = `
+        WITH ${PA.paidOrdersCte(joins)},
+        sales AS (
+          SELECT ${joins.oiToVariation.idExpr} AS pvid,
+                 SUM(oi.count)::bigint AS units,
+                 SUM(oi.per_amount * oi.count)::numeric AS gross
+          FROM order_items oi
+          ${joins.oiToOrder}
+          ${joins.oiToVariation.join}
+          JOIN paid_orders po ON po.order_id = o.id
+          GROUP BY ${joins.oiToVariation.idExpr}
+        )
+        SELECT
+          pv.id AS variation_id,
+          pv.sku,
+          p.id AS product_id,
+          p.title AS product_title,
+          COALESCE(ps.count, 0)::bigint AS current_stock,
+          COALESCE(ps.reserved_count, 0)::bigint AS reserved_stock,
+          COALESCE(s.units, 0)::bigint AS units_sold,
+          COALESCE(s.gross, 0)::numeric AS gross
+        FROM product_variations pv
+        ${joins.variationToProduct}
+        ${joins.variationToStock}
+        LEFT JOIN sales s ON s.pvid = pv.id
+        WHERE p.removed_at IS NULL AND p.status = 'Active'
+      `;
+      const res = await knex.raw(sql, [start, end]);
+      const all = rowsOf(res).map((r: any) => {
+        const stock = Number(r.current_stock) || 0;
+        const units = Number(r.units_sold) || 0;
+        return {
+          variationId: r.variation_id,
+          productId: r.product_id,
+          sku: r.sku,
+          productTitle: r.product_title,
+          currentStock: stock,
+          reservedStock: Number(r.reserved_stock) || 0,
+          unitsSold: units,
+          gross: Math.round(Number(r.gross) || 0),
+          daysOfCover: PA.daysOfCover(stock, units, days),
+          stockStatus: PA.classifyStock(stock, threshold),
+        };
+      });
+
+      const outOfStock = all.filter((r) => r.currentStock <= 0).slice(0, limit);
+      const lowStock = all
+        .filter((r) => r.currentStock > 0 && r.currentStock <= threshold)
+        .sort((a, b) => a.currentStock - b.currentStock)
+        .slice(0, limit);
+      const stockNoSales = all
+        .filter((r) => r.currentStock > 0 && r.unitsSold === 0)
+        .sort((a, b) => b.currentStock - a.currentStock)
+        .slice(0, limit);
+      const fastMoving = all
+        .filter((r) => r.unitsSold > 0)
+        .sort((a, b) => b.unitsSold - a.unitsSold)
+        .slice(0, limit);
+      const slowMoving = all
+        .filter((r) => r.unitsSold > 0 && r.currentStock > 0)
+        .sort((a, b) => (b.daysOfCover ?? 0) - (a.daysOfCover ?? 0))
+        .slice(0, limit);
+
+      ctx.body = {
+        data: {
+          range: { start, end },
+          windowDays: days,
+          lowStockThreshold: threshold,
+          timezone: PA.REPORT_TIMEZONE,
+          outOfStock,
+          lowStock,
+          stockNoSales,
+          fastMoving,
+          slowMoving,
         },
       };
     } catch (error) {
