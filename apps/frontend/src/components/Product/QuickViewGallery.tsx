@@ -47,8 +47,8 @@ export default function QuickViewGallery({
           </div>
         )}
 
-        {/* Main image */}
-        <div className="relative aspect-square sm:aspect-[4/5]">
+        {/* Main image — square keeps it compact; full PDP has the taller ratio */}
+        <div className="relative aspect-square">
           {images.length > 0 ? (
             <Image
               src={images[Math.min(selectedIndex, images.length - 1)]}
@@ -78,7 +78,7 @@ export default function QuickViewGallery({
                 type="button"
                 onClick={() => onSelectIndex(index)}
                 className={[
-                  "relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-2xl ring-1 transition",
+                  "relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-xl ring-1 transition",
                   active ? "ring-infinity-primary" : "ring-black/10 hover:ring-infinity-primary-lighter",
                   "focus:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary",
                 ].join(" ")}

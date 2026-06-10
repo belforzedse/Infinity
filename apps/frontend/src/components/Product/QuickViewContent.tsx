@@ -1,14 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import { useMemo, useState } from "react";
 import type { ProductDetail } from "@/services/product/product";
-import { faNum } from "@/utils/faNum";
 import { resolveAssetUrl } from "@/utils/resolveAssetUrl";
 import { computeDiscountForVariation } from "@/utils/discounts";
-import imageLoader from "@/utils/imageLoader";
-import DOMPurify from "isomorphic-dompurify";
-
 import QuickViewGallery from "./QuickViewGallery";
 import QuickViewVariationSelector from "./QuickViewVariationSelector";
 import QuickViewPricing from "./QuickViewPricing";
@@ -39,7 +34,7 @@ export default function QuickViewContent({
   const [selectedColorCode, setSelectedColorCode] = useState<string | null>(null);
   const [selectedSizeTitle, setSelectedSizeTitle] = useState<string | null>(null);
 
-  const { Title, Description, CoverImage, Media, product_variations } = productData.attributes;
+  const { Title, CoverImage, Media, product_variations } = productData.attributes;
 
   const allImages = useMemo(() => {
     const images: string[] = [];
@@ -165,12 +160,8 @@ export default function QuickViewContent({
     return set;
   }, [effectiveColorCode, sizes, variations]);
 
-  const sanitizedDescription = useMemo(() => {
-    return DOMPurify.sanitize(Description || "");
-  }, [Description]);
-
   return (
-    <div className="grid gap-5 p-4 sm:p-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-8 lg:p-8">
+    <div className="grid gap-4 p-4 sm:p-5 lg:grid-cols-2">
       <QuickViewGallery
         images={allImages}
         title={Title}
@@ -182,7 +173,7 @@ export default function QuickViewContent({
       />
 
       {/* Info */}
-      <div className="flex min-h-0 flex-col gap-5">
+      <div className="flex min-h-0 flex-col gap-4">
         <div className="space-y-2">
           <h2
             id="quick-view-title"
@@ -265,18 +256,7 @@ export default function QuickViewContent({
           onSelectSize={setSelectedSizeTitle}
         />
 
-        {/* Description */}
-        {Description && (
-          <div className="rounded-3xl bg-white ring-1 ring-black/5">
-            <div className="border-b border-black/5 px-4 py-3">
-              <h3 className="text-sm font-medium text-gray-800">توضیحات</h3>
-            </div>
-            <div
-              className="prose prose-sm line-clamp-4 max-w-none px-4 py-3 text-sm text-gray-600 sm:line-clamp-6"
-              dangerouslySetInnerHTML={{ __html: sanitizedDescription }}
-            />
-          </div>
-        )}
+        {/* Description intentionally omitted — shown on the full PDP. */}
       </div>
     </div>
   );

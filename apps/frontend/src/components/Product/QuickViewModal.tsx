@@ -143,26 +143,25 @@ export default function QuickViewModal({ isOpen, onClose, productId }: QuickView
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      // max-w-6xl keeps the two-column layout comfortable; overflow-hidden clips rounded corners.
-      className="max-w-6xl overflow-hidden"
-      // Let QuickViewContent handle its own padding (avoids double-padding).
-      contentClassName="p-0"
+      // flex-col + max-h-[90dvh]: header is fixed, content area scrolls — no viewport overflow.
+      // max-w-3xl keeps the modal compact without sacrificing the two-column layout.
+      className="flex max-h-[90dvh] max-w-3xl flex-col overflow-hidden"
+      // flex-1 min-h-0: content fills the space left by the header and scrolls when needed.
+      contentClassName="custom-scrollbar flex-1 overflow-y-auto p-0"
       aria-labelledby="quick-view-title"
     >
-      <div className="custom-scrollbar relative max-h-[90vh] overflow-y-auto">
-        {isLoading ? (
-          <QuickViewSkeleton />
-        ) : error ? (
-          <QuickViewError message={error} onRetry={handleRetry} onClose={onClose} />
-        ) : productData ? (
-          <QuickViewContent
-            productData={productData}
-            productId={productId}
-            onViewFullDetails={viewFullDetails}
-            onClose={onClose}
-          />
-        ) : null}
-      </div>
+      {isLoading ? (
+        <QuickViewSkeleton />
+      ) : error ? (
+        <QuickViewError message={error} onRetry={handleRetry} onClose={onClose} />
+      ) : productData ? (
+        <QuickViewContent
+          productData={productData}
+          productId={productId}
+          onViewFullDetails={viewFullDetails}
+          onClose={onClose}
+        />
+      ) : null}
     </Modal>
   );
 }
@@ -172,33 +171,26 @@ export default function QuickViewModal({ isOpen, onClose, productId }: QuickView
 // ---------------------------------------------------------------------------
 function QuickViewSkeleton() {
   return (
-    <div className="grid gap-8 p-6 lg:grid-cols-2 lg:p-10">
+    <div className="grid gap-4 p-4 sm:p-5 lg:grid-cols-2">
       {/* Image skeleton */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         <div className="skeleton-shimmer aspect-square rounded-2xl" />
         <div className="flex gap-2">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="skeleton-shimmer-light h-16 w-16 flex-shrink-0 rounded-xl" />
+            <div key={i} className="skeleton-shimmer-light h-14 w-14 flex-shrink-0 rounded-xl" />
           ))}
         </div>
       </div>
 
       {/* Info skeleton */}
-      <div className="space-y-6">
-        <div className="space-y-3">
-          <div className="skeleton-shimmer-light h-5 w-1/3 rounded" />
-          <div className="skeleton-shimmer h-7 w-2/3 rounded" />
-        </div>
-
+      <div className="space-y-4">
         <div className="space-y-2">
-          <div className="skeleton-shimmer-light h-4 w-full rounded" />
-          <div className="skeleton-shimmer-light h-4 w-5/6 rounded" />
-          <div className="skeleton-shimmer-light h-4 w-4/6 rounded" />
+          <div className="skeleton-shimmer-light h-5 w-1/3 rounded" />
+          <div className="skeleton-shimmer h-6 w-2/3 rounded" />
         </div>
-
-        <div className="skeleton-shimmer-light h-16 rounded-2xl" />
-        <div className="skeleton-shimmer-light h-12 rounded-2xl" />
-        <div className="skeleton-shimmer h-12 rounded-full" />
+        <div className="skeleton-shimmer-light h-14 rounded-2xl" />
+        <div className="skeleton-shimmer-light h-10 rounded-2xl" />
+        <div className="skeleton-shimmer h-11 rounded-full" />
       </div>
     </div>
   );
