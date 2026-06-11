@@ -163,8 +163,8 @@ class StrapiRepo {
     if (attr.externalId) {
       payload.external_id = attr.externalId;
     }
-    if (attr.type === "color") {
-      payload.ColorCode = attr.colorCode || "#FFFFFF";
+    if (attr.type === "color" && attr.colorCode) {
+      payload.ColorCode = attr.colorCode;
     }
 
     try {

@@ -352,19 +352,15 @@ function identifyAttributeType(attributeName) {
   return "model";
 }
 
-/** Hex code assigned to color values that aren't in the mapping table. */
-const UNMAPPED_COLOR_CODE = "#FFFFFF";
-
 /**
  * Resolve an attribute value to a Strapi-ready descriptor. Colors are normalized
  * through the shared color-mapping table (Persian name → Title + hex ColorCode).
  *
  * IMPORTANT: when a color value is NOT in the mapping table, the ORIGINAL value is
- * preserved as the Title (with a #FFFFFF swatch) rather than collapsed to the
- * default color. Stores often enter distinct color variants by code on the رنگ
- * attribute (e.g. "کد ۱", "کد ۲", …); collapsing every unmapped value to one
- * default color would merge all of them into a single variant. Each literal value
- * therefore becomes its own color record.
+ * preserved as the Title with NO colorCode. Stores often enter distinct color
+ * variants by code on the رنگ attribute (e.g. "کد ۱", "کد ۲", …); collapsing
+ * every unmapped value to a white swatch would merge distinct variants visually.
+ * Hex-less colors render as text/model-style selectors on the PDP instead.
  *
  * @param {"color"|"size"|"model"} type
  * @param {string} value
@@ -379,12 +375,12 @@ function resolveAttribute(type, value) {
   if (type === "color") {
     const mapping = resolveColorMapping(raw);
     const title = mapping.matched ? mapping.title : raw;
-    const colorCode = mapping.matched
-      ? mapping.colorCode || DEFAULT_COLOR.colorCode
-      : UNMAPPED_COLOR_CODE;
+    // Only carry a colorCode when the mapping table provides a genuine hex value.
+    // Unmapped colors (e.g. "کد ۱") get no colorCode — never default to white.
+    const colorCode = mapping.matched && mapping.colorCode ? mapping.colorCode : undefined;
     return {
       title,
-      colorCode,
+      ...(colorCode !== undefined && { colorCode }),
       matched: Boolean(mapping.matched),
       externalId: `color_${title.toLowerCase().replace(/\s+/g, "_")}`,
     };

@@ -21,7 +21,7 @@ export default function PDPHero({ productData, productId }: PDPHeroProps) {
   const assets = productData ? formatGalleryAssets(productData) : [];
 
   // Get product colors from helper function - only if productData exists
-  let colors: { id: string; title: string; colorCode: string }[] = [];
+  let colors: { id: string; title: string; colorCode: string | null | undefined }[] = [];
 
   if (productData) {
     const extractedColors = getProductColors(productData);

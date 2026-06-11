@@ -8,6 +8,7 @@ import { parsePositiveInt } from "../../../utils/parsePositiveInt";
 import {
   getMatomoRealtimePayload,
   getMatomoTrafficDashboardPayload,
+  getProductBehavioral,
   normalizeRange,
 } from "../services/matomo";
 import * as productAnalytics from "../services/product-analytics";
@@ -1377,7 +1378,7 @@ export default {
 
       // Product header + category.
       const infoRes = await knex.raw(
-        `SELECT p.id, p.title, p.product_type, p.status, ${joins.productToCategory.titleExpr} AS category_title
+        `SELECT p.id, p.title, p.slug, p.product_type, p.status, ${joins.productToCategory.titleExpr} AS category_title
          FROM products p
          ${joins.productToCategory.join}
          WHERE p.id = ?`,
@@ -1460,6 +1461,13 @@ export default {
         { units: 0, gross: 0, discounts: 0, refunds: 0, net: 0, currentStock: 0 },
       );
 
+      // Optional Matomo behavioral data for this product page. Fully graceful:
+      // `null` when Matomo is unconfigured/unavailable — never blocks the report.
+      const behavioral = await getProductBehavioral(String(info.slug || ""), {
+        startDate: start.toISOString().slice(0, 10),
+        endDate: end.toISOString().slice(0, 10),
+      });
+
       ctx.body = {
         data: {
           product: {
@@ -1475,6 +1483,8 @@ export default {
           totals,
           variations,
           trend,
+          // Behavioral engagement from Matomo (distinct from transactional truth above).
+          behavioral,
         },
       };
     } catch (error) {

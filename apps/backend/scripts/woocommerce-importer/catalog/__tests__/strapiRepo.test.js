@@ -103,6 +103,34 @@ test("resolveAttributeId: caches and creates once", async () => {
   assert.equal(http.posts.length, 1); // second call hits cache, no extra POST
 });
 
+test("resolveAttributeId: color with colorCode includes ColorCode in payload", async () => {
+  const http = mockHttp();
+  const repo = new StrapiRepo(http, noopLogger);
+  await repo.resolveAttributeId({ type: "color", title: "قرمز", colorCode: "#FF0000" });
+  assert.equal(http.posts.length, 1);
+  assert.equal(http.posts[0].body.data.ColorCode, "#FF0000");
+});
+
+test("resolveAttributeId: hex-less color omits ColorCode from payload entirely", async () => {
+  const http = mockHttp();
+  const repo = new StrapiRepo(http, noopLogger);
+  await repo.resolveAttributeId({ type: "color", title: "کد ۱" }); // no colorCode
+  assert.equal(http.posts.length, 1);
+  assert.ok(
+    !("ColorCode" in http.posts[0].body.data),
+    "ColorCode must not appear in payload for hex-less colors",
+  );
+});
+
+test("resolveAttributeId: hex-less color re-import does not post white on second call", async () => {
+  const http = mockHttp();
+  const repo = new StrapiRepo(http, noopLogger);
+  await repo.resolveAttributeId({ type: "color", title: "کد ۳" });
+  await repo.resolveAttributeId({ type: "color", title: "کد ۳" }); // cache hit
+  assert.equal(http.posts.length, 1, "second call must hit cache, not POST again");
+  assert.ok(!("ColorCode" in http.posts[0].body.data), "no ColorCode in the single POST");
+});
+
 test("syncProductSizeHelper: creates helper when product has a matrix", async () => {
   const http = mockHttp();
   const repo = new StrapiRepo(http, noopLogger);

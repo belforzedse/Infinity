@@ -20,7 +20,7 @@ type VariationUI = {
   price: number;
   discountPrice?: number | null;
   stock: number;
-  color: { title: string; colorCode: string } | null;
+  color: { title: string; colorCode: string | null } | null;
   size: { title: string } | null;
 };
 
@@ -93,7 +93,7 @@ export default function QuickViewContent({
           price,
           discountPrice,
           stock,
-          color: color ? { title: color.Title, colorCode: color.ColorCode } : null,
+          color: color ? { title: color.Title, colorCode: color.ColorCode ?? null } : null,
           size: size ? { title: size.Title } : null,
         };
       });
@@ -131,10 +131,12 @@ export default function QuickViewContent({
   }, [hasDiscount, currentVariation]);
 
   const colors = useMemo(() => {
+    // Only include colors with a valid hex code. Hex-less colors (null colorCode)
+    // are excluded from the product-card quick-view swatch selector.
     const uniqueColors = new Map<string, { title: string; colorCode: string }>();
     for (const v of variations) {
-      if (v.color && !uniqueColors.has(v.color.colorCode)) {
-        uniqueColors.set(v.color.colorCode, v.color);
+      if (v.color?.colorCode && !uniqueColors.has(v.color.colorCode)) {
+        uniqueColors.set(v.color.colorCode, v.color as { title: string; colorCode: string });
       }
     }
     return Array.from(uniqueColors.values());

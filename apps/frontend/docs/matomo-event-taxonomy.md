@@ -27,8 +27,36 @@ Use `trackMatomoEvent(...)` with these categories:
   - Examples: `view_cart`, `remove_from_cart`, `update_quantity`
 - `engagement`
   - Examples: `click_add_to_cart`, `share_product`, `open_comments`, `add_to_wishlist`, `remove_from_wishlist`
-- `search`
-  - Example: `search`
+
+## Site Search (native — NOT an event)
+
+Site search is recorded with Matomo's **native Site Search** tracking via
+`trackSiteSearch(keyword, category, resultsCount)` / the back-compat
+`trackSearch(query, source, resultsCount?)` wrapper — never as a `trackEvent`.
+This keeps raw queries out of event names and powers Behaviour → Site Search
+(keywords, **no-result keywords**, search → page follow-through).
+
+Rules:
+
+- The single authoritative call site is the results page (PLP) via
+  `components/Analytics/SiteSearchTracker`, where the real `resultsCount` is
+  known — submit handlers only navigate there.
+- `keyword` is passed through `sanitizeFreeText`, which drops values containing
+  an email or a 7+ digit run (phone / token / card fragments).
+- `category` is the surface (e.g. `plp`). `resultsCount = 0` is what surfaces a
+  search under the no-result report.
+
+## Custom Dimensions
+
+Centralized in `CUSTOM_DIMENSIONS` (`lib/analytics/matomo.ts`); numeric ids must
+match the Matomo admin configuration. Keep low-cardinality, prefer stable ids.
+
+| Key | Id | Scope | Values |
+| --- | -- | ----- | ------ |
+| `authStatus` | 1 | visit | `authenticated` \| `anonymous` |
+| `pageType` | 2 | action | `home` \| `plp` \| `pdp` \| `search` \| `cart` \| `checkout` \| `orders` \| `blog` \| `account` \| `admin` \| `other` |
+| `productId` | 3 | action | stable product id (PDP) |
+| `categoryId` | 4 | action | stable category id/slug (PLP/category) |
 
 ## Cardinality Rules
 

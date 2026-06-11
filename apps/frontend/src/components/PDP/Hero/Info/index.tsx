@@ -61,7 +61,7 @@ type Props = {
   colors: {
     id: string;
     title: string;
-    colorCode: string;
+    colorCode: string | null | undefined;
   }[];
 
   models?: {

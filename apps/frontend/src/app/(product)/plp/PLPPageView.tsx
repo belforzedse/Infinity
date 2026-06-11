@@ -5,6 +5,8 @@ import PLPList from "@/components/PLP/List";
 import PageContainer from "@/components/layout/PageContainer";
 import ProductListSkeleton from "@/components/Skeletons/ProductListSkeleton";
 import AsyncSidebarProducts from "@/components/PLP/List/AsyncSidebarProducts";
+import SiteSearchTracker from "@/components/Analytics/SiteSearchTracker";
+import CustomDimensionTracker from "@/components/Analytics/CustomDimensionTracker";
 import { SkeletonBlock } from "@repo/ui/skeleton";
 import { CollectionPageSchema } from "@/components/SEO/CollectionPageSchema";
 import type { PLPProduct as PLPListProduct } from "@/components/PLP/types";
@@ -90,6 +92,17 @@ export default async function PLPPageView({ categorySlug, searchParams }: PLPPag
 
   return (
     <PageContainer className="space-y-6 pb-20 pt-6">
+      {query.search ? (
+        <SiteSearchTracker
+          query={query.search}
+          resultCount={pagination.total}
+          page={query.page}
+        />
+      ) : null}
+      {resolvedCategoryContext?.slug ? (
+        <CustomDimensionTracker dimension="categoryId" value={resolvedCategoryContext.slug} />
+      ) : null}
+
       {products.length > 0 && (
         <CollectionPageSchema
           name={pageName}

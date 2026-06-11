@@ -182,9 +182,9 @@ test("resolveAttribute: color normalized through mapping table with hex code", (
   assert.equal(T.resolveAttribute("color", ""), null);
 });
 
-test("resolveAttribute: unmapped color values are preserved as distinct records (not collapsed)", () => {
+test("resolveAttribute: unmapped color values are preserved as distinct hex-less records", () => {
   // Stores enter color variants by code on the رنگ attribute. Each must become its
-  // own color record, not collapse into a single default color.
+  // own color record with no hex — never collapsed to a white swatch.
   const c1 = T.resolveAttribute("color", "کد ۱");
   const c2 = T.resolveAttribute("color", "کد ۲");
 
@@ -192,8 +192,32 @@ test("resolveAttribute: unmapped color values are preserved as distinct records 
   assert.equal(c2.title, "کد ۲");
   assert.equal(c1.matched, false);
   assert.notEqual(c1.externalId, c2.externalId); // distinct records
-  assert.equal(c1.colorCode, "#FFFFFF"); // unmapped colors use white
-  assert.equal(c2.colorCode, "#FFFFFF");
+  assert.ok(!("colorCode" in c1), "unmapped color must have no colorCode property");
+  assert.ok(!("colorCode" in c2), "unmapped color must have no colorCode property");
+});
+
+test("resolveAttribute: 'کد' prefix produces hex-less descriptor", () => {
+  const c = T.resolveAttribute("color", "کد ۱");
+  assert.equal(c.title, "کد ۱");
+  assert.equal(c.matched, false);
+  assert.ok(!("colorCode" in c), "کد-prefixed colors must not receive a colorCode");
+  assert.ok(c.externalId.startsWith("color_"), "must have valid externalId");
+});
+
+test("resolveAttribute: matched white color ('سفید') retains its hex", () => {
+  const c = T.resolveAttribute("color", "سفید");
+  if (c.matched) {
+    assert.ok("colorCode" in c, "mapped color must have colorCode");
+    assert.match(c.colorCode, /^#/, "mapped colorCode must start with #");
+  }
+  // If سفید is not in the active mapping, it correctly has no colorCode — both are valid
+});
+
+test("resolveAttribute: re-import of unmapped color never introduces white", () => {
+  const first = T.resolveAttribute("color", "کد ۲");
+  const second = T.resolveAttribute("color", "کد ۲");
+  assert.deepEqual(first, second, "result must be stable across calls");
+  assert.ok(!("colorCode" in first), "unmapped color must never carry a white fallback");
 });
 
 test("identifyAttributeType: Persian and English names", () => {

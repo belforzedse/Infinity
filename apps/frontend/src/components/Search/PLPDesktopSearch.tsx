@@ -5,7 +5,8 @@ import { usePathname, useRouter } from "next/navigation";
 import SearchIcon from "./Icons/SearchIcon";
 import { API_BASE_URL, IMAGE_BASE_URL, ENDPOINTS } from "@/constants/api";
 import SearchSuggestionCard from "./SearchSuggestionCard";
-import { trackSearch } from "@/lib/analytics/matomo";
+// Site search is tracked natively on the results page (PLP), where the real
+// result count is known — see components/Analytics/SiteSearchTracker.
 
 type Suggestion = {
   id: number;
@@ -75,9 +76,8 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({ className = "" }) =
     if (!trimmed) return;
 
     persistRecent(searchQuery);
-    trackSearch(trimmed, "desktop");
 
-    // Redirect to search results page with the query
+    // Redirect to search results page with the query (site search is tracked there).
     router.push(getSearchHref(trimmed));
   };
 
@@ -271,7 +271,6 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({ className = "" }) =
                           onClick={() => {
                             setSearchQuery(term);
                             setOpen(false);
-                            trackSearch(term, "desktop_recent");
                             router.push(getSearchHref(term));
                           }}
                           className="pressable text-xs rounded-full border border-slate-200 px-3 py-1 text-infinity-primary hover:border-infinity-primary-lighter hover:bg-infinity-primary-lighter/20"
@@ -292,7 +291,6 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({ className = "" }) =
                         onClick={() => {
                           setSearchQuery(term);
                           setOpen(false);
-                          trackSearch(term, "desktop_popular");
                           router.push(getSearchHref(term));
                         }}
                         className="pressable text-xs rounded-full border border-slate-200 px-3 py-1 text-neutral-600 hover:border-infinity-primary-lighter hover:bg-infinity-primary-lighter/20"
@@ -357,7 +355,6 @@ const PLPDesktopSearch: React.FC<PLPDesktopSearchProps> = ({ className = "" }) =
                     type="button"
                     onClick={() => {
                       persistRecent(searchQuery);
-                      trackSearch(searchQuery.trim(), "desktop_view_all");
                       router.push(getSearchHref(searchQuery.trim()));
                     }}
                     className="text-xs block w-full border-t border-slate-200 bg-white/0 px-3 py-2 text-right text-infinity-primary hover:bg-slate-50"

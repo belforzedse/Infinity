@@ -16,8 +16,7 @@
       "required": true
     },
     "ColorCode": {
-      "type": "string",
-      "required": true
+      "type": "string"
     },
     "external_id": {
       "type": "string",

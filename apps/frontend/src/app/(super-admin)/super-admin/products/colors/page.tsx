@@ -17,7 +17,7 @@ type ApiColor = {
   id: number;
   attributes: {
     Title: string;
-    ColorCode: string;
+    ColorCode: string | null;
     external_id?: string | null;
   };
 };
@@ -102,13 +102,14 @@ export default function ProductColorsPage() {
 
   const openModal = (color?: ApiColor) => {
     if (color) {
-      const colorCode = color.attributes?.ColorCode || "#000000";
+      const rawColorCode = color.attributes?.ColorCode ?? null;
+      const isColorless = !rawColorCode;
       setModalState({
         open: true,
         id: color.id,
         title: color.attributes?.Title || "",
-        colorCode: colorCode,
-        noColor: colorCode.toLowerCase() === "#ffffff",
+        colorCode: isColorless ? "" : rawColorCode,
+        noColor: isColorless,
       });
       return;
     }
@@ -133,28 +134,28 @@ export default function ProductColorsPage() {
       return;
     }
 
-    // If "No Color" is checked, use pure white #FFFFFF
-    const colorToSave = modalState.noColor ? "#ffffff" : modalState.colorCode;
-
-    const normalizedCode = (colorToSave || "#000000").startsWith("#")
-      ? colorToSave
-      : `#${colorToSave}`;
-
-    if (!/^#[0-9a-fA-F]{6}$/.test(normalizedCode)) {
-      toast.error("کد رنگ معتبر نیست");
-      return;
+    // Colorless entries persist null; otherwise validate and normalize the hex.
+    let normalizedColorCode: string | null = null;
+    if (!modalState.noColor) {
+      const raw = modalState.colorCode || "";
+      const withHash = raw.startsWith("#") ? raw : `#${raw}`;
+      if (!/^#[0-9a-fA-F]{6}$/.test(withHash)) {
+        toast.error("کد رنگ معتبر نیست");
+        return;
+      }
+      normalizedColorCode = withHash.toLowerCase();
     }
 
     setSaving(true);
     try {
       if (modalState.id) {
         await apiClient.put(`${ENDPOINTS.PRODUCT.COLORS}/${modalState.id}`, {
-          data: { Title: title, ColorCode: normalizedCode.toLowerCase() },
+          data: { Title: title, ColorCode: normalizedColorCode },
         });
         toast.success("رنگ به‌روزرسانی شد");
       } else {
         await apiClient.post(ENDPOINTS.PRODUCT.COLORS, {
-          data: { Title: title, ColorCode: normalizedCode.toLowerCase() },
+          data: { Title: title, ColorCode: normalizedColorCode },
         });
         toast.success("رنگ جدید ثبت شد");
       }
@@ -268,7 +269,7 @@ export default function ProductColorsPage() {
                     <div>
                       <p className="text-base font-semibold text-neutral-800">{color.attributes?.Title}</p>
                       <p className="text-xs text-neutral-500">
-                        {(color.attributes?.ColorCode || "").toUpperCase() || "—"}
+                        {color.attributes?.ColorCode?.toUpperCase() ?? "بدون رنگ"}
                       </p>
                     </div>
                   </div>
@@ -353,7 +354,7 @@ export default function ProductColorsPage() {
                               ...prev,
                               title: newTitle,
                               noColor: shouldAutoCheck ? true : prev.noColor,
-                              colorCode: shouldAutoCheck ? "#ffffff" : prev.colorCode,
+                              colorCode: shouldAutoCheck ? "" : prev.colorCode,
                             }));
                           }}
                           className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-infinity-primary focus:outline-none focus:ring-1 focus:ring-infinity-primary/30"
@@ -371,7 +372,7 @@ export default function ProductColorsPage() {
                             setModalState((prev) => ({
                               ...prev,
                               noColor: e.target.checked,
-                              colorCode: e.target.checked ? "#ffffff" : prev.colorCode
+                              colorCode: e.target.checked ? "" : prev.colorCode
                             }))
                           }
                           className="h-4 w-4 rounded border-slate-300 text-infinity-primary focus:ring-infinity-primary"
@@ -429,7 +430,7 @@ export default function ProductColorsPage() {
                           />
                           <div className="text-sm">
                             <p className="font-semibold text-neutral-800">
-                              {modalState.noColor ? "#FFFFFF" : modalState.colorCode.toUpperCase()}
+                              {modalState.noColor ? "بدون رنگ" : modalState.colorCode.toUpperCase()}
                             </p>
                             <p className="text-xs text-neutral-500 mt-1">
                               {modalState.noColor ? "بدون رنگ" : "رنگ انتخاب‌شده"}
@@ -564,7 +565,7 @@ export default function ProductColorsPage() {
                             {colors.find((c) => c.id === deleteId)?.attributes?.Title}
                           </p>
                           <p className="text-xs text-neutral-500">
-                            {(colors.find((c) => c.id === deleteId)?.attributes?.ColorCode || "").toUpperCase()}
+                            {colors.find((c) => c.id === deleteId)?.attributes?.ColorCode?.toUpperCase() ?? "بدون رنگ"}
                           </p>
                         </div>
                       </div>

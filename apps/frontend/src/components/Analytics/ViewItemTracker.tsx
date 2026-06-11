@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { trackFunnelStep } from "@/lib/analytics/matomo";
+import { setCustomDimension, trackFunnelStep } from "@/lib/analytics/matomo";
 
 type Props = {
   productId: number;
@@ -15,6 +15,9 @@ export default function ViewItemTracker({ productId, title, price }: Props) {
 
   useEffect(() => {
     if (!productId) return;
+    // Attach the stable product id to this product-view action so Matomo reports
+    // can segment behaviour by product (action-scoped dimension).
+    setCustomDimension("productId", productId);
     trackFunnelStep("view_item", {
       label: `${productId}:${title}`,
       value: price,

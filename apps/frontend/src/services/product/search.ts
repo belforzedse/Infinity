@@ -55,7 +55,7 @@ export interface ProductSearchItem {
               id: number;
               attributes: {
                 Title: string;
-                ColorCode: string;
+                ColorCode: string | null | undefined;
               };
             } | null;
           };
@@ -118,7 +118,7 @@ export interface ProductSearchItem {
     product_variation_color: {
       id: number;
       Title: string;
-      ColorCode: string;
+      ColorCode: string | null | undefined;
     };
     product_variation_size: {
       id: number;

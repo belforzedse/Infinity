@@ -2484,7 +2484,7 @@ export interface ApiProductVariationColorProductVariationColor extends Schema.Co
     draftAndPublish: false;
   };
   attributes: {
-    ColorCode: Attribute.String & Attribute.Required;
+    ColorCode: Attribute.String;
     createdAt: Attribute.DateTime;
     createdBy: Attribute.Relation<
       "api::product-variation-color.product-variation-color",

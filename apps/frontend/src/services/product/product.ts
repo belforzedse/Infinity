@@ -101,7 +101,7 @@ export interface ProductDetail {
               id: number;
               attributes: {
                 Title: string;
-                ColorCode: string;
+                ColorCode: string | null;
               };
             };
           };

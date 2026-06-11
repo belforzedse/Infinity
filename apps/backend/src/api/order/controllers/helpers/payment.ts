@@ -1,6 +1,7 @@
 import type { Strapi } from "@strapi/strapi";
 import { consumeOrderReservation, releaseOrderReservation } from "../../../../utils/stockReservations";
 import { decrementStockAtomic } from "../../../cart/services/lib/stock";
+import { trackOrderToMatomo } from "../../../report/services/matomo-tracker";
 const getFrontendBaseUrl = () =>
   (process.env.FRONTEND_BASE_URL || process.env.FRONTEND_URL || "https://infinitycolor.co").replace(
     /\/$/,
@@ -148,6 +149,11 @@ async function clearCartAfterPayment(strapi: Strapi, orderId?: number) {
     strapi.log.warn("clearCartAfterPayment called without orderId");
     return;
   }
+
+  // Fire-and-forget, idempotent server-side ecommerce tracking. This runs only
+  // on the confirmed-payment path and is fully self-contained + non-throwing, so
+  // it can never block, delay, or fail the payment flow (see matomo-tracker.ts).
+  void trackOrderToMatomo(strapi as any, orderId).catch(() => {});
 
   try {
     const order = await strapi.entityService.findOne("api::order.order", orderId, {

@@ -5,7 +5,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { API_BASE_URL, IMAGE_BASE_URL } from "@/constants/api";
 import SearchSuggestionCard from "@/components/Search/SearchSuggestionCard";
 import { getDeviceInfo } from "@/utils/device-detection";
-import { trackSearch } from "@/lib/analytics/matomo";
+// Site search is tracked natively on the results page (PLP), where the real
+// result count is known — see components/Analytics/SiteSearchTracker.
 
 interface Props {
   isOpen: boolean;
@@ -103,9 +104,8 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
 
     // Close the search modal
     closeModal({ force: true });
-    trackSearch(trimmed, "mobile");
 
-    // Redirect to search results page with the query
+    // Redirect to search results page with the query (site search is tracked there).
     router.push(getSearchHref(trimmed));
   };
 
@@ -292,7 +292,6 @@ export default function MobileSearch({ isOpen, onClose }: Props) {
                     type="button"
                     onClick={() => {
                       closeModal({ force: true });
-                      trackSearch(searchQuery.trim(), "mobile_view_all");
                       router.push(getSearchHref(searchQuery.trim()));
                     }}
                     className="pressable text-xs block w-full border-t border-white/70 bg-transparent px-3 py-2 text-right text-infinity-primary-dark transition-colors hover:bg-white/70"

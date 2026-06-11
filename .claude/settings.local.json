@@ -42,7 +42,9 @@
       "Bash(Select-Object Name, FullName)",
       "Bash(Get-ChildItem -Path \"D:\\\\projects\\\\Infinitycolor\" -Directory)",
       "Bash(Select-Object Name)",
-      "Bash(ls -la \"D:/projects/pandaak\" | head -50)"
+      "Bash(ls -la \"D:/projects/pandaak\" | head -50)",
+      "Bash(Select-Object Name, PSIsContainer)",
+      "PowerShell(Head -30)"
     ],
     "deny": [],
     "ask": []

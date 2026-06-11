@@ -249,13 +249,15 @@ export const FeaturesTable = ({ productId, onVariationsGenerated }: FeaturesTabl
       toast.error("نام رنگ را وارد کنید");
       return;
     }
-    // If "No Color" is checked, use pure white #FFFFFF
-    const colorToSave = colorModal.noColor ? "#ffffff" : colorModal.colorCode;
-
-    const saved = await createAttributeOption("colors", {
+    // Colorless entries omit ColorCode entirely; otherwise send the chosen hex.
+    const colorPayload: { Title: string; ColorCode?: string } = {
       Title: colorModal.name.trim(),
-      ColorCode: colorToSave,
-    });
+    };
+    if (!colorModal.noColor && colorModal.colorCode) {
+      colorPayload.ColorCode = colorModal.colorCode;
+    }
+
+    const saved = await createAttributeOption("colors", colorPayload);
     if (saved) {
       setInputValues((prev) => ({ ...prev, colors: "" }));
       closeColorModal();
@@ -931,7 +933,7 @@ export const FeaturesTable = ({ productId, onVariationsGenerated }: FeaturesTabl
                             ...prev,
                             name: newName,
                             noColor: shouldAutoCheck ? true : prev.noColor,
-                            colorCode: shouldAutoCheck ? "#ffffff" : prev.colorCode,
+                            colorCode: shouldAutoCheck ? "" : prev.colorCode,
                           }));
                         }}
                         className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500/30"
@@ -949,7 +951,7 @@ export const FeaturesTable = ({ productId, onVariationsGenerated }: FeaturesTabl
                           setColorModal((prev) => ({
                             ...prev,
                             noColor: e.target.checked,
-                            colorCode: e.target.checked ? "#ffffff" : prev.colorCode
+                            colorCode: e.target.checked ? "" : prev.colorCode
                           }))
                         }
                         className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
