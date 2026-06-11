@@ -1,6 +1,7 @@
 import { apiClient } from "@/services";
 import { API_BASE_URL, ENDPOINTS, getStrapiServerUrl } from "@/constants/api";
 import type { ApiResponse } from "@/types/api";
+import type { ApiRequestOptions } from "@repo/api/types";
 import type { ProductCardProps } from "@/components/Product/Card";
 import logger from "@/utils/logger";
 import { parseStockCount } from "@/utils/product";
@@ -500,11 +501,14 @@ export const getLazySecondaryMediaByProductId = async (
   return urls.slice(0, safeLimit);
 };
 // Get product by ID instead of slug since current API doesn't have slug field
-export const getProductById = async (id: string): Promise<ApiResponse<ProductDetail>> => {
+export const getProductById = async (
+  id: string,
+  options?: ApiRequestOptions,
+): Promise<ApiResponse<ProductDetail>> => {
   const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}/${id}?populate[0]=CoverImage&populate[1]=Media&populate[2]=product_main_category&populate[3]=product_reviews&populate[4]=product_tags&populate[5]=product_variations&populate[6]=product_variations.product_stock&populate[7]=product_variations.product_variation_color&populate[8]=product_variations.product_variation_size&populate[9]=product_variations.product_variation_model&populate[10]=product_other_categories&populate[11]=product_size_helper&populate[12]=product_reviews.user&populate[13]=product_reviews.user.user_info&populate[14]=product_reviews.product_review_replies&populate[15]=product_reviews.product_review_replies.user&populate[16]=product_reviews.product_review_replies.user.user_info`;
 
   try {
-    const response = await apiClient.get<any>(endpoint);
+    const response = await apiClient.get<any>(endpoint, options);
 
     // Check if product is trashed (removedAt is not null)
     const status = response.data?.attributes?.Status;

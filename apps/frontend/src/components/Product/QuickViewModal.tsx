@@ -26,7 +26,9 @@ export function preloadQuickViewProduct(productId: number): void {
   if (cached && Date.now() - cached.cachedAt < CACHE_TTL_MS) return;
 
   // Fire-and-forget — ignore errors here, the modal handles them on open
-  void getProductById(productId.toString()).then((response) => {
+  void getProductById(productId.toString(), {
+    headers: { "x-skip-global-loader": "1" },
+  }).then((response) => {
     if (response?.data) {
       productCache.set(productId, { data: response.data, cachedAt: Date.now() });
     }
@@ -80,7 +82,9 @@ export default function QuickViewModal({ isOpen, onClose, productId }: QuickView
     }
 
     try {
-      const response = await getProductById(productId.toString());
+      const response = await getProductById(productId.toString(), {
+        headers: { "x-skip-global-loader": "1" },
+      });
       if (!mountedRef.current) return;
 
       if (response?.data) {

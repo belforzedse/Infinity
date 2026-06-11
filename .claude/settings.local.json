@@ -41,7 +41,8 @@
       "Bash(Get-ChildItem -Path \"D:\\\\projects\\\\Infinitycolor\" -Force)",
       "Bash(Select-Object Name, FullName)",
       "Bash(Get-ChildItem -Path \"D:\\\\projects\\\\Infinitycolor\" -Directory)",
-      "Bash(Select-Object Name)"
+      "Bash(Select-Object Name)",
+      "Bash(ls -la \"D:/projects/pandaak\" | head -50)"
     ],
     "deny": [],
     "ask": []
