@@ -15,6 +15,7 @@ on:
       - 'turbo.json'
       - '.github/workflows/frontend-cicd.yml'
       - 'apps/frontend/docker-compose.scale.yml'
+      - 'apps/frontend/docker-compose.staging.scale.yml'
   pull_request:
     paths:
       - 'apps/frontend/**'
@@ -25,6 +26,7 @@ on:
       - 'turbo.json'
       - '.github/workflows/frontend-cicd.yml'
       - 'apps/frontend/docker-compose.scale.yml'
+      - 'apps/frontend/docker-compose.staging.scale.yml'
   workflow_dispatch:
 
 env:
@@ -199,7 +201,7 @@ jobs:
           username: ${{ secrets.FRONTEND_USER }}
           key: ${{ secrets.FRONTEND_SSH_KEY }}
           port: ${{ secrets.FRONTEND_PORT || '22' }}
-          source: "apps/frontend/docker-compose.yml,apps/frontend/docker-compose.scale.yml"
+          source: "apps/frontend/docker-compose.yml,apps/frontend/docker-compose.staging.scale.yml"
           target: /opt/infinity/frontend/
           strip_components: 2
 
@@ -239,7 +241,7 @@ jobs:
               return 1
             }
             pull_with_retry "ghcr.io/belforzedse/infinity-frontend:${IMAGE_TAG}"
-            docker compose -f docker-compose.yml -f docker-compose.scale.yml up -d --remove-orphans
+            docker compose -f docker-compose.yml -f docker-compose.staging.scale.yml up -d --remove-orphans
             if ! docker image prune -f; then
               echo "Skipped prune: another operation is already running."
             fi

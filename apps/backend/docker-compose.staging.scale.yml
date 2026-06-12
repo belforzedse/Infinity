@@ -1,0 +1,29 @@
+# Staging scale override: 2 total Strapi instances.
+# Use with:
+#   docker compose -f docker-compose.yml -f docker-compose.staging.scale.yml up -d --remove-orphans
+# Nginx should proxy to strapi_upstream (1337-1338).
+
+services:
+  strapi-2:
+    image: ghcr.io/belforzedse/infinity-backend:${IMAGE_TAG:-dev}
+    container_name: infinity-strapi-2
+    env_file:
+      - ${ENV_FILE:-dev.env}
+    depends_on:
+      infinity-postgres:
+        condition: service_healthy
+      infinity-redis:
+        condition: service_started
+    ports:
+      - "127.0.0.1:1338:1337"
+    restart: unless-stopped
+    volumes:
+      - backend_uploads-data:/app/public
+    networks:
+      - infinity-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:1337/api/_health"]
+      interval: 30s
+      timeout: 30s
+      retries: 6
+      start_period: 120s
