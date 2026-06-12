@@ -47,6 +47,10 @@ RUN --mount=type=cache,target=/root/.cache/node/corepack \
     echo "starting pnpm deploy..." \
     && fallback-registry.sh "${NPM_REGISTRY_URL}" "${NPM_REGISTRY_SECOND_FALLBACK_URL}" "${NPM_REGISTRY_THIRD_FALLBACK_URL}" "${NPM_REGISTRY_FALLBACK_URL}" \
     pnpm --filter @repo/backend deploy --legacy --prod /app \
+    && echo "pnpm deploy finished, copying build output..." \
+    && mkdir -p /app/dist /app/build \
+    && cp -a /repo/apps/backend/dist/. /app/dist/ \
+    && if [ -d /repo/apps/backend/build ]; then cp -a /repo/apps/backend/build/. /app/build/; fi \
     && cd /app \
     && echo "rebuilding sharp for musl runtime..." \
     && npm_config_platform=linux npm_config_arch=x64 npm_config_libc=musl pnpm rebuild sharp --unsafe-perm \

@@ -1,7 +1,7 @@
 # Staging scale override: 2 total Strapi instances.
 # Use with:
 #   docker compose -f docker-compose.yml -f docker-compose.staging.scale.yml up -d --remove-orphans
-# Nginx should proxy to strapi_upstream (1337-1338).
+# Nginx should proxy to strapi_upstream (1337 and 1339).
 
 services:
   strapi-2:
@@ -15,7 +15,7 @@ services:
       infinity-redis:
         condition: service_started
     ports:
-      - "127.0.0.1:1338:1337"
+      - "127.0.0.1:1339:1337"
     restart: unless-stopped
     volumes:
       - backend_uploads-data:/app/public
