@@ -31,6 +31,8 @@ describe("roleAccess - Founder rules", () => {
         "/super-admin/blog",
         "/super-admin/blog/posts",
         "/super-admin/faq/questions",
+        "/super-admin/stories",
+        "/super-admin/stories/add",
         "/super-admin/settings",
         "/super-admin/settings/general",
         "/super-admin/coupons",
@@ -54,7 +56,6 @@ describe("roleAccess - Founder rules", () => {
         "/super-admin/products",
         "/super-admin/carts",
         "/super-admin/shipping",
-        "/super-admin/stories",
         "/super-admin/reports/product-sales",
       ];
       for (const path of allowed) {
@@ -70,7 +71,7 @@ describe("roleAccess - Founder rules", () => {
 
   it("hides the expected sidebar parents", () => {
     expect([...FOUNDER_HIDDEN_PARENT_IDS].sort()).toEqual(
-      ["blog", "customization", "discounts", "faq", "settings", "users"].sort(),
+      ["blog", "customization", "discounts", "faq", "settings", "stories", "users"].sort(),
     );
   });
 });

@@ -9,6 +9,7 @@ jest.mock("../../../../utils/roles", () => ({
     SUPERADMIN: "Superadmin",
     STORE_MANAGER: "Store manager",
     EDITOR: "Editor",
+    FOUNDER: "Founder",
     CUSTOMER: "Customer",
   },
   fetchUserWithRole: (...args: any[]) => fetchUserWithRoleMock(...args),
@@ -73,7 +74,14 @@ function rawRouter(sql: string) {
   if (sql.includes("FULL OUTER JOIN orders_b")) {
     return {
       rows: [
-        { bucket: "2026-01-01", gross: "500000", units: "2", orders_count: "1", discounts: "0", refund_irr: "0" },
+        {
+          bucket: "2026-01-01",
+          gross: "500000",
+          units: "2",
+          orders_count: "1",
+          discounts: "0",
+          refund_irr: "0",
+        },
       ],
     };
   }
@@ -127,9 +135,28 @@ describe("product reporting endpoints", () => {
     await controller.productPerformance(ctx);
 
     expect(ctx.forbidden).toHaveBeenCalledWith(
-      "Access denied - Superadmin or Store manager role required",
+      "Access denied - Superadmin, Store manager or Founder role required",
     );
     expect(ctx.body).toBeUndefined();
+  });
+
+  it.each([
+    ["productOverview", {}],
+    ["productTrends", {}],
+    ["productPerformance", {}],
+    ["productExport", {}],
+    ["productDetail", { productId: "3" }],
+    ["productInventory", {}],
+  ])("allows Founder through the %s access gate", async (handlerName, query) => {
+    fetchUserWithRoleMock.mockResolvedValue({ role: { name: "Founder" } });
+    roleIsAllowedMock.mockImplementation((role, allowedRoles) => allowedRoles.includes(role));
+
+    const controller = loadController();
+    const ctx = createCtx({ query });
+    await controller[handlerName](ctx);
+
+    expect(roleIsAllowedMock).toHaveBeenCalledWith("Founder", expect.arrayContaining(["Founder"]));
+    expect(ctx.forbidden).not.toHaveBeenCalled();
   });
 
   describe("with an authorized manager", () => {

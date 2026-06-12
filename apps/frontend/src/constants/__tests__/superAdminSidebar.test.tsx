@@ -1,6 +1,4 @@
-import superAdminSidebar, {
-  getSidebarItemsForRole,
-} from "@/constants/superAdminSidebar";
+import superAdminSidebar, { getSidebarItemsForRole } from "@/constants/superAdminSidebar";
 import { FOUNDER_HIDDEN_PARENT_IDS } from "@/constants/roleAccess";
 
 describe("getSidebarItemsForRole - Founder", () => {
@@ -19,6 +17,10 @@ describe("getSidebarItemsForRole - Founder", () => {
     );
   });
 
+  it("does not expose stories", () => {
+    expect(founderIds).not.toContain("stories");
+  });
+
   it("exposes a single sales-report item labelled «گزارشات فروش» pointing to product-sales", () => {
     const reports = founderItems.filter((i) => i.id === "reports");
     expect(reports).toHaveLength(1);
@@ -28,12 +30,19 @@ describe("getSidebarItemsForRole - Founder", () => {
   });
 
   it("does NOT expose traffic or admin-activity reports anywhere", () => {
-    const allHrefs = founderItems.flatMap((i) => [
-      i.href ?? "",
-      ...i.children.map((c) => c.href),
-    ]);
+    const allHrefs = founderItems.flatMap((i) => [i.href ?? "", ...i.children.map((c) => c.href)]);
     expect(allHrefs).not.toContain("/super-admin/reports/traffic");
     expect(allHrefs).not.toContain("/super-admin/reports/admin-activity");
+  });
+});
+
+describe("getSidebarItemsForRole - Store manager", () => {
+  const storeManagerItems = getSidebarItemsForRole("Store manager");
+  const storeManagerIds = storeManagerItems.map((i) => i.id);
+
+  it("hides stories and FAQ", () => {
+    expect(storeManagerIds).not.toContain("stories");
+    expect(storeManagerIds).not.toContain("faq");
   });
 });
 

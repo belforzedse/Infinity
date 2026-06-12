@@ -30,7 +30,9 @@ import {
 // Create a styled layout/menu icons (unused definitions removed)
 const RarMenu = () => <FiMenu className="h-5 w-5 text-infinity-primary" stroke="#3d4c6e" />;
 //Create a styled club icon
-const _MultiUsersIcon = () => <FiUsers className="h-5 w-5 text-infinity-primary" stroke="#3d4c6e" />;
+const _MultiUsersIcon = () => (
+  <FiUsers className="h-5 w-5 text-infinity-primary" stroke="#3d4c6e" />
+);
 
 //Create a styled Pages icon
 const _PagesIcon = () => <FiLayers className="h-5 w-5 text-infinity-primary" stroke="#3d4c6e" />;
@@ -320,7 +322,7 @@ const superAdminSidebar: SidebarItem[] = [
       },
       {
         id: "product-sales",
-        label:" فروش هر محصول",
+        label: " فروش هر محصول",
         href: "/super-admin/reports/product-sales",
       },
       {
@@ -374,7 +376,16 @@ const superAdminSidebar: SidebarItem[] = [
   // },
 ];
 
-const STORE_MANAGER_HIDDEN_PARENT_IDS = new Set(["users", "reports", "shipping", "settings", "blog", "customization"]);
+const STORE_MANAGER_HIDDEN_PARENT_IDS = new Set([
+  "users",
+  "reports",
+  "shipping",
+  "settings",
+  "blog",
+  "customization",
+  "stories",
+  "faq",
+]);
 const STORE_MANAGER_HIDDEN_CHILD_IDS = new Set(["product-comments", "admin-activity"]);
 
 const cloneWithFilteredChildren = (item: SidebarItem) => {

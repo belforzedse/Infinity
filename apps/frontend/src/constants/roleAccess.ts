@@ -13,6 +13,7 @@ export const FOUNDER_HIDDEN_PARENT_IDS = new Set<string>([
   "blog",
   "faq",
   "discounts",
+  "stories",
   "users",
   "settings",
 ]);
@@ -26,6 +27,7 @@ export const FOUNDER_FORBIDDEN_PREFIXES: string[] = [
   "/super-admin/customization",
   "/super-admin/blog",
   "/super-admin/faq",
+  "/super-admin/stories",
   "/super-admin/settings",
   "/super-admin/coupons",
   "/super-admin/general-discounts",
