@@ -37,6 +37,11 @@ export default function FilterBar({ showProductFilters }: { showProductFilters?:
   const debounced = useDebouncedCallback((v: string) => f.setQ(v), 500);
 
   useEffect(() => {
+    if (!showProductFilters) {
+      setCategories([]);
+      return;
+    }
+
     getAllCategories()
       .then((res) => {
         const list = (res?.data || []).map((c: any) => ({
@@ -46,7 +51,7 @@ export default function FilterBar({ showProductFilters }: { showProductFilters?:
         setCategories(list);
       })
       .catch(() => setCategories([]));
-  }, []);
+  }, [showProductFilters]);
 
   const applyPreset = (days: number) => {
     f.setStart(toDateOnly(new Date(Date.now() - days * DAY_MS)));
