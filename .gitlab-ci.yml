@@ -10,6 +10,7 @@ variables:
   STRAPI_DISABLE_SOURCEMAPS: "true"
   STRAPI_TELEMETRY_DISABLED: "true"
   ENABLE_LARGE_HEAP: "true"
+  DOCKER_HUB_MIRROR: "docker.arvancloud.ir"
 
   # Docker-in-Docker for buildx (dind service). Runner waits ~30s for services;
   # if dind is slow, .docker_build before_script waits up to ~90s for docker info.
@@ -191,6 +192,8 @@ backend:deploy:
       	export DB_ENV_FILE=db.env
       	export REGISTRY_IMAGE_BASE="$CI_REGISTRY_IMAGE"
       	export IMAGE_TAG="$IMAGE_TAG"
+      	export POSTGRES_IMAGE="${DOCKER_HUB_MIRROR:-docker.arvancloud.ir}/postgres:16-alpine"
+      	export REDIS_IMAGE="${DOCKER_HUB_MIRROR:-docker.arvancloud.ir}/redis:7-alpine"
       	export SCALE_COMPOSE_FILE="$SCALE_COMPOSE_FILE"
       	export SCALE_CI_COMPOSE_FILE="$SCALE_CI_COMPOSE_FILE"
       	mkdir -p public/uploads
@@ -213,8 +216,8 @@ backend:deploy:
       		return 1
       	}
 
-      	pull_with_retry "postgres:16-alpine"
-      	pull_with_retry "redis:7-alpine"
+      	pull_with_retry "\$POSTGRES_IMAGE"
+      	pull_with_retry "\$REDIS_IMAGE"
       	pull_with_retry "$CI_REGISTRY_IMAGE/infinity-backend:$IMAGE_TAG"
       	docker run --rm --entrypoint node "$CI_REGISTRY_IMAGE/infinity-backend:$IMAGE_TAG" \
       	  -e "const sharp=require('sharp'); console.log('sharp-runtime-ok', process.platform, process.arch, sharp.versions);"
@@ -333,6 +336,7 @@ frontend:deploy:
       	export ENV_FILE="$ENV_FILE"
       	export REGISTRY_IMAGE_BASE="$CI_REGISTRY_IMAGE"
       	export IMAGE_TAG="$IMAGE_TAG"
+      	export REDIS_IMAGE="${DOCKER_HUB_MIRROR:-docker.arvancloud.ir}/redis:7-alpine"
       	export SCALE_COMPOSE_FILE="$SCALE_COMPOSE_FILE"
       	export SCALE_CI_COMPOSE_FILE="$SCALE_CI_COMPOSE_FILE"
       	sed -i "/^STRAPI_BUILD_TIME_URL=/d" "\$ENV_FILE" || true
@@ -347,6 +351,7 @@ frontend:deploy:
       		return 1
       	}
 
+      	pull_with_retry "\$REDIS_IMAGE"
       	pull_with_retry "$CI_REGISTRY_IMAGE/infinity-frontend:$IMAGE_TAG"
       	docker compose -f docker-compose.yml -f docker-compose.ci.yml -f "\$SCALE_COMPOSE_FILE" -f "\$SCALE_CI_COMPOSE_FILE" --env-file "\$ENV_FILE" down --remove-orphans || true
       	for c in infinity-frontend infinity-frontend-2 infinity-frontend-3 infinity-frontend-4 infinity-frontend-5 infinity-frontend-6 infinity-frontend-7 infinity-frontend-8 infinity-frontend-9 infinity-frontend-10 infinity-frontend-11 infinity-frontend-12; do docker rm -f "\$c" 2>/dev/null || true; done
