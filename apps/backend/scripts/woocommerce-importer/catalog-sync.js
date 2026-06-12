@@ -37,7 +37,7 @@ const ENV_CONFIG = {
     tokenEnv: "STRAPI_API_TOKEN_PRODUCTION",
   },
   staging: {
-    strapiUrl: process.env.STRAPI_IMPORT_STAGING_URL || "https://api.infinity.rgbgroup.ir/api",
+    strapiUrl: process.env.STRAPI_IMPORT_STAGING_URL || "https://api.staging.infinitycolor.co/api",
     trackingDir: "./import-tracking/staging",
     tokenEnv: "STRAPI_API_TOKEN_STAGING",
   },

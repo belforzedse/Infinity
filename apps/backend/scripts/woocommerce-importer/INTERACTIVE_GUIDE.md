@@ -15,7 +15,7 @@ node scripts/woocommerce-importer/interactive.js
 ```bash
 # Set up credentials in .env.local
 STRAPI_TOKEN='your_token' \
-STRAPI_URL='https://api.infinity.rgbgroup.ir/api' \
+STRAPI_URL='https://api.staging.infinitycolor.co/api' \
 npm run import:interactive
 ```
 

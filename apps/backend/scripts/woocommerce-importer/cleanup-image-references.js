@@ -214,7 +214,7 @@ async function main() {
       token: process.env.STRAPI_TOKEN_PROD || '',
     },
     staging: {
-      url: 'https://api.infinity.rgbgroup.ir/api',
+      url: 'https://api.staging.infinitycolor.co/api',
       token: process.env.STRAPI_TOKEN_STAGING || '',
     },
   };

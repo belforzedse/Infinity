@@ -10,13 +10,10 @@ import { getOrderStatusMeta } from "@/utils/statusTranslations";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-
-const quickActions = [
-  { href: "/super-admin/orders", label: "پیگیری سفارش‌ها" },
-  { href: "/super-admin/products", label: "مدیریت محصولات" },
-  { href: "/super-admin/users", label: "مشتریان" },
-];
-
+import {
+  canSeeDashboardUserMetric,
+  getDashboardQuickActionsForRole,
+} from "@/constants/superAdminDashboard";
 
 const statusToneBadge: Record<string, string> = {
   success: "bg-emerald-100 text-emerald-700",
@@ -28,14 +25,15 @@ const statusToneBadge: Record<string, string> = {
 export default function SuperAdminPage() {
   const router = useRouter();
   const { data: me, isLoading, error } = useMe();
-  const { isStoreManager, roleName } = useCurrentUser();
+  const { roleName } = useCurrentUser();
+  const showUserMetric = canSeeDashboardUserMetric(roleName);
   const {
     metrics,
     latestOrders,
     latestRevenue,
     loading: metricsLoading,
     error: metricsError,
-  } = useDashboardMetrics();
+  } = useDashboardMetrics({ includeUserMetric: showUserMetric });
 
   // Redirect editors to blog dashboard
   useEffect(() => {
@@ -50,15 +48,8 @@ export default function SuperAdminPage() {
     ? getUserFacingErrorMessage(error, "خطا در دریافت اطلاعات کاربری")
     : null;
 
-  // Filter out "کاربران" metric for store managers
-  const filteredMetrics = isStoreManager
-    ? metrics?.filter((metric) => metric.label !== "کاربران")
-    : metrics;
-
-  // Filter out "مشتریان" quick action for store managers
-  const filteredQuickActions = isStoreManager
-    ? quickActions.filter((action) => action.href !== "/super-admin/users")
-    : quickActions;
+  const filteredMetrics = metrics;
+  const filteredQuickActions = getDashboardQuickActionsForRole(roleName);
 
   const notifications = (latestOrders ?? []).map((order: any) => {
     // Extract nested Strapi attributes
@@ -73,13 +64,12 @@ export default function SuperAdminPage() {
 
     const key =
       order?.id ?? attributes?.OrderNumber ?? attributes?.createdAt ?? attributes?.updatedAt;
-    const time = new Date(attributes?.updatedAt ?? attributes?.createdAt ?? Date.now()).toLocaleTimeString(
-      "fa-IR",
-      {
-        hour: "2-digit",
-        minute: "2-digit",
-      },
-    );
+    const time = new Date(
+      attributes?.updatedAt ?? attributes?.createdAt ?? Date.now(),
+    ).toLocaleTimeString("fa-IR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
     const statusMeta = getOrderStatusMeta(attributes.Status);
     return {
       title: `سفارش #${order.id}`,
@@ -108,7 +98,7 @@ export default function SuperAdminPage() {
 
       <section className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {(metricsLoading || !filteredMetrics
-          ? Array.from({ length: isStoreManager ? 3 : 4 }, () => null as DashboardMetric | null)
+          ? Array.from({ length: showUserMetric ? 4 : 3 }, () => null as DashboardMetric | null)
           : filteredMetrics
         ).map((metric, index) => (
           <article

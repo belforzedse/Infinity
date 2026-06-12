@@ -106,7 +106,7 @@ module.exports = {
       },
       staging: {
         baseUrl:
-          process.env.STRAPI_IMPORT_STAGING_URL || "https://api.staging.infinitycolor.org/api",
+          process.env.STRAPI_IMPORT_STAGING_URL || "https://api.staging.infinitycolor.co/api",
         token: requiredEnvVar("STRAPI_API_TOKEN_STAGING", { optional: true, defaultValue: "" }),
       },
       local: {

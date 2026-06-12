@@ -58,7 +58,7 @@ try {
   // Fallback if importer config not available
   config = {
     strapi: {
-      baseUrl: "https://api.staging.infinitycolor.org/api",
+      baseUrl: "https://api.staging.infinitycolor.co/api",
       auth: {
         token:
           "STRAPI_API_TOKEN_STAGING",
@@ -72,7 +72,7 @@ const stagingConfig = config.strapi?.credentials?.staging;
 const STRAPI_URL =
   process.env.STRAPI_URL ||
   (stagingConfig ? stagingConfig.baseUrl : config.strapi.baseUrl) ||
-  "https://api.staging.infinitycolor.org/api";
+  "https://api.staging.infinitycolor.co/api";
 const API_TOKEN =
   process.env.STRAPI_TOKEN ||
   (stagingConfig ? stagingConfig.token : config.strapi.auth.token) ||

@@ -150,7 +150,7 @@ Copy the prompt/confirmation patterns from the existing `interactive.js` for the
    `config.import.images.maxImagesPerProduct`.
 3. Strapi health check used `{ pagination: { pageSize: 1 } }` (wrong shape). **Don’t write
    your own health check — `runSync`/`runVerify` already call `engine.preflight()`.**
-4. Hardcoded staging URL `api.staging.infinitycolor.org` (inconsistent). **Always use
+4. Hardcoded staging URLs are inconsistent and drift over time. **Always use
    `buildConfig(env)`; never hardcode URLs.**
 5. Default کیف/کفش name filter silently dropped most products. **The new engine has no name
    filter — do not add one.**

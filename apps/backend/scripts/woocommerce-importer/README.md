@@ -98,7 +98,7 @@ woocommerce: {
 ### Strapi Settings
 ```javascript
 strapi: {
-  baseUrl: 'https://api.infinity.rgbgroup.ir/api',
+  baseUrl: 'https://api.staging.infinitycolor.co/api',
   auth: {
     token: 'your_bearer_token'
   }

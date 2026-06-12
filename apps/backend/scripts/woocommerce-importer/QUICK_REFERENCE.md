@@ -79,7 +79,7 @@ node scripts/woocommerce-importer/index.js all --limit 100
 ### Using Environment Variables
 ```bash
 STRAPI_TOKEN='your_token' \
-STRAPI_URL='https://api.infinity.rgbgroup.ir/api' \
+STRAPI_URL='https://api.staging.infinitycolor.co/api' \
 npm run import:interactive
 ```
 
@@ -158,7 +158,7 @@ npm run import:dedup:categories
 ### "API connection error"
 ```bash
 # Check if Strapi is accessible
-curl https://api.infinity.rgbgroup.ir/api/product-categories -H "Authorization: Bearer YOUR_TOKEN"
+curl https://api.staging.infinitycolor.co/api/product-categories -H "Authorization: Bearer YOUR_TOKEN"
 
 # Try with explicit token
 STRAPI_TOKEN='your_token' npm run import:interactive

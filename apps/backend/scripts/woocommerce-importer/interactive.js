@@ -364,7 +364,7 @@ async function selectCredentials() {
   console.log("  1️⃣  Production");
   console.log("     URL: https://api.infinitycolor.co/api\n");
   console.log("  2️⃣  Staging");
-  console.log("     URL: https://api.staging.infinitycolor.org/api\n");
+  console.log("     URL: https://api.staging.infinitycolor.co/api\n");
   console.log("  3️⃣  Local");
   console.log("     URL: http://localhost:1337/api\n");
   console.log("  4️⃣  Custom");

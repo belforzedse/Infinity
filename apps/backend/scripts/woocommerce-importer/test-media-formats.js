@@ -6,7 +6,7 @@
 
 const axios = require('axios');
 
-const STRAPI_URL = process.env.STRAPI_URL || 'https://api.infinity.rgbgroup.ir/api';
+const STRAPI_URL = process.env.STRAPI_URL || 'https://api.staging.infinitycolor.co/api';
 const STRAPI_TOKEN = process.env.STRAPI_TOKEN;
 
 if (!STRAPI_TOKEN) {

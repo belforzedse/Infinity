@@ -57,6 +57,10 @@ type DashboardState = {
   error?: string;
 };
 
+type UseDashboardMetricsOptions = {
+  includeUserMetric?: boolean;
+};
+
 const ORDERS_ENDPOINT = "/orders";
 const PRODUCTS_ENDPOINT = "/products";
 const USERS_ENDPOINT = "/users";
@@ -64,7 +68,8 @@ const USERS_ENDPOINT = "/users";
 const buildCountUrl = (base: string, filters?: string) =>
   `${base}?pagination[page]=1&pagination[pageSize]=1${filters ? `&${filters}` : ""}`;
 
-export function useDashboardMetrics() {
+export function useDashboardMetrics(options: UseDashboardMetricsOptions = {}) {
+  const { includeUserMetric = true } = options;
   const [state, setState] = useState<DashboardState>({ loading: true });
 
   useEffect(() => {
@@ -89,7 +94,7 @@ export function useDashboardMetrics() {
             fetchCount(buildCountUrl(ORDERS_ENDPOINT)),
             fetchCount(buildCountUrl(ORDERS_ENDPOINT, "filters[Status][$eq]=Done")),
             fetchCount(buildCountUrl(PRODUCTS_ENDPOINT, "filters[Status][$eq]=Active")),
-            fetchCount(buildCountUrl(USERS_ENDPOINT)),
+            includeUserMetric ? fetchCount(buildCountUrl(USERS_ENDPOINT)) : Promise.resolve(0),
             fetchLatestOrders(),
           ]);
 
@@ -111,12 +116,15 @@ export function useDashboardMetrics() {
             value: productsTotal,
             helper: "محصولات در دسترس مشتریان",
           },
-          {
+        ];
+
+        if (includeUserMetric) {
+          metrics.push({
             label: "کاربران",
             value: usersTotal,
             helper: "حساب‌های فعال",
-          },
-        ];
+          });
+        }
 
         const latestRevenue = latestOrders.reduce((sum, order) => {
           const amount = order.attributes.contract?.data?.attributes?.Amount ?? 0;
@@ -144,7 +152,7 @@ export function useDashboardMetrics() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [includeUserMetric]);
 
   return state;
 }
