@@ -1,0 +1,7 @@
+# CI/GitLab override for staging scale compose: pull app images from registry.cyandm.org instead of ghcr.io.
+# Used by .gitlab-ci.yml deploy. Use with docker-compose.staging.scale.yml.
+# Usage: docker compose -f docker-compose.yml -f docker-compose.ci.yml -f docker-compose.staging.scale.yml -f docker-compose.staging.scale.ci.yml --env-file ... up -d
+
+services:
+  strapi-2:
+    image: ${REGISTRY_IMAGE_BASE}/infinity-backend:${IMAGE_TAG:-dev}

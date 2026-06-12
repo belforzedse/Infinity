@@ -146,20 +146,24 @@ backend:deploy:
         IMAGE_TAG: "dev"
         ENV_FILE: "dev.env"
         DEPLOY_ENV: "staging"
+        SCALE_COMPOSE_FILE: "docker-compose.staging.scale.yml"
+        SCALE_CI_COMPOSE_FILE: "docker-compose.staging.scale.ci.yml"
     - if: '$CI_COMMIT_REF_NAME == "main"'
       changes: [apps/backend/**/*, packages/**/*, package.json, pnpm-lock.yaml, pnpm-workspace.yaml, turbo.json, .gitlab-ci.yml]
       variables:
         IMAGE_TAG: "main"
         ENV_FILE: "main.env"
         DEPLOY_ENV: "production"
+        SCALE_COMPOSE_FILE: "docker-compose.scale.yml"
+        SCALE_CI_COMPOSE_FILE: "docker-compose.scale.ci.yml"
     - when: never
   script:
     - |
       set -euo pipefail
 
-      # Upload compose (base + scale + CI registry override)
+      # Upload compose files. Dev selects the staging scale files; main selects the production scale files.
       scp -P "${DEPLOY_PORT:-3031}" \
-        apps/backend/docker-compose.yml apps/backend/docker-compose.scale.yml apps/backend/docker-compose.ci.yml apps/backend/docker-compose.scale.ci.yml \
+        apps/backend/docker-compose.yml apps/backend/docker-compose.ci.yml apps/backend/docker-compose.scale.yml apps/backend/docker-compose.scale.ci.yml apps/backend/docker-compose.staging.scale.yml apps/backend/docker-compose.staging.scale.ci.yml \
         "${DEPLOY_USER}@${DEPLOY_HOST}:/opt/infinity/backend/"
 
       # BACKEND_ENV_FILE: File type => path; Variable type => env content. Avoid echoing content to log.
@@ -181,6 +185,8 @@ backend:deploy:
       	export DB_ENV_FILE=db.env
       	export REGISTRY_IMAGE_BASE="$CI_REGISTRY_IMAGE"
       	export IMAGE_TAG="$IMAGE_TAG"
+      	export SCALE_COMPOSE_FILE="$SCALE_COMPOSE_FILE"
+      	export SCALE_CI_COMPOSE_FILE="$SCALE_CI_COMPOSE_FILE"
       	mkdir -p public/uploads
 
       	DB_USER=\$(grep -E "^DATABASE_USERNAME=" "\$ENV_FILE" | tail -1 | cut -d= -f2-)
@@ -207,10 +213,10 @@ backend:deploy:
       	docker run --rm --entrypoint node "$CI_REGISTRY_IMAGE/infinity-backend:$IMAGE_TAG" \
       	  -e "const sharp=require('sharp'); console.log('sharp-runtime-ok', process.platform, process.arch, sharp.versions);"
 
-      	docker compose -f docker-compose.yml -f docker-compose.ci.yml -f docker-compose.scale.yml -f docker-compose.scale.ci.yml --env-file "\$ENV_FILE" down --remove-orphans || true
+      	docker compose -f docker-compose.yml -f docker-compose.ci.yml -f "\$SCALE_COMPOSE_FILE" -f "\$SCALE_CI_COMPOSE_FILE" --env-file "\$ENV_FILE" down --remove-orphans || true
       	for c in infinity-strapi infinity-strapi-2 infinity-strapi-3 infinity-strapi-4 infinity-strapi-5 infinity-strapi-6; do docker rm -f "\$c" 2>/dev/null || true; done
-      	docker compose -f docker-compose.yml -f docker-compose.ci.yml -f docker-compose.scale.yml -f docker-compose.scale.ci.yml --env-file "\$ENV_FILE" up -d infinity-postgres infinity-redis
-      	docker compose -f docker-compose.yml -f docker-compose.ci.yml -f docker-compose.scale.yml -f docker-compose.scale.ci.yml --env-file "\$ENV_FILE" up -d --remove-orphans
+      	docker compose -f docker-compose.yml -f docker-compose.ci.yml -f "\$SCALE_COMPOSE_FILE" -f "\$SCALE_CI_COMPOSE_FILE" --env-file "\$ENV_FILE" up -d infinity-postgres infinity-redis
+      	docker compose -f docker-compose.yml -f docker-compose.ci.yml -f "\$SCALE_COMPOSE_FILE" -f "\$SCALE_CI_COMPOSE_FILE" --env-file "\$ENV_FILE" up -d --remove-orphans
       	docker image prune -f || true
       REMOTE
 
@@ -284,19 +290,23 @@ frontend:deploy:
         IMAGE_TAG: "dev"
         ENV_FILE: "dev.env"
         DEPLOY_ENV: "staging"
+        SCALE_COMPOSE_FILE: "docker-compose.staging.scale.yml"
+        SCALE_CI_COMPOSE_FILE: "docker-compose.staging.scale.ci.yml"
     - if: '$CI_COMMIT_REF_NAME == "main"'
       changes: [apps/frontend/**/*, packages/**/*, package.json, pnpm-lock.yaml, pnpm-workspace.yaml, turbo.json, .gitlab-ci.yml]
       variables:
         IMAGE_TAG: "main"
         ENV_FILE: "main.env"
         DEPLOY_ENV: "production"
+        SCALE_COMPOSE_FILE: "docker-compose.scale.yml"
+        SCALE_CI_COMPOSE_FILE: "docker-compose.scale.ci.yml"
     - when: never
   script:
     - |
       set -euo pipefail
 
       scp -P "${DEPLOY_PORT:-3031}" \
-        apps/frontend/docker-compose.yml apps/frontend/docker-compose.scale.yml apps/frontend/docker-compose.ci.yml apps/frontend/docker-compose.scale.ci.yml \
+        apps/frontend/docker-compose.yml apps/frontend/docker-compose.ci.yml apps/frontend/docker-compose.scale.yml apps/frontend/docker-compose.scale.ci.yml apps/frontend/docker-compose.staging.scale.yml apps/frontend/docker-compose.staging.scale.ci.yml \
         "${DEPLOY_USER}@${DEPLOY_HOST}:/opt/infinity/frontend/"
 
       # FRONTEND_ENV_FILE: File type => path; Variable type => env content. Avoid echoing content to log.
@@ -317,6 +327,8 @@ frontend:deploy:
       	export ENV_FILE="$ENV_FILE"
       	export REGISTRY_IMAGE_BASE="$CI_REGISTRY_IMAGE"
       	export IMAGE_TAG="$IMAGE_TAG"
+      	export SCALE_COMPOSE_FILE="$SCALE_COMPOSE_FILE"
+      	export SCALE_CI_COMPOSE_FILE="$SCALE_CI_COMPOSE_FILE"
       	sed -i "/^STRAPI_BUILD_TIME_URL=/d" "\$ENV_FILE" || true
 
       	pull_with_retry() {
@@ -330,9 +342,9 @@ frontend:deploy:
       	}
 
       	pull_with_retry "$CI_REGISTRY_IMAGE/infinity-frontend:$IMAGE_TAG"
-      	docker compose -f docker-compose.yml -f docker-compose.ci.yml -f docker-compose.scale.yml -f docker-compose.scale.ci.yml --env-file "\$ENV_FILE" down --remove-orphans || true
+      	docker compose -f docker-compose.yml -f docker-compose.ci.yml -f "\$SCALE_COMPOSE_FILE" -f "\$SCALE_CI_COMPOSE_FILE" --env-file "\$ENV_FILE" down --remove-orphans || true
       	for c in infinity-frontend infinity-frontend-2 infinity-frontend-3 infinity-frontend-4 infinity-frontend-5 infinity-frontend-6 infinity-frontend-7 infinity-frontend-8 infinity-frontend-9 infinity-frontend-10 infinity-frontend-11 infinity-frontend-12; do docker rm -f "\$c" 2>/dev/null || true; done
-      	docker compose -f docker-compose.yml -f docker-compose.ci.yml -f docker-compose.scale.yml -f docker-compose.scale.ci.yml --env-file "\$ENV_FILE" up -d --remove-orphans
+      	docker compose -f docker-compose.yml -f docker-compose.ci.yml -f "\$SCALE_COMPOSE_FILE" -f "\$SCALE_CI_COMPOSE_FILE" --env-file "\$ENV_FILE" up -d --remove-orphans
       	docker image prune -f || true
       REMOTE
 
