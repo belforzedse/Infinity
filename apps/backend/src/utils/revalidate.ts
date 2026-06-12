@@ -18,7 +18,7 @@ type RevalidatePayload = Record<string, unknown> & {
 function getFrontendUrls(): string[] {
   return [
     process.env.NEXTJS_REVALIDATION_URL,
-    "https://staging.infinitycolor.org",
+    "https://staging.infinitycolor.co",
     "https://infinitycolor.co",
   ].filter(Boolean) as string[];
 }

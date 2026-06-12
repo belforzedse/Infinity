@@ -1,5 +1,5 @@
 # syntax=docker.arvancloud.ir/docker/dockerfile:1.7
-FROM node:22-alpine AS builder
+FROM docker.arvancloud.ir/node:22-alpine AS builder
 
 WORKDIR /repo
 ENV NEXT_TELEMETRY_DISABLED=1
@@ -35,7 +35,7 @@ RUN --mount=type=cache,target=/root/.cache/node/corepack \
     fallback-registry.sh "${NPM_REGISTRY_URL}" "${NPM_REGISTRY_SECOND_FALLBACK_URL}" "${NPM_REGISTRY_THIRD_FALLBACK_URL}" "${NPM_REGISTRY_FALLBACK_URL}" \
     pnpm run build
 
-FROM node:22-alpine AS runner
+FROM docker.arvancloud.ir/node:22-alpine AS runner
 WORKDIR /app
 
 ENV NEXT_TELEMETRY_DISABLED=1 \

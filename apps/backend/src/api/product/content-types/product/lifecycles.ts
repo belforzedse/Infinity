@@ -32,7 +32,7 @@ function isCounterOnlyProductUpdate(data: Record<string, unknown> | undefined): 
 async function triggerProductRevalidation(slug: string) {
   // Hardcoded for now (TODO: move to environment variables)
   const frontendUrls = [
-    "https://staging.infinitycolor.org",
+    "https://staging.infinitycolor.co",
     "https://infinitycolor.co",
   ];
 

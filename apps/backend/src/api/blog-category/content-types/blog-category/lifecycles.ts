@@ -18,7 +18,7 @@ function ensureSlug(data: Record<string, any>) {
 
 async function triggerBlogListingRevalidation() {
   const frontendUrls = [
-    "https://staging.infinitycolor.org",
+    "https://staging.infinitycolor.co",
     "https://infinitycolor.co",
   ];
 

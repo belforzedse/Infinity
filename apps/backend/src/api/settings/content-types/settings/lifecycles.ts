@@ -1,7 +1,7 @@
 async function triggerSiteSettingsRevalidation() {
   const frontendUrls = [
     process.env.NEXTJS_REVALIDATION_URL,
-    "https://staging.infinitycolor.org",
+    "https://staging.infinitycolor.co",
     "https://infinitycolor.co",
   ].filter(Boolean);
 

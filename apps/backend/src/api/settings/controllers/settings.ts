@@ -40,7 +40,7 @@ function extractPayloadFromRequestBody(body: any) {
 async function triggerHeroSliderRevalidation(strapi: { log: { warn: (msg: string) => void; error: (msg: string, ...args: unknown[]) => void; info: (msg: string) => void } }) {
   const frontendUrls = [
     process.env.NEXTJS_REVALIDATION_URL,
-    "https://staging.infinitycolor.org",
+    "https://staging.infinitycolor.co",
     "https://infinitycolor.co",
   ].filter(Boolean) as string[];
 

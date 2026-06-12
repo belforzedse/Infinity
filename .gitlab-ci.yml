@@ -43,8 +43,14 @@ variables:
         sleep 3
       done
     - echo "$CI_REGISTRY_PASSWORD" | docker login "$CI_REGISTRY" -u "$CI_REGISTRY_USER" --password-stdin
-    # Use mirrored buildkit image to avoid Docker Hub auth issues
-    - docker buildx create --use --driver docker-container --driver-opt image=registry.cyandm.org/bel4/infinity/buildkit:buildx-stable-1 || docker buildx create --use || true
+    # Buildx docker-container builders use their own BuildKit registry config, separate from the dind daemon mirror.
+    - |
+      cat > /tmp/buildkitd.toml <<'EOF'
+      [registry."docker.io"]
+        mirrors = ["docker.arvancloud.ir"]
+      EOF
+    # Use mirrored buildkit image to avoid Docker Hub auth issues.
+    - docker buildx create --use --driver docker-container --config /tmp/buildkitd.toml --driver-opt image=registry.cyandm.org/bel4/infinity/buildkit:buildx-stable-1 || docker buildx create --use --config /tmp/buildkitd.toml || true
 
 .deploy_ssh:
   # Mirror alpine:3.20 into this project's registry (see .cursor/rules/docker-hub-mirror-arvan.mdc).

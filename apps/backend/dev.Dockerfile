@@ -1,5 +1,5 @@
 # syntax=docker.arvancloud.ir/docker/dockerfile:1.7
-FROM node:20-alpine AS builder
+FROM docker.arvancloud.ir/node:20-alpine AS builder
 
 ARG STRAPI_DISABLE_SOURCEMAPS=true
 ARG STRAPI_TELEMETRY_DISABLED=true
@@ -52,7 +52,7 @@ RUN --mount=type=cache,target=/root/.cache/node/corepack \
     && npm_config_platform=linux npm_config_arch=x64 npm_config_libc=musl pnpm rebuild sharp --unsafe-perm \
     && node -e "const sharp=require('sharp'); console.log('sharp-ok', process.platform, process.arch, sharp.versions);"
 
-FROM node:20-alpine AS runner
+FROM docker.arvancloud.ir/node:20-alpine AS runner
 
 ARG STRAPI_DISABLE_SOURCEMAPS=true
 ARG STRAPI_TELEMETRY_DISABLED=true

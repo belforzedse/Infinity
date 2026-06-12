@@ -27,7 +27,7 @@ function isCounterOnlyBlogUpdate(data: Record<string, unknown> | undefined): boo
 async function triggerRevalidation(slug: string) {
   // Hardcoded for now (TODO: move to environment variables)
   const frontendUrls = [
-    "https://staging.infinitycolor.org",
+    "https://staging.infinitycolor.co",
     "https://infinitycolor.co",
   ];
 
@@ -107,7 +107,7 @@ export default {
   async afterDelete(event: any) {
     // Revalidate blog listing when a post is deleted
     const frontendUrls = [
-      "https://staging.infinitycolor.org",
+      "https://staging.infinitycolor.co",
       "https://infinitycolor.co",
     ];
     const revalidationSecret = process.env.REVALIDATION_SECRET;
