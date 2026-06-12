@@ -40,7 +40,7 @@ export default function PDPHeroInfoColor(props: Props) {
       <span className="text-foreground-primary text-xl">انتخاب رنگ</span>
 
       <div
-        className="flex max-w-full flex-nowrap items-center gap-4 overflow-x-auto overflow-y-visible px-1 py-1"
+        className="flex max-w-full flex-wrap items-center gap-3 overflow-visible px-1 py-1"
         role="radiogroup"
         aria-label="انتخاب رنگ محصول"
       >
@@ -57,6 +57,10 @@ export default function PDPHeroInfoColor(props: Props) {
                   <button
                     type="button"
                     className="flex shrink-0 items-center gap-1 rounded-3xl border border-gray-300 p-1"
+                    data-testid="pdp-color-option"
+                    data-color-id={color.id}
+                    data-color-title={color.title}
+                    data-color-code={color.colorCode || ""}
                     aria-pressed="true"
                     aria-label={`رنگ انتخاب شده: ${color.title}`}
                     disabled
@@ -72,6 +76,10 @@ export default function PDPHeroInfoColor(props: Props) {
                   <button
                     type="button"
                     onClick={() => (isDisabled ? undefined : handleColorClick(color.id))}
+                    data-testid="pdp-color-option"
+                    data-color-id={color.id}
+                    data-color-title={color.title}
+                    data-color-code={color.colorCode || ""}
                     className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition-colors"
                     style={{
                       backgroundColor: isDisabled ? "#f3f4f6" : color.colorCode!,
@@ -104,6 +112,10 @@ export default function PDPHeroInfoColor(props: Props) {
               <button
                 type="button"
                 onClick={() => (isDisabled ? undefined : handleColorClick(color.id))}
+                data-testid="pdp-color-option"
+                data-color-id={color.id}
+                data-color-title={color.title}
+                data-color-code={color.colorCode || ""}
                 className="shrink-0 rounded-3xl px-3 py-1 text-sm transition-colors"
                 style={
                   isDisabled
@@ -126,9 +138,7 @@ export default function PDPHeroInfoColor(props: Props) {
                 disabled={isDisabled}
                 aria-disabled={isDisabled}
                 aria-pressed={isSelected ? "true" : "false"}
-                aria-label={
-                  isDisabled ? `رنگ ${color.title} ناموجود` : `انتخاب رنگ ${color.title}`
-                }
+                aria-label={isDisabled ? `رنگ ${color.title} ناموجود` : `انتخاب رنگ ${color.title}`}
                 title={isDisabled ? "ناموجود" : color.title}
               >
                 {color.title}

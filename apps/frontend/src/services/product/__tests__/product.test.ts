@@ -9,6 +9,8 @@ import {
   findProductVariation,
   formatProductsToCardProps,
   formatGalleryAssets,
+  calculateUniqueColorsCount,
+  getUniqueColorCodes,
   type ProductDetail,
 } from "../product";
 
@@ -307,6 +309,46 @@ describe("Product Service Helpers", () => {
     });
   });
 
+  describe("product card color helpers", () => {
+    it("ignores color relations that do not have a color code", () => {
+      const variations = [
+        {
+          id: 1,
+          attributes: {
+            IsPublished: true,
+            product_variation_color: {
+              data: {
+                id: 10,
+                attributes: {
+                  Title: "Code 1",
+                  ColorCode: null,
+                },
+              },
+            },
+          },
+        },
+        {
+          id: 2,
+          attributes: {
+            IsPublished: true,
+            product_variation_color: {
+              data: {
+                id: 11,
+                attributes: {
+                  Title: "Red",
+                  ColorCode: "#ff0000",
+                },
+              },
+            },
+          },
+        },
+      ] as any;
+
+      expect(calculateUniqueColorsCount(variations)).toBe(1);
+      expect(getUniqueColorCodes(variations)).toEqual(["#ff0000"]);
+    });
+  });
+
   describe("getAvailableStockCount", () => {
     it("should return stock count", () => {
       const product = createMockProduct();
@@ -456,6 +498,28 @@ describe("Product Service Helpers", () => {
         colorCodes: ["#111111", "#ffffff"],
       });
       expect(result[0].images[0]).toContain("/uploads/projected.jpg");
+    });
+
+    it("should omit compact projection color count when color codes are missing", () => {
+      const result = formatProductsToCardProps([
+        {
+          id: 13,
+          attributes: {
+            Title: "Colorless Projected Product",
+            Price: 120000,
+            IsAvailable: true,
+            ColorsCount: 2,
+            ColorCodes: [],
+            CoverImage: {
+              url: "/uploads/projected.jpg",
+            },
+          },
+        },
+      ]);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].colorsCount).toBeUndefined();
+      expect(result[0].colorCodes).toBeUndefined();
     });
 
     it("should handle empty array", () => {

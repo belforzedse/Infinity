@@ -150,10 +150,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   // Save cart to localStorage when it changes (only for non-logged in users)
   useEffect(() => {
+    if (!isCartReady) return;
+
     if (!isLoggedIn) {
       localStorage.setItem("cart", JSON.stringify(cartItems));
     }
-  }, [cartItems, isLoggedIn]);
+  }, [cartItems, isLoggedIn, isCartReady]);
 
 
   // Fetch user's cart from API

@@ -1,5 +1,6 @@
 import CartService from "../index";
 import { apiClient } from "../../index";
+import { CHECKOUT_MAX_RETRIES, CHECKOUT_REQUEST_TIMEOUT_MS } from "@/constants/api";
 
 // Mock the API client
 jest.mock("../../index", () => ({
@@ -262,7 +263,10 @@ describe("CartService", () => {
 
       const result = await CartService.getSnappEligible();
 
-      expect(mockGet).toHaveBeenCalledWith("/payment-gateway/snapp-eligible");
+      expect(mockGet).toHaveBeenCalledWith("/payment-gateway/snapp-eligible", {
+        timeout: CHECKOUT_REQUEST_TIMEOUT_MS,
+        retries: CHECKOUT_MAX_RETRIES,
+      });
       expect(result).toEqual(mockResponse);
     });
 
@@ -291,7 +295,10 @@ describe("CartService", () => {
 
       const result = await CartService.getAvailableGateways();
 
-      expect(mockGet).toHaveBeenCalledWith("/payment-gateway/available");
+      expect(mockGet).toHaveBeenCalledWith("/payment-gateway/available", {
+        timeout: CHECKOUT_REQUEST_TIMEOUT_MS,
+        retries: CHECKOUT_MAX_RETRIES,
+      });
       expect(result).toEqual(["samankish", "mellat", "wallet"]);
     });
 

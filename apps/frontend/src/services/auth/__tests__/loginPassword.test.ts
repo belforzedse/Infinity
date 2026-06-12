@@ -2,7 +2,6 @@ import { loginPassword } from "../loginPassword";
 import { apiClient } from "../../index";
 import { ENDPOINTS } from "@/constants/api";
 
-// Mock the API client
 jest.mock("../../index", () => ({
   apiClient: {
     post: jest.fn(),
@@ -13,126 +12,81 @@ describe("loginPassword", () => {
   const mockPost = apiClient.post as jest.MockedFunction<typeof apiClient.post>;
 
   beforeEach(() => {
-    mockPost.mockClear();
+    mockPost.mockReset();
   });
 
-  it("logs in with phone and password", async () => {
-    const phone = "09123456789";
-    const password = "password123";
-    const mockResponse = { data: { token: "auth-token" } };
+  it("posts normalized phone and password with auth redirect suppression", async () => {
+    const response = { token: "auth-token" };
+    mockPost.mockResolvedValueOnce(response);
 
-    mockPost.mockResolvedValueOnce(mockResponse);
+    const result = await loginPassword("09123456789", "password123");
 
-    const result = await loginPassword(phone, password);
-
-    expect(mockPost).toHaveBeenCalledWith(ENDPOINTS.AUTH.LOGIN_PASSWORD, {
-      phone,
-      password,
-    });
-    expect(result).toEqual(mockResponse.data);
+    expect(mockPost).toHaveBeenCalledWith(
+      ENDPOINTS.AUTH.LOGIN_PASSWORD,
+      {
+        phone: "+989123456789",
+        password: "password123",
+      },
+      { suppressAuthRedirect: true },
+    );
+    expect(result).toEqual(response);
   });
 
-  it("handles API errors correctly", async () => {
-    const phone = "09123456789";
-    const password = "wrongpassword";
+  it.each([
+    ["09123456789", "+989123456789"],
+    ["+989123456789", "+989123456789"],
+    ["989123456789", "+989123456789"],
+  ])("normalizes %s to %s", async (phone, expected) => {
+    mockPost.mockResolvedValue({ token: "auth-token" });
+
+    await loginPassword(phone, "password123");
+
+    expect(mockPost).toHaveBeenLastCalledWith(
+      ENDPOINTS.AUTH.LOGIN_PASSWORD,
+      {
+        phone: expected,
+        password: "password123",
+      },
+      { suppressAuthRedirect: true },
+    );
+  });
+
+  it("passes empty credentials through for backend validation", async () => {
+    const response = { token: "auth-token" };
+    mockPost.mockResolvedValueOnce(response);
+
+    const result = await loginPassword("", "");
+
+    expect(mockPost).toHaveBeenCalledWith(
+      ENDPOINTS.AUTH.LOGIN_PASSWORD,
+      { phone: "", password: "" },
+      { suppressAuthRedirect: true },
+    );
+    expect(result).toEqual(response);
+  });
+
+  it("does not alter special or unicode password characters", async () => {
+    const password = "p@ssw0rd!#$%-Ù¾Ø³ÙˆØ±Ø¯";
+    mockPost.mockResolvedValueOnce({ token: "auth-token" });
+
+    await loginPassword("09123456789", password);
+
+    expect(mockPost).toHaveBeenCalledWith(
+      ENDPOINTS.AUTH.LOGIN_PASSWORD,
+      {
+        phone: "+989123456789",
+        password,
+      },
+      { suppressAuthRedirect: true },
+    );
+  });
+
+  it("propagates API errors", async () => {
     const error = new Error("Invalid credentials");
-
     mockPost.mockRejectedValueOnce(error);
 
-    await expect(loginPassword(phone, password)).rejects.toThrow("Invalid credentials");
-  });
-
-  it("works with different phone number formats", async () => {
-    const phoneNumbers = ["09123456789", "+989123456789", "989123456789"];
-    const password = "password123";
-    const mockResponse = { data: { token: "auth-token" } };
-
-    mockPost.mockResolvedValue(mockResponse);
-
-    for (const phone of phoneNumbers) {
-      await loginPassword(phone, password);
-
-      expect(mockPost).toHaveBeenCalledWith(ENDPOINTS.AUTH.LOGIN_PASSWORD, {
-        phone,
-        password,
-      });
-    }
-  });
-
-  it("handles empty credentials", async () => {
-    const phone = "";
-    const password = "";
-    const mockResponse = { data: { token: "auth-token" } };
-
-    mockPost.mockResolvedValueOnce(mockResponse);
-
-    const result = await loginPassword(phone, password);
-
-    expect(mockPost).toHaveBeenCalledWith(ENDPOINTS.AUTH.LOGIN_PASSWORD, {
-      phone: "",
-      password: "",
-    });
-    expect(result).toEqual(mockResponse.data);
-  });
-
-  it("calls correct API endpoint", async () => {
-    const phone = "09123456789";
-    const password = "password123";
-    const mockResponse = { data: { token: "auth-token" } };
-
-    mockPost.mockResolvedValueOnce(mockResponse);
-
-    await loginPassword(phone, password);
-
-    expect(mockPost).toHaveBeenCalledWith(ENDPOINTS.AUTH.LOGIN_PASSWORD, expect.any(Object));
-  });
-
-  it("returns response as expected", async () => {
-    const phone = "09123456789";
-    const password = "password123";
-    const mockResponse = {
-      data: {
-        token: "auth-token",
-        user: { id: 1, name: "John Doe", phone },
-      }
-    };
-
-    mockPost.mockResolvedValueOnce(mockResponse);
-
-    const result = await loginPassword(phone, password);
-
-    expect(result).toEqual(mockResponse.data);
-  });
-
-  it("handles special characters in password", async () => {
-    const phone = "09123456789";
-    const password = "p@ssw0rd!#$%";
-    const mockResponse = { data: { token: "auth-token" } };
-
-    mockPost.mockResolvedValueOnce(mockResponse);
-
-    const result = await loginPassword(phone, password);
-
-    expect(mockPost).toHaveBeenCalledWith(ENDPOINTS.AUTH.LOGIN_PASSWORD, {
-      phone,
-      password,
-    });
-    expect(result).toEqual(mockResponse.data);
-  });
-
-  it("handles unicode characters in credentials", async () => {
-    const phone = "09123456789";
-    const password = "پسورد۱۲۳";
-    const mockResponse = { data: { token: "auth-token" } };
-
-    mockPost.mockResolvedValueOnce(mockResponse);
-
-    const result = await loginPassword(phone, password);
-
-    expect(mockPost).toHaveBeenCalledWith(ENDPOINTS.AUTH.LOGIN_PASSWORD, {
-      phone,
-      password,
-    });
-    expect(result).toEqual(mockResponse.data);
+    await expect(loginPassword("09123456789", "wrongpassword")).rejects.toThrow(
+      "Invalid credentials",
+    );
   });
 });

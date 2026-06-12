@@ -109,7 +109,7 @@ export default function PDPHero({ productData, productId }: PDPHeroProps) {
   };
 
   return (
-    <div className="relative flex flex-col gap-4 md:flex-row md:gap-7">
+    <div className="relative flex flex-col gap-4 md:flex-row md:gap-7" data-testid="pdp-hero">
       <div className="md:hidden">
         <Main category={product.category} title={product.title} discount={product.discount} />
       </div>

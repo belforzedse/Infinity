@@ -70,6 +70,12 @@ jobs:
           corepack enable
           pnpm install --frozen-lockfile
 
+      - name: Run frontend checks
+        run: |
+          pnpm --filter @repo/frontend check-types
+          pnpm --filter @repo/frontend lint
+          pnpm --filter @repo/frontend test --runInBand
+
       - name: Select Dockerfile and image tag
         id: meta
         run: |

@@ -30,6 +30,7 @@
     "import:sync:verify": "node scripts/woocommerce-importer/catalog-sync.js verify",
     "retry:images": "node scripts/retry-failed-images.js",
     "seed:admin": "node scripts/seed-admin-user.js",
+    "seed:e2e": "node scripts/seed-e2e-storefront.js",
     "seed:report-fixtures": "node scripts/seed-report-fixtures.js",
     "regenerate:slugs": "node scripts/regenerate-product-slugs.js",
     "start": "strapi start",
@@ -39,6 +40,7 @@
     "test": "jest --detectOpenHandles",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
+    "test:importer": "node --test scripts/woocommerce-importer/catalog/__tests__/*.test.js",
     "type:generate": "strapi ts:generate-types",
     "type-check": "tsc --noEmit",
     "check-types": "tsc --noEmit",
@@ -46,7 +48,7 @@
     "diagnose:homepage-db": "node scripts/homepage-query-plans.js",
     "clean": "rm -rf .cache build dist .tmp",
     "logs": "pm2 logs infinity-backend --lines 100",
-    "validate": "pnpm run check-types && pnpm run test"
+    "validate": "pnpm run check-types && pnpm run test && pnpm run test:importer"
   },
   "dependencies": {
     "@sentry/node": "9.47.1",

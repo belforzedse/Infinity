@@ -268,8 +268,8 @@ export default {
     try {
       const user = await ensureRoleAccess(
         ctx,
-        [ROLE_NAMES.SUPERADMIN, ROLE_NAMES.STORE_MANAGER],
-        "Access denied - Superadmin or Store manager role required",
+        [ROLE_NAMES.SUPERADMIN, ROLE_NAMES.STORE_MANAGER, ROLE_NAMES.FOUNDER],
+        "Access denied - Superadmin, Store manager or Founder role required",
       );
       if (!user) return;
 

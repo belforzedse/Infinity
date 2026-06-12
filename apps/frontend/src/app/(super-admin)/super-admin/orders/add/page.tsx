@@ -300,26 +300,8 @@ export default function Page() {
         // Don't fail the order creation, but log the error prominently
       }
 
-      try {
-        await apiClient.post("/admin-activities", {
-          data: {
-            ResourceType: "Order",
-            ResourceId: String(orderId),
-            Action: "Create",
-            Description: "Manual order created via super-admin panel",
-            Metadata: {
-              orderId,
-              contractId: contractId || null,
-              total: data.total,
-              userId: selectedUser?.id || null,
-            },
-          },
-        });
-      } catch (activityError) {
-        logger.warn("Failed to log admin activity for manual order", {
-          message: (activityError as any)?.message,
-        });
-      }
+      // Admin activity for the manual order is recorded server-side by the order controller's
+      // gated `create` override (via `recordAdminAudit`), so no client-side activity write here.
 
       toast.success("سفارش با موفقیت ثبت شد");
       router.push("/super-admin/orders");

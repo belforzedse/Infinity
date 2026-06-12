@@ -10,6 +10,8 @@ export default function PLPButton({
   disabled = false,
   variant = "outline",
   fullWidth = true,
+  testId,
+  ariaLabel,
 }: {
   text: string;
   className?: string;
@@ -19,12 +21,16 @@ export default function PLPButton({
   disabled?: boolean;
   variant?: "primary" | "outline";
   fullWidth?: boolean;
+  testId?: string;
+  ariaLabel?: string;
 }) {
   return (
     <Button
       onClick={disabled ? undefined : onClick}
       disabled={disabled}
       variant={variant}
+      data-testid={testId}
+      aria-label={ariaLabel}
       className={cn(
         "text-xs gap-1 rounded-lg bg-background-secondary px-3 py-1 !leading-[32px]",
         "flex items-center justify-center",

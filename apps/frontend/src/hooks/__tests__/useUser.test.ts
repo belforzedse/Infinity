@@ -1,87 +1,125 @@
-import { renderHook, waitFor } from "@testing-library/react";
+import React from "react";
+import { act, renderHook, waitFor } from "@testing-library/react";
+import { Provider, createStore } from "jotai";
 import useUser from "../useUser";
-import { me } from "@/services/user/me";
+import UserService from "@/services/user";
+import { currentUserAtom, userErrorAtom, userLoadingAtom } from "@/lib/atoms/auth";
+import type { MeResponse } from "@/services/user/me";
 
-jest.mock("@/services/user/me", () => ({
-  me: jest.fn(),
+jest.mock("@/services/user", () => ({
+  __esModule: true,
+  default: {
+    me: jest.fn(),
+  },
 }));
 
-describe("useUser", () => {
-  const mockUserData = {
-    id: 1,
-    username: "testuser",
-    email: "test@example.com",
-  };
+const mockedMe = UserService.me as jest.MockedFunction<typeof UserService.me>;
 
+const buildUser = (overrides: Partial<MeResponse> = {}): MeResponse => ({
+  Bio: null,
+  BirthDate: null,
+  FirstName: "Test",
+  IsActive: true,
+  IsVerified: true,
+  LastName: "User",
+  NationalCode: null,
+  Phone: "+989123456789",
+  Sex: null,
+  createdAt: "2026-01-01T00:00:00.000Z",
+  id: 1,
+  updatedAt: "2026-01-01T00:00:00.000Z",
+  isAdmin: false,
+  roleName: "Customer",
+  UserName: "+989123456789",
+  ...overrides,
+});
+
+const renderUseUser = (
+  setupStore?: (store: ReturnType<typeof createStore>) => void,
+) => {
+  const store = createStore();
+  store.set(userLoadingAtom, false);
+  setupStore?.(store);
+
+  return {
+    store,
+    ...renderHook(() => useUser(), {
+      wrapper: ({ children }) => React.createElement(Provider, { store }, children),
+    }),
+  };
+};
+
+describe("useUser", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     localStorage.clear();
   });
 
-  it("should initialize without user data", async () => {
-    const { result } = renderHook(() => useUser());
+  it("reads empty auth state without fetching automatically", () => {
+    const { result } = renderUseUser();
 
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
+    expect(result.current).toMatchObject({
+      userData: null,
+      isLoading: false,
+      error: null,
+    });
+    expect(mockedMe).not.toHaveBeenCalled();
+  });
+
+  it("returns the current user from the shared auth atom", () => {
+    const user = buildUser({ id: 7, roleName: "Store manager" });
+
+    const { result } = renderUseUser((store) => {
+      store.set(currentUserAtom, user);
     });
 
-    expect(result.current.userData).toBeNull();
+    expect(result.current.userData).toEqual(user);
+    expect(result.current.isLoading).toBe(false);
+  });
+
+  it("fetches user data when refetch is called", async () => {
+    const user = buildUser({ id: 2, roleName: "SuperAdmin", isAdmin: true });
+    mockedMe.mockResolvedValueOnce(user);
+
+    const { result } = renderUseUser();
+
+    await act(async () => {
+      await result.current.refetch();
+    });
+
+    expect(mockedMe).toHaveBeenCalledTimes(1);
+    expect(result.current.userData).toEqual(user);
     expect(result.current.error).toBeNull();
+    expect(result.current.isLoading).toBe(false);
   });
 
-  it("should not fetch user data when no access token", async () => {
-    const { result } = renderHook(() => useUser());
-
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
-    });
-
-    expect(me).not.toHaveBeenCalled();
-    expect(result.current.userData).toBeNull();
-  });
-
-  it("should fetch user data when access token exists", async () => {
-    localStorage.setItem("accessToken", "mock-token");
-    (me as jest.Mock).mockResolvedValue(mockUserData);
-
-    const { result } = renderHook(() => useUser());
-
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
-    });
-
-    expect(me).toHaveBeenCalled();
-    expect(result.current.userData).toEqual(mockUserData);
-  });
-
-  it("should handle fetch errors", async () => {
-    localStorage.setItem("accessToken", "mock-token");
+  it("stores fetch errors and clears loading", async () => {
     const consoleError = jest.spyOn(console, "error").mockImplementation();
-    const mockError = new Error("Failed to fetch");
-    (me as jest.Mock).mockRejectedValue(mockError);
+    const error = new Error("Failed to fetch");
+    mockedMe.mockRejectedValueOnce(error);
 
-    const { result } = renderHook(() => useUser());
+    const { result } = renderUseUser();
 
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
+    await act(async () => {
+      await result.current.refetch();
     });
 
-    expect(result.current.error).toEqual(mockError);
+    expect(result.current.error).toBe(error);
     expect(result.current.userData).toBeNull();
-    expect(consoleError).toHaveBeenCalled();
+    expect(result.current.isLoading).toBe(false);
+    expect(consoleError).toHaveBeenCalledWith("Error fetching user data:", error);
 
     consoleError.mockRestore();
   });
 
-  it("should handle non-Error objects", async () => {
-    localStorage.setItem("accessToken", "mock-token");
+  it("normalizes non-Error failures into an Error object", async () => {
     const consoleError = jest.spyOn(console, "error").mockImplementation();
-    (me as jest.Mock).mockRejectedValue("String error");
+    mockedMe.mockRejectedValueOnce("String error" as never);
 
-    const { result } = renderHook(() => useUser());
+    const { result } = renderUseUser();
 
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
+    await act(async () => {
+      await result.current.refetch();
     });
 
     expect(result.current.error).toBeInstanceOf(Error);
@@ -90,73 +128,47 @@ describe("useUser", () => {
     consoleError.mockRestore();
   });
 
-  it("should refetch user data when calling refetch", async () => {
-    localStorage.setItem("accessToken", "mock-token");
-    (me as jest.Mock).mockResolvedValue(mockUserData);
+  it("clears a previous error after a successful refetch", async () => {
+    const user = buildUser();
+    mockedMe.mockResolvedValueOnce(user);
 
-    const { result } = renderHook(() => useUser());
-
-    await waitFor(() => {
-      expect(result.current.userData).toEqual(mockUserData);
+    const { result } = renderUseUser((store) => {
+      store.set(userErrorAtom, new Error("Previous error"));
     });
 
-    const updatedUserData = { ...mockUserData, username: "updated" };
-    (me as jest.Mock).mockResolvedValue(updatedUserData);
-
-    await waitFor(async () => {
+    await act(async () => {
       await result.current.refetch();
     });
 
-    await waitFor(() => {
-      expect(result.current.userData).toEqual(updatedUserData);
-    });
-
-    expect(me).toHaveBeenCalledTimes(2);
+    expect(result.current.error).toBeNull();
+    expect(result.current.userData).toEqual(user);
   });
 
-  it("should clear error on successful refetch", async () => {
-    localStorage.setItem("accessToken", "mock-token");
-    const consoleError = jest.spyOn(console, "error").mockImplementation();
-    (me as jest.Mock).mockRejectedValueOnce(new Error("First error"));
-
-    const { result } = renderHook(() => useUser());
-
-    await waitFor(() => {
-      expect(result.current.error).toBeTruthy();
-    });
-
-    (me as jest.Mock).mockResolvedValue(mockUserData);
-
-    await waitFor(async () => {
-      await result.current.refetch();
-    });
-
-    await waitFor(() => {
-      expect(result.current.error).toBeNull();
-      expect(result.current.userData).toEqual(mockUserData);
-    });
-
-    consoleError.mockRestore();
-  });
-
-  it("should set loading during refetch", async () => {
-    localStorage.setItem("accessToken", "mock-token");
-    (me as jest.Mock).mockResolvedValue(mockUserData);
-
-    const { result } = renderHook(() => useUser());
-
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
-    });
-
-    (me as jest.Mock).mockImplementation(
-      () => new Promise((resolve) => setTimeout(() => resolve(mockUserData), 100)),
+  it("sets loading while a refetch is in flight", async () => {
+    let resolveUser!: (value: MeResponse) => void;
+    mockedMe.mockImplementationOnce(
+      () =>
+        new Promise<MeResponse>((resolve) => {
+          resolveUser = resolve;
+        }),
     );
 
-    await waitFor(async () => {
-      const refetchPromise = result.current.refetch();
+    const { result } = renderUseUser();
+
+    let refetchPromise!: Promise<void>;
+    act(() => {
+      refetchPromise = result.current.refetch();
+    });
+
+    await waitFor(() => {
       expect(result.current.isLoading).toBe(true);
+    });
+
+    await act(async () => {
+      resolveUser(buildUser({ id: 3 }));
       await refetchPromise;
     });
+
+    expect(result.current.isLoading).toBe(false);
   });
 });

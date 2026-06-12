@@ -30,7 +30,13 @@ export default function useAddToCart({
   model,
   variationId,
 }: UseAddToCartProps) {
-  const { addToCart: addToCartContext, openDrawer, cartItems, updateQuantity } = useCart();
+  const {
+    addToCart: addToCartContext,
+    openDrawer,
+    cartItems,
+    updateQuantity,
+    isCartReady,
+  } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
   const [isInCart, setIsInCart] = useState(false);
@@ -88,7 +94,7 @@ export default function useAddToCart({
       actualQuantity = typeof quantity === "number" ? quantity : 1;
     }
 
-    if (isAdding || actualQuantity <= 0) return;
+    if (!isCartReady || isAdding || actualQuantity <= 0) return;
 
     setIsAdding(true);
 
@@ -141,6 +147,7 @@ export default function useAddToCart({
     setQuantity: updateItemQuantity,
     isAdding,
     isInCart,
+    isCartReady,
     cartItemId,
     addToCart: handleAddToCart,
   };

@@ -212,7 +212,7 @@ const RichTextToolbar: React.FC<ToolbarProps> = ({ editor, simplified = false })
 
   return (
     <>
-      <div className={`${simplified ? "" : "sticky top-4 z-30"} mb-4 flex ${simplified ? "justify-start border-b border-slate-200" : "justify-center"}`}>
+      <div className={`${simplified ? "" : "sticky top-[5.5rem] z-30"} mb-4 flex ${simplified ? "justify-start border-b border-slate-200" : "justify-center"}`}>
         <div className={`flex w-fit max-w-full flex-wrap items-center ${simplified ? "justify-end" : "justify-center"} gap-1 ${simplified ? "": "rounded-3xl border border-slate-200"} bg-white/10 px-4 py-2.5 ${simplified ? "" : "shadow-lg"} backdrop-blur-lg transition-all`}>
       {/* Headings */}
       <ToolbarButton

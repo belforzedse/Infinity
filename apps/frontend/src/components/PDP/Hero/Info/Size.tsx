@@ -153,6 +153,9 @@ export default function PDPHeroInfoSize(props: Props) {
               <button
                 type="button"
                 key={size.id}
+                data-testid="pdp-size-option"
+                data-size-id={size.id}
+                data-size-title={size.title}
                 className={`flex h-9 w-20 items-center justify-center rounded-lg px-3 py-2 transition-all duration-200 ${
                   isDisabled
                     ? "pointer-events-none cursor-not-allowed bg-gray-100 text-gray-400 line-through opacity-60"

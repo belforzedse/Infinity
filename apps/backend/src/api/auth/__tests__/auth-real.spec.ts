@@ -409,7 +409,7 @@ describe('Auth Controller - Real Implementation', () => {
     });
 
     await expect(authController.loginWithPassword(ctx)).rejects.toThrow(
-      'User not found or password is incorrect'
+      'شماره همراه یا رمز عبور اشتباه است.'
     );
 
     expect(ctx.unauthorized).toHaveBeenCalledWith('شماره همراه یا رمز عبور اشتباه است.');
@@ -422,7 +422,7 @@ describe('Auth Controller - Real Implementation', () => {
     });
 
     await expect(authController.loginWithPassword(ctx)).rejects.toThrow(
-      'Phone and password are required'
+      'شماره همراه و رمز عبور الزامی است.'
     );
 
     expect(ctx.badRequest).toHaveBeenCalledWith('شماره همراه و رمز عبور الزامی است.');
@@ -437,7 +437,7 @@ describe('Auth Controller - Real Implementation', () => {
     });
 
     await expect(authController.loginWithPassword(ctx)).rejects.toThrow(
-      'User not found or password is incorrect'
+      'شماره همراه یا رمز عبور اشتباه است.'
     );
 
     expect(ctx.unauthorized).toHaveBeenCalledWith('شماره همراه یا رمز عبور اشتباه است.');
@@ -498,9 +498,9 @@ describe('Auth Controller - Real Implementation', () => {
       request: { body: { otp: '999999', otpToken: '1234567890.abc', newPassword: 'new-pass' } },
     });
 
-    await expect(authController.resetPassword(ctx)).rejects.toThrow('otp is invalid');
+    await expect(authController.resetPassword(ctx)).rejects.toThrow('کد وارد شده نامعتبر یا منقضی شده است. دوباره تلاش کنید.');
 
-    expect(ctx.badRequest).toHaveBeenCalledWith('otp is invalid');
+    expect(ctx.badRequest).toHaveBeenCalledWith('کد وارد شده نامعتبر یا منقضی شده است. دوباره تلاش کنید.');
     expect(mockStrapi.entityService.update).not.toHaveBeenCalled();
   });
   });

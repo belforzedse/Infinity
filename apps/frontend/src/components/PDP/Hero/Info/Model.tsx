@@ -72,6 +72,9 @@ export default function PDPHeroInfoModel(props: Props) {
               type="button"
               key={model.id}
               onClick={() => handleModelClick(model.id)}
+              data-testid="pdp-model-option"
+              data-model-id={model.id}
+              data-model-title={model.title}
               className="btn-model"
               style={
                 isDisabled

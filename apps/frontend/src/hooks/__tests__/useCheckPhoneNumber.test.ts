@@ -1,12 +1,18 @@
-import { renderHook, act, waitFor } from "@testing-library/react";
+import React from "react";
+import { act, renderHook, waitFor } from "@testing-library/react";
+import { Provider, createStore } from "jotai";
 import { useCheckPhoneNumber } from "../useCheckPhoneNumber";
 import { AuthService } from "@/services";
 
 const mockPush = jest.fn();
+const mockSearchParamsGet = jest.fn(() => null as string | null);
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({
     push: mockPush,
+  }),
+  useSearchParams: () => ({
+    get: mockSearchParamsGet,
   }),
 }));
 
@@ -16,29 +22,30 @@ jest.mock("@/services", () => ({
   },
 }));
 
-jest.mock("jotai", () => ({
-  atom: (initialValue: any) => initialValue,
-  useAtom: (atom: any) => {
-    const [state, setState] = require("react").useState(atom);
-    return [state, setState];
-  },
-}));
+const renderUseCheckPhoneNumber = () => {
+  const store = createStore();
+
+  return renderHook(() => useCheckPhoneNumber(), {
+    wrapper: ({ children }) => React.createElement(Provider, { store }, children),
+  });
+};
 
 describe("useCheckPhoneNumber", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockSearchParamsGet.mockReturnValue(null);
   });
 
-  it("should initialize with empty state", () => {
-    const { result } = renderHook(() => useCheckPhoneNumber());
+  it("initializes with empty state", () => {
+    const { result } = renderUseCheckPhoneNumber();
 
     expect(result.current.isLoading).toBe(false);
     expect(result.current.error).toBeNull();
     expect(result.current.phoneNumber).toBe("");
   });
 
-  it("should validate phone number format", async () => {
-    const { result } = renderHook(() => useCheckPhoneNumber());
+  it("rejects invalid phone numbers before calling the API", async () => {
+    const { result } = renderUseCheckPhoneNumber();
 
     await act(async () => {
       await result.current.checkPhoneNumber("123456");
@@ -46,85 +53,113 @@ describe("useCheckPhoneNumber", () => {
 
     expect(result.current.error).toBe("شماره تلفن نامعتبر است");
     expect(AuthService.checkUserExists).not.toHaveBeenCalled();
+    expect(mockPush).not.toHaveBeenCalled();
   });
 
-  it("should accept valid phone number format", async () => {
+  it("accepts local and international Iranian phone formats", async () => {
     (AuthService.checkUserExists as jest.Mock).mockResolvedValue({ hasUser: true });
 
-    const { result } = renderHook(() => useCheckPhoneNumber());
+    const { result } = renderUseCheckPhoneNumber();
+
+    await act(async () => {
+      await result.current.checkPhoneNumber("09123456789");
+      await result.current.checkPhoneNumber("+989123456789");
+    });
+
+    expect(AuthService.checkUserExists).toHaveBeenNthCalledWith(1, "09123456789");
+    expect(AuthService.checkUserExists).toHaveBeenNthCalledWith(2, "+989123456789");
+  });
+
+  it("navigates to login and stores the phone when the user exists", async () => {
+    (AuthService.checkUserExists as jest.Mock).mockResolvedValue({ hasUser: true });
+
+    const { result } = renderUseCheckPhoneNumber();
 
     await act(async () => {
       await result.current.checkPhoneNumber("09123456789");
     });
 
-    expect(result.current.error).toBeNull();
-    expect(AuthService.checkUserExists).toHaveBeenCalledWith("09123456789");
+    expect(result.current.phoneNumber).toBe("09123456789");
+    expect(mockPush).toHaveBeenCalledWith("/auth/login");
   });
 
-  it("should navigate to login if user exists", async () => {
-    (AuthService.checkUserExists as jest.Mock).mockResolvedValue({ hasUser: true });
-
-    const { result } = renderHook(() => useCheckPhoneNumber());
-
-    await act(async () => {
-      await result.current.checkPhoneNumber("09123456789");
-    });
-
-    await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith("/auth/login");
-    });
-  });
-
-  it("should navigate to register if user does not exist", async () => {
+  it("navigates to register when the phone is new", async () => {
     (AuthService.checkUserExists as jest.Mock).mockResolvedValue({ hasUser: false });
 
-    const { result } = renderHook(() => useCheckPhoneNumber());
+    const { result } = renderUseCheckPhoneNumber();
 
     await act(async () => {
       await result.current.checkPhoneNumber("09123456789");
     });
 
-    await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith("/auth/register");
-    });
+    expect(mockPush).toHaveBeenCalledWith("/auth/register");
   });
 
-  it("should set loading state during check", async () => {
+  it("preserves the redirect query when routing", async () => {
+    mockSearchParamsGet.mockImplementation((key) =>
+      key === "redirect" ? "/checkout?step=payment" : null,
+    );
+    (AuthService.checkUserExists as jest.Mock).mockResolvedValue({ hasUser: true });
+
+    const { result } = renderUseCheckPhoneNumber();
+
+    await act(async () => {
+      await result.current.checkPhoneNumber("09123456789");
+    });
+
+    expect(mockPush).toHaveBeenCalledWith(
+      "/auth/login?redirect=%2Fcheckout%3Fstep%3Dpayment",
+    );
+  });
+
+  it("sets loading while the existence check is in flight", async () => {
+    let resolveCheck!: (value: { hasUser: boolean }) => void;
     (AuthService.checkUserExists as jest.Mock).mockImplementation(
-      () => new Promise((resolve) => setTimeout(() => resolve({ hasUser: true }), 100)),
+      () =>
+        new Promise((resolve) => {
+          resolveCheck = resolve;
+        }),
     );
 
-    const { result } = renderHook(() => useCheckPhoneNumber());
+    const { result } = renderUseCheckPhoneNumber();
 
+    let checkPromise!: Promise<void>;
     act(() => {
-      result.current.checkPhoneNumber("09123456789");
+      checkPromise = result.current.checkPhoneNumber("09123456789");
     });
-
-    expect(result.current.isLoading).toBe(true);
 
     await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
+      expect(result.current.isLoading).toBe(true);
     });
+
+    await act(async () => {
+      resolveCheck({ hasUser: true });
+      await checkPromise;
+    });
+
+    expect(result.current.isLoading).toBe(false);
   });
 
-  it("should handle API errors", async () => {
+  it("shows an error and avoids navigation when the API fails", async () => {
     const consoleError = jest.spyOn(console, "error").mockImplementation();
-    (AuthService.checkUserExists as jest.Mock).mockRejectedValue(new Error("Network error"));
+    const error = new Error("Network error");
+    (AuthService.checkUserExists as jest.Mock).mockRejectedValue(error);
 
-    const { result } = renderHook(() => useCheckPhoneNumber());
+    const { result } = renderUseCheckPhoneNumber();
 
     await act(async () => {
       await result.current.checkPhoneNumber("09123456789");
     });
 
     expect(result.current.error).toBe("خطا در بررسی شماره تلفن");
-    expect(consoleError).toHaveBeenCalled();
+    expect(mockPush).not.toHaveBeenCalled();
+    expect(consoleError).toHaveBeenCalledWith(error);
 
     consoleError.mockRestore();
   });
 
-  it("should clear error on new check", async () => {
-    const { result } = renderHook(() => useCheckPhoneNumber());
+  it("clears a previous validation error on the next valid check", async () => {
+    const { result } = renderUseCheckPhoneNumber();
 
     await act(async () => {
       await result.current.checkPhoneNumber("123");
@@ -139,19 +174,5 @@ describe("useCheckPhoneNumber", () => {
     });
 
     expect(result.current.error).toBeNull();
-  });
-
-  it("should store phone number in state", async () => {
-    (AuthService.checkUserExists as jest.Mock).mockResolvedValue({ hasUser: true });
-
-    const { result } = renderHook(() => useCheckPhoneNumber());
-
-    await act(async () => {
-      await result.current.checkPhoneNumber("09123456789");
-    });
-
-    await waitFor(() => {
-      expect(result.current.phoneNumber).toBe("09123456789");
-    });
   });
 });

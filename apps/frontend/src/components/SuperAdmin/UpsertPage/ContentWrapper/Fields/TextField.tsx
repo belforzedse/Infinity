@@ -4,12 +4,18 @@ type Props = {
   value: string;
   onChange: (value: string) => void;
   readOnly?: boolean;
+  name?: string;
+  label?: string;
+  testId?: string;
 };
 
-export default function TextField({ value, onChange, readOnly }: Props) {
+export default function TextField({ value, onChange, readOnly, name, label, testId }: Props) {
   return (
     <input
       type="text"
+      name={name}
+      aria-label={label}
+      data-testid={testId}
       disabled={readOnly}
       readOnly={readOnly}
       className={`text-sm w-full rounded-lg border border-neutral-200 px-5 py-3 ${

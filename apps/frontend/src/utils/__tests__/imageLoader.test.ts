@@ -33,10 +33,10 @@ describe("imageLoader", () => {
     expect(result).toContain("q=70");
   });
 
-  it("should add webp format parameter", () => {
+  it("should add avif format parameter", () => {
     const result = imageLoader({ src: "/image.jpg", width: 800 });
 
-    expect(result).toContain("f=webp");
+    expect(result).toContain("f=avif");
   });
 
   it("should handle absolute URLs", () => {
@@ -75,7 +75,7 @@ describe("imageLoader", () => {
     expect(result).toContain("not%20a%20valid%20url%20with%20spaces");
     expect(result).toContain("w=800");
     expect(result).toContain("q=90");
-    expect(result).toContain("f=webp");
+    expect(result).toContain("f=avif");
   });
 
   it("should use & for URLs with existing params in fallback", () => {

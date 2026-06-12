@@ -275,7 +275,7 @@ export interface ProductCardProjection {
  * and flattened format (direct properties).
  */
 const getVariationAttributes = (
-  variation: VariationInput
+  variation: VariationInput,
 ): VariationInput | VariationAttributesInput => variation.attributes ?? variation;
 
 /**
@@ -283,9 +283,7 @@ const getVariationAttributes = (
  * - VariationColorWrapper: { data: { id, attributes: { ColorCode } } }
  * - VariationColorRelation: { id, attributes: { ColorCode }, ColorCode }
  */
-const resolveColorData = (
-  input: VariationColorInput
-): VariationColorRelation | undefined => {
+const resolveColorData = (input: VariationColorInput): VariationColorRelation | undefined => {
   if (!input || typeof input !== "object") return undefined;
   if ("data" in input) {
     return input.data ?? undefined;
@@ -324,7 +322,9 @@ const hasCompactCardProjection = (product: any): boolean => {
   return attrs && attrs.Price !== undefined && attrs.IsAvailable !== undefined;
 };
 
-export const formatProductCardProjection = (product: ProductCardProjection): ProductCardProps | null => {
+export const formatProductCardProjection = (
+  product: ProductCardProjection,
+): ProductCardProps | null => {
   if (!product || !product.id) return null;
   const attrs = readCompactProductAttrs(product);
   const price = parseNumber(attrs.Price) ?? 0;
@@ -335,8 +335,11 @@ export const formatProductCardProjection = (product: ProductCardProjection): Pro
   const discount = parseNumber(attrs.Discount) ?? 0;
   const colorsCount = parseNumber(attrs.ColorsCount) ?? 0;
   const colorCodes = Array.isArray(attrs.ColorCodes)
-    ? attrs.ColorCodes.filter((code: unknown): code is string => typeof code === "string" && code.trim() !== "")
+    ? attrs.ColorCodes.filter(
+        (code: unknown): code is string => typeof code === "string" && code.trim() !== "",
+      )
     : [];
+  const hasColorCodes = colorCodes.length > 0;
 
   const result: ProductCardProps = {
     id: Number(product.id),
@@ -347,8 +350,8 @@ export const formatProductCardProjection = (product: ProductCardProjection): Pro
     price,
     seenCount: parseNumber(attrs.SeenCount) || 0,
     isAvailable: attrs.IsAvailable === true,
-    colorsCount: colorsCount > 0 ? colorsCount : undefined,
-    colorCodes: colorCodes.length > 0 ? colorCodes : undefined,
+    colorsCount: hasColorCodes && colorsCount > 0 ? colorsCount : undefined,
+    colorCodes: hasColorCodes ? colorCodes : undefined,
   };
 
   if (discountPrice > 0 && discountPrice < price) {
@@ -407,14 +410,10 @@ const normalizeAssetUrl = (path?: string | null): string => {
   return resolveAssetUrl(trimmed);
 };
 
-export const extractLazySecondaryMediaUrls = (
-  product: LazyMediaProductEntity,
-): string[] => {
+export const extractLazySecondaryMediaUrls = (product: LazyMediaProductEntity): string[] => {
   if (!product?.attributes) return [];
 
-  const coverUrl = normalizeAssetUrl(
-    product.attributes.CoverImage?.data?.attributes?.url,
-  );
+  const coverUrl = normalizeAssetUrl(product.attributes.CoverImage?.data?.attributes?.url);
   const mediaItems = product.attributes.Media?.data;
   if (!Array.isArray(mediaItems) || mediaItems.length === 0) {
     return [];
@@ -441,9 +440,7 @@ export const getLazySecondaryMediaByProductId = async (
   }
 
   const safeLimit =
-    Number.isFinite(limit) && limit > 0
-      ? Math.floor(limit)
-      : DEFAULT_LAZY_SECONDARY_MEDIA_LIMIT;
+    Number.isFinite(limit) && limit > 0 ? Math.floor(limit) : DEFAULT_LAZY_SECONDARY_MEDIA_LIMIT;
 
   const resolved = lazySecondaryMediaResolved.get(productId);
   if (resolved) {
@@ -679,7 +676,7 @@ export const formatGalleryAssets = (product: ProductDetail) => {
         assets.push({
           id: media.id.toString(),
           type: isVideo ? ("video" as const) : ("image" as const),
-        src: resolveAssetUrl(media.attributes.url),
+          src: resolveAssetUrl(media.attributes.url),
           thumbnail: thumbnailUrl,
           alt: media.attributes.alternativeText || product.attributes.Title,
         });
@@ -690,6 +687,27 @@ export const formatGalleryAssets = (product: ProductDetail) => {
   // Return assets array - if empty, return empty array (no placeholder)
   return assets;
 };
+
+const getRelationNode = (relation: any) => {
+  if (!relation) return null;
+  if (Object.prototype.hasOwnProperty.call(relation, "data")) return relation.data;
+  return relation;
+};
+
+const getRelationAttributes = (relation: any) => {
+  const node = getRelationNode(relation);
+  if (!node) return null;
+  return node.attributes ?? node;
+};
+
+const getRelationId = (relation: any): number | undefined => {
+  const id = getRelationNode(relation)?.id;
+  return typeof id === "number" ? id : undefined;
+};
+
+const getVariationStockAttributes = (
+  variation: ProductDetail["attributes"]["product_variations"]["data"][0],
+) => getRelationAttributes(variation?.attributes?.product_stock);
 
 // Find the first available product variation to use as default
 export const getDefaultProductVariation = (product: ProductDetail) => {
@@ -705,7 +723,7 @@ export const getDefaultProductVariation = (product: ProductDetail) => {
     }
 
     // Check if it has stock data and quantity > 0
-    const stock = variation.attributes.product_stock?.data?.attributes;
+    const stock = getVariationStockAttributes(variation);
     return stock ? parseStockCount(stock.Count) > 0 : false;
   });
 
@@ -735,12 +753,13 @@ export const getProductColors = (product: ProductDetail) => {
   const colors = new Map();
 
   product.attributes.product_variations.data.forEach((variation) => {
-    if (variation.attributes.IsPublished && variation.attributes.product_variation_color?.data) {
-      const color = variation.attributes.product_variation_color.data;
+    const color = getRelationNode(variation.attributes.product_variation_color);
+    const colorAttributes = getRelationAttributes(variation.attributes.product_variation_color);
+    if (variation.attributes.IsPublished && color && colorAttributes) {
       colors.set(color.id, {
         id: color.id,
-        title: color.attributes.Title,
-        colorCode: color.attributes.ColorCode,
+        title: colorAttributes.Title,
+        colorCode: colorAttributes.ColorCode,
       });
     }
   });
@@ -757,16 +776,17 @@ export const getProductColorsWithStock = (product: ProductDetail) => {
   const colors = new Map();
 
   product.attributes.product_variations.data.forEach((variation) => {
-    if (variation.attributes.IsPublished && variation.attributes.product_variation_color?.data) {
-      const color = variation.attributes.product_variation_color.data;
+    const color = getRelationNode(variation.attributes.product_variation_color);
+    const colorAttributes = getRelationAttributes(variation.attributes.product_variation_color);
+    if (variation.attributes.IsPublished && color && colorAttributes) {
       const hasStock = hasStockForVariation(variation);
 
       // If color already exists, update stock status (OR operation - if any variation has stock)
       const existingColor = colors.get(color.id);
       colors.set(color.id, {
         id: color.id,
-        title: color.attributes.Title,
-        colorCode: color.attributes.ColorCode,
+        title: colorAttributes.Title,
+        colorCode: colorAttributes.ColorCode,
         hasStock: existingColor ? existingColor.hasStock || hasStock : hasStock,
       });
     }
@@ -784,16 +804,17 @@ export const getProductSizes = (product: ProductDetail, colorId?: number) => {
   const sizes = new Map();
 
   product.attributes.product_variations.data.forEach((variation) => {
-    if (variation.attributes.IsPublished && variation.attributes.product_variation_size?.data) {
+    const size = getRelationNode(variation.attributes.product_variation_size);
+    const sizeAttributes = getRelationAttributes(variation.attributes.product_variation_size);
+    if (variation.attributes.IsPublished && size && sizeAttributes) {
       // If colorId is specified, only include sizes for that color
-      if (colorId && variation.attributes.product_variation_color?.data.id !== colorId) {
+      if (colorId && getRelationId(variation.attributes.product_variation_color) !== colorId) {
         return;
       }
 
-      const size = variation.attributes.product_variation_size.data;
       sizes.set(size.id, {
         id: size.id,
-        title: size.attributes.Title,
+        title: sizeAttributes.Title,
       });
     }
   });
@@ -810,18 +831,19 @@ export const getProductSizesWithStock = (product: ProductDetail, colorId?: numbe
   const sizes = new Map();
 
   product.attributes.product_variations.data.forEach((variation) => {
-    if (variation.attributes.IsPublished && variation.attributes.product_variation_size?.data) {
+    const size = getRelationNode(variation.attributes.product_variation_size);
+    const sizeAttributes = getRelationAttributes(variation.attributes.product_variation_size);
+    if (variation.attributes.IsPublished && size && sizeAttributes) {
       // If colorId is specified, only include sizes for that color
-      if (colorId && variation.attributes.product_variation_color?.data.id !== colorId) {
+      if (colorId && getRelationId(variation.attributes.product_variation_color) !== colorId) {
         return;
       }
 
-      const size = variation.attributes.product_variation_size.data;
       const hasStock = hasStockForVariation(variation);
 
       sizes.set(size.id, {
         id: size.id,
-        title: size.attributes.Title,
+        title: sizeAttributes.Title,
         hasStock,
       });
     }
@@ -839,11 +861,12 @@ export const getProductModels = (product: ProductDetail) => {
   const models = new Map();
 
   product.attributes.product_variations.data.forEach((variation) => {
-    if (variation.attributes.IsPublished && variation.attributes.product_variation_model?.data) {
-      const model = variation.attributes.product_variation_model.data;
+    const model = getRelationNode(variation.attributes.product_variation_model);
+    const modelAttributes = getRelationAttributes(variation.attributes.product_variation_model);
+    if (variation.attributes.IsPublished && model && modelAttributes) {
       models.set(model.id, {
         id: model.id,
-        title: model.attributes.Title,
+        title: modelAttributes.Title,
       });
     }
   });
@@ -855,11 +878,11 @@ export const getProductModels = (product: ProductDetail) => {
 export const getAvailableStockCount = (
   variation: ProductDetail["attributes"]["product_variations"]["data"][0],
 ): number => {
-  if (!variation?.attributes?.product_stock?.data?.attributes) {
+  const stockData = getVariationStockAttributes(variation);
+  if (!stockData) {
     return 0;
   }
 
-  const stockData = variation.attributes.product_stock.data.attributes;
   return parseStockCount(stockData.Count);
 };
 
@@ -874,9 +897,9 @@ export type PdpSelectionState = {
 export const getVariationRelationIds = (
   variation: ProductDetail["attributes"]["product_variations"]["data"][0],
 ): { colorId: string; sizeId: string; modelId: string } => ({
-  colorId: variation.attributes.product_variation_color?.data?.id?.toString() ?? "",
-  sizeId: variation.attributes.product_variation_size?.data?.id?.toString() ?? "",
-  modelId: variation.attributes.product_variation_model?.data?.id?.toString() ?? "",
+  colorId: getRelationId(variation.attributes.product_variation_color)?.toString() ?? "",
+  sizeId: getRelationId(variation.attributes.product_variation_size)?.toString() ?? "",
+  modelId: getRelationId(variation.attributes.product_variation_model)?.toString() ?? "",
 });
 
 /** Picks color/size/model from the first in-stock variation so PDP matches card availability. */
@@ -891,13 +914,11 @@ export const getInitialPdpSelection = (
   if (!variations?.length) return empty;
 
   const purchasable = variations.filter(
-    (variation) =>
-      variation.attributes.IsPublished === true && hasStockForVariation(variation, 1),
+    (variation) => variation.attributes.IsPublished === true && hasStockForVariation(variation, 1),
   );
 
   const preferred =
-    purchasable[0] ??
-    (productData ? getDefaultProductVariation(productData) : null);
+    purchasable[0] ?? (productData ? getDefaultProductVariation(productData) : null);
 
   if (preferred) {
     const ids = getVariationRelationIds(preferred);
@@ -908,8 +929,7 @@ export const getInitialPdpSelection = (
     };
   }
 
-  const firstColor =
-    colors.length > 0 ? colors[0].id : "";
+  const firstColor = colors.length > 0 ? colors[0].id : "";
   const firstSize = sizes.length > 0 ? sizes[0].id : "";
   const firstModel = models.length > 0 ? models[0].id : "";
 
@@ -926,6 +946,8 @@ export const hasStockForVariation = (
   variation: ProductDetail["attributes"]["product_variations"]["data"][0],
   requestedQuantity: number = 1,
 ): boolean => {
+  const stockData = getVariationStockAttributes(variation);
+
   if (process.env.NODE_ENV !== "production") {
     logger.info("=== STOCK CHECK DEBUG ===");
     logger.info("Variation ID", { id: variation?.id });
@@ -934,18 +956,17 @@ export const hasStockForVariation = (
       stock: variation?.attributes?.product_stock,
     });
     logger.info("Stock attributes", {
-      attrs: variation?.attributes?.product_stock?.data?.attributes,
+      attrs: stockData,
     });
   }
 
-  if (!variation?.attributes?.product_stock?.data?.attributes) {
+  if (!stockData) {
     if (process.env.NODE_ENV !== "production") {
       logger.info("No stock data found - returning false");
     }
     return false;
   }
 
-  const stockData = variation.attributes.product_stock.data.attributes;
   if (process.env.NODE_ENV !== "production") {
     logger.info("Stock data object", { stockData });
     logger.info("Available keys in stock data", {
@@ -981,11 +1002,11 @@ export const findProductVariation = (
 
   return product.attributes.product_variations.data.find((variation) => {
     const colorMatch =
-      !colorId || variation.attributes.product_variation_color?.data?.id === colorId;
-    const sizeMatch = !sizeId || variation.attributes.product_variation_size?.data?.id === sizeId;
-    const variationModelId = variation.attributes.product_variation_model?.data?.id;
-    const modelMatch =
-      !modelId || variationModelId === undefined || variationModelId === modelId;
+      !colorId || getRelationId(variation.attributes.product_variation_color) === colorId;
+    const sizeMatch =
+      !sizeId || getRelationId(variation.attributes.product_variation_size) === sizeId;
+    const variationModelId = getRelationId(variation.attributes.product_variation_model);
+    const modelMatch = !modelId || variationModelId === undefined || variationModelId === modelId;
 
     return variation.attributes.IsPublished && colorMatch && sizeMatch && modelMatch;
   });
@@ -1005,9 +1026,10 @@ export const getRelatedProductsByMainCategory = async (
   const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?view=card&filters[product_main_category][id][$eq]=${categoryId}&filters[id][$ne]=${productId}&filters[Status][$eq]=Active&filters[removedAt][$null]=true&filters[product_variations][Price][$gte]=1&filters[product_variations][product_stock][Count][$gt]=0&pagination[limit]=${limit}`;
 
   try {
-    const response = await fetch(`${getProductCardFetchBaseUrl()}${endpoint}`, CARD_FETCH_OPTIONS).then((res) =>
-      res.json(),
-    );
+    const response = await fetch(
+      `${getProductCardFetchBaseUrl()}${endpoint}`,
+      CARD_FETCH_OPTIONS,
+    ).then((res) => res.json());
     return formatProductsToCardProps((response as any).data);
   } catch (error) {
     console.error("Error fetching related products by main category:", error);
@@ -1043,9 +1065,10 @@ export const getRelatedProductsByOtherCategories = async (
 
     const endpoint = `${ENDPOINTS.PRODUCT.PRODUCT}?view=card&${categoryFilters}&filters[id][$ne]=${productId}&filters[Status][$eq]=Active&filters[removedAt][$null]=true&filters[product_variations][Price][$gte]=1&filters[product_variations][product_stock][Count][$gt]=0&pagination[limit]=${limit}`;
 
-    const response = await fetch(`${getProductCardFetchBaseUrl()}${endpoint}`, CARD_FETCH_OPTIONS).then((res) =>
-      res.json(),
-    );
+    const response = await fetch(
+      `${getProductCardFetchBaseUrl()}${endpoint}`,
+      CARD_FETCH_OPTIONS,
+    ).then((res) => res.json());
     return formatProductsToCardProps((response as any).data);
   } catch (error) {
     console.error("Error fetching related products by other categories:", error);
@@ -1065,9 +1088,11 @@ export const calculateUniqueColorsCount = (variations: VariationInput[]): number
     // Handle both nested Strapi format (v.attributes) and flattened format (v)
     const attrs = getVariationAttributes(variation);
     const colorData = resolveColorData(attrs.product_variation_color);
+    const colorCode = colorData?.attributes?.ColorCode ?? colorData?.ColorCode;
 
-    // Only count color if variation is published (defaults to true if undefined)
-    if (attrs.IsPublished !== false && colorData?.id) {
+    // Only count real colors; model/code-only variations can have a color relation
+    // without a ColorCode and should not produce product-card color chips.
+    if (attrs.IsPublished !== false && colorData?.id && colorCode?.trim()) {
       uniqueColors.add(colorData.id);
     }
   });
@@ -1198,9 +1223,7 @@ export const formatProductsToCardProps = (products: any[]): ProductCardProps[] =
  * Get multiple products by their IDs
  * Returns products formatted for card display
  */
-export const getProductsByIds = async (
-  ids: (number | string)[],
-): Promise<ProductCardProps[]> => {
+export const getProductsByIds = async (ids: (number | string)[]): Promise<ProductCardProps[]> => {
   if (!ids || ids.length === 0) {
     return [];
   }

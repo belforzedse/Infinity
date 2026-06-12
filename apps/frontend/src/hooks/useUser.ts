@@ -9,7 +9,7 @@ interface UseUserReturnType {
   error: Error | null;
   refetch: () => Promise<void>;
 }
-//hi
+
 export default function useUser(): UseUserReturnType {
   const [userData, setUserData] = useAtom(currentUserAtom);
   const [isLoading, setIsLoading] = useAtom(userLoadingAtom);

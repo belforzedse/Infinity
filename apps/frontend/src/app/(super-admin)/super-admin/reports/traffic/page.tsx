@@ -87,7 +87,8 @@ function formatFunnelStep(step: TrafficDashboard["funnel"][number]["step"]): str
 
 function downloadCsv(filename: string, columns: string[], rows: Array<Array<string | number>>) {
   const escape = (v: string | number) => {
-    const s = String(v ?? "");
+    const raw = String(v ?? "");
+    const s = /^[=+\-@\t\r]/.test(raw) ? `'${raw}` : raw;
     return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };
   const lines = [columns.map(escape).join(",")];

@@ -9,6 +9,7 @@ import {
   publishHeroSliderDraft,
   updateHeroSliderDraft,
 } from "@/services/super-admin/settings/hero-slider";
+import { revalidateHeroSliderCache } from "@/actions/revalidate-hero-slider";
 
 jest.mock("@/components/SuperAdmin/Layout/ContentWrapper", () => ({
   __esModule: true,
@@ -50,9 +51,14 @@ jest.mock("@/services/super-admin/settings/hero-slider", () => ({
   publishHeroSliderDraft: jest.fn(),
 }));
 
+jest.mock("@/actions/revalidate-hero-slider", () => ({
+  revalidateHeroSliderCache: jest.fn(),
+}));
+
 const getHeroSliderDraftAndPublishedMock = getHeroSliderDraftAndPublished as jest.Mock;
 const updateHeroSliderDraftMock = updateHeroSliderDraft as jest.Mock;
 const publishHeroSliderDraftMock = publishHeroSliderDraft as jest.Mock;
+const revalidateHeroSliderCacheMock = revalidateHeroSliderCache as jest.Mock;
 
 function createHeroState() {
   const draft = normalizeHeroSliderPayload({
@@ -99,6 +105,7 @@ describe("Hero slider editor", () => {
         publishedBy: 1,
       },
     });
+    revalidateHeroSliderCacheMock.mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -143,6 +150,7 @@ describe("Hero slider editor", () => {
     await waitFor(() => {
       expect(updateHeroSliderDraftMock).toHaveBeenCalledTimes(1);
       expect(publishHeroSliderDraftMock).toHaveBeenCalledTimes(1);
+      expect(revalidateHeroSliderCacheMock).toHaveBeenCalledTimes(1);
     });
   });
 

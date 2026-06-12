@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { FOUNDER_HIDDEN_PARENT_IDS } from "@/constants/roleAccess";
 import ProductIcon from "@/components/SuperAdmin/Layout/Icons/ProductIcon";
 import OrdersIcon from "@/components/SuperAdmin/Layout/Icons/OrdersIcon";
 import UsersIcon from "@/components/SuperAdmin/Layout/Icons/UsersIcon";
@@ -403,6 +404,26 @@ export const getSidebarItemsForRole = (roleName?: string | null): SidebarItem[] 
 
   if (normalizedRole === "superadmin") {
     return superAdminSidebar;
+  }
+
+  // Founder: operational admin. Keeps everything except the restricted parents, and the
+  // reports menu collapses to a single «گزارشات فروش» link (product-sales only — no traffic
+  // or admin-activity reports).
+  if (normalizedRole === "founder") {
+    return superAdminSidebar
+      .filter((item) => !FOUNDER_HIDDEN_PARENT_IDS.has(item.id))
+      .map((item) => {
+        if (item.id === "reports") {
+          return {
+            id: "reports",
+            label: "گزارشات فروش",
+            href: "/super-admin/reports/product-sales",
+            icon: <ChartIcon />,
+            children: [],
+          };
+        }
+        return { ...item, children: item.children.map((child) => ({ ...child })) };
+      });
   }
 
   // Check for editor role (handle "Editor", "editor", etc.)

@@ -75,6 +75,7 @@ export default async function PLPPageView({ categorySlug, searchParams }: PLPPag
   );
   const sidebarSlot = (
     <Suspense
+      key="plp-sidebar-slot"
       fallback={
         <div className="flex flex-col gap-7">
           <SkeletonBlock tone="light" className="h-20 rounded" />

@@ -49,6 +49,7 @@ export default function QuickViewPricing({
           <button
             type="button"
             onClick={onViewFullDetails}
+            data-testid="quick-view-full-details"
             className="flex-1 rounded-2xl bg-infinity-primary px-5 py-3 text-sm font-medium text-white shadow-sm transition hover:bg-infinity-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary focus-visible:ring-offset-2"
           >
             مشاهده جزئیات کامل
@@ -56,6 +57,7 @@ export default function QuickViewPricing({
           <button
             type="button"
             onClick={onClose}
+            data-testid="quick-view-close"
             className="rounded-2xl bg-white px-5 py-3 text-sm font-medium text-gray-700 ring-1 ring-black/10 transition hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-300 focus-visible:ring-offset-2"
           >
             بستن

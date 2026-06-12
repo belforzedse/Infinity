@@ -10,6 +10,7 @@ interface InfoCardProps {
   menuButtonRef: React.RefObject<HTMLButtonElement | null>;
   handleMenuToggle: (e: React.MouseEvent) => void;
   isMenuOpen: boolean;
+  menuButtonTestId?: string;
 }
 
 export function InfoCard({
@@ -18,6 +19,7 @@ export function InfoCard({
   menuButtonRef,
   handleMenuToggle,
   isMenuOpen,
+  menuButtonTestId,
   children,
 }: InfoCardProps & { children?: React.ReactNode }): React.JSX.Element {
   return (
@@ -34,6 +36,7 @@ export function InfoCard({
             className="focus:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
             aria-label="منوی عملیات"
             aria-expanded={isMenuOpen}
+            data-testid={menuButtonTestId}
             type="button"
           >
             <MoreIcon className="h-6 w-6 text-neutral-400" />

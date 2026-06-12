@@ -97,6 +97,7 @@ export default function CartDrawer() {
               <Dialog.Panel
                 ref={panelRef}
                 className="min-h-screen w-full max-w-md transform overflow-hidden bg-white shadow-xl transition-all"
+                data-testid="cart-drawer"
                 {...bind()}
               >
                 <div className="flex h-full flex-col">

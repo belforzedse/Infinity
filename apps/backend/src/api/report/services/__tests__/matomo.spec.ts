@@ -96,7 +96,11 @@ describe("Matomo report service", () => {
         case "Referrers.getWebsites":
           return mockJsonResponse([{ label: "google", nb_visits: 40, nb_uniq_visitors: 25 }]) as any;
         case "Referrers.getCampaigns":
-          return mockJsonResponse([{ label: "winter_sale", nb_visits: 12, nb_uniq_visitors: 9 }]) as any;
+          return mockJsonResponse([
+            { label: "winter_sale", nb_visits: 12, nb_uniq_visitors: 9 },
+            { label: "javascript:domxss", nb_visits: 2, nb_uniq_visitors: 0 },
+            { label: "{{template_probe}}", nb_visits: 1, nb_uniq_visitors: 0 },
+          ]) as any;
         case "Actions.getPageUrls":
           return mockJsonResponse([{ label: "/pdp/item-1", nb_hits: 44, nb_visits: 31 }]) as any;
         case "Actions.getEntryPageUrls":
@@ -128,6 +132,10 @@ describe("Matomo report service", () => {
     expect(payload.realtime.activeVisitorsLast5Min).toBe(3);
     expect(payload.series).toHaveLength(2);
     expect(payload.acquisition.sources[0].source).toBe("google");
+    expect(payload.acquisition.campaigns).toEqual([
+      { campaign: "winter_sale", visits: 12, visitors: 9 },
+      { campaign: "Suspicious campaign blocked", visits: 3, visitors: 0 },
+    ]);
     expect(payload.pages.top[0].url).toBe("/pdp/item-1");
     expect(payload.funnel.map((row) => row.step)).toEqual([
       "view_item",

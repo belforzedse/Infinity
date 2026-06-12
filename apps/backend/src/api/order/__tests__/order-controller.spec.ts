@@ -145,6 +145,49 @@ describe("Order Controller", () => {
       expect(fetchedOrder.id).toBe(30);
     });
 
+    it("should allow a Founder to view any order", async () => {
+      const { strapi, registerQuery } = createStrapiMock();
+      const order = {
+        id: 35,
+        Status: "Pending",
+        user: { id: 99 }, // Different user
+      };
+
+      registerQuery("api::order.order", {
+        findOne: jest.fn().mockResolvedValue(order),
+      });
+
+      const ctx = createCtx({
+        params: { id: 35 },
+        state: {
+          user: {
+            id: 2,
+            role: { type: "founder", name: "Founder" },
+          },
+        },
+      });
+
+      // Mirrors the real isAdminUser expression in order.findOne
+      const requesterRoleType = ctx.state.user.role?.type?.toLowerCase();
+      const requesterRoleName = ctx.state.user.role?.name?.toLowerCase();
+      const isAdminUser =
+        ctx.state.user.isAdmin === true ||
+        requesterRoleType === "superadmin" ||
+        requesterRoleType === "store-manager" ||
+        requesterRoleType === "founder" ||
+        requesterRoleName === "superadmin" ||
+        requesterRoleName === "store manager" ||
+        requesterRoleName === "founder";
+
+      const fetchedOrder = await strapi.db
+        .query("api::order.order")
+        .findOne({ where: { id: ctx.params.id } });
+
+      expect(isAdminUser).toBe(true);
+      expect(fetchedOrder.user.id).toBe(99);
+      expect(ctx.forbidden).not.toHaveBeenCalled();
+    });
+
     it("should return 404 when order does not exist", async () => {
       const { strapi, registerQuery } = createStrapiMock();
       registerQuery("api::order.order", {

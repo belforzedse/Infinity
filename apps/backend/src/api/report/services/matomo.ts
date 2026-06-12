@@ -92,6 +92,7 @@ export type TrafficDashboardPayload = {
 const DEFAULT_TIMEOUT_MS = 8000;
 const STEP_ORDER = ["view_item", "add_to_cart", "begin_checkout", "purchase"] as const;
 const TABLE_LIMIT = 10;
+const SUSPICIOUS_CAMPAIGN_LABEL = "Suspicious campaign blocked";
 
 const DAY_MS = 86_400_000;
 
@@ -170,6 +171,47 @@ function normalizePercent(value: unknown): number {
     return normalizeNumber(cleaned);
   }
   return normalizeNumber(value);
+}
+
+function normalizeLabel(value: unknown, fallback = "Unknown"): string {
+  const normalized = String(value ?? "").trim();
+  return normalized || fallback;
+}
+
+function isSuspiciousCampaignLabel(value: string): boolean {
+  const normalized = value.trim().toLowerCase();
+  if (!normalized) return false;
+
+  return (
+    normalized.startsWith("javascript:") ||
+    normalized.startsWith("data:") ||
+    normalized.includes("domxss") ||
+    normalized.includes("<script") ||
+    normalized.includes("</script") ||
+    normalized.includes("onerror=") ||
+    normalized.includes("onload=") ||
+    normalized.includes("{{") ||
+    normalized.includes("{%") ||
+    normalized.includes("<%") ||
+    normalized.includes("${")
+  );
+}
+
+function toCampaignRows(input: unknown): TrafficDashboardPayload["acquisition"]["campaigns"] {
+  const counters = new Map<string, { campaign: string; visits: number; visitors: number }>();
+
+  normalizeRows(input).forEach((row) => {
+    const rawLabel = normalizeLabel(row?.label);
+    const campaign = isSuspiciousCampaignLabel(rawLabel) ? SUSPICIOUS_CAMPAIGN_LABEL : rawLabel;
+    const current = counters.get(campaign) || { campaign, visits: 0, visitors: 0 };
+    current.visits += normalizeNumber(row?.nb_visits);
+    current.visitors += normalizeNumber(row?.nb_uniq_visitors);
+    counters.set(campaign, current);
+  });
+
+  return Array.from(counters.values())
+    .sort((a, b) => b.visits - a.visits)
+    .slice(0, TABLE_LIMIT);
 }
 
 function ensureTrailingSlash(value: string): string {
@@ -287,7 +329,7 @@ function toSeriesRows(input: unknown): TrafficDashboardPayload["series"] {
 function toLabeledVisits(input: unknown): LabeledVisits[] {
   return normalizeRows(input)
     .map((row) => ({
-      label: String(row?.label || "Unknown"),
+      label: normalizeLabel(row?.label),
       visits: normalizeNumber(row?.nb_visits),
       visitors: normalizeNumber(row?.nb_uniq_visitors),
     }))
@@ -500,20 +542,14 @@ export async function getMatomoTrafficDashboardPayload(
       channelTypes: toLabeledVisits(values.channelTypes),
       sources: normalizeRows(values.sources)
         .map((row) => ({
-          source: String(row?.label || "Unknown"),
+          source: normalizeLabel(row?.label),
           visits: normalizeNumber(row?.nb_visits),
           visitors: normalizeNumber(row?.nb_uniq_visitors),
         }))
         .slice(0, TABLE_LIMIT),
       searchEngines: toLabeledVisits(values.searchEngines),
       socials: toLabeledVisits(values.socials),
-      campaigns: normalizeRows(values.campaigns)
-        .map((row) => ({
-          campaign: String(row?.label || "Unknown"),
-          visits: normalizeNumber(row?.nb_visits),
-          visitors: normalizeNumber(row?.nb_uniq_visitors),
-        }))
-        .slice(0, TABLE_LIMIT),
+      campaigns: toCampaignRows(values.campaigns),
     },
     pages: {
       top: normalizeRows(values.topPages)
@@ -560,13 +596,13 @@ export async function getMatomoTrafficDashboardPayload(
     },
     audience: {
       devices: normalizeRows(values.devices)
-        .map((row) => ({ device: String(row?.label || "Unknown"), visits: normalizeNumber(row?.nb_visits) }))
+        .map((row) => ({ device: normalizeLabel(row?.label), visits: normalizeNumber(row?.nb_visits) }))
         .slice(0, TABLE_LIMIT),
       browsers: toLabeledVisits(values.browsers),
       operatingSystems: toLabeledVisits(values.operatingSystems),
       languages: toLabeledVisits(values.languages),
       countries: normalizeRows(values.countries)
-        .map((row) => ({ country: String(row?.label || "Unknown"), visits: normalizeNumber(row?.nb_visits) }))
+        .map((row) => ({ country: normalizeLabel(row?.label), visits: normalizeNumber(row?.nb_visits) }))
         .slice(0, TABLE_LIMIT),
       newVsReturning: {
         newVisits: normalizeNumber(visitFrequency?.nb_visits_new),
@@ -575,10 +611,10 @@ export async function getMatomoTrafficDashboardPayload(
     },
     funnel: parseFunnelRows(values.events),
     deviceBreakdown: normalizeRows(values.devices)
-      .map((row) => ({ device: String(row?.label || "Unknown"), visits: normalizeNumber(row?.nb_visits) }))
+      .map((row) => ({ device: normalizeLabel(row?.label), visits: normalizeNumber(row?.nb_visits) }))
       .slice(0, TABLE_LIMIT),
     geoBreakdown: normalizeRows(values.countries)
-      .map((row) => ({ country: String(row?.label || "Unknown"), visits: normalizeNumber(row?.nb_visits) }))
+      .map((row) => ({ country: normalizeLabel(row?.label), visits: normalizeNumber(row?.nb_visits) }))
       .slice(0, TABLE_LIMIT),
     tracking: {
       configured: isMatomoConfigured(),

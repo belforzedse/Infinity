@@ -3,6 +3,7 @@ import { computeTotals } from "../../../cart/services/lib/financials";
 import { mapToSnappayCategory } from "../../../payment-gateway/services/snappay-category-mapper";
 import { logAdminOrderEdit } from "../../../../utils/adminActivity";
 import { releaseReservedStockAtomic } from "../../../cart/services/lib/stock";
+import { roleIsAllowed, OPERATIONAL_ROLES } from "../../../../utils/roles";
 
 type ItemAdjustment = {
   orderItemId: number;
@@ -75,7 +76,7 @@ export async function adminAdjustItemsHandler(strapi: Strapi, ctx: any) {
       .query("plugin::users-permissions.user")
       .findOne({ where: { id: pluginUser.id }, populate: ["role"] });
     const roleName = fullUser?.role?.name;
-    if (!fullUser || (roleName !== "Superadmin" && roleName !== "Store manager")) {
+    if (!fullUser || !roleIsAllowed(roleName, OPERATIONAL_ROLES)) {
       return ctx.forbidden("Admin access required");
     }
 

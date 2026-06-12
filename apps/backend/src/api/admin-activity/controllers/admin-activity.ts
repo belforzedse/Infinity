@@ -4,7 +4,7 @@
 
 import { factories } from "@strapi/strapi";
 import { ROLE_NAMES } from "../../../utils/roles";
-import { fetchUserWithRole, normalizeRoleName } from "../../../utils/roles";
+import { fetchUserWithRole, normalizeRoleName, roleIsAllowed } from "../../../utils/roles";
 
 export default factories.createCoreController("api::admin-activity.admin-activity" as any, ({ strapi }) => ({
   async findMyActivities(ctx) {
@@ -16,7 +16,7 @@ export default factories.createCoreController("api::admin-activity.admin-activit
     const page = Number(ctx.query.page ?? 1);
     const pageSize = Number(ctx.query.pageSize ?? 20);
 
-    const activities = await strapi.entityService.findMany("api::admin-activity.admin-activity" as any, {
+    const activities = await strapi.entityService.findMany("api::manual-admin-activity.manual-admin-activity" as any, {
       filters: { performed_by: { id: user.id } },
       sort: { createdAt: "desc" },
       populate: ["performed_by"],
@@ -33,26 +33,46 @@ export default factories.createCoreController("api::admin-activity.admin-activit
     }
 
     const roleName = normalizeRoleName(user?.role?.name);
-    // Only superadmins can view admin activities
-    if (roleName !== ROLE_NAMES.SUPERADMIN) {
-      return ctx.forbidden("Only superadmins can view admin activities");
+    // Superadmins and Founders can view order-specific event logs.
+    // (Founders are blocked from the global admin-activity report; this is order-scoped only.)
+    if (!roleIsAllowed(roleName, [ROLE_NAMES.SUPERADMIN, ROLE_NAMES.FOUNDER])) {
+      return ctx.forbidden("You do not have permission to view these activities");
     }
 
     const { orderId } = ctx.params;
     const page = Number(ctx.query.page ?? 1);
     const pageSize = Number(ctx.query.pageSize ?? 20);
 
-    const activities = await strapi.entityService.findMany("api::admin-activity.admin-activity" as any, {
-      filters: {
-        ResourceType: "Order",
-        ResourceId: String(orderId),
-      },
-      sort: { createdAt: "desc" },
-      populate: ["performed_by"],
-      pagination: { page, pageSize },
-    });
+    const filters = {
+      ResourceType: "Order",
+      ResourceId: String(orderId),
+    } as const;
 
-    return ctx.send(activities);
+    // Read the canonical admin audit log (`manual-admin-activity`), which is what
+    // `recordAdminAudit` writes to. (The legacy `admin-activity` table is retired.)
+    const [activities, total] = await Promise.all([
+      strapi.entityService.findMany("api::manual-admin-activity.manual-admin-activity" as any, {
+        filters,
+        sort: { createdAt: "desc" },
+        populate: ["performed_by"],
+        pagination: { page, pageSize },
+      }),
+      strapi.entityService.count("api::manual-admin-activity.manual-admin-activity" as any, {
+        filters,
+      }),
+    ]);
+
+    return ctx.send({
+      data: activities,
+      meta: {
+        pagination: {
+          page,
+          pageSize,
+          pageCount: Math.ceil(total / pageSize),
+          total,
+        },
+      },
+    });
   },
 
   async findUserActivities(ctx) {
@@ -71,7 +91,7 @@ export default factories.createCoreController("api::admin-activity.admin-activit
     const page = Number(ctx.query.page ?? 1);
     const pageSize = Number(ctx.query.pageSize ?? 20);
 
-    const activities = await strapi.entityService.findMany("api::admin-activity.admin-activity" as any, {
+    const activities = await strapi.entityService.findMany("api::manual-admin-activity.manual-admin-activity" as any, {
       filters: {
         ResourceType: "User",
         ResourceId: String(userId),
@@ -100,7 +120,7 @@ export default factories.createCoreController("api::admin-activity.admin-activit
     const page = Number(ctx.query.page ?? 1);
     const pageSize = Number(ctx.query.pageSize ?? 20);
 
-    const activities = await strapi.entityService.findMany("api::admin-activity.admin-activity" as any, {
+    const activities = await strapi.entityService.findMany("api::manual-admin-activity.manual-admin-activity" as any, {
       filters: {
         ResourceType: "Product",
         ResourceId: String(productId),
@@ -149,7 +169,7 @@ export default factories.createCoreController("api::admin-activity.admin-activit
       filters.ResourceType = resourceType;
     }
 
-    const activities = await strapi.entityService.findMany("api::admin-activity.admin-activity" as any, {
+    const activities = await strapi.entityService.findMany("api::manual-admin-activity.manual-admin-activity" as any, {
       filters,
       sort: { createdAt: "desc" },
       populate: ["performed_by"],

@@ -211,11 +211,13 @@ export default function PLPList({
   const sidebarContent = sidebarSlot ?? (
     <>
       <SidebarSuggestions
+        key="suggested-sidebar"
         title="شاید بپسندید"
         icon={<HeartIcon />}
         items={mappedSuggestedSidebar.length > 0 ? mappedSuggestedSidebar : sidebarProducts}
       />
       <SidebarSuggestions
+        key="discounted-sidebar"
         title="تخفیف های آخرماه"
         icon={<DiscountIcon />}
         items={mappedDiscountedSidebar.length > 0 ? mappedDiscountedSidebar : sidebarProducts}

@@ -13,6 +13,11 @@ import { adminVoidBarcodeHandler } from "./helpers/adminVoidBarcode";
 import { decrementManualOrderStockHandler } from "./helpers/manualOrderStock";
 import { getActiveReserveHandler } from "./handlers/getActiveReserve";
 import { releaseReserveHandler } from "./handlers/releaseReserve";
+import { logAdminOrderCreate, logAdminOrderFieldUpdate } from "../../../utils/adminActivity";
+
+// Business fields captured as admin activity on a generic `PUT /orders/:id` edit. Whitelisted on
+// purpose: anything not listed here (tokens, payment internals, relations) is never diffed/logged.
+const AUDITED_ORDER_FIELDS = ["Status", "Note", "Description", "ShippingCost"] as const;
 
 export default factories.createCoreController(
   "api::order.order",
@@ -28,8 +33,10 @@ export default factories.createCoreController(
         requester?.isAdmin === true ||
         requesterRoleType === "superadmin" ||
         requesterRoleType === "store-manager" ||
+        requesterRoleType === "founder" ||
         requesterRoleName === "superadmin" ||
-        requesterRoleName === "store manager";
+        requesterRoleName === "store manager" ||
+        requesterRoleName === "founder";
 
       try {
         // Query with all necessary relations populated
@@ -134,6 +141,97 @@ export default factories.createCoreController(
           },
         });
       }
+    },
+
+    /**
+     * Core `POST /orders`. Wraps the default create to record a "manual order created" admin
+     * activity. `recordAdminAudit` (via the helper) gates on the actor's role, so only admin-created
+     * orders are logged; customer checkout creates orders through cart finalize (which uses
+     * `entityService.create` and bypasses this controller), so there is no double-logging.
+     */
+    async create(ctx) {
+      const response = await super.create(ctx);
+
+      try {
+        const actorId = ctx.state?.user?.id ? Number(ctx.state.user.id) : null;
+        const orderId = Number((response as any)?.data?.id ?? (response as any)?.id);
+        if (actorId && orderId) {
+          const requestData = (ctx.request?.body as any)?.data ?? {};
+          const ip = ctx.request?.ip || (ctx as any).ip || null;
+          const userAgent =
+            ctx.request?.headers?.["user-agent"] || (ctx as any).headers?.["user-agent"] || null;
+          void logAdminOrderCreate(
+            strapi,
+            orderId,
+            actorId,
+            { type: requestData.Type ?? null, status: requestData.Status ?? null },
+            ip,
+            userAgent,
+          );
+        }
+      } catch (activityError) {
+        strapi.log.error("Failed to log admin activity for order create", {
+          error: (activityError as Error).message,
+        });
+      }
+
+      return response;
+    },
+
+    /**
+     * Core `PUT /orders/:id`. Wraps the default update to capture a human-readable admin activity
+     * entry (who edited the order + a before/after diff of business fields). This is the only order
+     * edit path with no logging of its own; the admin adjust/cancel/barcode flows use
+     * `entityService.update` directly and so bypass this controller — no double-logging.
+     */
+    async update(ctx) {
+      const { id } = ctx.params;
+      const requestData = (ctx.request?.body as any)?.data ?? {};
+
+      // Snapshot the whitelisted fields before the write so we can diff afterwards.
+      let before: Record<string, any> | null = null;
+      try {
+        before = await strapi.db.query("api::order.order").findOne({
+          where: { id },
+          select: AUDITED_ORDER_FIELDS as unknown as string[],
+        });
+      } catch (e) {
+        before = null;
+      }
+
+      const response = await super.update(ctx);
+
+      // Fire-and-forget: build a normalized diff of only the whitelisted fields the caller actually
+      // changed, then record it. `recordAdminAudit` (via the helper) verifies the actor is an admin
+      // and silently no-ops otherwise, so non-admin/customer updates never produce an entry.
+      try {
+        const actorId = ctx.state?.user?.id ? Number(ctx.state.user.id) : null;
+        if (before && actorId) {
+          const changes: Record<string, { from?: any; to?: any }> = {};
+          for (const field of AUDITED_ORDER_FIELDS) {
+            if (!(field in requestData)) continue;
+            const from = before[field] ?? null;
+            const to = requestData[field] ?? null;
+            if (String(from ?? "") !== String(to ?? "")) {
+              changes[field] = { from, to };
+            }
+          }
+
+          if (Object.keys(changes).length > 0) {
+            const ip = ctx.request?.ip || (ctx as any).ip || null;
+            const userAgent =
+              ctx.request?.headers?.["user-agent"] || (ctx as any).headers?.["user-agent"] || null;
+            void logAdminOrderFieldUpdate(strapi, Number(id), changes, actorId, ip, userAgent);
+          }
+        }
+      } catch (activityError) {
+        strapi.log.error("Failed to log admin activity for order update", {
+          orderId: id,
+          error: (activityError as Error).message,
+        });
+      }
+
+      return response;
     },
 
     async generateAnipoBarcode(ctx) {

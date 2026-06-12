@@ -147,24 +147,36 @@ describe("API Utilities", () => {
     });
 
     it("returns null for invalid token", () => {
+      const consoleError = jest.spyOn(console, "error").mockImplementation();
       const invalidToken = "invalid.token.here";
       const result = parseJwt(invalidToken);
 
       expect(result).toBeNull();
+      expect(consoleError).toHaveBeenCalled();
+
+      consoleError.mockRestore();
     });
 
     it("returns null for malformed token", () => {
+      const consoleError = jest.spyOn(console, "error").mockImplementation();
       const malformedToken = "not.a.jwt";
       const result = parseJwt(malformedToken);
 
       expect(result).toBeNull();
+      expect(consoleError).toHaveBeenCalled();
+
+      consoleError.mockRestore();
     });
 
     it("handles token without payload", () => {
+      const consoleError = jest.spyOn(console, "error").mockImplementation();
       const tokenWithoutPayload = "header..signature";
       const result = parseJwt(tokenWithoutPayload);
 
       expect(result).toBeNull();
+      expect(consoleError).not.toHaveBeenCalled();
+
+      consoleError.mockRestore();
     });
   });
 
@@ -209,11 +221,15 @@ describe("API Utilities", () => {
     });
 
     it("returns true for invalid token", () => {
+      const consoleError = jest.spyOn(console, "error").mockImplementation();
       const invalidToken = "invalid.token.here";
 
       const result = isTokenExpired(invalidToken);
 
       expect(result).toBe(true);
+      expect(consoleError).toHaveBeenCalled();
+
+      consoleError.mockRestore();
     });
 
     it("handles edge case where token expires exactly now", () => {

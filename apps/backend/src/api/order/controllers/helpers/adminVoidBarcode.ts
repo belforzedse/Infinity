@@ -1,5 +1,6 @@
 import type { Strapi } from "@strapi/strapi";
 import { logAdminBarcodeOperation } from "../../../../utils/adminActivity";
+import { roleIsAllowed, OPERATIONAL_ROLES } from "../../../../utils/roles";
 
 export async function adminVoidBarcodeHandler(strapi: Strapi, ctx: any) {
   const { id } = ctx.params;
@@ -13,7 +14,7 @@ export async function adminVoidBarcodeHandler(strapi: Strapi, ctx: any) {
       .query("plugin::users-permissions.user")
       .findOne({ where: { id: pluginUser.id }, populate: ["role"] });
     const roleName = fullUser?.role?.name;
-    if (!fullUser || (roleName !== "Superadmin" && roleName !== "Store manager")) {
+    if (!fullUser || !roleIsAllowed(roleName, OPERATIONAL_ROLES)) {
       return ctx.forbidden("Admin access required");
     }
 

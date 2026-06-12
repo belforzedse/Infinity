@@ -72,12 +72,13 @@ describe("ForgotPasswordForm", () => {
         phoneNumber: "09123456789",
       });
     });
+    await waitFor(() => {
+      expect(screen.getByTestId("auth-button")).not.toBeDisabled();
+    });
   });
 
   it("should disable submit button while loading", async () => {
-    mockOnSubmit.mockImplementation(
-      () => new Promise((resolve) => setTimeout(resolve, 100)),
-    );
+    mockOnSubmit.mockImplementation(() => new Promise(() => {}));
 
     render(<ForgotPasswordForm onSubmit={mockOnSubmit} />);
 
@@ -92,9 +93,7 @@ describe("ForgotPasswordForm", () => {
   });
 
   it("should show loading spinner when submitting", async () => {
-    mockOnSubmit.mockImplementation(
-      () => new Promise((resolve) => setTimeout(resolve, 100)),
-    );
+    mockOnSubmit.mockImplementation(() => new Promise(() => {}));
 
     render(<ForgotPasswordForm onSubmit={mockOnSubmit} />);
 
@@ -119,6 +118,9 @@ describe("ForgotPasswordForm", () => {
     await waitFor(() => {
       expect(consoleError).toHaveBeenCalled();
     });
+    await waitFor(() => {
+      expect(screen.getByTestId("auth-button")).not.toBeDisabled();
+    });
 
     consoleError.mockRestore();
   });
@@ -139,7 +141,7 @@ describe("ForgotPasswordForm", () => {
   });
 
   it("should prevent default form submission", () => {
-    mockOnSubmit.mockResolvedValue(undefined);
+    mockOnSubmit.mockImplementation(() => new Promise(() => {}));
 
     render(<ForgotPasswordForm onSubmit={mockOnSubmit} />);
 

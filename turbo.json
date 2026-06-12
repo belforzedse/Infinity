@@ -5,6 +5,32 @@
       "dependsOn": ["^build"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**", "build/**"]
     },
+    "e2e": {
+      "cache": false,
+      "passThroughEnv": [
+        "CI",
+        "E2E_*",
+        "PLAYWRIGHT_*",
+        "NEXT_PUBLIC_*",
+        "STRAPI_INTERNAL_URL",
+        "DATABASE_*",
+        "POSTGRES_*",
+        "REDIS_*"
+      ]
+    },
+    "e2e:smoke": {
+      "cache": false,
+      "passThroughEnv": [
+        "CI",
+        "E2E_*",
+        "PLAYWRIGHT_*",
+        "NEXT_PUBLIC_*",
+        "STRAPI_INTERNAL_URL",
+        "DATABASE_*",
+        "POSTGRES_*",
+        "REDIS_*"
+      ]
+    },
     "dev": {
       "cache": false,
       "persistent": true

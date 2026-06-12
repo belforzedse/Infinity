@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { FAQQuestion } from "@/types/faq";
 import { Plus, X } from "lucide-react";
+import DOMPurify from "isomorphic-dompurify";
 
 interface FAQQuestionItemProps {
   question: FAQQuestion;
@@ -14,6 +15,7 @@ export default function FAQQuestionItem({
   defaultOpen = false,
 }: FAQQuestionItemProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
+  const sanitizedAnswer = DOMPurify.sanitize(question.Answer || "");
 
   return (
     <div className="rounded-xl border border-slate-200 bg-white">
@@ -37,7 +39,7 @@ export default function FAQQuestionItem({
         <div className="border-t border-slate-200 px-4 pb-4 pt-3">
           <div
             className="text-sm leading-relaxed text-neutral-600 prose prose-sm max-w-none"
-            dangerouslySetInnerHTML={{ __html: question.Answer }}
+            dangerouslySetInnerHTML={{ __html: sanitizedAnswer }}
           />
         </div>
       )}

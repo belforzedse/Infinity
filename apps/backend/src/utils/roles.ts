@@ -4,6 +4,7 @@ export const ROLE_NAMES = {
   SUPERADMIN: "Superadmin",
   STORE_MANAGER: "Store manager",
   EDITOR: "Editor",
+  FOUNDER: "Founder",
   CUSTOMER: "Customer",
 } as const;
 
@@ -16,6 +17,8 @@ const ROLE_ALIAS_MAP: Record<string, RoleName> = {
   storemanager: ROLE_NAMES.STORE_MANAGER,
   "store-manager": ROLE_NAMES.STORE_MANAGER,
   editor: ROLE_NAMES.EDITOR,
+  founder: ROLE_NAMES.FOUNDER,
+  founders: ROLE_NAMES.FOUNDER,
   customer: ROLE_NAMES.CUSTOMER,
 };
 
@@ -23,6 +26,17 @@ export const MANAGEMENT_ROLES: RoleName[] = [
   ROLE_NAMES.SUPERADMIN,
   ROLE_NAMES.STORE_MANAGER,
   ROLE_NAMES.EDITOR,
+];
+
+/**
+ * Roles that can access core operational/order functionality
+ * (orders, products, carts, shipping, sales reports).
+ * Used to keep role lists centralized instead of scattering string literals.
+ */
+export const OPERATIONAL_ROLES: RoleName[] = [
+  ROLE_NAMES.SUPERADMIN,
+  ROLE_NAMES.STORE_MANAGER,
+  ROLE_NAMES.FOUNDER,
 ];
 
 export function normalizeRoleName(name?: string | null): RoleName | null {

@@ -188,10 +188,17 @@ const ParentCategoryCard = ({
     category.attributes?.Title ||
     "Category image";
   const title = category.attributes?.Title || "Unnamed";
+  const slug = category.attributes?.Slug || "";
 
   return (
     <>
-      <div className="interactive-card pressable group relative flex h-full w-full flex-col rounded-3xl border border-infinity-primary-lighter/30 bg-white p-1 transition-all duration-300 hover:border-infinity-primary-lighter/40 hover:shadow-lg md:mx-auto md:w-[258px]">
+      <div
+        className="interactive-card pressable group relative flex h-full w-full flex-col rounded-3xl border border-infinity-primary-lighter/30 bg-white p-1 transition-all duration-300 hover:border-infinity-primary-lighter/40 hover:shadow-lg md:mx-auto md:w-[258px]"
+        data-testid="admin-category-card"
+        data-category-id={category.id}
+        data-category-slug={slug}
+        data-category-title={title}
+      >
         <div className="flex h-full flex-col rounded-[20px] bg-white p-3">
           <div className="relative aspect-[227/310] overflow-hidden rounded-3xl bg-slate-100">
             <img
@@ -259,6 +266,7 @@ const ParentCategoryCard = ({
                   }
                   className="flex h-8 w-8 items-center justify-center rounded-xl border border-red-100 bg-red-50 text-red-600 transition hover:bg-red-100"
                   aria-label="حذف دسته‌بندی"
+                  data-testid="admin-category-delete"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
@@ -267,6 +275,7 @@ const ParentCategoryCard = ({
                 href={`/super-admin/products/categories/edit/${category.id}`}
                 className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50"
                 aria-label="ویرایش دسته‌بندی"
+                data-testid="admin-category-edit"
               >
                 <EditIcon />
               </Link>

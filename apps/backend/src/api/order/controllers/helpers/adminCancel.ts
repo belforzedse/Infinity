@@ -1,6 +1,7 @@
 import type { Strapi } from "@strapi/strapi";
 import { logAdminOrderCancel } from "../../../../utils/adminActivity";
 import { releaseReservedStockAtomic } from "../../../cart/services/lib/stock";
+import { roleIsAllowed, OPERATIONAL_ROLES } from "../../../../utils/roles";
 
 const computePaidAmountToman = (order: any): number => {
   if (String(order?.Status) === "Paying") return 0;
@@ -51,7 +52,7 @@ export async function adminCancelOrderHandler(strapi: Strapi, ctx: any) {
       .query("plugin::users-permissions.user")
       .findOne({ where: { id: pluginUser.id }, populate: ["role"] });
     const roleName = fullUser?.role?.name;
-    if (!fullUser || (roleName !== "Superadmin" && roleName !== "Store manager")) {
+    if (!fullUser || !roleIsAllowed(roleName, OPERATIONAL_ROLES)) {
       return ctx.forbidden("Admin access required");
     }
 

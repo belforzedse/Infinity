@@ -15,6 +15,7 @@ describe("ShoppingCartBillPaymentGateway", () => {
         selected="samankish"
         onChange={onChange}
         availableGateways={["samankish", "mellat", "snappay", "wallet"]}
+        snappEligible={true}
       />,
     );
 

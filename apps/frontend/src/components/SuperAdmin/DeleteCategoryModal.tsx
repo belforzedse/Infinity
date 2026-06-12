@@ -137,6 +137,7 @@ export default function DeleteCategoryModal({
             type="button"
             onClick={handleConfirm}
             disabled={!canConfirm || !hasOptions}
+            data-testid="delete-category-confirm"
             className="rounded-xl bg-red-600 px-5 py-2.5 text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isDeleting ? (

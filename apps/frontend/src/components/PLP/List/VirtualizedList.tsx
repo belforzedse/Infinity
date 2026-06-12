@@ -12,13 +12,14 @@ import dynamic from "next/dynamic";
 // Dynamically import react-window to avoid build/SSR issues
 // Using dynamic import with ssr: false since react-window is client-only
 const List = dynamic(
-  () => import("react-window").then((mod: any) => {
-    // react-window exports FixedSizeList as a named export
-    return mod.FixedSizeList || mod.default?.FixedSizeList || mod.default;
-  }) as Promise<React.ComponentType<any>>,
+  () =>
+    import("react-window").then((mod: any) => {
+      // react-window exports FixedSizeList as a named export
+      return mod.FixedSizeList || mod.default?.FixedSizeList || mod.default;
+    }) as Promise<React.ComponentType<any>>,
   {
     ssr: false, // Client-only component, no SSR needed
-  }
+  },
 );
 
 interface Product {
@@ -81,7 +82,7 @@ interface Product {
       }>;
     };
   };
-};
+}
 
 interface VirtualizedListProps {
   products: Product[];
@@ -112,12 +113,10 @@ export default function VirtualizedList({
   const processedProducts = useMemo(() => {
     const isMobileView = (viewportWidth ?? Infinity) < 768;
     return products.map((product) => {
-      const firstValidVariation = product.attributes.product_variations?.data?.find(
-        (variation) => {
-          const price = variation.attributes.Price;
-          return price && parseInt(price.toString()) > 0;
-        },
-      );
+      const firstValidVariation = product.attributes.product_variations?.data?.find((variation) => {
+        const price = variation.attributes.Price;
+        return price && parseInt(price.toString()) > 0;
+      });
 
       const price = parseInt(firstValidVariation?.attributes?.Price?.toString() || "0");
 
@@ -147,10 +146,9 @@ export default function VirtualizedList({
         seenCount: product.attributes.SeenCount || 0,
         colorsCount: calculateUniqueColorsCount(product.attributes.product_variations?.data || []),
         colorCodes: getUniqueColorCodes(product.attributes.product_variations?.data || []),
-        image:
-          product.attributes.CoverImage?.data?.attributes?.url
-            ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
-            : "",
+        image: product.attributes.CoverImage?.data?.attributes?.url
+          ? `${IMAGE_BASE_URL}${product.attributes.CoverImage.data.attributes.url}`
+          : "",
         images: getProductImages(product, !isMobileView, IMAGE_BASE_URL),
         isAvailable,
       };
@@ -254,6 +252,7 @@ export default function VirtualizedList({
                       discount={product.discount}
                       discountPrice={product.discountPrice}
                       colorsCount={product.colorsCount}
+                      colorCodes={product.colorCodes}
                       isAvailable={product.isAvailable}
                       priority={rowStart + colIndex < 6}
                     />
@@ -284,4 +283,3 @@ export default function VirtualizedList({
     </>
   );
 }
-

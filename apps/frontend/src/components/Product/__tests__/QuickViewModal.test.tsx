@@ -194,7 +194,9 @@ describe("QuickViewModal", () => {
 
   // 5. Error state shown on failed fetch ------------------------------------
   it("shows the error state when the fetch throws", async () => {
-    mockGetProductById.mockRejectedValue(new Error("Network error"));
+    const consoleError = jest.spyOn(console, "error").mockImplementation();
+    const error = new Error("Network error");
+    mockGetProductById.mockRejectedValue(error);
 
     renderModal(5);
 
@@ -203,13 +205,18 @@ describe("QuickViewModal", () => {
     });
     expect(screen.getByRole("button", { name: /تلاش مجدد/i })).toBeInTheDocument();
     expect(screen.queryByTestId("quick-view-content")).not.toBeInTheDocument();
+    expect(consoleError).toHaveBeenCalledWith("Error fetching product for quick view:", error);
+
+    consoleError.mockRestore();
   });
 
   // 6. Retry button evicts cache and re-fetches ------------------------------
   it("retries the fetch and shows content after clicking تلاش مجدد", async () => {
     const product = makeProduct(6, "شلوار مشکی");
+    const consoleError = jest.spyOn(console, "error").mockImplementation();
+    const error = new Error("Network error");
     mockGetProductById
-      .mockRejectedValueOnce(new Error("Network error"))
+      .mockRejectedValueOnce(error)
       .mockResolvedValueOnce({ data: product });
 
     renderModal(6);
@@ -227,6 +234,9 @@ describe("QuickViewModal", () => {
       expect(screen.getByTestId("quick-view-content")).toBeInTheDocument(),
     );
     expect(mockGetProductById).toHaveBeenCalledTimes(2);
+    expect(consoleError).toHaveBeenCalledWith("Error fetching product for quick view:", error);
+
+    consoleError.mockRestore();
   });
 
   // 7. Modal not shown when isOpen=false ------------------------------------

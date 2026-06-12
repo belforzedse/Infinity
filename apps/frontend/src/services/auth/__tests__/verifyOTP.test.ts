@@ -2,122 +2,72 @@ import { verifyOTP } from "../verifyOTP";
 import { apiClient } from "../../index";
 import { ENDPOINTS } from "@/constants/api";
 
-// Mock the API client
 jest.mock("../../index", () => ({
   apiClient: {
     post: jest.fn(),
   },
 }));
 
-// Mock sessionStorage
-const sessionStorageMock = {
-  getItem: jest.fn(),
-  setItem: jest.fn(),
-  removeItem: jest.fn(),
-  clear: jest.fn(),
-};
-Object.defineProperty(window, "sessionStorage", {
-  value: sessionStorageMock,
-});
-
 describe("verifyOTP", () => {
   const mockPost = apiClient.post as jest.MockedFunction<typeof apiClient.post>;
 
   beforeEach(() => {
-    mockPost.mockClear();
-    sessionStorageMock.getItem.mockClear();
+    mockPost.mockReset();
+    sessionStorage.clear();
   });
 
-  it("verifies OTP with correct parameters", async () => {
-    const otp = "123456";
-    const otpToken = "mock-otp-token";
-    const mockResponse = { data: { token: "auth-token" } };
+  it("posts the OTP with the stored otpToken and returns the API payload", async () => {
+    const response = { token: "auth-token", user: { id: 1, name: "Test User" } };
+    sessionStorage.setItem("otpToken", "mock-otp-token");
+    mockPost.mockResolvedValueOnce(response);
 
-    sessionStorageMock.getItem.mockReturnValue(otpToken);
-    mockPost.mockResolvedValueOnce(mockResponse);
+    const result = await verifyOTP("123456");
 
-    const result = await verifyOTP(otp);
-
-    expect(sessionStorageMock.getItem).toHaveBeenCalledWith("otpToken");
-    expect(mockPost).toHaveBeenCalledWith(ENDPOINTS.AUTH.VERIFY_OTP, {
-      otpToken,
-      otp,
-    });
-    expect(result).toEqual(mockResponse.data);
+    expect(mockPost).toHaveBeenCalledWith(
+      ENDPOINTS.AUTH.VERIFY_OTP,
+      {
+        otpToken: "mock-otp-token",
+        otp: "123456",
+      },
+      { suppressAuthRedirect: true },
+    );
+    expect(result).toEqual(response);
   });
 
-  it("handles missing otpToken in sessionStorage", async () => {
-    const otp = "123456";
-    const mockResponse = { data: { token: "auth-token" } };
+  it("passes a null otpToken through when sessionStorage has no token", async () => {
+    mockPost.mockResolvedValueOnce({ token: "auth-token" });
 
-    sessionStorageMock.getItem.mockReturnValue(null);
-    mockPost.mockResolvedValueOnce(mockResponse);
+    await verifyOTP("123456");
 
-    const result = await verifyOTP(otp);
-
-    expect(mockPost).toHaveBeenCalledWith(ENDPOINTS.AUTH.VERIFY_OTP, {
-      otpToken: null,
-      otp,
-    });
-    expect(result).toEqual(mockResponse.data);
+    expect(mockPost).toHaveBeenCalledWith(
+      ENDPOINTS.AUTH.VERIFY_OTP,
+      {
+        otpToken: null,
+        otp: "123456",
+      },
+      { suppressAuthRedirect: true },
+    );
   });
 
-  it("verifies OTP with different codes", async () => {
-    const otpCodes = ["123456", "000000", "999999"];
-    const otpToken = "mock-otp-token";
-    const mockResponse = { data: { token: "auth-token" } };
+  it("uses the exact OTP value entered by the user", async () => {
+    sessionStorage.setItem("otpToken", "mock-otp-token");
+    mockPost.mockResolvedValue({ token: "auth-token" });
 
-    sessionStorageMock.getItem.mockReturnValue(otpToken);
-    mockPost.mockResolvedValue(mockResponse);
-
-    for (const otp of otpCodes) {
+    for (const otp of ["123456", "000000", "999999"]) {
       await verifyOTP(otp);
-      expect(mockPost).toHaveBeenCalledWith(ENDPOINTS.AUTH.VERIFY_OTP, {
-        otpToken,
-        otp,
-      });
+      expect(mockPost).toHaveBeenLastCalledWith(
+        ENDPOINTS.AUTH.VERIFY_OTP,
+        { otpToken: "mock-otp-token", otp },
+        { suppressAuthRedirect: true },
+      );
     }
   });
 
-  it("handles API errors correctly", async () => {
-    const otp = "123456";
-    const otpToken = "mock-otp-token";
-    const error = new Error("کد وارد شده نامعتبر یا منقضی شده است. دوباره تلاش کنید.");
-
-    sessionStorageMock.getItem.mockReturnValue(otpToken);
+  it("propagates API errors", async () => {
+    const error = new Error("Invalid OTP");
+    sessionStorage.setItem("otpToken", "mock-otp-token");
     mockPost.mockRejectedValueOnce(error);
 
-    await expect(verifyOTP(otp)).rejects.toThrow("کد وارد شده نامعتبر یا منقضی شده است. دوباره تلاش کنید.");
-  });
-
-  it("returns response with user data", async () => {
-    const otp = "123456";
-    const otpToken = "mock-otp-token";
-    const mockResponse = {
-      data: {
-        token: "auth-token",
-        user: { id: 1, name: "John" },
-      }
-    };
-
-    sessionStorageMock.getItem.mockReturnValue(otpToken);
-    mockPost.mockResolvedValueOnce(mockResponse);
-
-    const result = await verifyOTP(otp);
-
-    expect(result).toEqual(mockResponse.data);
-  });
-
-  it("calls correct API endpoint", async () => {
-    const otp = "123456";
-    const otpToken = "mock-otp-token";
-    const mockResponse = { data: { token: "auth-token" } };
-
-    sessionStorageMock.getItem.mockReturnValue(otpToken);
-    mockPost.mockResolvedValueOnce(mockResponse);
-
-    await verifyOTP(otp);
-
-    expect(mockPost).toHaveBeenCalledWith(ENDPOINTS.AUTH.VERIFY_OTP, expect.any(Object));
+    await expect(verifyOTP("123456")).rejects.toThrow("Invalid OTP");
   });
 });

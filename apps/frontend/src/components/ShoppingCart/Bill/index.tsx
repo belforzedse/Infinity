@@ -55,6 +55,7 @@ function ShoppingCartBillForm({}: Props) {
   const currentUser = useAtomValue(currentUserAtom);
   const userLoading = useAtomValue(userLoadingAtom);
   const [hasRedirected, setHasRedirected] = useState(false);
+  const [hasAccessToken, setHasAccessToken] = useState(false);
 
   // Check authentication on mount - redirect to login if not authenticated.
   // Wait for global auth loading to finish so we don't redirect while user is still being fetched
@@ -65,6 +66,7 @@ function ShoppingCartBillForm({}: Props) {
     const currentPath = window.location.pathname;
     if (!currentPath.includes("/checkout")) {
       setHasRedirected(false);
+      setHasAccessToken(false);
       return;
     }
 
@@ -76,6 +78,7 @@ function ShoppingCartBillForm({}: Props) {
     if (hasRedirected) return;
     // Belt-and-suspenders: if token exists, give the app a moment to hydrate user
     const token = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
+    setHasAccessToken(Boolean(token));
     if (token) return;
 
     setHasRedirected(true);
@@ -673,6 +676,16 @@ function ShoppingCartBillForm({}: Props) {
 
   const isMergeMode = mergeChoice === "merge";
 
+  if (userLoading || hasRedirected || (!currentUser && !hasAccessToken)) {
+    return (
+      <div
+        className="min-h-[40vh]"
+        aria-live="polite"
+        data-testid="checkout-auth-gate"
+      />
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <span className="text-lg text-neutral-800 lg:text-3xl">اطلاعات صورت حساب</span>
@@ -680,7 +693,15 @@ function ShoppingCartBillForm({}: Props) {
         currentStep={submitOrderStep}
         steps={["Information", "Delivery", "Payment"]}
       /> */}
-      {error && <div className="rounded-lg bg-red-50 p-3 text-red-600">{error}</div>}
+      {error && (
+        <div
+          className="rounded-lg bg-red-50 p-3 text-red-600"
+          role="alert"
+          data-testid="checkout-form-error"
+        >
+          {error}
+        </div>
+      )}
 
       {activeReserve && mergeChoice === null && (
         <div className="rounded-lg border border-infinity-primary-lighter/60 bg-infinity-primary-lighter/50 p-4">
@@ -777,6 +798,7 @@ function ShoppingCartBillForm({}: Props) {
           />
           <button
             type="submit"
+            data-testid="checkout-submit"
             disabled={isSubmitting}
             className={
               "text-xl w-full text-nowrap rounded-lg bg-infinity-primary py-3 text-white lg:text-base lg:py-4 " +

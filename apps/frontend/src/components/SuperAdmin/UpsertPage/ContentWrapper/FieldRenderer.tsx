@@ -54,6 +54,9 @@ export default function FieldRenderer<T>({
           value={formData[field.name] as string}
           onChange={(value) => updateFormData(field.name, value)}
           readOnly={isReadOnly}
+          name={field.name as string}
+          label={field.label}
+          testId={`admin-field-${String(field.name)}`}
         />
       );
     },

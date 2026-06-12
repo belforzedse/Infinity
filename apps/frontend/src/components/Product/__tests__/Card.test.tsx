@@ -2,6 +2,15 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import ProductCard, { type ProductCardProps } from "../Card";
 import { faNum } from "@/utils/faNum";
 
+jest.mock("next/dynamic", () => ({
+  __esModule: true,
+  default: () => {
+    const DynamicComponent = () => null;
+    DynamicComponent.preload = jest.fn();
+    return DynamicComponent;
+  },
+}));
+
 jest.mock("@/hooks/useProductLike", () => ({
   __esModule: true,
   default: jest.fn(() => ({
@@ -19,11 +28,7 @@ jest.mock("@/services/product/product", () => ({
 jest.mock("../ImageSlider", () => ({
   __esModule: true,
   default: ({ images, title }: { images: string[]; title: string }) => (
-    <div
-      data-testid="image-slider"
-      data-image-count={images.length}
-      data-images={images.join(",")}
-    >
+    <div data-testid="image-slider" data-image-count={images.length} data-images={images.join(",")}>
       {title}
     </div>
   ),
@@ -85,9 +90,7 @@ describe("ProductCard", () => {
   });
 
   it("should render discount badge when product is on sale", () => {
-    render(
-      <ProductCard {...mockProps} price={100000} discountPrice={80000} discount={20} />,
-    );
+    render(<ProductCard {...mockProps} price={100000} discountPrice={80000} discount={20} />);
 
     expect(screen.getByText(`${faNum(20)}٪ تخفیف`)).toBeInTheDocument();
   });
@@ -126,10 +129,16 @@ describe("ProductCard", () => {
     expect(screen.queryByText(/نفر در ۲۴ ساعت گذشته/)).not.toBeInTheDocument();
   });
 
-  it("should always render the color badge", () => {
+  it("should not render a color badge without real color codes", () => {
     const { container } = render(<ProductCard {...mockProps} />);
 
-    expect(container.querySelector('[role="img"][aria-label="پیش‌نمایش رنگ"]')).toBeInTheDocument();
+    expect(container.querySelector(".product-card-color-badge")).not.toBeInTheDocument();
+  });
+
+  it("should render the color badge when real color codes are provided", () => {
+    const { container } = render(<ProductCard {...mockProps} colorCodes={["#111111"]} />);
+
+    expect(container.querySelector(".product-card-color-badge")).toBeInTheDocument();
   });
 
   it("should show remaining color count when colorsCount is provided", () => {
@@ -242,7 +251,9 @@ describe("ProductCard", () => {
   });
 
   it("should not request lazy media when product already has multiple images", () => {
-    const { container } = render(<ProductCard {...mockProps} images={["/image1.jpg", "/image2.jpg"]} />);
+    const { container } = render(
+      <ProductCard {...mockProps} images={["/image1.jpg", "/image2.jpg"]} />,
+    );
     const article = container.querySelector("article");
 
     expect(article).toBeInTheDocument();
@@ -276,7 +287,11 @@ describe("ProductCard", () => {
   });
 
   it("should merge lazy-loaded images without duplicates", async () => {
-    getLazySecondaryMediaByProductId.mockResolvedValue(["/image1.jpg", "/image2.jpg", "/image2.jpg"]);
+    getLazySecondaryMediaByProductId.mockResolvedValue([
+      "/image1.jpg",
+      "/image2.jpg",
+      "/image2.jpg",
+    ]);
     const { container } = render(<ProductCard {...mockProps} images={["/image1.jpg"]} />);
     const article = container.querySelector("article");
 
@@ -293,6 +308,7 @@ describe("ProductCard", () => {
   });
 
   it("should keep original images when lazy media fetch fails", async () => {
+    const consoleDebug = jest.spyOn(console, "debug").mockImplementation();
     getLazySecondaryMediaByProductId.mockRejectedValue(new Error("fetch failed"));
     const { container } = render(<ProductCard {...mockProps} images={["/image1.jpg"]} />);
     const article = container.querySelector("article");
@@ -307,6 +323,12 @@ describe("ProductCard", () => {
     const slider = screen.getByTestId("image-slider");
     expect(slider).toHaveAttribute("data-image-count", "1");
     expect(slider).toHaveAttribute("data-images", "/image1.jpg");
+    expect(consoleDebug).toHaveBeenCalledWith(
+      "[ProductCard] Secondary media fetch failed",
+      expect.objectContaining({ productId: 1 }),
+    );
+
+    consoleDebug.mockRestore();
   });
 
   it("should not lazy-load secondary media for unavailable products", () => {

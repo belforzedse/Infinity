@@ -1,6 +1,7 @@
 import type { Strapi } from "@strapi/strapi";
 import { decrementStockAtomic } from "../../../cart/services/lib/stock";
 import { logManualActivity } from "../../../../utils/manualAdminActivity";
+import { roleIsAllowed, OPERATIONAL_ROLES } from "../../../../utils/roles";
 
 /**
  * Decrement stock for manual orders
@@ -29,7 +30,7 @@ export async function decrementManualOrderStockHandler(strapi: Strapi, ctx: any)
       .findOne({ where: { id: pluginUser.id }, populate: ["role"] });
 
     const roleName = fullUser?.role?.name;
-    if (!fullUser || (roleName !== "Superadmin" && roleName !== "Store manager")) {
+    if (!fullUser || !roleIsAllowed(roleName, OPERATIONAL_ROLES)) {
       ctx.status = 403;
       ctx.body = {
         data: {

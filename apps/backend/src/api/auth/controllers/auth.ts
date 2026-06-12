@@ -203,7 +203,8 @@ async function self(ctx) {
     const isAdmin =
       normalizedRoleName === "superadmin" ||
       normalizedRoleName === "store manager" ||
-      normalizedRoleName === "editor";
+      normalizedRoleName === "editor" ||
+      normalizedRoleName === "founder";
 
     // Load profile from local-user-info which now points to plugin user
     const localUserInfo = await strapi.db

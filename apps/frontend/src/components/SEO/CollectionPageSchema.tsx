@@ -1,3 +1,5 @@
+import { safeJsonLd } from "@/utils/seo";
+
 interface ProductItem {
   id: number;
   title: string;
@@ -62,7 +64,7 @@ export function CollectionPageSchema({
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }}
     />
   );
 }

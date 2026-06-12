@@ -23,5 +23,6 @@ export const useCurrentUser = () => {
     isAdmin: user?.isAdmin ?? false,
     roleName: user?.roleName ?? null,
     isStoreManager: (user?.roleName ?? "").toLowerCase() === "store manager",
+    isFounder: (user?.roleName ?? "").toLowerCase() === "founder",
   };
 };

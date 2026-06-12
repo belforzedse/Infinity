@@ -89,6 +89,7 @@ export default function PDPHeroInfoAction({
 }: PDPHeroInfoActionProps) {
   const [showShareToast, setShowShareToast] = useState(false);
   const toastTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const [isClientMounted, setIsClientMounted] = useState(false);
 
   // Initialize product like hook
   const { isLiked, isLoading, toggleLike } = useProductLike({
@@ -96,7 +97,7 @@ export default function PDPHeroInfoAction({
   });
 
   // Initialize add to cart hook
-  const { quantity, setQuantity, isAdding, isInCart, addToCart } = useAddToCart({
+  const { quantity, setQuantity, isAdding, isInCart, isCartReady, addToCart } = useAddToCart({
     productId,
     name,
     category,
@@ -248,6 +249,11 @@ export default function PDPHeroInfoAction({
 
   // Clean up timeout on component unmount
   useEffect(() => {
+    setIsClientMounted(true);
+  }, []);
+
+  // Clean up timeout on component unmount
+  useEffect(() => {
     return () => {
       if (toastTimeoutRef.current) {
         clearTimeout(toastTimeoutRef.current);
@@ -305,9 +311,15 @@ export default function PDPHeroInfoAction({
 
   // Find the current option based on quantity
   const currentOption = dynamicOptions.find((opt) => opt.id === quantity) || null;
+  const isCartActionReady = isClientMounted && isCartReady;
+  const isCartActionPending = isClientMounted && !isCartReady;
 
   return (
-    <div className="relative flex flex-col items-center gap-3 md:flex-row">
+    <div
+      className="relative flex flex-col items-center gap-3 md:flex-row"
+      data-testid="pdp-cart-action"
+      data-cart-ready={isCartActionReady ? "true" : "false"}
+    >
       <div className="flex w-full items-center gap-3 md:w-auto">
         <button
           className="flex h-12 flex-1 items-center justify-center rounded-xl shadow-md md:w-12 md:flex-auto"
@@ -348,13 +360,15 @@ export default function PDPHeroInfoAction({
           <>
             <Button
               className={`text-base flex flex-1 items-center justify-center rounded-xl bg-actions-primary py-3 !text-gray-100 ${
-                isAdding ? "cursor-wait opacity-50" : ""
+                isAdding || isCartActionPending ? "cursor-wait opacity-50" : ""
               }`}
               text={isInCart ? "مشاهده سبد خرید" : "افزودن به سبد خرید"}
               variant="primary"
+              testId="pdp-add-to-cart"
               leftIcon={<BasketIcon />}
+              disabled={isCartActionPending}
               onClick={
-                isAdding
+                isAdding || isCartActionPending
                   ? undefined
                   : () => {
                       handleAddToCart(quantity || 1);

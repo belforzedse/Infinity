@@ -137,11 +137,25 @@ const ProductSmallCard: React.FC<ProductSmallCardProps> = ({
   );
 
   return (
-    <>
-      <article className={clsx("relative w-full min-w-0", className)}>
+    <div
+      className={clsx("relative w-full min-w-0", className)}
+      data-testid="product-small-card"
+      data-product-id={id}
+      data-product-slug={slug || id.toString()}
+      data-product-title={title}
+    >
+      <article
+        className="relative w-full min-w-0"
+        data-testid="product-card"
+        data-product-id={id}
+        data-product-slug={slug || id.toString()}
+        data-product-title={title}
+        aria-label={`Ù…Ø­ØµÙˆÙ„ ${title}`}
+      >
         <Link
           href={productUrl}
           className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+          data-testid="product-card-link"
           aria-label={`مشاهده جزئیات ${title}`}
         >
           <div className="flex h-[116px] flex-row gap-2 rounded-2xl border border-slate-100 bg-white p-2 md:w-full">
@@ -163,6 +177,7 @@ const ProductSmallCard: React.FC<ProductSmallCardProps> = ({
               menuButtonRef={menuButtonRef}
               handleMenuToggle={handleMenuToggle}
               isMenuOpen={isMenuOpen}
+              menuButtonTestId="product-small-card-menu"
             >
               <PriceCard
                 isAvailable={isAvailable}
@@ -211,6 +226,7 @@ const ProductSmallCard: React.FC<ProductSmallCardProps> = ({
                   className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs text-neutral-700 transition-colors hover:bg-infinity-primary-lighter/20 hover:text-infinity-primary"
                   role="menuitem"
                   aria-label="نمایش سریع"
+                  data-testid="product-small-card-quick-view"
                 >
                   <EyeIcon className="h-4 w-4 text-neutral-400" />
                   <span>نمایش سریع</span>
@@ -258,7 +274,7 @@ const ProductSmallCard: React.FC<ProductSmallCardProps> = ({
           }}
         />
       )}
-    </>
+    </div>
   );
 };
 

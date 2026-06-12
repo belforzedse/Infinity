@@ -17,6 +17,8 @@
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
+    "e2e": "turbo run e2e",
+    "e2e:smoke": "turbo run e2e:smoke",
     "lint": "turbo run lint",
     "test": "turbo run test",
     "check-types": "turbo run check-types",

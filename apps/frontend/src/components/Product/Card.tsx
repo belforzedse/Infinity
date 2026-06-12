@@ -178,6 +178,10 @@ const ProductCard: FC<ProductCardProps> = ({
     <>
       <article
         className={`${isAvailable ? "group" : ""} relative w-full min-w-0`}
+        data-testid="product-card"
+        data-product-id={id}
+        data-product-slug={slug || id.toString()}
+        data-product-title={title}
         aria-label={`محصول ${title}`}
         onMouseEnter={handleInteractionIntent}
         onFocusCapture={handleInteractionIntent}
@@ -186,6 +190,7 @@ const ProductCard: FC<ProductCardProps> = ({
         <Link
           href={productUrl}
           className="block rounded-3xl focus:outline-none focus-visible:ring-2 focus-visible:ring-infinity-primary focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+          data-testid="product-card-link"
           aria-label={`مشاهده جزئیات ${title}`}
         >
           <div className="interactive-card pressable flex h-full w-full min-w-0 flex-col gap-1 rounded-2xl border border-slate-100 bg-white p-1 transition-all duration-300 md:group-hover:border-infinity-primary-lighter/40">

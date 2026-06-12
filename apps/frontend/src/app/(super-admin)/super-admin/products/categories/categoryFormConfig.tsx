@@ -140,6 +140,7 @@ export const getCategoryFormConfig = (
       <>
         <button
           type="button"
+          data-testid="admin-category-cancel"
           className="text-sm flex-1 rounded-xl bg-slate-200 px-5 py-2 text-slate-500 md:flex-none"
           onClick={onCancel}
           disabled={isLoading}
@@ -148,6 +149,7 @@ export const getCategoryFormConfig = (
         </button>
         <button
           type="button"
+          data-testid="admin-category-save"
           className="text-sm flex-1 rounded-xl bg-actions-primary px-5 py-2 text-white md:flex-none"
           onClick={onSubmit}
           disabled={isLoading}

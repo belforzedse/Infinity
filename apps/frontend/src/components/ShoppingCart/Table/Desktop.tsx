@@ -45,7 +45,14 @@ const ShoppingCartDesktopTable: React.FC<Props> = ({ cartItems, className }) => 
             const hasDiscount = !!(item.originalPrice && item.originalPrice > item.price);
 
             return (
-              <tr key={item.id} className="transition hover:bg-stone-50/80">
+              <tr
+                key={item.id}
+                className="transition hover:bg-stone-50/80"
+                data-testid="cart-item"
+                data-cart-product-id={item.productId}
+                data-cart-variation-id={item.variationId || ""}
+                data-cart-item-id={item.id}
+              >
                 <td className="px-3 py-3 align-top">
                   <div className="flex items-start gap-2.5">
                     <Link

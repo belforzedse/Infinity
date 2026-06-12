@@ -11,6 +11,7 @@ import Size from "./Size";
 import {
   findProductVariation,
   getInitialPdpSelection,
+  getVariationRelationIds,
   hasStockForVariation,
   type ProductDetail,
 } from "@/services/product/product";
@@ -143,19 +144,11 @@ export default function PDPHeroInfo(props: Props) {
       const purchasable = published && stockOk;
       if (purchasable) availableVars.push(variation);
 
-      // variation relations may be missing; guard
-      const colorRel = variation.attributes.product_variation_color?.data;
-      const sizeRel = variation.attributes.product_variation_size?.data;
-      const modelRel = variation.attributes.product_variation_model?.data;
+      const { colorId, sizeId, modelId } = getVariationRelationIds(variation);
 
-      if (colorRel)
-        colorHasStock[colorRel.id.toString()] =
-          colorHasStock[colorRel.id.toString()] || purchasable;
-      if (sizeRel)
-        sizeHasStock[sizeRel.id.toString()] = sizeHasStock[sizeRel.id.toString()] || purchasable;
-      if (modelRel)
-        modelHasStock[modelRel.id.toString()] =
-          modelHasStock[modelRel.id.toString()] || purchasable;
+      if (colorId) colorHasStock[colorId] = colorHasStock[colorId] || purchasable;
+      if (sizeId) sizeHasStock[sizeId] = sizeHasStock[sizeId] || purchasable;
+      if (modelId) modelHasStock[modelId] = modelHasStock[modelId] || purchasable;
     });
 
     colors.forEach((c) => {

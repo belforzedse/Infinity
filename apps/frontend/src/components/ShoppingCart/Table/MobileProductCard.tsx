@@ -49,7 +49,13 @@ export default function ShoppingCartMobileProductCard({ cartItem }: Props) {
       : undefined;
 
   return (
-    <div className="flex w-full flex-col divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-100 bg-white lg:hidden">
+    <div
+      className="flex w-full flex-col divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-100 bg-white lg:hidden"
+      data-testid="cart-item"
+      data-cart-product-id={cartItem.productId}
+      data-cart-variation-id={cartItem.variationId || ""}
+      data-cart-item-id={cartItem.id}
+    >
       <div className="grid grid-cols-4">
         <div className="flex items-center justify-start border-l border-slate-100 bg-stone-50 pr-3">
           <span className="text-xs text-neutral-500">نام محصول</span>

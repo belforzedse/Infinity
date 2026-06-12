@@ -73,6 +73,7 @@ export default function CategoriesPage() {
   }, [filterValue, setFilter]);
 
   return (
+    <>
     <ContentWrapper
       title="دسته‌بندی‌ها"
       hasFilterButton
@@ -92,13 +93,14 @@ export default function CategoriesPage() {
         url={`${ENDPOINTS.PRODUCT.CATEGORY}?populate[children]=*&populate[Image]=*&filters[parent][id][$null]=true`}
         mobileTable={(data) => <MobileTable data={data} onDelete={handleDelete} />}
       />
-      <DeleteCategoryModal
-        isOpen={deleteModalCategory !== null}
-        onClose={() => setDeleteModalCategory(null)}
-        category={deleteModalCategory}
-        onConfirm={handleConfirmDelete}
-        isDeleting={isDeleting}
-      />
     </ContentWrapper>
+    <DeleteCategoryModal
+      isOpen={deleteModalCategory !== null}
+      onClose={() => setDeleteModalCategory(null)}
+      category={deleteModalCategory}
+      onConfirm={handleConfirmDelete}
+      isDeleting={isDeleting}
+    />
+    </>
   );
 }

@@ -2,20 +2,20 @@ import React from "react";
 import { beforeEach, describe, expect, it, jest } from "@jest/globals";
 import { act, render, waitFor } from "@testing-library/react";
 import { Provider } from "jotai";
-import AuthInitializer from "../AuthInitializer";
 import type { MeResponse } from "../../../services/user/me";
 import jotaiStore from "../../../lib/jotaiStore";
 import { currentUserAtom } from "../../../lib/atoms/auth";
 import { ACCESS_TOKEN_EVENT, ACCESS_TOKEN_STORAGE_KEY } from "../../../utils/accessToken";
-import UserService from "../../../services/user";
 
-jest.mock("@/services/user", () => ({
+jest.mock("../../../services/user", () => ({
   __esModule: true,
   default: {
     me: jest.fn(),
   },
 }));
 
+const AuthInitializer = require("../AuthInitializer").default as typeof import("../AuthInitializer").default;
+const UserService = require("../../../services/user").default as typeof import("../../../services/user").default;
 const mockedMe = UserService.me as jest.MockedFunction<typeof UserService.me>;
 
 const buildUser = (overrides: Partial<MeResponse> = {}): MeResponse => ({

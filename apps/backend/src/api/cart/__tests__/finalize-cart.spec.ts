@@ -1,5 +1,7 @@
 import { finalizeToOrderHandler } from "../controllers/handlers/finalizeToOrder";
 import {
+  cancelOrderAndRelease,
+  ensurePaymentGateway,
   requestMellatPayment,
   requestSamanPayment,
   requestSnappPayment,
@@ -7,9 +9,12 @@ import {
 import { deductWalletBalanceAtomic } from "../../local-user-wallet/services/local-user-wallet";
 
 jest.mock("../controllers/handlers/gateway-helpers", () => ({
+  cancelOrderAndRelease: jest.fn().mockResolvedValue(undefined),
+  ensurePaymentGateway: jest.fn().mockResolvedValue(undefined),
   requestMellatPayment: jest.fn(),
   requestSamanPayment: jest.fn(),
   requestSnappPayment: jest.fn(),
+  requestZarinPalPayment: jest.fn(),
 }));
 
 jest.mock("../../local-user-wallet/services/local-user-wallet", () => ({
@@ -110,10 +115,18 @@ const mockedRequestSnappPayment = requestSnappPayment as jest.MockedFunction<
 const mockedRequestSamanPayment = requestSamanPayment as jest.MockedFunction<
   typeof requestSamanPayment
 >;
+const mockedCancelOrderAndRelease = cancelOrderAndRelease as jest.MockedFunction<
+  typeof cancelOrderAndRelease
+>;
+const mockedEnsurePaymentGateway = ensurePaymentGateway as jest.MockedFunction<
+  typeof ensurePaymentGateway
+>;
 
 describe("finalizeToOrderHandler", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockedCancelOrderAndRelease.mockResolvedValue(undefined);
+    mockedEnsurePaymentGateway.mockResolvedValue(undefined as any);
   });
 
   it("rejects the request when required shipping data is missing", async () => {
@@ -196,12 +209,12 @@ describe("finalizeToOrderHandler", () => {
 
     const handler = finalizeToOrderHandler(strapi);
     await expect(handler(ctx)).rejects.toMatchObject({
-      message: "Selected payment gateway is disabled",
+      message: "درگاه پرداخت انتخاب‌شده غیرفعال است.",
       status: 400,
     });
 
     expect(ctx.badRequest).toHaveBeenCalledWith(
-      "Selected payment gateway is disabled",
+      "درگاه پرداخت انتخاب‌شده غیرفعال است.",
       expect.objectContaining({
         data: expect.objectContaining({
           success: false,
@@ -356,6 +369,14 @@ describe("finalizeToOrderHandler", () => {
         data: expect.objectContaining({ error: "insufficient_wallet" }),
       }),
     );
+    expect(mockedCancelOrderAndRelease).toHaveBeenCalledWith(
+      strapi,
+      10,
+      20,
+      1,
+      "wallet_payment_failed",
+      { createAuditLogs: true },
+    );
   });
 
   it("propagates stock issues reported by finalizeCartToOrder", async () => {
@@ -466,15 +487,13 @@ describe("finalizeToOrderHandler", () => {
       }),
     );
 
-    expect(strapi.entityService.update).toHaveBeenCalledWith(
-      "api::order.order",
+    expect(mockedCancelOrderAndRelease).toHaveBeenCalledWith(
+      strapi,
       501,
-      { data: { Status: "Cancelled" } },
-    );
-    expect(strapi.entityService.update).toHaveBeenCalledWith(
-      "api::contract.contract",
       77,
-      { data: { Status: "Cancelled" } },
+      9,
+      "payment_gateway_failure",
+      { createAuditLogs: true },
     );
 
     expect(ctx.badRequest).toHaveBeenCalledWith(

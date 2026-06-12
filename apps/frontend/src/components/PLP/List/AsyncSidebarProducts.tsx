@@ -35,7 +35,7 @@ export default async function AsyncSidebarProducts() {
   const mappedSuggested = mapCardToSmallCard(favorites);
 
   return (
-    <>
+    <div className="flex flex-col gap-7">
       <SidebarSuggestions
         title="شاید بپسندید"
         icon={<HeartIcon />}
@@ -46,6 +46,6 @@ export default async function AsyncSidebarProducts() {
         icon={<DiscountIcon />}
         items={mappedDiscounted}
       />
-    </>
+    </div>
   );
 }

@@ -1,3 +1,5 @@
+import { safeJsonLd } from "@/utils/seo";
+
 interface BreadcrumbItem {
   label: string;
   href?: string;
@@ -24,7 +26,7 @@ export function BreadcrumbSchema({ breadcrumbs }: BreadcrumbSchemaProps) {
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+      dangerouslySetInnerHTML={{ __html: safeJsonLd(schema) }}
     />
   );
 }

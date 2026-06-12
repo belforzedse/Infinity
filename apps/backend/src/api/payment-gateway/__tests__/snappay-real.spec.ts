@@ -272,10 +272,15 @@ describe('SnappPay Service - Real Implementation', () => {
       expect(result.errorData?.message).toContain('timeout');
     });
 
-    it('uses staging endpoint from environment', () => {
-      expect(process.env.SNAPPAY_BASE_URL).toBe(
-        'https://fms-gateway-staging.apps.public.okd4.teh-1.snappcloud.io',
-      );
+    it('uses the configured inert test endpoint from environment', async () => {
+      mockAxiosInstance.post.mockRejectedValueOnce(new Error('stop before network'));
+
+      await service.eligible(1_000_000);
+
+      expect(process.env.SNAPPAY_BASE_URL).toBe('https://snappay.test.invalid');
+      expect(mockedAxios.create).toHaveBeenCalledWith({
+        baseURL: 'https://snappay.test.invalid',
+      });
     });
   });
 });

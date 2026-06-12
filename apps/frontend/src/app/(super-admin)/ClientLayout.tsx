@@ -8,7 +8,8 @@ import { useRouter, usePathname } from "next/navigation";
 import { UserService } from "@/services";
 import { HTTP_STATUS } from "@/constants/api";
 import { currentUserAtom } from "@/lib/atoms/auth";
-import { useSetAtom } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
+import { isFounderRole, canFounderAccessPath } from "@/constants/roleAccess";
 import clsx from "clsx";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
@@ -17,6 +18,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
   const setCurrentUser = useSetAtom(currentUserAtom);
+  const currentUser = useAtomValue(currentUserAtom);
   const hasRunRef = useRef(false);
   const lastCheckRef = useRef<number>(0);
   const isCheckingRef = useRef(false);
@@ -183,6 +185,18 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     }
   }, [isLoading, isAuthorized, redirectToPrevious]);
 
+  // Founder route guard: Founders are admins (pass the isAdmin gate) but must not open
+  // restricted sections by URL. Centralized here so it applies on direct loads and client
+  // navigations. Real enforcement is the backend 403s; this keeps restricted UIs unreachable.
+  const founderBlocked =
+    isFounderRole(currentUser?.roleName) && !canFounderAccessPath(pathname);
+
+  useEffect(() => {
+    if (isAuthorized && founderBlocked) {
+      router.replace("/super-admin");
+    }
+  }, [isAuthorized, founderBlocked, router]);
+
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-neutral-50">
@@ -195,6 +209,11 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   }
 
   if (!isAuthorized) {
+    return null;
+  }
+
+  // Don't render restricted content for Founders while the guard redirects.
+  if (founderBlocked) {
     return null;
   }
 

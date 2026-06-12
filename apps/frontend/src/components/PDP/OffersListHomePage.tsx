@@ -20,9 +20,7 @@ export default function OffersListHomePage(props: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [windowWidth, setWindowWidth] = useState(
-    typeof window !== "undefined" ? window.innerWidth : 1440,
-  );
+  const [windowWidth, setWindowWidth] = useState(1440);
 
   // Controls whether to show all products or a subset.
   // Defaults to showing a subset on the homepage sections.
@@ -35,6 +33,7 @@ export default function OffersListHomePage(props: Props) {
       setCurrentPage(0); // Reset to first page on resize
     };
 
+    handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
